@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { format } from 'date-fns'
+import { ko } from 'date-fns/locale'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,9 +12,15 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { Calendar } from '@/components/ui/calendar'
+import {
   Search,
   MapPin,
-  Calendar,
+  Calendar as CalendarIcon,
   Palette,
   ChevronRight,
   Sun,
@@ -27,7 +35,7 @@ import {
 export function MainPage() {
   const [searchData, setSearchData] = useState({
     departure: '',
-    date: '',
+    date: null,
     theme: '',
   })
 
@@ -143,16 +151,39 @@ export function MainPage() {
 
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <Calendar className="h-4 w-4" />
+                  <CalendarIcon className="h-4 w-4" />
                   날짜
                 </label>
-                <Input
-                  type="date"
-                  value={searchData.date}
-                  onChange={(e) =>
-                    setSearchData((prev) => ({ ...prev, date: e.target.value }))
-                  }
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="h-10 w-full justify-start text-left font-normal"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {searchData.date ? (
+                        format(searchData.date, 'PPP', { locale: ko })
+                      ) : (
+                        <span className="text-muted-foreground">
+                          날짜를 선택해주세요
+                        </span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={searchData.date}
+                      onSelect={(date) =>
+                        setSearchData((prev) => ({ ...prev, date }))
+                      }
+                      initialFocus
+                      disabled={(date) => date < new Date()}
+                      locale={ko}
+                      weekStartsOn={1}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <div className="space-y-2">
@@ -260,7 +291,7 @@ export function MainPage() {
           <Card>
             <CardContent className="p-6 text-center">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-purple-100">
-                <Calendar className="h-6 w-6 text-purple-600" />
+                <CalendarIcon className="h-6 w-6 text-purple-600" />
               </div>
               <h3 className="mb-2 text-lg font-semibold">여행 계획</h3>
               <p className="text-gray-600">체계적인 여행 계획과 일정 관리</p>

@@ -53,10 +53,10 @@ export function Header() {
 
           <div className="flex items-center space-x-4">
             <Button variant="outline" asChild>
-              <Link to="/plans">내 플랜</Link>
+              <Link to="/login">로그인</Link>
             </Button>
             <Button asChild>
-              <Link to="/login">로그인</Link>
+              <Link to="/sign-up">회원가입</Link>
             </Button>
           </div>
         </div>
