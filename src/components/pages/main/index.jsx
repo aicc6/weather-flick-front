@@ -1,27 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
-import { format } from 'date-fns'
-import { ko } from 'date-fns/locale'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent } from '@/components/ui/card'
+
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { Calendar } from '@/components/ui/calendar'
-import {
-  Search,
   MapPin,
   Calendar as CalendarIcon,
-  Palette,
   Sun,
   Cloud,
   CloudRain,
@@ -34,6 +15,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel'
+import { Button } from '@/components/ui/button'
 
 /**
  * URL: '/'
@@ -159,7 +141,7 @@ export function MainPage() {
                 key={destination.id}
                 className="w-full flex-shrink-0 px-2 md:w-1/2 lg:w-1/3"
               >
-                <div className="rounded-xl bg-white p-6 text-center shadow-md">
+                <div className="bg-card rounded-xl p-6 text-center shadow-md">
                   <div className="mb-2 flex items-center justify-center gap-2">
                     <span className="text-2xl">{destination.icon}</span>
                     <WeatherIcon
@@ -168,7 +150,9 @@ export function MainPage() {
                     />
                   </div>
                   <h3 className="text-xl font-bold">{destination.name}</h3>
-                  <p className="text-gray-600">{destination.description}</p>
+                  <p className="text-muted-foreground">
+                    {destination.description}
+                  </p>
                 </div>
               </div>
             ))}
@@ -216,160 +200,115 @@ export function MainPage() {
   }
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {/* 메인 컨텐츠 */}
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* 메인 배너 */}
-        <div className="mb-12 text-center">
-          <h1 className="mb-4 text-4xl font-bold text-gray-900 md:text-5xl">
-            이번 주말, 날씨에 딱 맞는 여행지 추천 받아보세요!
-          </h1>
-          <p className="mx-auto max-w-3xl text-xl text-gray-600">
-            실시간 날씨 정보를 기반으로 최적의 여행지를 추천해드립니다
-          </p>
+    <div className="min-h-screen">
+      <section className="pt-12 pb-8 text-center">
+        <h1 className="text-foreground mb-2 text-4xl font-bold">
+          이번 주말, 날씨에 딱 맞는 여행지 추천 받아보세요!
+        </h1>
+        <p className="text-muted-foreground mb-8 text-lg">
+          실시간 날씨 정보를 기반으로 최적의 여행지를 추천해드립니다
+        </p>
+        <div className="bg-card mx-auto mb-10 max-w-2xl rounded-2xl p-8 shadow-lg">
+          <div className="grid grid-cols-1 items-end gap-4 md:grid-cols-4">
+            <div className="space-y-2">
+              <label className="text-foreground flex items-center gap-2 text-sm font-medium">
+                <MapPin className="h-4 w-4" />
+                출발지
+              </label>
+              <input
+                className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:outline-none"
+                placeholder="서울, 부산, 대구..."
+                value={searchData.departure}
+                onChange={(e) =>
+                  setSearchData((prev) => ({
+                    ...prev,
+                    departure: e.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-foreground flex items-center gap-2 text-sm font-medium">
+                <CalendarIcon className="h-4 w-4" />
+                날짜
+              </label>
+              <input
+                type="date"
+                className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:outline-none"
+                value={searchData.date ? searchData.date : ''}
+                onChange={(e) =>
+                  setSearchData((prev) => ({ ...prev, date: e.target.value }))
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-foreground flex items-center gap-2 text-sm font-medium">
+                <CalendarIcon className="h-4 w-4" />
+                테마
+              </label>
+              <select
+                className="border-input bg-background text-foreground focus:ring-ring w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:outline-none"
+                value={searchData.theme}
+                onChange={(e) =>
+                  setSearchData((prev) => ({ ...prev, theme: e.target.value }))
+                }
+              >
+                <option value="">테마 선택</option>
+                <option value="휴양">휴양</option>
+                <option value="캠핑">캠핑</option>
+                <option value="문화">문화</option>
+                <option value="맛집">맛집</option>
+                <option value="액티비티">액티비티</option>
+              </select>
+            </div>
+            <Button
+              className="mt-6 h-10 w-full font-semibold"
+              variant="default"
+              onClick={handleSearch}
+            >
+              여행지 찾기
+            </Button>
+          </div>
+          <div className="mt-4 text-center">
+            <p className="text-muted-foreground text-sm">
+              &quot;날씨 기반으로 딱 맞는 여행 추천 받기&quot;
+            </p>
+          </div>
         </div>
-
-        {/* 검색 바 */}
-        <Card className="mx-auto mb-12 max-w-4xl">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 items-end gap-4 md:grid-cols-4">
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <MapPin className="h-4 w-4" />
-                  출발지
-                </label>
-                <Input
-                  placeholder="서울, 부산, 대구..."
-                  value={searchData.departure}
-                  onChange={(e) =>
-                    setSearchData((prev) => ({
-                      ...prev,
-                      departure: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <CalendarIcon className="h-4 w-4" />
-                  날짜
-                </label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="h-10 w-full justify-start text-left font-normal"
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {searchData.date ? (
-                        format(searchData.date, 'PPP', { locale: ko })
-                      ) : (
-                        <span className="text-muted-foreground">
-                          날짜를 선택해주세요
-                        </span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={searchData.date}
-                      onSelect={(date) =>
-                        setSearchData((prev) => ({ ...prev, date }))
-                      }
-                      initialFocus
-                      disabled={(date) => date < new Date()}
-                      locale={ko}
-                      weekStartsOn={1}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <Palette className="h-4 w-4" />
-                  테마
-                </label>
-                <Select
-                  value={searchData.theme}
-                  onValueChange={(value) =>
-                    setSearchData((prev) => ({ ...prev, theme: value }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="테마 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="휴양">휴양</SelectItem>
-                    <SelectItem value="캠핑">캠핑</SelectItem>
-                    <SelectItem value="문화">문화</SelectItem>
-                    <SelectItem value="맛집">맛집</SelectItem>
-                    <SelectItem value="액티비티">액티비티</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Button onClick={handleSearch} className="h-10">
-                <Search className="mr-2 h-4 w-4" />
-                여행지 찾기
-              </Button>
-            </div>
-
-            <div className="mt-4 text-center">
-              <p className="text-sm text-gray-600">
-                &ldquo;날씨 기반으로 딱 맞는 여행 추천 받기&rdquo;
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 추천 여행지 섹션 */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold tracking-tight">추천 여행지</h2>
-          <div className="mt-4">
+      </section>
+      <section className="mb-12">
+        <h2 className="text-foreground mb-4 text-center text-2xl font-bold">
+          추천 여행지
+        </h2>
+        <div className="flex justify-center">
+          <div className="w-full max-w-5xl">
             <RecommendedDestCarousel destinations={recommendedDestinations} />
           </div>
         </div>
-
-        {/* 추가 정보 섹션 */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-                <Sun className="h-6 w-6 text-blue-600" />
-              </div>
-              <h3 className="mb-2 text-lg font-semibold">실시간 날씨</h3>
-              <p className="text-gray-600">
-                최신 날씨 정보로 정확한 여행 계획을 세워보세요
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-                <MapPin className="h-6 w-6 text-green-600" />
-              </div>
-              <h3 className="mb-2 text-lg font-semibold">맞춤 추천</h3>
-              <p className="text-gray-600">
-                개인 취향과 날씨를 고려한 맞춤형 여행지 추천
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-purple-100">
-                <CalendarIcon className="h-6 w-6 text-purple-600" />
-              </div>
-              <h3 className="mb-2 text-lg font-semibold">여행 계획</h3>
-              <p className="text-gray-600">체계적인 여행 계획과 일정 관리</p>
-            </CardContent>
-          </Card>
+      </section>
+      <section className="mx-auto mb-16 grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="bg-card rounded-xl p-8 text-center shadow-md">
+          <Sun className="mx-auto mb-2 h-8 w-8 text-blue-400" />
+          <h3 className="text-foreground text-lg font-semibold">실시간 날씨</h3>
+          <p className="text-muted-foreground">
+            최신 날씨 정보로 정확한 여행 계획을 세워보세요
+          </p>
         </div>
-      </div>
+        <div className="bg-card rounded-xl p-8 text-center shadow-md">
+          <MapPin className="mx-auto mb-2 h-8 w-8 text-green-400" />
+          <h3 className="text-foreground text-lg font-semibold">맞춤 추천</h3>
+          <p className="text-muted-foreground">
+            개인 취향과 날씨를 고려한 맞춤형 여행지 추천
+          </p>
+        </div>
+        <div className="bg-card rounded-xl p-8 text-center shadow-md">
+          <CalendarIcon className="mx-auto mb-2 h-8 w-8 text-purple-400" />
+          <h3 className="text-foreground text-lg font-semibold">여행 계획</h3>
+          <p className="text-muted-foreground">
+            체계적인 여행 계획과 일정 관리
+          </p>
+        </div>
+      </section>
       <Chatbot />
     </div>
   )

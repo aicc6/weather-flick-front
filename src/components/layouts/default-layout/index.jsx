@@ -3,7 +3,7 @@ import { Header } from './header'
 
 export function DefaultLayout({ children }) {
   return (
-    <div>
+    <div className="bg-background text-foreground min-h-screen transition-colors">
       <Header />
 
       <main>{children}</main>
