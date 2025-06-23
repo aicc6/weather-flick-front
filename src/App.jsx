@@ -4,6 +4,7 @@ import { MainPage } from './components/pages/main'
 import { LoginPage } from './components/pages/login'
 import { SignUpPage } from './components/pages/sign-up'
 import { ReviewsPage } from './components/pages/reviews'
+import RecommendPage from './components/pages/recommend'
 import '@/App.css'
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/sign-up" element={<SignUpPage />} />
           <Route path="/reviews" element={<ReviewsPage />} />
+          <Route path="/recommend" element={<RecommendPage />} />
         </Routes>
       </DefaultLayout>
     </BrowserRouter>

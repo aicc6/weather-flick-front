@@ -44,6 +44,12 @@ export function Header() {
               여행지
             </Link>
             <Link
+              to="/recommend"
+              className="font-medium text-blue-700 hover:text-blue-900"
+            >
+              추천여행지
+            </Link>
+            <Link
               to="/reviews"
               className="font-medium text-gray-700 hover:text-gray-900"
             >
