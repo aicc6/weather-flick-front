@@ -134,7 +134,7 @@ export function MainPage() {
               transform: `translateX(-${currentIndex * (100 / visibleCount)}%)`,
               transition: 'transform 0.5s ease',
             }}
-            className="flex"
+            className="my-2"
           >
             {destinations.map((destination) => (
               <div
