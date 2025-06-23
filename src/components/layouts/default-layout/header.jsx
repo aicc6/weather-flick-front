@@ -44,6 +44,12 @@ export function Header() {
               여행지
             </Link>
             <Link
+              to="/reviews"
+              className="font-medium text-gray-700 hover:text-gray-900"
+            >
+              여행 리뷰
+            </Link>
+            <Link
               to="/about"
               className="font-medium text-gray-700 hover:text-gray-900"
             >

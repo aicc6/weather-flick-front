@@ -28,6 +28,7 @@ import {
   CloudRain,
   CloudSnow,
 } from 'lucide-react'
+import { Chatbot } from '@/components/common/chatbot'
 
 /**
  * URL: '/'
@@ -299,6 +300,7 @@ export function MainPage() {
           </Card>
         </div>
       </div>
+      <Chatbot />
     </div>
   )
 }
