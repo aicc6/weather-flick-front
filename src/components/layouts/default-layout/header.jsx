@@ -110,7 +110,7 @@ export function Header() {
             <Button variant="outline" asChild>
               <Link to="/login">로그인</Link>
             </Button>
-            <Button asChild variant="outline" className="text-black">
+            <Button asChild variant="outline">
               <Link to="/sign-up">회원가입</Link>
             </Button>
           </div>

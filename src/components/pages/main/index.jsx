@@ -203,7 +203,7 @@ export function MainPage() {
     <div className="min-h-screen">
       <section className="pt-12 pb-8 text-center">
         <h1 className="text-foreground mb-2 text-4xl font-bold">
-          이번 주말, 날씨에 딱 맞는 여행지 추천 받아보세요!
+          “날씨 기반 스마트 여행 플래너”
         </h1>
         <p className="text-muted-foreground mb-8 text-lg">
           실시간 날씨 정보를 기반으로 최적의 여행지를 추천해드립니다
@@ -263,7 +263,7 @@ export function MainPage() {
             </div>
             <Button
               className="mt-6 h-10 w-full font-semibold"
-              variant="default"
+              variant="outline"
               onClick={handleSearch}
             >
               여행지 찾기
