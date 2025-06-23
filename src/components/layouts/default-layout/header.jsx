@@ -6,8 +6,7 @@
  */
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Sun } from 'lucide-react'
-import { Moon } from 'lucide-react'
+import { Sun, Moon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export function Header() {
@@ -95,6 +94,12 @@ export function Header() {
           </nav>
 
           <div className="flex items-center space-x-4">
+            <Button variant="outline" asChild>
+              <Link to="/login">로그인</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/sign-up">회원가입</Link>
+            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -106,12 +111,6 @@ export function Header() {
               ) : (
                 <Moon className="h-5 w-5 text-gray-700 dark:text-gray-200" />
               )}
-            </Button>
-            <Button variant="outline" asChild>
-              <Link to="/login">로그인</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link to="/sign-up">회원가입</Link>
             </Button>
           </div>
         </div>
