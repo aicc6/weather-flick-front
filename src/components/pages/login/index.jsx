@@ -54,7 +54,6 @@ const loginSchema = z.object({
   password: z.string().min(1, '비밀번호를 입력해주세요.'),
 })
 
-console.log(import.meta.env.VITE_GOOGLE_CLIENT_ID)
 /**
  * URL: '/login'
  */
