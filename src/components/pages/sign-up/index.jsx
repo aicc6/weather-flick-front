@@ -112,11 +112,11 @@ export function SignUpPage() {
       // 예: const user = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
       //   headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
       // }).then(res => res.json());
-      console.log(tokenResponse)
       if (tokenResponse.access_token) {
         try {
           const res = await authAPI.googleLogin(tokenResponse.access_token)
-          localStorage.setItem('token', res.data.access_token)
+
+          localStorage.setItem('token', res.access_token)
           // 인증 상태 갱신 함수 호출 (예: setAuth)
           // ...
           // 메인 페이지 등으로 이동

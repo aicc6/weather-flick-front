@@ -9,6 +9,8 @@ const handle401Error = () => {
 
 // 응답 처리 헬퍼
 const handleResponse = async (response) => {
+  console.log(response)
+
   if (response.status === 401) {
     handle401Error()
     throw new Error('Unauthorized')
@@ -88,7 +90,7 @@ export const authAPI = {
   },
   googleLogin: async (access_token) => {
     return handleResponse(
-      await authHttp.POST('/auth/google', {
+      await authHttp.POST('auth/google', {
         body: { access_token },
       }),
     )
