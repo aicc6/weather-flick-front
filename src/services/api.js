@@ -1,90 +1,90 @@
-import axios from 'axios'
+import { http, authHttp } from '@/lib/http'
 
-// API 기본 설정
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+// 401 에러 처리
+const handle401Error = () => {
+  localStorage.removeItem('access_token')
+  localStorage.removeItem('user_info')
+  window.location.href = '/login'
+}
 
-// axios 인스턴스 생성
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
+// 응답 처리 헬퍼
+const handleResponse = async (response) => {
+  if (response.status === 401) {
+    handle401Error()
+    throw new Error('Unauthorized')
+  }
 
-// 요청 인터셉터 - 토큰 자동 추가
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('access_token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+  if (!response.ok) {
+    const error = new Error(`HTTP Error: ${response.status}`)
+    error.status = response.status
+    error.statusText = response.statusText
+
+    try {
+      const errorData = await response.json()
+      error.data = errorData
+    } catch {
+      // JSON 파싱 실패 시 기본 에러 메시지 사용
     }
-    return config
-  },
-  (error) => {
-    return Promise.reject(error)
-  },
-)
 
-// 응답 인터셉터 - 토큰 만료 처리
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // 토큰이 만료되었거나 유효하지 않은 경우
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('user_info')
-      window.location.href = '/login'
-    }
-    return Promise.reject(error)
-  },
-)
+    throw error
+  }
+
+  // 응답이 비어있을 수 있으므로 체크
+  const contentType = response.headers.get('content-type')
+  if (contentType && contentType.includes('application/json')) {
+    return response.json()
+  }
+
+  return response.text()
+}
 
 // 인증 관련 API
 export const authAPI = {
   // 회원가입
   register: async (userData) => {
-    const response = await api.post('/auth/register', userData)
-    return response.data
+    const response = await http.POST('auth/register', { body: userData })
+    return handleResponse(response)
   },
 
-  // 로그인
+  // 로그인 (FastAPI OAuth2PasswordRequestForm 형식)
   login: async (credentials) => {
-    // OAuth2PasswordRequestForm은 form-data 형식을 요구합니다
     const formData = new URLSearchParams()
     formData.append('username', credentials.username)
     formData.append('password', credentials.password)
 
-    const response = await api.post('/auth/login', formData.toString(), {
+    const response = await http.POST('auth/login', {
+      body: formData,
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
     })
-    return response.data
+    return handleResponse(response)
   },
 
   // 로그아웃
   logout: async () => {
-    const response = await api.post('/auth/logout')
-    return response.data
+    const response = await authHttp.POST('auth/logout')
+    return handleResponse(response)
   },
 
   // 현재 사용자 정보 조회
   getMe: async () => {
-    const response = await api.get('/auth/me')
-    return response.data
+    const response = await authHttp.GET('auth/me')
+    return handleResponse(response)
   },
 
   // 사용자 프로필 업데이트
   updateProfile: async (userData) => {
-    const response = await api.put('/auth/me', userData)
-    return response.data
+    const response = await authHttp.PUT('auth/me', { body: userData })
+    return handleResponse(response)
   },
 
   // 비밀번호 변경
   changePassword: async (passwordData) => {
-    const response = await api.post('/auth/change-password', passwordData)
-    return response.data
+    const response = await authHttp.POST('auth/change-password', {
+      body: passwordData,
+    })
+    return handleResponse(response)
   },
 }
 
@@ -121,4 +121,6 @@ export const tokenManager = {
   },
 }
 
-export default api
+// OpenAPI-fetch 스타일로 사용할 수 있는 API 클라이언트 export
+export { http, authHttp }
+export default { http, authHttp, authAPI, tokenManager }

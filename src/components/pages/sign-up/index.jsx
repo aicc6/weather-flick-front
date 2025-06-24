@@ -109,9 +109,9 @@ export function SignUpPage() {
     onSuccess: async (tokenResponse) => {
       console.log('Google 로그인 성공:', tokenResponse)
       // TODO: 백엔드로 access token 전송하여 사용자 정보 받고, 회원가입/로그인 처리
-      // 예: const user = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+      // 예: const user = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
       //   headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-      // });
+      // }).then(res => res.json());
     },
     onError: (error) => {
       console.error('Google 로그인 오류:', error)
