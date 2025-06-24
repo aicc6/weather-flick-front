@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
-import { useGoogleLogin } from '@react-oauth/google'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,6 +16,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '@/contexts/AuthContext'
 import { GoogleIcon } from '@/components/icons'
 import { loginSchema } from '@/schemas'
+import { authAPI } from '../../../services/api'
+import { useGoogleLogin } from '@react-oauth/google'
 
 /**
  * URL: '/login'
@@ -81,14 +82,28 @@ export function LoginPage() {
     }
   }
 
-  const handleGoogleLogin = useGoogleLogin({
+  const handleGoogleLogin = async (accessToken) => {
+    try {
+      const res = await authAPI.googleLogin(accessToken)
+      localStorage.setItem('token', res.data.access_token)
+      // 인증 상태 갱신 함수 호출 (예: setAuth)
+      // ...
+      // 메인 페이지 등으로 이동
+      navigate(from, { replace: true })
+    } catch (err) {
+      setSubmitError(err.response?.data?.detail || '구글 로그인 실패')
+    }
+  }
+
+  const googleLoginHandler = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      console.log('Google 로그인 성공:', tokenResponse)
-      // TODO: 백엔드로 access token 전송하여 사용자 정보 받고, 로그인 처리
+      // console.log('성공', tokenResponse)
+      if (tokenResponse.access_token) {
+        await handleGoogleLogin(tokenResponse.access_token)
+      }
     },
     onError: (error) => {
-      console.error('Google 로그인 오류:', error)
-      setSubmitError('Google 로그인 중 오류가 발생했습니다.')
+      setSubmitError('구글 로그인 중 오류가 발생했습니다.')
     },
   })
 
@@ -179,7 +194,7 @@ export function LoginPage() {
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => handleGoogleLogin()}
+            onClick={() => googleLoginHandler()}
             disabled={isLoading}
           >
             <GoogleIcon />

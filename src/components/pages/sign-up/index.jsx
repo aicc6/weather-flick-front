@@ -17,6 +17,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '@/contexts/AuthContext'
 import { GoogleIcon } from '@/components/icons'
 import { signUpSchema } from '@/schemas'
+import { authAPI } from '../../../services/api'
 
 /**
  * URL: /sign-up
@@ -105,17 +106,28 @@ export function SignUpPage() {
     }
   }
 
-  const handleGoogleLogin = useGoogleLogin({
+  const googleLoginHandler = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      console.log('Google 로그인 성공:', tokenResponse)
       // TODO: 백엔드로 access token 전송하여 사용자 정보 받고, 회원가입/로그인 처리
       // 예: const user = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
       //   headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
       // }).then(res => res.json());
+      console.log(tokenResponse)
+      if (tokenResponse.access_token) {
+        try {
+          const res = await authAPI.googleLogin(tokenResponse.access_token)
+          localStorage.setItem('token', res.data.access_token)
+          // 인증 상태 갱신 함수 호출 (예: setAuth)
+          // ...
+          // 메인 페이지 등으로 이동
+          navigate('/')
+        } catch (err) {
+          setSubmitError(err.response?.data?.detail || '구글 회원가입 실패')
+        }
+      }
     },
     onError: (error) => {
-      console.error('Google 로그인 오류:', error)
-      setSubmitError('Google 로그인 중 오류가 발생했습니다.')
+      setSubmitError('구글 회원가입 중 오류가 발생했습니다.')
     },
   })
 
@@ -247,7 +259,7 @@ export function SignUpPage() {
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => handleGoogleLogin()}
+            onClick={() => googleLoginHandler()}
             disabled={isLoading}
           >
             <GoogleIcon />

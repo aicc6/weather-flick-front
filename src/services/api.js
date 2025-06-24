@@ -86,6 +86,13 @@ export const authAPI = {
     })
     return handleResponse(response)
   },
+  googleLogin: async (access_token) => {
+    return handleResponse(
+      await authHttp.POST('/auth/google', {
+        body: { access_token },
+      }),
+    )
+  },
 }
 
 // 토큰 관리
