@@ -118,7 +118,7 @@ export function MainPage() {
     }
 
     // 현재 보여줄 아이템 인덱스 계산
-    const getVisibleItems = () => {
+    const _getVisibleItems = () => {
       const items = []
       for (let i = 0; i < visibleCount; i++) {
         items.push(destinations[(currentIndex + i) % total])

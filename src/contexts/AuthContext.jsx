@@ -36,14 +36,10 @@ export const AuthProvider = ({ children }) => {
 
   // 로그인
   const login = async (credentials) => {
-    try {
-      const response = await authAPI.login(credentials)
-      tokenManager.setToken(response.access_token, response.user_info)
-      setUser(response.user_info)
-      return response
-    } catch (error) {
-      throw error
-    }
+    const response = await authAPI.login(credentials)
+    tokenManager.setToken(response.access_token, response.user_info)
+    setUser(response.user_info)
+    return response
   }
 
   // 로그아웃
@@ -62,23 +58,15 @@ export const AuthProvider = ({ children }) => {
 
   // 회원가입
   const register = async (userData) => {
-    try {
-      const response = await authAPI.register(userData)
-      return response
-    } catch (error) {
-      throw error
-    }
+    const response = await authAPI.register(userData)
+    return response
   }
 
   // 사용자 정보 업데이트
   const updateProfile = async (userData) => {
-    try {
-      const updatedUser = await authAPI.updateProfile(userData)
-      setUser(updatedUser)
-      return updatedUser
-    } catch (error) {
-      throw error
-    }
+    const updatedUser = await authAPI.updateProfile(userData)
+    setUser(updatedUser)
+    return updatedUser
   }
 
   const value = {
