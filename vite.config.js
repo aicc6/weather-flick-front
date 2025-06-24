@@ -8,5 +8,24 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), tsconfigPaths()],
   server: {
     port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/images': {
+        target: 'https://images.unsplash.com',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/images/, ''),
+      },
+      '/google-api': {
+        target: 'https://www.googleapis.com',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/google-api/, ''),
+      },
+    },
   },
 })
