@@ -3,7 +3,6 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useGoogleLogin } from '@react-oauth/google'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,15 +16,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '@/contexts/AuthContext'
 import { GoogleIcon } from '@/components/icons'
-
-// 로그인 폼 스키마 정의
-const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, '이메일을 입력해주세요.')
-    .email('올바른 이메일 형식을 입력해주세요.'),
-  password: z.string().min(1, '비밀번호를 입력해주세요.'),
-})
+import { loginSchema } from '@/schemas'
 
 /**
  * URL: '/login'

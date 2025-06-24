@@ -8,6 +8,11 @@ import {
   CloudRain,
   CloudSnow,
 } from '@/components/icons'
+import {
+  recommendedDestinations,
+  travelThemes,
+  AUTOPLAY_INTERVAL,
+} from '@/data'
 import { Chatbot } from '@/components/common/chatbot'
 import {
   Carousel,
@@ -26,52 +31,6 @@ export function MainPage() {
     date: null,
     theme: '',
   })
-
-  // 추천 여행지 데이터
-  const recommendedDestinations = [
-    {
-      id: 1,
-      name: '제주도',
-      weather: '맑음',
-      temperature: 26,
-      icon: '⛱',
-      description: '한라산과 해변의 완벽한 조화',
-    },
-    {
-      id: 2,
-      name: '가평',
-      weather: '흐림',
-      temperature: 24,
-      icon: '⛺',
-      description: '자연 속 힐링 캠핑',
-    },
-    {
-      id: 3,
-      name: '해운대',
-      weather: '맑음',
-      temperature: 28,
-      icon: '🌊',
-      description: '아름다운 해변과 맛있는 해산물',
-    },
-    {
-      id: 4,
-      name: '남이섬',
-      weather: '비',
-      temperature: 22,
-      icon: '🏕',
-      description: '로맨틱한 섬 여행',
-    },
-    {
-      id: 5,
-      name: '부산',
-      weather: '맑음',
-      temperature: 27,
-      icon: '🏖',
-      description: '도시와 바다의 만남',
-    },
-  ]
-
-  const AUTOPLAY_INTERVAL = 3000 // 3초
 
   function RecommendedDestCarousel({ destinations }) {
     const [currentIndex, setCurrentIndex] = useState(0)
@@ -253,12 +212,11 @@ export function MainPage() {
                   setSearchData((prev) => ({ ...prev, theme: e.target.value }))
                 }
               >
-                <option value="">테마 선택</option>
-                <option value="휴양">휴양</option>
-                <option value="캠핑">캠핑</option>
-                <option value="문화">문화</option>
-                <option value="맛집">맛집</option>
-                <option value="액티비티">액티비티</option>
+                {travelThemes.map((theme) => (
+                  <option key={theme.value} value={theme.value}>
+                    {theme.label}
+                  </option>
+                ))}
               </select>
             </div>
             <Button

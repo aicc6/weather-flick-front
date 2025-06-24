@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useGoogleLogin } from '@react-oauth/google'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,31 +16,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '@/contexts/AuthContext'
 import { GoogleIcon } from '@/components/icons'
-
-// 회원가입 폼 스키마 정의
-const signUpSchema = z
-  .object({
-    name: z
-      .string()
-      .min(2, '이름은 2자 이상이어야 합니다.')
-      .max(50, '이름은 50자 이하여야 합니다.'),
-    email: z
-      .string()
-      .min(1, '이메일을 입력해주세요.')
-      .email('올바른 이메일 형식을 입력해주세요.'),
-    password: z
-      .string()
-      .min(8, '비밀번호는 8자 이상이어야 합니다.')
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        '비밀번호는 대문자, 소문자, 숫자를 포함해야 합니다.',
-      ),
-    confirmPassword: z.string().min(1, '비밀번호 확인을 입력해주세요.'),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: '비밀번호가 일치하지 않습니다.',
-    path: ['confirmPassword'],
-  })
+import { signUpSchema } from '@/schemas'
 
 /**
  * URL: /sign-up

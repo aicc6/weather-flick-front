@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { MessageSquare, Send, X, Bot, Sparkles } from '@/components/icons'
 import { cn } from '@/lib/utils'
+import { initialBotMessage, mockBotResponse, CHATBOT_CONFIG } from '@/data'
 
 // Typing indicator component
 const TypingIndicator = () => (
@@ -31,13 +32,12 @@ export function Chatbot() {
       setTimeout(() => {
         setMessages([
           {
+            ...initialBotMessage,
             id: Date.now(),
-            text: '안녕하세요! 여행 계획에 대해 궁금한 점이 있으신가요? 날씨에 맞는 여행지를 추천해 드릴게요. ✈️',
-            sender: 'bot',
           },
         ])
         setIsTyping(false)
-      }, 1200)
+      }, CHATBOT_CONFIG.welcomeDelay / 2)
     }
   }, [isOpen, messages.length])
 
@@ -64,12 +64,11 @@ export function Chatbot() {
     setTimeout(() => {
       const botResponse = {
         id: Date.now() + 1,
-        text: '현재는 데모 버전입니다. 입력하신 내용에 대한 답변을 드릴 수 없습니다. 곧 실제 AI 챗봇으로 찾아뵙겠습니다! ✨',
-        sender: 'bot',
+        ...mockBotResponse,
       }
       setMessages((prev) => [...prev, botResponse])
       setIsTyping(false) // Bot stops "typing"
-    }, 1500)
+    }, CHATBOT_CONFIG.typingDelay)
   }
 
   return (

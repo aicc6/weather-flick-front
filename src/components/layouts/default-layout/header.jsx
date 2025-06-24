@@ -7,6 +7,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Sun, Moon, User, LogOut } from '@/components/icons'
+import { navigationLinks } from '@/data'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import {
@@ -72,42 +73,19 @@ export function Header() {
           </div>
 
           <nav className="hidden items-center space-x-8 md:flex">
-            <Link
-              to="/"
-              className="font-medium text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white"
-            >
-              홈
-            </Link>
-            <Link
-              to="/plans"
-              className="font-medium text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white"
-            >
-              내 플랜
-            </Link>
-            <Link
-              to="/destinations"
-              className="font-medium text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white"
-            >
-              여행지
-            </Link>
-            <Link
-              to="/recommend"
-              className="font-medium text-blue-700 hover:text-blue-900 dark:text-blue-300 dark:hover:text-blue-400"
-            >
-              추천여행지
-            </Link>
-            <Link
-              to="/reviews"
-              className="font-medium text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white"
-            >
-              여행 리뷰
-            </Link>
-            <Link
-              to="/about"
-              className="font-medium text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white"
-            >
-              소개
-            </Link>
+            {navigationLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`font-medium ${
+                  link.isHighlighted
+                    ? 'text-blue-700 hover:text-blue-900 dark:text-blue-300 dark:hover:text-blue-400'
+                    : 'text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white'
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
 
           <div className="flex items-center space-x-4">
