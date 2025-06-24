@@ -4,13 +4,25 @@
  * - [ ] Navigation Menu
  * - [ ] Login / Sign Up
  */
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Sun, Moon } from 'lucide-react'
+import { Sun, Moon, User, LogOut } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 export function Header() {
   const [isDark, setIsDark] = useState(false)
+  const { user, isLoggedIn, logout } = useAuth()
+  const navigate = useNavigate()
 
   useEffect(() => {
     // 초기 테마 적용
@@ -37,6 +49,11 @@ export function Header() {
       localStorage.setItem('theme', 'dark')
       setIsDark(true)
     }
+  }
+
+  const handleLogout = async () => {
+    await logout()
+    navigate('/')
   }
 
   return (
@@ -94,12 +111,50 @@ export function Header() {
           </nav>
 
           <div className="flex items-center space-x-4">
-            <Button variant="outline" asChild>
-              <Link to="/login">로그인</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link to="/sign-up">회원가입</Link>
-            </Button>
+            {isLoggedIn ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="relative h-8 w-8 rounded-full"
+                  >
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback>
+                        {user?.username?.charAt(0)?.toUpperCase() || (
+                          <User className="h-4 w-4" />
+                        )}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm leading-none font-medium">
+                        {user?.username}
+                      </p>
+                      <p className="text-muted-foreground text-xs leading-none">
+                        {user?.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>로그아웃</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Button variant="outline" asChild>
+                  <Link to="/login">로그인</Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/sign-up">회원가입</Link>
+                </Button>
+              </>
+            )}
             <Button
               variant="ghost"
               size="icon"

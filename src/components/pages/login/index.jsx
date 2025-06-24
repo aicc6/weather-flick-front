@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useGoogleLogin } from '@react-oauth/google'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useAuth } from '@/contexts/AuthContext'
 
 // Google 아이콘 컴포넌트
 const GoogleIcon = (props) => (
@@ -60,6 +61,12 @@ const loginSchema = z.object({
 export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { login } = useAuth()
+
+  // 리다이렉트된 페이지 정보 가져오기
+  const from = location.state?.from?.pathname || '/'
 
   const {
     register,
@@ -79,14 +86,33 @@ export function LoginPage() {
     setSubmitError('')
 
     try {
-      // TODO: 실제 API 호출로 교체
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // AuthContext를 통한 로그인
+      const credentials = {
+        username: data.email, // FastAPI OAuth2PasswordRequestForm은 username 필드를 사용
+        password: data.password,
+      }
 
-      // TODO: 로그인 성공 후 리다이렉트
-      console.log('로그인 데이터:', data)
+      await login(credentials)
+
+      // 로그인 성공 후 원래 페이지로 이동
+      navigate(from, { replace: true })
     } catch (error) {
       console.error('로그인 오류:', error)
-      setSubmitError('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.')
+
+      // 백엔드에서 오는 에러 메시지 처리
+      if (error.response?.data?.detail) {
+        const errorMessage = error.response.data.detail
+
+        if (errorMessage.includes('Incorrect email or password')) {
+          setSubmitError('이메일 또는 비밀번호가 올바르지 않습니다.')
+        } else {
+          setSubmitError(errorMessage)
+        }
+      } else {
+        setSubmitError(
+          '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.',
+        )
+      }
     } finally {
       setIsLoading(false)
     }
@@ -169,9 +195,13 @@ export function LoginPage() {
               </Link>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <button
+              type="submit"
+              className="w-full rounded-md bg-blue-600 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isLoading}
+            >
               {isLoading ? '로그인 중...' : '로그인'}
-            </Button>
+            </button>
           </form>
 
           <div className="relative my-6">

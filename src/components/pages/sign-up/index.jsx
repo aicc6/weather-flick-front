@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useGoogleLogin } from '@react-oauth/google'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useAuth } from '@/contexts/AuthContext'
 
 // Google 아이콘 컴포넌트
 const GoogleIcon = (props) => (
@@ -77,6 +78,8 @@ export function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const navigate = useNavigate()
+  const { register: registerUser } = useAuth()
 
   const {
     register,
@@ -99,14 +102,57 @@ export function SignUpPage() {
     setSubmitError('')
 
     try {
-      // TODO: 실제 API 호출로 교체
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // AuthContext를 통한 회원가입
+      const userData = {
+        email: data.email,
+        username: data.name,
+        password: data.password,
+      }
+
+      await registerUser(userData)
 
       setIsSuccess(true)
       reset()
+
+      // 3초 후 로그인 페이지로 이동
+      setTimeout(() => {
+        navigate('/login')
+      }, 3000)
     } catch (error) {
       console.error('회원가입 오류:', error)
-      setSubmitError('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.')
+      console.error('오류 응답:', error.response)
+
+      // 백엔드에서 오는 에러 메시지 처리
+      if (error.response?.data?.detail) {
+        const errorMessage = error.response.data.detail
+
+        // 이메일 중복 에러
+        if (errorMessage.includes('Email already registered')) {
+          setSubmitError('이미 등록된 이메일입니다.')
+        }
+        // 사용자명 중복 에러
+        else if (errorMessage.includes('Username already taken')) {
+          setSubmitError('이미 사용 중인 사용자명입니다.')
+        }
+        // 비밀번호 강도 에러
+        else if (errorMessage.includes('Password is too weak')) {
+          setSubmitError(
+            '비밀번호가 너무 약합니다. 대문자, 소문자, 숫자를 포함해주세요.',
+          )
+        } else {
+          setSubmitError(errorMessage)
+        }
+      } else if (error.code === 'ERR_NETWORK') {
+        setSubmitError(
+          '서버에 연결할 수 없습니다. 백엔드가 실행 중인지 확인해주세요.',
+        )
+      } else if (error.response?.status === 422) {
+        setSubmitError(
+          '입력 데이터가 올바르지 않습니다. 모든 필드를 확인해주세요.',
+        )
+      } else {
+        setSubmitError(`회원가입 중 오류가 발생했습니다: ${error.message}`)
+      }
     } finally {
       setIsLoading(false)
     }
@@ -233,9 +279,13 @@ export function SignUpPage() {
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? '가입 중...' : '이메일로 가입하기'}
-            </Button>
+            <button
+              type="submit"
+              className="w-full rounded-md bg-blue-600 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isLoading}
+            >
+              {isLoading ? '가입 중...' : '회원가입하기'}
+            </button>
           </form>
 
           <div className="relative my-6">
