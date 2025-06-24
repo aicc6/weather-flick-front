@@ -16,7 +16,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '@/contexts/AuthContext'
 import { GoogleIcon } from '@/components/icons'
 import { loginSchema } from '@/schemas'
-import { authAPI } from '../../../services/api'
+import { authAPI, tokenManager } from '@/services/api'
 import { useGoogleLogin } from '@react-oauth/google'
 
 /**
@@ -85,7 +85,7 @@ export function LoginPage() {
   const handleGoogleLogin = async (accessToken) => {
     try {
       const res = await authAPI.googleLogin(accessToken)
-      localStorage.setItem('token', res.data.access_token)
+      tokenManager.setToken(res.access_token, res.user_info)
       // 인증 상태 갱신 함수 호출 (예: setAuth)
       // ...
       // 메인 페이지 등으로 이동
@@ -102,7 +102,7 @@ export function LoginPage() {
         await handleGoogleLogin(tokenResponse.access_token)
       }
     },
-    onError: (error) => {
+    onError: (_error) => {
       setSubmitError('구글 로그인 중 오류가 발생했습니다.')
     },
   })

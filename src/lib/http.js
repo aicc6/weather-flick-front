@@ -1,3 +1,5 @@
+import { STORAGE_KEYS } from '@/constants/storage'
+
 const replaceUrl = (url, pathVariables) => {
   return Object.entries(pathVariables).reduce((val = '', [key, value]) => {
     if (!['string', 'number'].includes(typeof value))
@@ -81,7 +83,7 @@ export const http = createHttp(DEFAULT_CONFIG)
 
 // 인증 헤더를 추가하는 함수
 const getAuthHeaders = () => {
-  const token = localStorage.getItem('access_token')
+  const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 

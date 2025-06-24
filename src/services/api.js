@@ -1,9 +1,10 @@
 import { http, authHttp } from '@/lib/http'
+import { STORAGE_KEYS } from '@/constants/storage'
 
 // 401 에러 처리
 const handle401Error = () => {
-  localStorage.removeItem('access_token')
-  localStorage.removeItem('user_info')
+  localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
+  localStorage.removeItem(STORAGE_KEYS.USER_INFO)
   window.location.href = '/login'
 }
 
@@ -101,32 +102,32 @@ export const authAPI = {
 export const tokenManager = {
   // 토큰 저장
   setToken: (token, userInfo) => {
-    localStorage.setItem('access_token', token)
+    localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token)
     if (userInfo) {
-      localStorage.setItem('user_info', JSON.stringify(userInfo))
+      localStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify(userInfo))
     }
   },
 
   // 토큰 가져오기
   getToken: () => {
-    return localStorage.getItem('access_token')
+    return localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
   },
 
   // 사용자 정보 가져오기
   getUserInfo: () => {
-    const userInfo = localStorage.getItem('user_info')
+    const userInfo = localStorage.getItem(STORAGE_KEYS.USER_INFO)
     return userInfo ? JSON.parse(userInfo) : null
   },
 
   // 토큰 제거
   removeToken: () => {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('user_info')
+    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
+    localStorage.removeItem(STORAGE_KEYS.USER_INFO)
   },
 
   // 로그인 상태 확인
   isLoggedIn: () => {
-    return !!localStorage.getItem('access_token')
+    return !!localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
   },
 }
 

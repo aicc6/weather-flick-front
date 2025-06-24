@@ -1,6 +1,7 @@
 // HTTP 클라이언트 사용 예시들
 
 import { http, authHttp, createApiClient } from './http'
+import { STORAGE_KEYS } from '@/constants/storage'
 
 // 1. 기본 사용법
 export const basicUsage = {
@@ -150,7 +151,7 @@ export const realWorldScenarios = {
       xhr.open('POST', `${import.meta.env.VITE_API_BASE_URL}/upload`)
       xhr.setRequestHeader(
         'Authorization',
-        `Bearer ${localStorage.getItem('access_token')}`,
+        `Bearer ${localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)}`,
       )
       xhr.send(formData)
     })
