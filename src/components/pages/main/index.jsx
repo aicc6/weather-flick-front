@@ -2,12 +2,12 @@ import { useState, useRef, useEffect } from 'react'
 
 import {
   MapPin,
-  Calendar as CalendarIcon,
+  CalendarIcon,
   Sun,
   Cloud,
   CloudRain,
   CloudSnow,
-} from 'lucide-react'
+} from '@/components/icons'
 import { Chatbot } from '@/components/common/chatbot'
 import {
   Carousel,

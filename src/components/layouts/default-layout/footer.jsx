@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Sun, Mail, Phone, MapPin } from 'lucide-react'
+import { Sun, Mail, Phone, MapPin } from '@/components/icons'
 
 export function Footer() {
   return (

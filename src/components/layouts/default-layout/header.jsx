@@ -6,7 +6,7 @@
  */
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Sun, Moon, User, LogOut } from 'lucide-react'
+import { Sun, Moon, User, LogOut } from '@/components/icons'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import {
