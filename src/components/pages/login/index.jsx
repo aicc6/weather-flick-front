@@ -16,7 +16,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '@/contexts/AuthContext'
 import { GoogleIcon } from '@/components/icons'
 import { loginSchema } from '@/schemas'
-import { authAPI, tokenManager } from '@/services/api'
 import { useGoogleLogin } from '@react-oauth/google'
 
 /**
@@ -27,7 +26,7 @@ export function LoginPage() {
   const [submitError, setSubmitError] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
-  const { login } = useAuth()
+  const { login, googleLogin } = useAuth()
 
   // 리다이렉트된 페이지 정보 가져오기
   const from = location.state?.from?.pathname || '/'
@@ -84,10 +83,7 @@ export function LoginPage() {
 
   const handleGoogleLogin = async (accessToken) => {
     try {
-      const res = await authAPI.googleLogin(accessToken)
-      tokenManager.setToken(res.access_token, res.user_info)
-      // 인증 상태 갱신 함수 호출 (예: setAuth)
-      // ...
+      await googleLogin(accessToken)
       // 메인 페이지 등으로 이동
       navigate(from, { replace: true })
     } catch (err) {

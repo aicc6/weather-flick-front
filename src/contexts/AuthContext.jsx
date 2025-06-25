@@ -36,10 +36,18 @@ export const AuthProvider = ({ children }) => {
 
   // 로그인
   const login = async (credentials) => {
-    const response = await authAPI.login(credentials)
-    tokenManager.setToken(response.access_token, response.user_info)
-    setUser(response.user_info)
-    return response
+    try {
+      console.log('로그인 시도:', credentials)
+      const response = await authAPI.login(credentials)
+      console.log('로그인 응답:', response)
+      tokenManager.setToken(response.access_token, response.user_info)
+      setUser(response.user_info)
+      console.log('로그인 성공, 사용자 상태 업데이트됨')
+      return response
+    } catch (error) {
+      console.error('로그인 오류:', error)
+      throw error
+    }
   }
 
   // 로그아웃
@@ -62,6 +70,22 @@ export const AuthProvider = ({ children }) => {
     return response
   }
 
+  // 구글 로그인
+  const googleLogin = async (accessToken) => {
+    try {
+      console.log('구글 로그인 시도:', accessToken)
+      const response = await authAPI.googleLogin(accessToken)
+      console.log('구글 로그인 응답:', response)
+      tokenManager.setToken(response.access_token, response.user_info)
+      setUser(response.user_info)
+      console.log('구글 로그인 성공, 사용자 상태 업데이트됨')
+      return response
+    } catch (error) {
+      console.error('구글 로그인 오류:', error)
+      throw error
+    }
+  }
+
   // 사용자 정보 업데이트
   const updateProfile = async (userData) => {
     const updatedUser = await authAPI.updateProfile(userData)
@@ -75,7 +99,9 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     register,
+    googleLogin,
     updateProfile,
+    setUser,
     isLoggedIn: !!user,
   }
 

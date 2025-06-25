@@ -17,18 +17,16 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '@/contexts/AuthContext'
 import { GoogleIcon } from '@/components/icons'
 import { signUpSchema } from '@/schemas'
-import { authAPI } from '../../../services/api'
-import { STORAGE_KEYS } from '@/data'
 
 /**
  * URL: /sign-up
  */
 export function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false)
-  const [isSuccess, setIsSuccess] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const [isSuccess, setIsSuccess] = useState(false)
   const navigate = useNavigate()
-  const { register: registerUser } = useAuth()
+  const { register: registerUser, googleLogin } = useAuth()
 
   const {
     register,
@@ -115,15 +113,7 @@ export function SignUpPage() {
       // }).then(res => res.json());
       if (tokenResponse.access_token) {
         try {
-          const res = await authAPI.googleLogin(tokenResponse.access_token)
-
-          localStorage.setItem(
-            STORAGE_KEYS.USER_INFO,
-            JSON.stringify(res.user_info),
-          )
-          localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, res.access_token)
-          // 인증 상태 갱신 함수 호출 (예: setAuth)
-          // ...
+          await googleLogin(tokenResponse.access_token)
           // 메인 페이지 등으로 이동
           navigate('/')
         } catch (err) {
