@@ -3,10 +3,10 @@ import { z } from 'zod'
 // 회원가입 폼 스키마
 export const signUpSchema = z
   .object({
-    name: z
+    nickname: z
       .string()
-      .min(2, '이름은 2자 이상이어야 합니다.')
-      .max(50, '이름은 50자 이하여야 합니다.'),
+      .min(2, '닉네임은 2자 이상이어야 합니다.')
+      .max(50, '닉네임은 50자 이하여야 합니다.'),
     email: z
       .string()
       .min(1, '이메일을 입력해주세요.')
@@ -37,7 +37,7 @@ export const loginSchema = z.object({
 // 에러 메시지 매핑 (인증 관련)
 export const authErrorMessages = {
   'Email already registered': '이미 등록된 이메일입니다.',
-  'Username already taken': '이미 사용 중인 사용자명입니다.',
+  'Username already taken': '이미 사용 중인 닉네임입니다.',
   'Password is too weak':
     '비밀번호가 너무 약합니다. 대문자, 소문자, 숫자를 포함해주세요.',
   'Incorrect email or password': '이메일 또는 비밀번호가 올바르지 않습니다.',

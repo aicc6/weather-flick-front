@@ -79,7 +79,7 @@ export function SignUpPage() {
         }
         // 사용자명 중복 에러
         else if (errorMessage.includes('Username already taken')) {
-          setSubmitError('이미 사용 중인 사용자명입니다.')
+          setSubmitError('이미 사용 중인 닉네임입니다.')
         }
         // 비밀번호 강도 에러
         else if (errorMessage.includes('Password is too weak')) {
