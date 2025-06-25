@@ -37,7 +37,7 @@ export function SignUpPage() {
     resolver: zodResolver(signUpSchema),
     mode: 'onChange',
     defaultValues: {
-      name: '',
+      nickname: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -52,7 +52,7 @@ export function SignUpPage() {
       // AuthContext를 통한 회원가입
       const userData = {
         email: data.email,
-        username: data.name,
+        username: data.nickname,
         password: data.password,
       }
 
@@ -174,16 +174,18 @@ export function SignUpPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="name">이름</Label>
+              <Label htmlFor="nickname">닉네임</Label>
               <Input
-                id="name"
+                id="nickname"
                 type="text"
-                placeholder="홍길동"
-                {...register('name')}
-                className={errors.name ? 'border-red-500' : ''}
+                placeholder="닉네임을 입력하세요"
+                {...register('nickname')}
+                className={errors.nickname ? 'border-red-500' : ''}
               />
-              {errors.name && (
-                <p className="text-sm text-red-500">{errors.name.message}</p>
+              {errors.nickname && (
+                <p className="text-sm text-red-500">
+                  {errors.nickname.message}
+                </p>
               )}
             </div>
 
