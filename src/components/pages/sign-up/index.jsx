@@ -42,6 +42,7 @@ export function SignUpPage() {
     formState: { errors },
     reset,
     clearErrors,
+    setValue,
   } = useForm({
     resolver: zodResolver(signUpSchema),
     mode: 'onChange',
@@ -54,6 +55,7 @@ export function SignUpPage() {
   })
 
   const onSubmit = async (data) => {
+    console.log('회원가입 onSubmit 호출', data)
     setIsLoading(true)
     setSubmitError('')
 
@@ -184,6 +186,9 @@ export function SignUpPage() {
       } else {
         setVerificationMsg('이메일 인증이 완료되었습니다!')
         setIsEmailVerified(true)
+        setVerificationInput('')
+        setValue('email', emailRef.current.value)
+        clearErrors('email')
       }
     } catch (e) {
       setVerificationMsg('인증에 실패했습니다. 네트워크 오류.')
@@ -233,6 +238,14 @@ export function SignUpPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {console.log(
+              'isLoading',
+              isLoading,
+              'isEmailVerified',
+              isEmailVerified,
+              'errors',
+              errors,
+            )}
             {submitError && (
               <Alert variant="destructive">
                 <AlertDescription>{submitError}</AlertDescription>
