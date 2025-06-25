@@ -1,10 +1,12 @@
+import { useNavigate } from 'react-router-dom'
 import { Star } from '@/components/icons'
-import { reviews } from '@/data'
+import { reviews as initialReviews } from '@/data'
 
 /**
  * URL: /reviews
  */
 export function ReviewsPage() {
+  const navigate = useNavigate()
   const renderStars = (rating) => {
     const stars = []
     for (let i = 0; i < 5; i++) {
@@ -19,26 +21,34 @@ export function ReviewsPage() {
   }
 
   return (
-    <div className="bg-gray-50 py-12">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div className="bg-gray-50 py-12 dark:bg-gray-900">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 text-center">
           <h1 className="text-4xl font-bold text-gray-900">여행 리뷰</h1>
           <p className="mt-4 text-lg text-gray-600">
-            Weather Flick 사용자들의 생생한 여행 경험을 확인해보세요.
+            여행지에 대한 다양한 후기를 확인해보세요!
           </p>
+          <button
+            className="mt-6 rounded bg-blue-600 px-6 py-2 font-semibold text-white hover:bg-blue-700"
+            onClick={() => navigate('/reviews/write')}
+          >
+            리뷰 작성하기
+          </button>
         </div>
         <div className="grid gap-8 lg:grid-cols-2">
-          {reviews.map((review) => (
+          {initialReviews.map((review) => (
             <article
               key={review.id}
-              className="flex flex-col overflow-hidden rounded-lg bg-white shadow-md md:flex-row"
+              className="flex flex-col overflow-hidden rounded-lg bg-white shadow-md md:flex-row dark:bg-gray-800"
             >
               <div className="md:w-1/3">
-                <img
-                  className="h-full w-full object-cover"
-                  src={review.imageUrl}
-                  alt={review.title}
-                />
+                {review.imageUrl && (
+                  <img
+                    className="h-full w-full object-cover"
+                    src={review.imageUrl}
+                    alt={review.title}
+                  />
+                )}
               </div>
               <div className="flex flex-col justify-between p-6 md:w-2/3">
                 <div>
