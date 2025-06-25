@@ -6,6 +6,7 @@ import { SignUpPage } from './components/pages/sign-up'
 import { ReviewsPage } from './components/pages/reviews'
 import { ReviewWritePage } from './components/pages/reviews/write'
 import RecommendPage from './components/pages/recommend'
+import { VerifyEmailPage } from './components/pages/auth/verify-email'
 import '@/App.css'
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
           <Route path="/reviews" element={<ReviewsPage />} />
           <Route path="/reviews/write" element={<ReviewWritePage />} />
           <Route path="/recommend" element={<RecommendPage />} />
+          <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
         </Routes>
       </DefaultLayout>
     </BrowserRouter>

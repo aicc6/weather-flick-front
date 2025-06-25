@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useGoogleLogin } from '@react-oauth/google'
@@ -25,14 +25,23 @@ export function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [isSuccess, setIsSuccess] = useState(false)
+  const [isEmailVerified, setIsEmailVerified] = useState(false)
+  const [verificationSent, setVerificationSent] = useState(false)
+  const [verificationCode, setVerificationCode] = useState('')
+  const [verificationInput, setVerificationInput] = useState('')
+  const [verificationMsg, setVerificationMsg] = useState('')
+  const [isVerifying, setIsVerifying] = useState(false)
+  const [isSending, setIsSending] = useState(false)
   const navigate = useNavigate()
   const { register: registerUser, googleLogin } = useAuth()
+  const emailRef = useRef()
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    clearErrors,
   } = useForm({
     resolver: zodResolver(signUpSchema),
     mode: 'onChange',
@@ -58,6 +67,23 @@ export function SignUpPage() {
 
       await registerUser(userData)
 
+      // 이메일 인증코드 발송
+      try {
+        const res = await fetch(
+          'https://wf-api-dev.seongjunlee.dev/auth/send-verification',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: data.email }),
+          },
+        )
+        if (!res.ok) throw new Error('이메일 인증코드 발송에 실패했습니다.')
+      } catch (e) {
+        setSubmitError(
+          '이메일 인증코드 발송에 실패했습니다. 이메일 주소를 확인해 주세요.',
+        )
+      }
+
       setIsSuccess(true)
       reset()
 
@@ -67,39 +93,15 @@ export function SignUpPage() {
       }, 3000)
     } catch (error) {
       console.error('회원가입 오류:', error)
-      console.error('오류 응답:', error.response)
-
-      // 백엔드에서 오는 에러 메시지 처리
-      if (error.response?.data?.detail) {
-        const errorMessage = error.response.data.detail
-
-        // 이메일 중복 에러
-        if (errorMessage.includes('Email already registered')) {
-          setSubmitError('이미 등록된 이메일입니다.')
-        }
-        // 사용자명 중복 에러
-        else if (errorMessage.includes('Username already taken')) {
-          setSubmitError('이미 사용 중인 닉네임입니다.')
-        }
-        // 비밀번호 강도 에러
-        else if (errorMessage.includes('Password is too weak')) {
-          setSubmitError(
-            '비밀번호가 너무 약합니다. 대문자, 소문자, 숫자를 포함해주세요.',
-          )
-        } else {
-          setSubmitError(errorMessage)
-        }
-      } else if (error.code === 'ERR_NETWORK') {
-        setSubmitError(
-          '서버에 연결할 수 없습니다. 백엔드가 실행 중인지 확인해주세요.',
-        )
-      } else if (error.response?.status === 422) {
-        setSubmitError(
-          '입력 데이터가 올바르지 않습니다. 모든 필드를 확인해주세요.',
-        )
-      } else {
-        setSubmitError(`회원가입 중 오류가 발생했습니다: ${error.message}`)
+      let errorMessage = '회원가입 중 오류가 발생했습니다.'
+      if (error.data?.detail) {
+        errorMessage = error.data.detail
+      } else if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail
+      } else if (error.message) {
+        errorMessage = error.message
       }
+      setSubmitError(errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -125,6 +127,70 @@ export function SignUpPage() {
       setSubmitError('구글 회원가입 중 오류가 발생했습니다.')
     },
   })
+
+  const sendVerificationCode = async () => {
+    clearErrors('email')
+    setVerificationMsg('')
+    setVerificationSent(false)
+    setIsEmailVerified(false)
+    const email = emailRef.current.value
+    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      setVerificationMsg('올바른 이메일 형식을 입력해주세요.')
+      return
+    }
+    setIsSending(true)
+    setVerificationMsg('인증번호 발송 중...')
+    try {
+      const res = await fetch(
+        'https://wf-api-dev.seongjunlee.dev/auth/send-verification',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        },
+      )
+      if (!res.ok) throw new Error('이메일 인증코드 발송에 실패했습니다.')
+      setVerificationSent(true)
+      setVerificationMsg('인증번호가 이메일로 발송되었습니다.')
+    } catch (e) {
+      setVerificationMsg(
+        '이메일 인증코드 발송에 실패했습니다. 이메일 주소를 확인해 주세요.',
+      )
+    }
+    setIsSending(false)
+  }
+
+  const verifyCode = async () => {
+    setIsVerifying(true)
+    setVerificationMsg('')
+    try {
+      const res = await fetch(
+        'https://wf-api-dev.seongjunlee.dev/auth/verify-email',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: emailRef.current.value,
+            verification_code: verificationInput,
+          }),
+        },
+      )
+      if (!res.ok) {
+        const data = await res.json()
+        setVerificationMsg(
+          data.detail || '인증에 실패했습니다. 인증번호를 확인해 주세요.',
+        )
+        setIsEmailVerified(false)
+      } else {
+        setVerificationMsg('이메일 인증이 완료되었습니다!')
+        setIsEmailVerified(true)
+      }
+    } catch (e) {
+      setVerificationMsg('인증에 실패했습니다. 네트워크 오류.')
+      setIsEmailVerified(false)
+    }
+    setIsVerifying(false)
+  }
 
   if (isSuccess) {
     return (
@@ -191,14 +257,52 @@ export function SignUpPage() {
 
             <div className="space-y-2">
               <Label htmlFor="email">이메일</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="example@email.com"
-                {...register('email')}
-                className={errors.email ? 'border-red-500' : ''}
-              />
-              {errors.email && (
+              <div className="flex gap-2">
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="example@email.com"
+                  {...register('email')}
+                  ref={emailRef}
+                  className={errors.email ? 'flex-1 border-red-500' : 'flex-1'}
+                  disabled={isEmailVerified}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={sendVerificationCode}
+                  disabled={isEmailVerified || isSending}
+                >
+                  {isSending ? '발송 중...' : '인증번호 발송'}
+                </Button>
+              </div>
+              {verificationSent && (
+                <div className="mt-2 flex gap-2">
+                  <Input
+                    type="text"
+                    placeholder="인증번호 입력"
+                    value={verificationInput}
+                    onChange={(e) => setVerificationInput(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={verifyCode}
+                    disabled={isVerifying || isEmailVerified}
+                  >
+                    {isVerifying ? '인증 중...' : '인증하기'}
+                  </Button>
+                </div>
+              )}
+              {verificationMsg && (
+                <p
+                  className={`mt-1 text-sm ${isEmailVerified ? 'text-green-600' : 'text-red-500'}`}
+                >
+                  {verificationMsg}
+                </p>
+              )}
+              {!verificationMsg && errors.email && (
                 <p className="text-sm text-red-500">{errors.email.message}</p>
               )}
             </div>
@@ -235,13 +339,13 @@ export function SignUpPage() {
               )}
             </div>
 
-            <button
+            <Button
               type="submit"
               className="w-full rounded-md bg-blue-600 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={isLoading}
+              disabled={isLoading || !isEmailVerified}
             >
               {isLoading ? '가입 중...' : '회원가입하기'}
-            </button>
+            </Button>
           </form>
 
           <div className="relative my-6">
