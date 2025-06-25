@@ -128,8 +128,8 @@ export function SignUpPage() {
 
   if (isSuccess) {
     return (
-      <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-        <Card className="w-full max-w-md">
+      <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4 dark:from-gray-900 dark:to-gray-800">
+        <Card className="w-full max-w-md bg-white dark:bg-gray-800">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl text-green-600">
               회원가입 완료!
@@ -157,8 +157,8 @@ export function SignUpPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4 dark:from-gray-900 dark:to-gray-800">
+      <Card className="w-full max-w-md bg-white dark:bg-gray-800">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">회원가입</CardTitle>
           <CardDescription>
@@ -249,7 +249,9 @@ export function SignUpPage() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-card text-muted-foreground px-2">또는</span>
+              <span className="bg-white px-2 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                또는
+              </span>
             </div>
           </div>
 
