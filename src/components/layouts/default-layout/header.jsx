@@ -98,9 +98,7 @@ export function Header() {
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarFallback>
-                        {user?.username?.charAt(0)?.toUpperCase() || (
-                          <User className="h-4 w-4" />
-                        )}
+                        <User className="h-4 w-4" />
                       </AvatarFallback>
                     </Avatar>
                   </Button>
