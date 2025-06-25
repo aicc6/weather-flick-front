@@ -33,3 +33,4 @@ export { Calendar as CalendarIcon } from 'lucide-react'
 
 // Custom Icons
 export { default as GoogleIcon } from './custom/GoogleIcon'
+export { WeatherIcon } from './custom/WeatherIcon'
