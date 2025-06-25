@@ -63,9 +63,11 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600">
-                <Sun className="h-5 w-5 text-white" />
-              </div>
+              <img
+                src="/logo.jpg"
+                alt="Weather Flick Logo"
+                className="h-8 w-8 rounded-lg object-cover"
+              />
               <span className="text-xl font-bold text-gray-900 dark:text-white">
                 Weather Flick
               </span>
