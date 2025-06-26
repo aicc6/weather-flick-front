@@ -156,7 +156,7 @@ export function SignUpPage() {
       setVerificationMsg('인증번호가 이메일로 발송되었습니다.')
     } catch (e) {
       setVerificationMsg(
-        '이메일 인증코드 발송에 실패했습니다. 이메일 주소를 확인해 주세요.',
+        '이미 가입되어 있는 이메일입니다. 다른 이메일을 입력해주세요.',
       )
     }
     setIsSending(false)
