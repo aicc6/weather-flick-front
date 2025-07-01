@@ -25,6 +25,12 @@ export function Header() {
   const { user, isLoggedIn, logout } = useAuth()
   const navigate = useNavigate()
 
+  // 디버깅을 위한 로그
+  console.log('Header 렌더링 - user:', user)
+  console.log('Header 렌더링 - isLoggedIn:', isLoggedIn)
+  console.log('Header 렌더링 - user?.nickname:', user?.nickname)
+  console.log('Header 렌더링 - user?.email:', user?.email)
+
   useEffect(() => {
     // 초기 테마 적용
     const saved = localStorage.getItem('theme')
@@ -109,7 +115,7 @@ export function Header() {
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm leading-none font-medium">
-                        {user?.username}
+                        {user?.nickname || user?.email}
                       </p>
                       <p className="text-muted-foreground text-xs leading-none">
                         {user?.email}

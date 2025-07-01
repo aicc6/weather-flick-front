@@ -57,8 +57,10 @@ export function LoginPage() {
 
       await login(credentials)
 
-      // 로그인 성공 후 원래 페이지로 이동
-      navigate(from, { replace: true })
+      // 로그인 성공 후 상태 업데이트를 위해 약간의 지연 후 페이지 이동
+      setTimeout(() => {
+        navigate(from, { replace: true })
+      }, 100)
     } catch (error) {
       console.error('로그인 오류:', error)
 
@@ -85,7 +87,9 @@ export function LoginPage() {
     try {
       await googleLogin(accessToken)
       // 메인 페이지 등으로 이동
-      navigate(from, { replace: true })
+      setTimeout(() => {
+        navigate(from, { replace: true })
+      }, 100)
     } catch (err) {
       setSubmitError(err.response?.data?.detail || '구글 로그인 실패')
     }

@@ -14,6 +14,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   // 초기 로드 시 사용자 정보 확인
   useEffect(() => {
@@ -22,10 +23,12 @@ export const AuthProvider = ({ children }) => {
         if (tokenManager.isLoggedIn()) {
           const userInfo = await authAPI.getMe()
           setUser(userInfo)
+          setIsLoggedIn(true)
         }
       } catch (error) {
         console.error('사용자 정보 로드 실패:', error)
         tokenManager.removeToken()
+        setIsLoggedIn(false)
       } finally {
         setLoading(false)
       }
@@ -40,9 +43,11 @@ export const AuthProvider = ({ children }) => {
       console.log('로그인 시도:', credentials)
       const response = await authAPI.login(credentials)
       console.log('로그인 응답:', response)
+      console.log('사용자 정보:', response.user_info)
       tokenManager.setToken(response.access_token, response.user_info)
       setUser(response.user_info)
-      console.log('로그인 성공, 사용자 상태 업데이트됨')
+      setIsLoggedIn(true)
+      console.log('로그인 성공, 사용자 상태 업데이트됨:', response.user_info)
       return response
     } catch (error) {
       console.error('로그인 오류:', error)
@@ -61,6 +66,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       tokenManager.removeToken()
       setUser(null)
+      setIsLoggedIn(false)
     }
   }
 
@@ -78,6 +84,7 @@ export const AuthProvider = ({ children }) => {
       console.log('구글 로그인 응답:', response)
       tokenManager.setToken(response.access_token, response.user_info)
       setUser(response.user_info)
+      setIsLoggedIn(true)
       console.log('구글 로그인 성공, 사용자 상태 업데이트됨')
       return response
     } catch (error) {
@@ -102,7 +109,7 @@ export const AuthProvider = ({ children }) => {
     googleLogin,
     updateProfile,
     setUser,
-    isLoggedIn: !!user,
+    isLoggedIn,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
