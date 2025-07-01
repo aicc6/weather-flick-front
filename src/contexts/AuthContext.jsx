@@ -119,23 +119,6 @@ export const AuthProvider = ({ children }) => {
     return response
   }
 
-  // 구글 로그인
-  const googleLogin = useCallback(
-    async (accessToken) => {
-      try {
-        const response = await authAPI.googleLogin(accessToken)
-        tokenManager.setToken(response.access_token, response.user_info)
-        setUser(response.user_info)
-        setIsLoggedIn(true)
-        forceUpdate()
-        return response
-      } catch (error) {
-        console.error('구글 로그인 오류:', error)
-        throw error
-      }
-    },
-    [forceUpdate],
-  )
 
   // 사용자 정보 업데이트
   const updateProfile = async (userData) => {
@@ -155,10 +138,10 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     register,
-    googleLogin,
     updateProfile,
     updateUser,
     setUser,
+    setIsAuthenticated: setIsLoggedIn,
     isLoggedIn,
     updateTrigger,
     forceUpdateRef: forceUpdateRef.current,

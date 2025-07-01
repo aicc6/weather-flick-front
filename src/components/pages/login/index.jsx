@@ -16,7 +16,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '@/contexts/AuthContext'
 import { GoogleIcon } from '@/components/icons'
 import { loginSchema } from '@/schemas'
-import { useGoogleLogin } from '@react-oauth/google'
+import { authAPI } from '@/services/api'
 
 /**
  * URL: '/login'
@@ -26,7 +26,7 @@ export function LoginPage() {
   const [submitError, setSubmitError] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
-  const { login, googleLogin } = useAuth()
+  const { login } = useAuth()
 
   // 리다이렉트된 페이지 정보 가져오기
   const from = location.state?.from?.pathname || '/'
@@ -87,33 +87,17 @@ export function LoginPage() {
     }
   }
 
-  const handleGoogleLogin = async (accessToken) => {
+  const handleGoogleLogin = async () => {
     try {
-      await googleLogin(accessToken)
-      // 메인 페이지 등으로 이동 후 자동 새로고침
-      setTimeout(() => {
-        navigate(from, { replace: true })
-        // 페이지 이동 후 자동 새로고침
-        setTimeout(() => {
-          window.location.reload()
-        }, 100)
-      }, 300)
-    } catch (err) {
-      setSubmitError(err.response?.data?.detail || '구글 로그인 실패')
+      const response = await authAPI.getGoogleAuthUrl()
+      if (response.auth_url) {
+        window.location.href = response.auth_url
+      }
+    } catch (error) {
+      console.error('구글 인증 URL 생성 오류:', error)
+      setSubmitError('구글 로그인 URL을 가져오는데 실패했습니다.')
     }
   }
-
-  const googleLoginHandler = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      // console.log('성공', tokenResponse)
-      if (tokenResponse.access_token) {
-        await handleGoogleLogin(tokenResponse.access_token)
-      }
-    },
-    onError: (_error) => {
-      setSubmitError('구글 로그인 중 오류가 발생했습니다.')
-    },
-  })
 
   return (
     <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4 dark:from-gray-900 dark:to-gray-800">
@@ -204,7 +188,7 @@ export function LoginPage() {
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => googleLoginHandler()}
+            onClick={handleGoogleLogin}
             disabled={isLoading}
           >
             <GoogleIcon />

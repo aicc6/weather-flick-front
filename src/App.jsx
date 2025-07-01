@@ -7,6 +7,7 @@ import { ReviewsPage } from './components/pages/reviews'
 import { ReviewWritePage } from './components/pages/reviews/write'
 import RecommendPage from './components/pages/recommend'
 import { VerifyEmailPage } from './components/pages/auth/verify-email'
+import { GoogleCallbackPage } from './components/pages/auth/GoogleCallback'
 import { ProfilePage } from './components/pages/profile'
 import { ProfileEditPage } from './components/pages/profile/edit'
 import PlansPage from './components/pages/plans'
@@ -25,6 +26,7 @@ function App() {
           <Route path="/recommend" element={<RecommendPage />} />
           <Route path="/plans" element={<PlansPage />} />
           <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/edit" element={<ProfileEditPage />} />
         </Routes>

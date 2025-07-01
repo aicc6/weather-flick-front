@@ -1,7 +1,6 @@
 import { useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
-import { useGoogleLogin } from '@react-oauth/google'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,6 +16,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '@/contexts/AuthContext'
 import { GoogleIcon } from '@/components/icons'
 import { signUpSchema } from '@/schemas'
+import { authAPI } from '@/services/api'
 import { useEmailVerification } from '@/hooks/useEmailVerification'
 import { EmailVerification } from './EmailVerification'
 import { SignUpSuccess } from './SignUpSuccess'
@@ -29,7 +29,7 @@ export function SignUpPage() {
   const [submitError, setSubmitError] = useState('')
   const [isSuccess, setIsSuccess] = useState(false)
   const navigate = useNavigate()
-  const { register: registerUser, googleLogin } = useAuth()
+  const { register: registerUser } = useAuth()
   const emailRef = useRef()
 
   const {
@@ -93,21 +93,17 @@ export function SignUpPage() {
     }
   }
 
-  const googleLoginHandler = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      if (tokenResponse.access_token) {
-        try {
-          await googleLogin(tokenResponse.access_token)
-          navigate('/')
-        } catch (err) {
-          setSubmitError(err.response?.data?.detail || '구글 회원가입 실패')
-        }
+  const handleGoogleLogin = async () => {
+    try {
+      const response = await authAPI.getGoogleAuthUrl()
+      if (response.auth_url) {
+        window.location.href = response.auth_url
       }
-    },
-    onError: () => {
-      setSubmitError('구글 회원가입 중 오류가 발생했습니다.')
-    },
-  })
+    } catch (error) {
+      console.error('구글 인증 URL 생성 오류:', error)
+      setSubmitError('구글 로그인 URL을 가져오는데 실패했습니다.')
+    }
+  }
 
   const handleSendVerification = async (e) => {
     e.preventDefault()
@@ -242,7 +238,7 @@ export function SignUpPage() {
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => googleLoginHandler()}
+            onClick={handleGoogleLogin}
             disabled={isLoading}
           >
             <GoogleIcon />

@@ -89,12 +89,20 @@ export const authAPI = {
     })
     return handleResponse(response)
   },
-  googleLogin: async (access_token) => {
-    return handleResponse(
-      await authHttp.POST('auth/google', {
-        body: { access_token },
-      }),
-    )
+  // 구글 OAuth 인증 URL 생성
+  getGoogleAuthUrl: async () => {
+    const response = await http.GET('auth/google/auth-url')
+    return handleResponse(response)
+  },
+
+  // OAuth 콜백 처리
+  googleCallback: async (code, state) => {
+    const response = await http.GET('auth/google/callback', {
+      params: {
+        query: { code, state }
+      }
+    })
+    return handleResponse(response)
   },
 }
 
