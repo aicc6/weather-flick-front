@@ -144,6 +144,11 @@ export const AuthProvider = ({ children }) => {
     return updatedUser
   }
 
+  // 프로필 업데이트 (updateProfile의 별칭)
+  const updateUser = async (userData) => {
+    return await updateProfile(userData)
+  }
+
   const value = {
     user,
     loading,
@@ -152,6 +157,7 @@ export const AuthProvider = ({ children }) => {
     register,
     googleLogin,
     updateProfile,
+    updateUser,
     setUser,
     isLoggedIn,
     updateTrigger,
