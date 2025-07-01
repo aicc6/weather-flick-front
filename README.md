@@ -49,7 +49,6 @@ npm run build
 
 ```env
 VITE_API_BASE_URL=http://localhost:8000
-VITE_GOOGLE_CLIENT_ID=your_google_client_id
 ```
 
 ## 백엔드 연결
