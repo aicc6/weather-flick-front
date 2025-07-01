@@ -7,7 +7,7 @@ export const navigationLinks = [
   },
   {
     path: '/plans',
-    label: '내 플랜',
+    label: '여행 플랜',
     isHighlighted: false,
   },
   {

@@ -8,8 +8,7 @@ export const reviews = [
     rating: 5,
     content:
       '날씨가 정말 좋았고, 해안도로를 따라 자전거를 타는 경험은 잊을 수 없습니다. 꼭 한번 가보세요!',
-    imageUrl:
-      '/images/photo-1590698933909-2c9c1b3b7a1e?q=80&w=1000&auto=format&fit=crop',
+    imageUrl: '/logo.jpg',
   },
   {
     id: 2,
@@ -19,8 +18,7 @@ export const reviews = [
     rating: 4,
     content:
       '비가 와서 걱정했지만, 오히려 차분하고 고즈넉한 분위기 속에서 경주를 즐길 수 있었습니다. 불국사와 석굴암은 비오는 날씨에도 정말 멋졌습니다.',
-    imageUrl:
-      '/images/photo-1583513702443-055a3a0d5f53?q=80&w=1000&auto=format&fit=crop',
+    imageUrl: '/logo.jpg',
   },
   {
     id: 3,
@@ -30,8 +28,7 @@ export const reviews = [
     rating: 5,
     content:
       '아이들이 바다를 보고 정말 좋아했어요. 날씨 예보를 보고 맑은 날에 맞춰 갔는데, 정말 탁월한 선택이었습니다. 중앙시장에서 먹은 닭강정도 최고!',
-    imageUrl:
-      '/images/photo-1608232189605-9e1e82865b14?q=80&w=1000&auto=format&fit=crop',
+    imageUrl: '/logo.jpg',
   },
   {
     id: 4,
@@ -41,7 +38,6 @@ export const reviews = [
     rating: 4,
     content:
       '미세먼지 없는 맑은 날, 경복궁과 창덕궁을 거닐었습니다. 도심 속에서 느끼는 여유와 역사의 숨결이 인상 깊었습니다.',
-    imageUrl:
-      '/images/photo-1545641203-74a7b9a91b94?q=80&w=1000&auto=format&fit=crop',
+    imageUrl: '/logo.jpg',
   },
 ]

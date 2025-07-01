@@ -155,22 +155,23 @@ export function ProfilePage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {user?.preferred_region && (
+              {user?.preferred_region && user.preferred_region !== 'none' && (
                 <Badge variant="secondary" className="flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
                   선호 지역: {user.preferred_region}
                 </Badge>
               )}
-              {user?.preferred_theme && (
+              {user?.preferred_theme && user.preferred_theme !== 'none' && (
                 <Badge variant="secondary">
                   선호 테마: {user.preferred_theme}
                 </Badge>
               )}
-              {!user?.preferred_region && !user?.preferred_theme && (
-                <p className="text-sm text-gray-500">
-                  선호 설정을 추가해보세요!
-                </p>
-              )}
+              {(!user?.preferred_region || user.preferred_region === 'none') &&
+                (!user?.preferred_theme || user.preferred_theme === 'none') && (
+                  <p className="text-sm text-gray-500">
+                    선호 설정을 추가해보세요!
+                  </p>
+                )}
             </div>
           </CardContent>
         </Card>

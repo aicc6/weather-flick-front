@@ -23,8 +23,8 @@ export function ProfileEditPage() {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     nickname: '',
-    preferredRegion: '',
-    preferredTheme: '',
+    preferredRegion: 'none',
+    preferredTheme: 'none',
     bio: '',
   })
   const [errors, setErrors] = useState({})
@@ -33,8 +33,8 @@ export function ProfileEditPage() {
     if (user) {
       setFormData({
         nickname: user.nickname || '',
-        preferredRegion: user.preferred_region || '',
-        preferredTheme: user.preferred_theme || '',
+        preferredRegion: user.preferred_region || 'none',
+        preferredTheme: user.preferred_theme || 'none',
         bio: user.bio || '',
       })
     }
@@ -82,8 +82,10 @@ export function ProfileEditPage() {
       // 백엔드 API와 필드명 맞춤
       const updateData = {
         nickname: formData.nickname,
-        preferred_region: formData.preferredRegion,
-        preferred_theme: formData.preferredTheme,
+        preferred_region:
+          formData.preferredRegion === 'none' ? null : formData.preferredRegion,
+        preferred_theme:
+          formData.preferredTheme === 'none' ? null : formData.preferredTheme,
         bio: formData.bio,
       }
       await updateUser(updateData)
@@ -238,7 +240,7 @@ export function ProfileEditPage() {
                     <SelectValue placeholder="선호하는 지역을 선택하세요" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">선택하지 않음</SelectItem>
+                    <SelectItem value="none">선택하지 않음</SelectItem>
                     {regions.map((region) => (
                       <SelectItem key={region} value={region}>
                         {region}
@@ -261,7 +263,7 @@ export function ProfileEditPage() {
                     <SelectValue placeholder="선호하는 테마를 선택하세요" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">선택하지 않음</SelectItem>
+                    <SelectItem value="none">선택하지 않음</SelectItem>
                     {themes.map((theme) => (
                       <SelectItem key={theme} value={theme}>
                         {theme}
@@ -272,9 +274,10 @@ export function ProfileEditPage() {
               </div>
 
               {/* 선택된 항목 표시 */}
-              {(formData.preferredRegion || formData.preferredTheme) && (
+              {(formData.preferredRegion !== 'none' ||
+                formData.preferredTheme !== 'none') && (
                 <div className="flex flex-wrap gap-2 pt-2">
-                  {formData.preferredRegion && (
+                  {formData.preferredRegion !== 'none' && (
                     <Badge
                       variant="secondary"
                       className="flex items-center gap-1"
@@ -283,19 +286,23 @@ export function ProfileEditPage() {
                       {formData.preferredRegion}
                       <button
                         type="button"
-                        onClick={() => handleInputChange('preferredRegion', '')}
+                        onClick={() =>
+                          handleInputChange('preferredRegion', 'none')
+                        }
                         className="ml-1 hover:text-red-500"
                       >
                         <X className="h-3 w-3" />
                       </button>
                     </Badge>
                   )}
-                  {formData.preferredTheme && (
+                  {formData.preferredTheme !== 'none' && (
                     <Badge variant="secondary">
                       {formData.preferredTheme}
                       <button
                         type="button"
-                        onClick={() => handleInputChange('preferredTheme', '')}
+                        onClick={() =>
+                          handleInputChange('preferredTheme', 'none')
+                        }
                         className="ml-1 hover:text-red-500"
                       >
                         <X className="h-3 w-3" />

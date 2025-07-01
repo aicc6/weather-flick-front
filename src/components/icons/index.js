@@ -37,6 +37,8 @@ export {
   Trash2,
   Palette,
   Save,
+  Eye,
+  Umbrella,
 } from 'lucide-react'
 
 // Communication Icons
