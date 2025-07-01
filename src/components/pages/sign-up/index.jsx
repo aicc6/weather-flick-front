@@ -70,7 +70,7 @@ export function SignUpPage() {
     try {
       const userData = {
         email: data.email,
-        username: data.nickname,
+        nickname: data.nickname,
         password: data.password,
       }
 
@@ -161,7 +161,9 @@ export function SignUpPage() {
               />
               {errors.nickname && (
                 <p className="text-sm text-red-500">
-                  {errors.nickname.message}
+                  {typeof errors.nickname.message === 'string'
+                    ? errors.nickname.message
+                    : '닉네임을 올바르게 입력해주세요.'}
                 </p>
               )}
             </div>
@@ -192,7 +194,9 @@ export function SignUpPage() {
               />
               {errors.password && (
                 <p className="text-sm text-red-500">
-                  {errors.password.message}
+                  {typeof errors.password.message === 'string'
+                    ? errors.password.message
+                    : '비밀번호를 올바르게 입력해주세요.'}
                 </p>
               )}
             </div>
@@ -208,7 +212,9 @@ export function SignUpPage() {
               />
               {errors.confirmPassword && (
                 <p className="text-sm text-red-500">
-                  {errors.confirmPassword.message}
+                  {typeof errors.confirmPassword.message === 'string'
+                    ? errors.confirmPassword.message
+                    : '비밀번호 확인을 올바르게 입력해주세요.'}
                 </p>
               )}
             </div>
