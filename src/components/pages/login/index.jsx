@@ -57,10 +57,14 @@ export function LoginPage() {
 
       await login(credentials)
 
-      // 로그인 성공 후 상태 업데이트를 위해 약간의 지연 후 페이지 이동
+      // 로그인 성공 후 자동 새로고침으로 헤더 상태 강제 업데이트
       setTimeout(() => {
         navigate(from, { replace: true })
-      }, 100)
+        // 페이지 이동 후 자동 새로고침
+        setTimeout(() => {
+          window.location.reload()
+        }, 100)
+      }, 300)
     } catch (error) {
       console.error('로그인 오류:', error)
 
@@ -86,10 +90,14 @@ export function LoginPage() {
   const handleGoogleLogin = async (accessToken) => {
     try {
       await googleLogin(accessToken)
-      // 메인 페이지 등으로 이동
+      // 메인 페이지 등으로 이동 후 자동 새로고침
       setTimeout(() => {
         navigate(from, { replace: true })
-      }, 100)
+        // 페이지 이동 후 자동 새로고침
+        setTimeout(() => {
+          window.location.reload()
+        }, 100)
+      }, 300)
     } catch (err) {
       setSubmitError(err.response?.data?.detail || '구글 로그인 실패')
     }

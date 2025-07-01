@@ -23,7 +23,7 @@ export {
 export { Sun, Moon, Cloud, CloudRain, CloudSnow } from 'lucide-react'
 
 // User & Social Icons
-export { User, LogOut, Mail, Phone, MapPin, Star } from 'lucide-react'
+export { User, LogOut, Mail, Phone, MapPin, Star, Settings } from 'lucide-react'
 
 // Communication Icons
 export { MessageSquare, Send, Bot, Sparkles } from 'lucide-react'

@@ -6,7 +6,7 @@
  */
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Sun, Moon, User, LogOut } from '@/components/icons'
+import { Sun, Moon, User, LogOut, Settings } from '@/components/icons'
 import { navigationLinks } from '@/data'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
@@ -14,7 +14,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
@@ -22,14 +21,16 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 export function Header() {
   const [isDark, setIsDark] = useState(false)
-  const { user, isLoggedIn, logout } = useAuth()
+  const {
+    user,
+    isLoggedIn,
+    logout,
+    loading,
+    updateTrigger,
+    forceUpdateRef,
+    forceUpdate,
+  } = useAuth()
   const navigate = useNavigate()
-
-  // 디버깅을 위한 로그
-  console.log('Header 렌더링 - user:', user)
-  console.log('Header 렌더링 - isLoggedIn:', isLoggedIn)
-  console.log('Header 렌더링 - user?.nickname:', user?.nickname)
-  console.log('Header 렌더링 - user?.email:', user?.email)
 
   useEffect(() => {
     // 초기 테마 적용
@@ -97,7 +98,9 @@ export function Header() {
           </nav>
 
           <div className="flex items-center space-x-4">
-            {isLoggedIn ? (
+            {loading ? (
+              <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700" />
+            ) : isLoggedIn && user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -112,16 +115,25 @@ export function Header() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
+                  <div className="px-2 py-1.5">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm leading-none font-medium">
-                        {user?.nickname || user?.email}
+                        {user.nickname || user.email || '사용자'}
                       </p>
                       <p className="text-muted-foreground text-xs leading-none">
-                        {user?.email}
+                        {user.email || ''}
                       </p>
                     </div>
-                  </DropdownMenuLabel>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>프로필</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/settings')}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>설정</span>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />

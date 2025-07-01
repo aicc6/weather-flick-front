@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from 'react'
 import { authAPI, tokenManager } from '@/services/api'
 
 const AuthContext = createContext()
@@ -15,15 +22,39 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [updateTrigger, setUpdateTrigger] = useState(0)
+  const forceUpdateRef = useRef(0)
+
+  // 강제 업데이트 함수
+  const forceUpdate = useCallback(() => {
+    forceUpdateRef.current += 1
+    setUpdateTrigger((prev) => prev + 1)
+  }, [])
 
   // 초기 로드 시 사용자 정보 확인
   useEffect(() => {
     const initializeAuth = async () => {
       try {
         if (tokenManager.isLoggedIn()) {
-          const userInfo = await authAPI.getMe()
-          setUser(userInfo)
-          setIsLoggedIn(true)
+          // 먼저 localStorage에서 사용자 정보 복원
+          const storedUserInfo = tokenManager.getUserInfo()
+          if (storedUserInfo) {
+            setUser(storedUserInfo)
+            setIsLoggedIn(true)
+            forceUpdate()
+          }
+
+          // 서버에서 최신 사용자 정보 가져오기
+          try {
+            const userInfo = await authAPI.getMe()
+            setUser(userInfo)
+            setIsLoggedIn(true)
+            forceUpdate()
+          } catch (serverError) {
+            // 서버 오류 시 localStorage 정보를 계속 사용
+          }
+        } else {
+          setIsLoggedIn(false)
         }
       } catch (error) {
         console.error('사용자 정보 로드 실패:', error)
@@ -35,28 +66,39 @@ export const AuthProvider = ({ children }) => {
     }
 
     initializeAuth()
-  }, [])
+  }, [forceUpdate])
 
   // 로그인
-  const login = async (credentials) => {
-    try {
-      console.log('로그인 시도:', credentials)
-      const response = await authAPI.login(credentials)
-      console.log('로그인 응답:', response)
-      console.log('사용자 정보:', response.user_info)
-      tokenManager.setToken(response.access_token, response.user_info)
-      setUser(response.user_info)
-      setIsLoggedIn(true)
-      console.log('로그인 성공, 사용자 상태 업데이트됨:', response.user_info)
-      return response
-    } catch (error) {
-      console.error('로그인 오류:', error)
-      throw error
-    }
-  }
+  const login = useCallback(
+    async (credentials) => {
+      try {
+        const response = await authAPI.login(credentials)
+
+        // 토큰 저장
+        tokenManager.setToken(response.access_token, response.user_info)
+
+        // 상태 업데이트를 동기적으로 처리
+        setUser(response.user_info)
+        setIsLoggedIn(true)
+        forceUpdate()
+
+        // 상태 업데이트가 완료될 때까지 잠시 대기
+        await new Promise((resolve) => setTimeout(resolve, 150))
+
+        // 한 번 더 강제 업데이트
+        forceUpdate()
+
+        return response
+      } catch (error) {
+        console.error('로그인 오류:', error)
+        throw error
+      }
+    },
+    [forceUpdate],
+  )
 
   // 로그아웃
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       if (tokenManager.isLoggedIn()) {
         await authAPI.logout()
@@ -67,8 +109,9 @@ export const AuthProvider = ({ children }) => {
       tokenManager.removeToken()
       setUser(null)
       setIsLoggedIn(false)
+      forceUpdate()
     }
-  }
+  }, [forceUpdate])
 
   // 회원가입
   const register = async (userData) => {
@@ -77,21 +120,22 @@ export const AuthProvider = ({ children }) => {
   }
 
   // 구글 로그인
-  const googleLogin = async (accessToken) => {
-    try {
-      console.log('구글 로그인 시도:', accessToken)
-      const response = await authAPI.googleLogin(accessToken)
-      console.log('구글 로그인 응답:', response)
-      tokenManager.setToken(response.access_token, response.user_info)
-      setUser(response.user_info)
-      setIsLoggedIn(true)
-      console.log('구글 로그인 성공, 사용자 상태 업데이트됨')
-      return response
-    } catch (error) {
-      console.error('구글 로그인 오류:', error)
-      throw error
-    }
-  }
+  const googleLogin = useCallback(
+    async (accessToken) => {
+      try {
+        const response = await authAPI.googleLogin(accessToken)
+        tokenManager.setToken(response.access_token, response.user_info)
+        setUser(response.user_info)
+        setIsLoggedIn(true)
+        forceUpdate()
+        return response
+      } catch (error) {
+        console.error('구글 로그인 오류:', error)
+        throw error
+      }
+    },
+    [forceUpdate],
+  )
 
   // 사용자 정보 업데이트
   const updateProfile = async (userData) => {
@@ -110,6 +154,9 @@ export const AuthProvider = ({ children }) => {
     updateProfile,
     setUser,
     isLoggedIn,
+    updateTrigger,
+    forceUpdateRef: forceUpdateRef.current,
+    forceUpdate,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
