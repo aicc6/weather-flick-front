@@ -384,8 +384,10 @@ export default function PlanForm({ onSubmit }) {
 
   // 제안 항목 선택
   const handleSuggestionSelect = (suggestion) => {
-    console.log('Local suggestion selected:', suggestion)
     setFormData((prev) => ({ ...prev, destination: suggestion.fullName }))
+    if (inputRef.current) {
+      inputRef.current.value = suggestion.fullName // input DOM도 동기화
+    }
     setShowSuggestions(false)
     setSuggestions([])
   }
@@ -569,15 +571,15 @@ export default function PlanForm({ onSubmit }) {
                 <Calendar
                   mode="single"
                   selected={formData.startDate}
-                  onSelect={(date) => handleInputChange('startDate', date)}
+                  onSelect={(date) => {
+                    if (date) handleInputChange('startDate', date)
+                  }}
                   initialFocus
                   disabled={(date) => {
                     const today = new Date()
                     today.setHours(0, 0, 0, 0)
                     const selectedDate = new Date(date)
                     selectedDate.setHours(0, 0, 0, 0)
-
-                    // 오늘보다 이전 날짜는 선택 불가
                     return selectedDate < today
                   }}
                 />
@@ -607,25 +609,21 @@ export default function PlanForm({ onSubmit }) {
                 <Calendar
                   mode="single"
                   selected={formData.endDate}
-                  onSelect={(date) => handleInputChange('endDate', date)}
+                  onSelect={(date) => {
+                    if (date) handleInputChange('endDate', date)
+                  }}
                   initialFocus
                   disabled={(date) => {
                     const today = new Date()
                     today.setHours(0, 0, 0, 0)
-
-                    // 오늘보다 이전 날짜는 선택 불가
                     if (date < today) return true
-
-                    // 출발일이 선택된 경우, 출발일보다 이전 날짜는 선택 불가
                     if (formData.startDate) {
                       const startDate = new Date(formData.startDate)
                       startDate.setHours(0, 0, 0, 0)
                       const selectedDate = new Date(date)
                       selectedDate.setHours(0, 0, 0, 0)
-
                       return selectedDate < startDate
                     }
-
                     return false
                   }}
                 />
