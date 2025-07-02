@@ -93,6 +93,8 @@ export default function PlanForm({ onSubmit }) {
   const [suggestions, setSuggestions] = useState([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [useGoogleApi, setUseGoogleApi] = useState(true)
+  const [startDateOpen, setStartDateOpen] = useState(false)
+  const [endDateOpen, setEndDateOpen] = useState(false)
   const inputRef = useRef(null)
   const autocompleteRef = useRef(null)
 
@@ -410,6 +412,13 @@ export default function PlanForm({ onSubmit }) {
         ...prev,
         [field]: value,
       }))
+
+      // 날짜 선택 시 해당 달력 닫기
+      if (field === 'startDate') {
+        setStartDateOpen(false)
+      } else if (field === 'endDate') {
+        setEndDateOpen(false)
+      }
     }
   }
 
@@ -551,7 +560,7 @@ export default function PlanForm({ onSubmit }) {
             <Label htmlFor="startDate" className="text-sm text-gray-600">
               출발일
             </Label>
-            <Popover>
+            <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -589,7 +598,7 @@ export default function PlanForm({ onSubmit }) {
             <Label htmlFor="endDate" className="text-sm text-gray-600">
               도착일
             </Label>
-            <Popover>
+            <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
