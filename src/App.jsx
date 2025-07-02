@@ -18,6 +18,7 @@ import { ProfilePage } from './pages/profile'
 import { ProfileEditPage } from './pages/profile/edit'
 import { ChangePasswordPage } from './pages/profile/change-password'
 import PlansPage from './pages/plans'
+import PlannerPage from './pages/planner'
 import '@/App.css'
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
           />
           <Route path="/recommend/result" element={<RecommendResultPage />} />
           <Route path="/plans" element={<PlansPage />} />
+          <Route path="/planner" element={<PlannerPage />} />
           <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
           <Route
             path="/auth/google/callback"

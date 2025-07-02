@@ -30,4 +30,9 @@ export const navigationLinks = [
     label: '소개',
     isHighlighted: false,
   },
+  {
+    path: '/planner',
+    label: '여행 플래너',
+    isHighlighted: false,
+  },
 ]
