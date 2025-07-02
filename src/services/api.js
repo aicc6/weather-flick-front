@@ -99,8 +99,8 @@ export const authAPI = {
   googleCallback: async (code, state) => {
     const response = await http.GET('auth/google/callback', {
       params: {
-        query: { code, state }
-      }
+        query: { code, state },
+      },
     })
     return handleResponse(response)
   },

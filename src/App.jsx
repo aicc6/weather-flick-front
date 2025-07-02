@@ -26,7 +26,10 @@ function App() {
           <Route path="/recommend" element={<RecommendPage />} />
           <Route path="/plans" element={<PlansPage />} />
           <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
-          <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
+          <Route
+            path="/auth/google/callback"
+            element={<GoogleCallbackPage />}
+          />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/edit" element={<ProfileEditPage />} />
         </Routes>

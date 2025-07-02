@@ -119,7 +119,6 @@ export const AuthProvider = ({ children }) => {
     return response
   }
 
-
   // 사용자 정보 업데이트
   const updateProfile = async (userData) => {
     const updatedUser = await authAPI.updateProfile(userData)
