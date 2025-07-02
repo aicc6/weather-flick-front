@@ -93,17 +93,28 @@ export default function RecommendPeriodPage() {
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm font-medium text-gray-500">2/5</span>
+          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            2/5
+          </span>
         </div>
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">여행 기간은?</h1>
-        <p className="text-gray-600">원하는 기간을 선택해 주세요.</p>
+        <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
+          여행 기간은?
+        </h1>
+        <p className="text-gray-600 dark:text-gray-300">
+          원하는 기간을 선택해 주세요.
+        </p>
       </div>
 
       {/* 선택된 지역 표시 */}
       {region && (
-        <div className="mb-6 rounded-lg bg-gray-50 p-3">
-          <p className="mb-1 text-sm text-gray-600">선택된 여행지</p>
-          <Badge variant="outline" className="text-gray-700">
+        <div className="mb-6 rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
+          <p className="mb-1 text-sm text-gray-600 dark:text-gray-400">
+            선택된 여행지
+          </p>
+          <Badge
+            variant="outline"
+            className="text-gray-700 dark:border-gray-600 dark:text-gray-300"
+          >
             {region}
           </Badge>
         </div>
@@ -114,23 +125,23 @@ export default function RecommendPeriodPage() {
         {periods.map((period) => (
           <Card
             key={period.id}
-            className={`cursor-pointer transition-all hover:shadow-md ${
+            className={`cursor-pointer transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800 ${
               selectedPeriod?.id === period.id
-                ? 'bg-blue-50 ring-2 ring-blue-500'
-                : 'hover:bg-gray-50'
+                ? 'bg-blue-50 ring-2 ring-blue-500 dark:bg-blue-900/20 dark:ring-blue-400'
+                : 'hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
             onClick={() => handlePeriodSelect(period)}
           >
             <CardContent className="p-6 text-center">
               <div className="mb-3 text-3xl">{period.icon}</div>
-              <h3 className="mb-2 text-xl font-bold text-gray-900">
+              <h3 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">
                 {period.label}
               </h3>
-              <p className="text-sm leading-relaxed text-gray-600">
+              <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
                 {period.description}
               </p>
               {period.days > 1 && (
-                <div className="mt-3 text-xs font-medium text-blue-600">
+                <div className="mt-3 text-xs font-medium text-blue-600 dark:text-blue-400">
                   {period.days}일 일정
                 </div>
               )}
@@ -141,11 +152,16 @@ export default function RecommendPeriodPage() {
 
       {/* 선택된 기간 표시 */}
       {selectedPeriod && (
-        <div className="mb-8 rounded-lg bg-blue-50 p-4">
-          <p className="mb-2 text-sm text-blue-600">선택된 여행 기간</p>
+        <div className="mb-8 rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+          <p className="mb-2 text-sm text-blue-600 dark:text-blue-400">
+            선택된 여행 기간
+          </p>
           <div className="flex items-center gap-2">
             <span className="text-2xl">{selectedPeriod.icon}</span>
-            <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+            <Badge
+              variant="secondary"
+              className="bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200"
+            >
               {selectedPeriod.label}
             </Badge>
           </div>
@@ -153,12 +169,14 @@ export default function RecommendPeriodPage() {
       )}
 
       {/* 추천 팁 */}
-      <div className="mb-8 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+      <div className="mb-8 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-900/20">
         <div className="flex items-start gap-3">
-          <Calendar className="mt-0.5 h-5 w-5 text-yellow-600" />
+          <Calendar className="mt-0.5 h-5 w-5 text-yellow-600 dark:text-yellow-400" />
           <div>
-            <h4 className="mb-1 font-semibold text-yellow-800">💡 추천 팁</h4>
-            <p className="text-sm text-yellow-700">
+            <h4 className="mb-1 font-semibold text-yellow-800 dark:text-yellow-300">
+              💡 추천 팁
+            </h4>
+            <p className="text-sm text-yellow-700 dark:text-yellow-300">
               • <strong>2박 3일</strong>: 가장 인기 있는 기간으로 주요 명소를
               둘러볼 수 있어요
               <br />• <strong>3박 4일 이상</strong>: 여유로운 일정으로 현지
@@ -175,7 +193,7 @@ export default function RecommendPeriodPage() {
         <Button
           onClick={handleNext}
           disabled={!selectedPeriod}
-          className="rounded-lg bg-blue-600 px-8 py-3 text-white hover:bg-blue-700 disabled:bg-gray-300"
+          className="rounded-lg bg-blue-600 px-8 py-3 text-white hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-600"
           size="lg"
         >
           다음

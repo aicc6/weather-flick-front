@@ -94,31 +94,43 @@ export default function RecommendWhoPage() {
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm font-medium text-gray-500">3/5</span>
+          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            3/5
+          </span>
         </div>
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">
+        <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
           누구와 함께 가시나요?
         </h1>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-300">
           동행자에 따라 맞춤형 여행 코스를 추천해드려요.
         </p>
       </div>
 
       {/* 선택된 정보 표시 */}
-      <div className="mb-6 rounded-lg bg-gray-50 p-3">
+      <div className="mb-6 rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
         <div className="flex flex-wrap gap-3">
           {region && (
             <div>
-              <span className="text-xs text-gray-500">여행지</span>
-              <Badge variant="outline" className="ml-2">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                여행지
+              </span>
+              <Badge
+                variant="outline"
+                className="ml-2 dark:border-gray-600 dark:text-gray-300"
+              >
                 {region}
               </Badge>
             </div>
           )}
           {period && (
             <div>
-              <span className="text-xs text-gray-500">기간</span>
-              <Badge variant="outline" className="ml-2">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                기간
+              </span>
+              <Badge
+                variant="outline"
+                className="ml-2 dark:border-gray-600 dark:text-gray-300"
+              >
                 {period}
               </Badge>
             </div>
@@ -131,27 +143,27 @@ export default function RecommendWhoPage() {
         {companions.map((companion) => (
           <Card
             key={companion.id}
-            className={`cursor-pointer transition-all hover:shadow-md ${
+            className={`cursor-pointer transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800 ${
               selectedCompanion?.id === companion.id
-                ? 'bg-blue-50 ring-2 ring-blue-500'
-                : 'hover:bg-gray-50'
+                ? 'bg-blue-50 ring-2 ring-blue-500 dark:bg-blue-900/20 dark:ring-blue-400'
+                : 'hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
             onClick={() => handleCompanionSelect(companion)}
           >
             <CardContent className="p-6">
               <div className="mb-4 text-center">
                 <div className="mb-3 text-4xl">{companion.icon}</div>
-                <h3 className="mb-2 text-xl font-bold text-gray-900">
+                <h3 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">
                   {companion.label}
                 </h3>
-                <p className="mb-4 text-sm text-gray-600">
+                <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
                   {companion.description}
                 </p>
               </div>
 
               <div className="space-y-3">
                 <div>
-                  <h4 className="mb-2 text-xs font-semibold text-gray-700">
+                  <h4 className="mb-2 text-xs font-semibold text-gray-700 dark:text-gray-300">
                     특징
                   </h4>
                   <div className="flex flex-wrap gap-1">
@@ -168,10 +180,10 @@ export default function RecommendWhoPage() {
                 </div>
 
                 <div>
-                  <h4 className="mb-1 text-xs font-semibold text-gray-700">
+                  <h4 className="mb-1 text-xs font-semibold text-gray-700 dark:text-gray-300">
                     추천 장소
                   </h4>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
                     {companion.recommendations}
                   </p>
                 </div>
@@ -183,18 +195,20 @@ export default function RecommendWhoPage() {
 
       {/* 선택된 동행자 표시 */}
       {selectedCompanion && (
-        <div className="mb-8 rounded-lg bg-blue-50 p-4">
-          <p className="mb-2 text-sm text-blue-600">선택된 동행자</p>
+        <div className="mb-8 rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+          <p className="mb-2 text-sm text-blue-600 dark:text-blue-400">
+            선택된 동행자
+          </p>
           <div className="flex items-center gap-3">
             <span className="text-3xl">{selectedCompanion.icon}</span>
             <div>
               <Badge
                 variant="secondary"
-                className="mb-1 bg-blue-100 text-blue-800"
+                className="mb-1 bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200"
               >
                 {selectedCompanion.label}
               </Badge>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 {selectedCompanion.description}
               </p>
             </div>
@@ -203,14 +217,14 @@ export default function RecommendWhoPage() {
       )}
 
       {/* 추천 팁 */}
-      <div className="mb-8 rounded-lg border border-green-200 bg-green-50 p-4">
+      <div className="mb-8 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
         <div className="flex items-start gap-3">
-          <Users className="mt-0.5 h-5 w-5 text-green-600" />
+          <Users className="mt-0.5 h-5 w-5 text-green-600 dark:text-green-400" />
           <div>
-            <h4 className="mb-1 font-semibold text-green-800">
+            <h4 className="mb-1 font-semibold text-green-800 dark:text-green-300">
               💡 동행자별 추천 팁
             </h4>
-            <div className="space-y-1 text-sm text-green-700">
+            <div className="space-y-1 text-sm text-green-700 dark:text-green-300">
               <p>
                 • <strong>혼자 여행</strong>: 자유로운 일정과 개인적 취향을
                 반영한 코스
@@ -237,7 +251,7 @@ export default function RecommendWhoPage() {
         <Button
           onClick={handleNext}
           disabled={!selectedCompanion}
-          className="rounded-lg bg-blue-600 px-8 py-3 text-white hover:bg-blue-700 disabled:bg-gray-300"
+          className="rounded-lg bg-blue-600 px-8 py-3 text-white hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-600"
           size="lg"
         >
           다음

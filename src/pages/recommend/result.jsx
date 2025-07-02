@@ -222,43 +222,49 @@ export default function RecommendResultPage() {
             완료
           </Badge>
         </div>
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">
+        <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
           🎉 맞춤 여행 일정이 완성되었어요!
         </h1>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-300">
           선택해주신 취향을 반영한 특별한 여행 코스입니다.
         </p>
       </div>
 
       {/* 여행 요약 정보 */}
-      <Card className="mb-8">
+      <Card className="mb-8 dark:border-gray-700 dark:bg-gray-800">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 dark:text-white">
             <Star className="h-5 w-5 text-yellow-500" />
             여행 요약
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <div className="rounded-lg bg-blue-50 p-3 text-center">
-              <MapPin className="mx-auto mb-1 h-5 w-5 text-blue-600" />
-              <p className="text-xs text-gray-600">여행지</p>
-              <p className="font-semibold">{recommendations.summary.region}</p>
+            <div className="rounded-lg bg-blue-50 p-3 text-center dark:bg-blue-900/20">
+              <MapPin className="mx-auto mb-1 h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <p className="text-xs text-gray-600 dark:text-gray-400">여행지</p>
+              <p className="font-semibold dark:text-white">
+                {recommendations.summary.region}
+              </p>
             </div>
-            <div className="rounded-lg bg-green-50 p-3 text-center">
-              <Calendar className="mx-auto mb-1 h-5 w-5 text-green-600" />
-              <p className="text-xs text-gray-600">기간</p>
-              <p className="font-semibold">{recommendations.summary.period}</p>
+            <div className="rounded-lg bg-green-50 p-3 text-center dark:bg-green-900/20">
+              <Calendar className="mx-auto mb-1 h-5 w-5 text-green-600 dark:text-green-400" />
+              <p className="text-xs text-gray-600 dark:text-gray-400">기간</p>
+              <p className="font-semibold dark:text-white">
+                {recommendations.summary.period}
+              </p>
             </div>
-            <div className="rounded-lg bg-purple-50 p-3 text-center">
-              <Users className="mx-auto mb-1 h-5 w-5 text-purple-600" />
-              <p className="text-xs text-gray-600">동행자</p>
-              <p className="font-semibold">{recommendations.summary.who}</p>
+            <div className="rounded-lg bg-purple-50 p-3 text-center dark:bg-purple-900/20">
+              <Users className="mx-auto mb-1 h-5 w-5 text-purple-600 dark:text-purple-400" />
+              <p className="text-xs text-gray-600 dark:text-gray-400">동행자</p>
+              <p className="font-semibold dark:text-white">
+                {recommendations.summary.who}
+              </p>
             </div>
-            <div className="rounded-lg bg-orange-50 p-3 text-center">
-              <Heart className="mx-auto mb-1 h-5 w-5 text-orange-600" />
-              <p className="text-xs text-gray-600">스타일</p>
-              <p className="font-semibold">
+            <div className="rounded-lg bg-orange-50 p-3 text-center dark:bg-orange-900/20">
+              <Heart className="mx-auto mb-1 h-5 w-5 text-orange-600 dark:text-orange-400" />
+              <p className="text-xs text-gray-600 dark:text-gray-400">스타일</p>
+              <p className="font-semibold dark:text-white">
                 {recommendations.summary.styles.length}개
               </p>
             </div>
@@ -268,17 +274,25 @@ export default function RecommendResultPage() {
 
       {/* 일정 상세 */}
       <div className="mb-8 space-y-6">
-        <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-900">
-          <Clock className="h-6 w-6 text-blue-600" />
+        <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-900 dark:text-white">
+          <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
           상세 일정
         </h2>
 
         {recommendations.itinerary.map((dayPlan, index) => (
-          <Card key={dayPlan.day}>
+          <Card
+            key={dayPlan.day}
+            className="dark:border-gray-700 dark:bg-gray-800"
+          >
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
+              <CardTitle className="flex items-center justify-between dark:text-white">
                 <span>Day {dayPlan.day}</span>
-                <Badge variant="outline">{dayPlan.date}</Badge>
+                <Badge
+                  variant="outline"
+                  className="dark:border-gray-600 dark:text-gray-300"
+                >
+                  {dayPlan.date}
+                </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -286,29 +300,29 @@ export default function RecommendResultPage() {
                 {dayPlan.places.map((place, placeIndex) => (
                   <div key={place.id}>
                     <div className="flex items-start gap-4">
-                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100">
-                        <span className="font-semibold text-blue-600">
+                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20">
+                        <span className="font-semibold text-blue-600 dark:text-blue-400">
                           {placeIndex + 1}
                         </span>
                       </div>
                       <div className="flex-1">
                         <div className="mb-2 flex items-start justify-between">
                           <div>
-                            <h4 className="font-semibold text-gray-900">
+                            <h4 className="font-semibold text-gray-900 dark:text-white">
                               {place.name}
                             </h4>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
                               {place.time}
                             </p>
                           </div>
                           <div className="flex items-center gap-1">
                             <Star className="h-4 w-4 text-yellow-500" />
-                            <span className="text-sm font-medium">
+                            <span className="text-sm font-medium dark:text-gray-300">
                               {place.rating}
                             </span>
                           </div>
                         </div>
-                        <p className="mb-2 text-sm text-gray-700">
+                        <p className="mb-2 text-sm text-gray-700 dark:text-gray-300">
                           {place.description}
                         </p>
                         <div className="flex flex-wrap gap-1">
@@ -316,7 +330,7 @@ export default function RecommendResultPage() {
                             <Badge
                               key={tagIndex}
                               variant="secondary"
-                              className="text-xs"
+                              className="text-xs dark:bg-gray-700 dark:text-gray-300"
                             >
                               {tag}
                             </Badge>
@@ -325,7 +339,7 @@ export default function RecommendResultPage() {
                       </div>
                     </div>
                     {placeIndex < dayPlan.places.length - 1 && (
-                      <div className="my-4 border-t border-gray-200" />
+                      <div className="my-4 border-t border-gray-200 dark:border-gray-600" />
                     )}
                   </div>
                 ))}
@@ -336,31 +350,31 @@ export default function RecommendResultPage() {
       </div>
 
       {/* 날씨 정보 */}
-      <Card className="mb-8">
+      <Card className="mb-8 dark:border-gray-700 dark:bg-gray-800">
         <CardHeader>
-          <CardTitle>🌤️ 날씨 정보</CardTitle>
+          <CardTitle className="dark:text-white">🌤️ 날씨 정보</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="mb-2 text-gray-700">
+          <p className="mb-2 text-gray-700 dark:text-gray-300">
             {recommendations.weather_info.forecast}
           </p>
-          <p className="text-sm text-green-600">
+          <p className="text-sm text-green-600 dark:text-green-400">
             {recommendations.weather_info.recommendation}
           </p>
         </CardContent>
       </Card>
 
       {/* 여행 팁 */}
-      <Card className="mb-8">
+      <Card className="mb-8 dark:border-gray-700 dark:bg-gray-800">
         <CardHeader>
-          <CardTitle>💡 여행 팁</CardTitle>
+          <CardTitle className="dark:text-white">💡 여행 팁</CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
             {recommendations.tips.map((tip, index) => (
               <li key={index} className="flex items-start gap-2">
                 <span className="mt-1 text-blue-500">•</span>
-                <span className="text-gray-700">{tip}</span>
+                <span className="text-gray-700 dark:text-gray-300">{tip}</span>
               </li>
             ))}
           </ul>
@@ -380,7 +394,7 @@ export default function RecommendResultPage() {
           onClick={handleShare}
           variant="outline"
           size="lg"
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
         >
           <Share2 className="h-4 w-4" />
           공유하기
@@ -389,6 +403,7 @@ export default function RecommendResultPage() {
           onClick={() => navigate('/recommend')}
           variant="outline"
           size="lg"
+          className="dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
         >
           새로운 추천 받기
         </Button>
