@@ -17,6 +17,8 @@ export {
   CircleIcon as Circle,
   MinusIcon as Minus,
   MoreHorizontalIcon as MoreHorizontal,
+  Share2,
+  RefreshCw,
 } from 'lucide-react'
 
 // Weather Icons
@@ -25,6 +27,7 @@ export { Sun, Moon, Cloud, CloudRain, CloudSnow } from 'lucide-react'
 // User & Social Icons
 export {
   User,
+  Users,
   LogOut,
   Mail,
   Phone,
@@ -48,7 +51,7 @@ export {
 export { MessageSquare, Send, Bot, Sparkles } from 'lucide-react'
 
 // Calendar Icons
-export { Calendar, CalendarIcon } from 'lucide-react'
+export { Calendar, CalendarIcon, Clock } from 'lucide-react'
 
 // Custom Icons
 export { default as GoogleIcon } from './custom/GoogleIcon'
