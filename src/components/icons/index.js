@@ -38,6 +38,9 @@ export {
   Palette,
   Save,
   Eye,
+  EyeOff,
+  Lock,
+  Shield,
   Umbrella,
 } from 'lucide-react'
 

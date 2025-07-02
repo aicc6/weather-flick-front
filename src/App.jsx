@@ -10,6 +10,7 @@ import { VerifyEmailPage } from './pages/auth/verify-email'
 import { GoogleCallbackPage } from './pages/auth/GoogleCallback'
 import { ProfilePage } from './pages/profile'
 import { ProfileEditPage } from './pages/profile/edit'
+import { ChangePasswordPage } from './pages/profile/change-password'
 import PlansPage from './pages/plans'
 import '@/App.css'
 
@@ -32,6 +33,7 @@ function App() {
           />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/edit" element={<ProfileEditPage />} />
+          <Route path="/change-password" element={<ChangePasswordPage />} />
         </Routes>
       </DefaultLayout>
     </BrowserRouter>
