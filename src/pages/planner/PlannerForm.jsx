@@ -17,6 +17,59 @@ export default function PlannerForm({
 }) {
   const [startDateOpen, setStartDateOpen] = useState(false)
   const [endDateOpen, setEndDateOpen] = useState(false)
+  const [destSuggestions, setDestSuggestions] = useState([])
+  const [showDestDropdown, setShowDestDropdown] = useState(false)
+  const [isLocating, setIsLocating] = useState(false)
+
+  // 출발지: 현재 위치로 자동 입력
+  const handleAutoLocation = async () => {
+    setIsLocating(true)
+    if (!navigator.geolocation) {
+      alert('이 브라우저는 위치 정보를 지원하지 않습니다.')
+      setIsLocating(false)
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude
+        const lng = position.coords.longitude
+        try {
+          const res = await fetch(
+            `/api/location/reverse-geocode?lat=${lat}&lng=${lng}`,
+          )
+          const data = await res.json()
+          if (data.address) {
+            setFormData((f) => ({ ...f, origin: data.address }))
+          } else {
+            alert('주소를 찾을 수 없습니다.')
+          }
+        } catch (e) {
+          alert('위치 정보를 가져오지 못했습니다.')
+        }
+        setIsLocating(false)
+      },
+      () => {
+        alert('위치 권한이 거부되었습니다.')
+        setIsLocating(false)
+      },
+    )
+  }
+
+  // 목적지 자동완성
+  const handleDestinationInput = async (value) => {
+    setFormData((f) => ({ ...f, destination: value }))
+    if (value.length > 1) {
+      const res = await fetch(
+        `/api/destinations/search?query=${encodeURIComponent(value)}`,
+      )
+      const suggestions = await res.json()
+      setDestSuggestions(suggestions)
+      setShowDestDropdown(true)
+    } else {
+      setDestSuggestions([])
+      setShowDestDropdown(false)
+    }
+  }
 
   return (
     <form
@@ -31,25 +84,53 @@ export default function PlannerForm({
       {/* 출발지 */}
       <div>
         <label className="mb-1 block text-sm font-medium">출발지</label>
-        <Input
-          placeholder="현재 위치 or 도시명"
-          value={formData.origin}
-          onChange={(e) =>
-            setFormData((f) => ({ ...f, origin: e.target.value }))
-          }
-        />
+        <div className="flex gap-2">
+          <Input
+            placeholder="현재 위치 or 도시명"
+            value={formData.origin}
+            onChange={(e) =>
+              setFormData((f) => ({ ...f, origin: e.target.value }))
+            }
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleAutoLocation}
+            disabled={isLocating}
+          >
+            {isLocating ? '위치 확인중...' : '현재 위치로'}
+          </Button>
+        </div>
       </div>
       {/* 목적지 */}
-      <div>
+      <div className="relative">
         <label className="mb-1 block text-sm font-medium">목적지</label>
         <Input
           placeholder="여행지 검색 (예: 제주도, 부산...)"
           value={formData.destination}
-          onChange={(e) =>
-            setFormData((f) => ({ ...f, destination: e.target.value }))
-          }
+          onChange={(e) => handleDestinationInput(e.target.value)}
+          onFocus={() => {
+            if (destSuggestions.length > 0) setShowDestDropdown(true)
+          }}
+          onBlur={() => setTimeout(() => setShowDestDropdown(false), 150)}
         />
-        {/* TODO: 자동완성, 추천 리스트 등 */}
+        {/* 자동완성 드롭다운 */}
+        {showDestDropdown && destSuggestions.length > 0 && (
+          <div className="absolute right-0 left-0 z-10 mt-1 max-h-60 overflow-y-auto rounded-lg border bg-white shadow-lg">
+            {destSuggestions.map((s, i) => (
+              <div
+                key={i}
+                className="cursor-pointer px-4 py-2 hover:bg-blue-50"
+                onMouseDown={() => {
+                  setFormData((f) => ({ ...f, destination: s }))
+                  setShowDestDropdown(false)
+                }}
+              >
+                {s}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       {/* 날짜 */}
       <div className="flex gap-2">
