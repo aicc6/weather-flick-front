@@ -249,25 +249,18 @@ export default function PlanForm({ onSubmit }) {
             // 장소 선택 시 이벤트 리스너
             autocompleteRef.current.addListener('place_changed', () => {
               const place = autocompleteRef.current.getPlace()
-              console.log('Place selected from Google:', place)
-
               if (place && (place.geometry || place.formatted_address)) {
-                // 선택된 장소 정보를 state에 저장
                 const destinationValue =
                   place.formatted_address || place.name || ''
-
                 setFormData((prev) => ({
                   ...prev,
                   destination: destinationValue,
                 }))
-
-                console.log('Selected place details:', {
-                  name: place.name,
-                  formatted_address: place.formatted_address,
-                  place_id: place.place_id,
-                  types: place.types,
-                })
-
+                // input의 value를 강제로 동기화하고 포커스 해제
+                if (inputRef.current) {
+                  inputRef.current.value = destinationValue
+                  inputRef.current.blur()
+                }
                 setShowSuggestions(false)
               }
             })
@@ -387,9 +380,6 @@ export default function PlanForm({ onSubmit }) {
   // 제안 항목 선택
   const handleSuggestionSelect = (suggestion) => {
     setFormData((prev) => ({ ...prev, destination: suggestion.fullName }))
-    if (inputRef.current) {
-      inputRef.current.value = suggestion.fullName // input DOM도 동기화
-    }
     setShowSuggestions(false)
     setSuggestions([])
   }
