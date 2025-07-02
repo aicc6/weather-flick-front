@@ -48,31 +48,36 @@ export const mockDestinations = [
     id: 1,
     name: '제주도',
     description: '아름다운 해변과 자연 경관',
-    image: '/logo.jpg',
+    image:
+      'https://images.unsplash.com/photo-1539650116574-75c0c6d0598b?w=800&h=600&fit=crop&crop=center&q=80',
   },
   {
     id: 2,
     name: '부산',
     description: '활기찬 해운대와 맛집',
-    image: '/logo.jpg',
+    image:
+      'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&crop=center&q=80',
   },
   {
     id: 3,
     name: '강릉',
     description: '커피와 바다, 힐링 여행지',
-    image: '/logo.jpg',
+    image:
+      'https://images.unsplash.com/photo-1597211833712-5e41faa202ea?w=800&h=600&fit=crop&crop=center&q=80',
   },
   {
     id: 4,
     name: '경주',
     description: '역사와 문화의 도시',
-    image: '/logo.jpg',
+    image:
+      'https://images.unsplash.com/photo-1632559572768-4e7ec0f0a67e?w=800&h=600&fit=crop&crop=center&q=80',
   },
   {
     id: 5,
     name: '여수',
     description: '야경과 해산물의 천국',
-    image: '/logo.jpg',
+    image:
+      'https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=800&h=600&fit=crop&crop=center&q=80',
   },
 ]
 
