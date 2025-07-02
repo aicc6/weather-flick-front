@@ -8,6 +8,7 @@ import {
   CardDescription,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { http } from '@/lib/http'
 
 export function VerifyEmailPage() {
   const [searchParams] = useSearchParams()
@@ -22,26 +23,36 @@ export function VerifyEmailPage() {
       setMessage('인증 토큰이 유효하지 않습니다.')
       return
     }
+
     // 이메일 인증 API 요청
-    fetch('https://wf-api-dev.seongjunlee.dev/auth/verify-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token }),
-    })
-      .then(async (res) => {
-        if (res.ok) {
+    const verifyEmail = async () => {
+      try {
+        const response = await http.POST('auth/verify-email', {
+          body: { token },
+        })
+
+        if (response.ok) {
           setStatus('success')
           setMessage('이메일 인증이 완료되었습니다! 이제 로그인할 수 있습니다.')
         } else {
-          const data = await res.json()
+          const contentType = response.headers.get('content-type')
+          let errorMessage = '이메일 인증에 실패했습니다.'
+
+          if (contentType && contentType.includes('application/json')) {
+            const data = await response.json()
+            errorMessage = data.detail || errorMessage
+          }
+
           setStatus('error')
-          setMessage(data.detail || '이메일 인증에 실패했습니다.')
+          setMessage(errorMessage)
         }
-      })
-      .catch(() => {
+      } catch (error) {
         setStatus('error')
         setMessage('네트워크 오류로 인증에 실패했습니다.')
-      })
+      }
+    }
+
+    verifyEmail()
   }, [searchParams])
 
   return (
