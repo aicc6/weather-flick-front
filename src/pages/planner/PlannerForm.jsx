@@ -74,6 +74,13 @@ export default function PlannerForm() {
     }
   }
 
+  // 날짜를 yyyy-mm-dd (로컬 타임존 기준)로 변환
+  function formatDateLocal(date) {
+    return date
+      ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+      : ''
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!origin || !destination || !startDate || !endDate) {
@@ -89,8 +96,8 @@ export default function PlannerForm() {
       const data = await fetchPlanRecommendation({
         origin,
         destination,
-        startDate: startDate.toISOString().slice(0, 10),
-        endDate: endDate.toISOString().slice(0, 10),
+        startDate: formatDateLocal(startDate),
+        endDate: formatDateLocal(endDate),
       })
       setPlans(data.plans)
     } catch (err) {
