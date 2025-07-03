@@ -54,6 +54,7 @@ export default function PlannerForm({
       },
     )
   }
+  console.log('자동완성 후보:', destSuggestions)
 
   // 목적지 자동완성
   const handleDestinationInput = async (value) => {
@@ -116,11 +117,11 @@ export default function PlannerForm({
         />
         {/* 자동완성 드롭다운 */}
         {showDestDropdown && destSuggestions.length > 0 && (
-          <div className="absolute right-0 left-0 z-10 mt-1 max-h-60 overflow-y-auto rounded-lg border bg-white shadow-lg">
+          <div className="absolute right-0 left-0 z-10 mt-1 max-h-60 overflow-y-auto rounded-lg border bg-white shadow-lg dark:bg-zinc-800 dark:text-white">
             {destSuggestions.map((s, i) => (
               <div
                 key={i}
-                className="cursor-pointer px-4 py-2 hover:bg-blue-50"
+                className="cursor-pointer px-4 py-2 hover:bg-blue-50 dark:hover:bg-zinc-700"
                 onMouseDown={() => {
                   setFormData((f) => ({ ...f, destination: s }))
                   setShowDestDropdown(false)
