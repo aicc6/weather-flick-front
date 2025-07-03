@@ -556,10 +556,12 @@ export default function TravelCoursePage() {
 
               {/* 액션 버튼 */}
               <div className="flex gap-3 pt-2">
-                <Button variant="outline" size="sm" className="flex-1">
-                  <Navigation className="mr-2 h-4 w-4" />
-                  상세보기
-                </Button>
+                <Link to={`/recommend/${course.id}`} className="flex-1">
+                  <Button variant="outline" size="sm" className="w-full">
+                    <Navigation className="mr-2 h-4 w-4" />
+                    상세보기
+                  </Button>
+                </Link>
                 <Link
                   to={`/customized-schedule?region=${course.region}`}
                   className="flex-1"
