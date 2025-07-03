@@ -23,7 +23,7 @@ export function MainPage() {
 
   return (
     <div className="relative min-h-screen">
-      {/* Hero Section with Background Image */}
+      {/* Hero Section with Background Image - 다크모드 영향받지 않음 */}
       <section
         className="relative flex min-h-[80vh] flex-col justify-center pt-12 pb-8 text-center"
         style={{
@@ -46,7 +46,7 @@ export function MainPage() {
           <p className="mb-8 text-lg text-white/90 drop-shadow-md">
             실시간 날씨 정보를 기반으로 최적의 여행지를 추천해드립니다
           </p>
-          <div className="mx-auto mb-10 max-w-2xl rounded-2xl bg-white/95 p-8 shadow-2xl backdrop-blur-sm">
+          <div className="mx-auto mb-10 max-w-2xl rounded-2xl bg-white/95 p-8 shadow-2xl backdrop-blur-sm dark:bg-gray-900/95">
             <div className="grid grid-cols-1 items-end gap-4 md:grid-cols-4">
               <div className="space-y-2">
                 <label className="text-foreground flex items-center gap-2 text-sm font-medium">
@@ -118,8 +118,8 @@ export function MainPage() {
         </div>
       </section>
 
-      {/* Rest of the content with white background */}
-      <div className="bg-white">
+      {/* Rest of the content with responsive background - 다크모드 적용 */}
+      <div className="bg-white transition-colors duration-300 dark:bg-gray-900">
         <section className="mb-12 py-8">
           <h2 className="text-foreground mb-4 text-center text-2xl font-bold">
             추천 여행지
@@ -132,8 +132,8 @@ export function MainPage() {
         </section>
 
         <section className="mx-auto mb-16 grid max-w-5xl grid-cols-1 gap-6 px-4 md:grid-cols-3">
-          <div className="bg-card rounded-xl p-8 text-center shadow-md">
-            <Sun className="mx-auto mb-2 h-8 w-8 text-blue-400" />
+          <div className="bg-card border-border rounded-xl border p-8 text-center shadow-md transition-shadow duration-300 hover:shadow-lg">
+            <Sun className="mx-auto mb-2 h-8 w-8 text-blue-400 dark:text-blue-300" />
             <h3 className="text-foreground text-lg font-semibold">
               실시간 날씨
             </h3>
@@ -141,15 +141,15 @@ export function MainPage() {
               최신 날씨 정보로 정확한 여행 계획을 세워보세요
             </p>
           </div>
-          <div className="bg-card rounded-xl p-8 text-center shadow-md">
-            <MapPin className="mx-auto mb-2 h-8 w-8 text-green-400" />
+          <div className="bg-card border-border rounded-xl border p-8 text-center shadow-md transition-shadow duration-300 hover:shadow-lg">
+            <MapPin className="mx-auto mb-2 h-8 w-8 text-green-400 dark:text-green-300" />
             <h3 className="text-foreground text-lg font-semibold">맞춤 추천</h3>
             <p className="text-muted-foreground">
               개인 취향과 날씨를 고려한 맞춤형 여행지 추천
             </p>
           </div>
-          <div className="bg-card rounded-xl p-8 text-center shadow-md">
-            <CalendarIcon className="mx-auto mb-2 h-8 w-8 text-purple-400" />
+          <div className="bg-card border-border rounded-xl border p-8 text-center shadow-md transition-shadow duration-300 hover:shadow-lg">
+            <CalendarIcon className="mx-auto mb-2 h-8 w-8 text-purple-400 dark:text-purple-300" />
             <h3 className="text-foreground text-lg font-semibold">여행 계획</h3>
             <p className="text-muted-foreground">
               체계적인 여행 계획과 일정 관리
