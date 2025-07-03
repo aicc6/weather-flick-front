@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { authAPI, tokenManager } from '@/services/api'
 import { useAuth } from '@/contexts/AuthContext'
@@ -6,52 +6,53 @@ import { useAuth } from '@/contexts/AuthContext'
 export function GoogleCallbackPage() {
   const [status, setStatus] = useState('processing') // processing, success, error
   const [error, setError] = useState('')
+  const isProcessing = useRef(false) // 중복 요청 방지
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { setUser, setIsAuthenticated } = useAuth()
 
   useEffect(() => {
     const handleCallback = async () => {
+      // 중복 요청 방지
+      if (isProcessing.current) {
+        console.log('이미 처리 중입니다. 중복 요청을 무시합니다.')
+        return
+      }
+      
+      isProcessing.current = true
+      
       try {
-        const code = searchParams.get('code')
-        const state = searchParams.get('state')
+        // URL 파라미터 확인
+        const authCode = searchParams.get('auth_code') // 새로운 보안 방식
+        const token = searchParams.get('token') // 기존 방식 (호환성)
+        const userId = searchParams.get('user_id') // 기존 방식 (호환성)
         const error = searchParams.get('error')
 
         if (error) {
           setStatus('error')
-          setError('구글 로그인이 취소되었습니다.')
+          setError(
+            error === 'oauth_failed'
+              ? '구글 로그인 처리 중 오류가 발생했습니다.'
+              : '구글 로그인이 취소되었습니다.',
+          )
           return
         }
 
-        if (!code) {
-          setStatus('error')
-          setError('인증 코드가 없습니다.')
-          return
-        }
+        if (authCode) {
+          // 새로운 보안 방식: 임시 인증 코드를 JWT 토큰으로 교환
+          console.log(
+            '인증 코드로 토큰 교환 시작:',
+            authCode.substring(0, 10) + '...',
+          )
 
-        // 백엔드에 인증 코드 전송
-        const response = await authAPI.googleCallback(code, state)
+          try {
+            const response = await authAPI.exchangeGoogleAuthCode(authCode)
+            console.log('토큰 교환 성공:', response)
 
-        if (response.redirect_url) {
-          // redirect_url에서 토큰과 사용자 ID 추출
-          const url = new URL(response.redirect_url, window.location.origin)
-          const token = url.searchParams.get('token')
-          const userId = url.searchParams.get('user_id')
-
-          if (token) {
-            // 토큰 저장 (사용자 정보는 별도로 조회해야 할 수 있음)
-            tokenManager.setToken(token, null)
-
-            // 사용자 정보 조회
-            try {
-              const userInfo = await authAPI.getMe()
-              tokenManager.setToken(token, userInfo)
-              setUser(userInfo)
-              setIsAuthenticated(true)
-            } catch (userError) {
-              // 사용자 정보 조회 실패 시에도 토큰은 저장된 상태로 진행
-              setIsAuthenticated(true)
-            }
+            // 토큰 저장
+            tokenManager.setToken(response.access_token, response.user_info)
+            setUser(response.user_info)
+            setIsAuthenticated(true)
 
             setStatus('success')
 
@@ -59,18 +60,92 @@ export function GoogleCallbackPage() {
             setTimeout(() => {
               navigate('/', { replace: true })
             }, 1500)
+          } catch (exchangeError) {
+            console.error('토큰 교환 오류 상세:', exchangeError)
+            console.error('오류 응답:', exchangeError.response?.data)
+            console.error('오류 상태:', exchangeError.response?.status)
+            setStatus('error')
+            setError(
+              exchangeError.response?.data?.detail ||
+                exchangeError.data?.detail ||
+                '인증 처리 중 오류가 발생했습니다.',
+            )
+          }
+        } else if (token) {
+          // 기존 방식: URL에서 직접 토큰 추출 (호환성을 위해 유지)
+          console.warn(
+            '기존 방식의 토큰 전달을 사용하고 있습니다. 보안을 위해 새로운 방식 사용을 권장합니다.',
+          )
+
+          tokenManager.setToken(token, null)
+
+          // 사용자 정보 조회
+          try {
+            const userInfo = await authAPI.getMe()
+            tokenManager.setToken(token, userInfo)
+            setUser(userInfo)
+            setIsAuthenticated(true)
+          } catch (userError) {
+            setIsAuthenticated(true)
+          }
+
+          setStatus('success')
+
+          setTimeout(() => {
+            navigate('/', { replace: true })
+          }, 1500)
+        } else {
+          // 레거시: code, state 파라미터 처리 (완전 호환성)
+          const code = searchParams.get('code')
+          const state = searchParams.get('state')
+
+          if (!code) {
+            setStatus('error')
+            setError('인증 정보가 없습니다.')
+            return
+          }
+
+          console.warn('레거시 OAuth 콜백 방식을 사용하고 있습니다.')
+
+          // 백엔드에 인증 코드 전송
+          const response = await authAPI.googleCallback(code, state)
+
+          if (response.redirect_url) {
+            const url = new URL(response.redirect_url, window.location.origin)
+            const token = url.searchParams.get('token')
+
+            if (token) {
+              tokenManager.setToken(token, null)
+
+              try {
+                const userInfo = await authAPI.getMe()
+                tokenManager.setToken(token, userInfo)
+                setUser(userInfo)
+                setIsAuthenticated(true)
+              } catch (userError) {
+                setIsAuthenticated(true)
+              }
+
+              setStatus('success')
+
+              setTimeout(() => {
+                navigate('/', { replace: true })
+              }, 1500)
+            } else {
+              setStatus('error')
+              setError('인증 토큰을 받지 못했습니다.')
+            }
           } else {
             setStatus('error')
-            setError('인증 토큰을 받지 못했습니다.')
+            setError('로그인 처리 중 오류가 발생했습니다.')
           }
-        } else {
-          setStatus('error')
-          setError('로그인 처리 중 오류가 발생했습니다.')
         }
       } catch (err) {
         console.error('구글 콜백 처리 오류:', err)
         setStatus('error')
         setError(err.data?.detail || '로그인 처리 중 오류가 발생했습니다.')
+      } finally {
+        isProcessing.current = false
       }
     }
 

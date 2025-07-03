@@ -95,12 +95,20 @@ export const authAPI = {
     return handleResponse(response)
   },
 
-  // OAuth 콜백 처리
+  // OAuth 콜백 처리 (기존 방식 - 호환성을 위해 유지)
   googleCallback: async (code, state) => {
     const response = await http.GET('auth/google/callback', {
       params: {
         query: { code, state },
       },
+    })
+    return handleResponse(response)
+  },
+
+  // 임시 인증 코드를 JWT 토큰으로 교환 (새로운 보안 방식)
+  exchangeGoogleAuthCode: async (authCode) => {
+    const response = await http.POST('auth/google/exchange', {
+      body: { auth_code: authCode },
     })
     return handleResponse(response)
   },
