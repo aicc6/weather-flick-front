@@ -142,3 +142,18 @@ export const tokenManager = {
 // OpenAPI-fetch 스타일로 사용할 수 있는 API 클라이언트 export
 export { http, authHttp }
 export default { http, authHttp, authAPI, tokenManager }
+
+export async function fetchPlanRecommendation({
+  origin,
+  destination,
+  startDate,
+  endDate,
+}) {
+  const res = await fetch('/api/plan/recommend', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ origin, destination, startDate, endDate }),
+  })
+  if (!res.ok) throw new Error('API 요청 실패')
+  return res.json()
+}
