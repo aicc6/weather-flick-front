@@ -30,7 +30,7 @@ export default function RecommendPage() {
   ]
 
   const handleStartRecommendation = () => {
-    navigate('/recommend/region')
+    navigate('/customized-schedule/region')
   }
 
   return (

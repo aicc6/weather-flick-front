@@ -7,6 +7,11 @@ export const navigationLinks = [
   },
   {
     path: '/recommend',
+    label: '여행지추천',
+    isHighlighted: false,
+  },
+  {
+    path: '/customized-schedule',
     label: '맞춤 일정',
     isHighlighted: true,
   },

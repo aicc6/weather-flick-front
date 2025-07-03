@@ -30,6 +30,14 @@ export function Footer() {
                   to="/recommend"
                   className="transition-colors hover:text-gray-900 dark:hover:text-white"
                 >
+                  여행지추천
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/customized-schedule"
+                  className="transition-colors hover:text-gray-900 dark:hover:text-white"
+                >
                   맞춤 일정
                 </Link>
               </li>

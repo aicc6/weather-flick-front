@@ -93,13 +93,15 @@ export default function RecommendStylePage() {
     if (selectedStyles.length > 0) {
       const styleParams = selectedStyles.join(',')
       navigate(
-        `/recommend/schedule?region=${region}&period=${period}&days=${days}&who=${who}&styles=${styleParams}`,
+        `/customized-schedule/schedule?region=${region}&period=${period}&days=${days}&who=${who}&styles=${styleParams}`,
       )
     }
   }
 
   const handleBack = () => {
-    navigate(`/recommend/who?region=${region}&period=${period}&days=${days}`)
+    navigate(
+      `/customized-schedule/who?region=${region}&period=${period}&days=${days}`,
+    )
   }
 
   return (

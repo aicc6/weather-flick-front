@@ -72,13 +72,13 @@ export default function RecommendWhoPage() {
   const handleNext = () => {
     if (selectedCompanion) {
       navigate(
-        `/recommend/style?region=${region}&period=${period}&days=${days}&who=${selectedCompanion.id}`,
+        `/customized-schedule/style?region=${region}&period=${period}&days=${days}&who=${selectedCompanion.id}`,
       )
     }
   }
 
   const handleBack = () => {
-    navigate(`/recommend/period?region=${region}`)
+    navigate(`/customized-schedule/period?region=${region}`)
   }
 
   return (

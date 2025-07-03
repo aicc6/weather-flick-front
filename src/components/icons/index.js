@@ -9,6 +9,7 @@ export {
   ArrowLeft,
   ArrowRight,
   Menu,
+  Navigation,
 } from 'lucide-react'
 
 // UI Action Icons
@@ -20,6 +21,9 @@ export {
   MoreHorizontalIcon as MoreHorizontal,
   Share2,
   RefreshCw,
+  Search,
+  Filter,
+  Camera,
 } from 'lucide-react'
 
 // Weather Icons

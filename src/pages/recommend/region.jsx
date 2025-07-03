@@ -60,12 +60,12 @@ export default function RecommendRegionPage() {
 
   const handleNext = () => {
     if (selectedRegion) {
-      navigate(`/recommend/period?region=${selectedRegion.id}`)
+      navigate(`/customized-schedule/period?region=${selectedRegion.id}`)
     }
   }
 
   const handleBack = () => {
-    navigate('/recommend')
+    navigate('/customized-schedule')
   }
 
   return (

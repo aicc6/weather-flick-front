@@ -71,13 +71,13 @@ export default function RecommendPeriodPage() {
   const handleNext = () => {
     if (selectedPeriod) {
       navigate(
-        `/recommend/who?region=${region}&period=${selectedPeriod.id}&days=${selectedPeriod.days}`,
+        `/customized-schedule/who?region=${region}&period=${selectedPeriod.id}&days=${selectedPeriod.days}`,
       )
     }
   }
 
   const handleBack = () => {
-    navigate('/recommend/region')
+    navigate('/customized-schedule/region')
   }
 
   return (

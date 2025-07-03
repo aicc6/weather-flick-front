@@ -5,6 +5,7 @@ import { LoginPage } from './pages/login'
 import { SignUpPage } from './pages/sign-up'
 import { ReviewsPage } from './pages/reviews'
 import { ReviewWritePage } from './pages/reviews/write'
+import RecommendDestinationsPage from './pages/destinations'
 import RecommendPage from './pages/recommend'
 import RecommendRegionPage from './pages/recommend/region'
 import RecommendPeriodPage from './pages/recommend/period'
@@ -28,18 +29,34 @@ function App() {
           <Route path="/" element={<MainPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/sign-up" element={<SignUpPage />} />
+          <Route path="/recommend" element={<RecommendDestinationsPage />} />
           <Route path="/reviews" element={<ReviewsPage />} />
           <Route path="/reviews/write" element={<ReviewWritePage />} />
-          <Route path="/recommend" element={<RecommendPage />} />
-          <Route path="/recommend/region" element={<RecommendRegionPage />} />
-          <Route path="/recommend/period" element={<RecommendPeriodPage />} />
-          <Route path="/recommend/who" element={<RecommendWhoPage />} />
-          <Route path="/recommend/style" element={<RecommendStylePage />} />
+          <Route path="/customized-schedule" element={<RecommendPage />} />
           <Route
-            path="/recommend/schedule"
+            path="/customized-schedule/region"
+            element={<RecommendRegionPage />}
+          />
+          <Route
+            path="/customized-schedule/period"
+            element={<RecommendPeriodPage />}
+          />
+          <Route
+            path="/customized-schedule/who"
+            element={<RecommendWhoPage />}
+          />
+          <Route
+            path="/customized-schedule/style"
+            element={<RecommendStylePage />}
+          />
+          <Route
+            path="/customized-schedule/schedule"
             element={<RecommendSchedulePage />}
           />
-          <Route path="/recommend/result" element={<RecommendResultPage />} />
+          <Route
+            path="/customized-schedule/result"
+            element={<RecommendResultPage />}
+          />
           <Route path="/planner" element={<PlannerPage />} />
           <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
           <Route

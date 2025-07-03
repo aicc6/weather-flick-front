@@ -74,13 +74,13 @@ export default function RecommendSchedulePage() {
         schedule: selectedSchedule.id,
       }).toString()
 
-      navigate(`/recommend/result?${params}`)
+      navigate(`/customized-schedule/result?${params}`)
     }
   }
 
   const handleBack = () => {
     navigate(
-      `/recommend/style?region=${region}&period=${period}&days=${days}&who=${who}`,
+      `/customized-schedule/style?region=${region}&period=${period}&days=${days}&who=${who}`,
     )
   }
 
