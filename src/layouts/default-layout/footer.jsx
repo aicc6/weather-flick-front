@@ -27,34 +27,26 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <li>
                 <Link
-                  to="/plans"
+                  to="/recommend"
                   className="transition-colors hover:text-gray-900 dark:hover:text-white"
                 >
-                  여행 플랜
+                  맞춤 일정
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/destinations"
+                  to="/planner"
                   className="transition-colors hover:text-gray-900 dark:hover:text-white"
                 >
-                  여행지 추천
+                  여행 플래너
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/weather"
+                  to="/reviews"
                   className="transition-colors hover:text-gray-900 dark:hover:text-white"
                 >
-                  날씨 정보
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/about"
-                  className="transition-colors hover:text-gray-900 dark:hover:text-white"
-                >
-                  서비스 소개
+                  여행 리뷰
                 </Link>
               </li>
             </ul>

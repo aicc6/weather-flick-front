@@ -157,7 +157,7 @@ export default function RecommendResultPage() {
   }
 
   const handleSavePlans = () => {
-    navigate('/plans', {
+    navigate('/planner', {
       state: {
         recommendedPlan: recommendations,
       },

@@ -6,28 +6,13 @@ export const navigationLinks = [
     isHighlighted: false,
   },
   {
-    path: '/plans',
-    label: '여행 플랜',
-    isHighlighted: false,
-  },
-  {
-    path: '/destinations',
-    label: '여행지',
-    isHighlighted: false,
-  },
-  {
     path: '/recommend',
-    label: '추천여행지',
+    label: '맞춤 일정',
     isHighlighted: true,
   },
   {
     path: '/reviews',
     label: '여행 리뷰',
-    isHighlighted: false,
-  },
-  {
-    path: '/about',
-    label: '소개',
     isHighlighted: false,
   },
   {
