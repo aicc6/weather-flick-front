@@ -22,7 +22,7 @@ export function MainPage() {
   }
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative h-full">
       {/* Hero Section with Background Image - 다크모드 영향받지 않음 */}
       <section
         className="relative flex min-h-[80vh] flex-col justify-center pt-12 pb-8 text-center"
@@ -36,7 +36,7 @@ export function MainPage() {
         }}
       >
         {/* Overlay for better text readability */}
-        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="absolute inset-0 bg-black/40 dark:bg-gray-900/60"></div>
 
         {/* Content */}
         <div className="relative z-10">
@@ -131,7 +131,7 @@ export function MainPage() {
           </div>
         </section>
 
-        <section className="mx-auto mb-16 grid max-w-5xl grid-cols-1 gap-6 px-4 md:grid-cols-3">
+        <section className="mx-auto grid max-w-5xl grid-cols-1 gap-6 px-4 pb-16 md:grid-cols-3">
           <div className="bg-card border-border rounded-xl border p-8 text-center shadow-md transition-shadow duration-300 hover:shadow-lg">
             <Sun className="mx-auto mb-2 h-8 w-8 text-blue-400 dark:text-blue-300" />
             <h3 className="text-foreground text-lg font-semibold">

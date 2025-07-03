@@ -3,10 +3,10 @@ import { Header } from './header'
 
 export function DefaultLayout({ children }) {
   return (
-    <div className="bg-background text-foreground min-h-screen transition-colors">
+    <div className="bg-background text-foreground flex min-h-screen flex-col transition-colors">
       <Header />
 
-      <main>{children}</main>
+      <main className="flex-1">{children}</main>
 
       <Footer />
     </div>

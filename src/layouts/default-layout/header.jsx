@@ -130,7 +130,7 @@ export function Header() {
                   alt="Weather Flick Logo"
                   className="h-8 w-8 rounded-lg object-cover"
                 />
-                <span className="text-xl font-bold text-gray-900 dark:text-white">
+                <span className="hidden text-xl font-bold text-gray-900 sm:inline dark:text-white">
                   Weather Flick
                 </span>
               </Link>
@@ -251,7 +251,7 @@ export function Header() {
                 alt="Weather Flick Logo"
                 className="h-8 w-8 rounded-lg object-cover"
               />
-              <span className="text-xl font-bold text-gray-900 dark:text-white">
+              <span className="hidden text-xl font-bold text-gray-900 sm:inline dark:text-white">
                 Weather Flick
               </span>
             </div>
