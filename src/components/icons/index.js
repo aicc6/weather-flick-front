@@ -8,6 +8,7 @@ export {
   ChevronRightIcon,
   ArrowLeft,
   ArrowRight,
+  Menu,
 } from 'lucide-react'
 
 // UI Action Icons
