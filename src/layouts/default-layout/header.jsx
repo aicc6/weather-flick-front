@@ -4,7 +4,7 @@
  * - [ ] Navigation Menu
  * - [ ] Login / Sign Up
  */
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Sun, Moon, User, LogOut, Settings, Menu, X } from '@/components/icons'
 import { navigationLinks } from '@/data'
@@ -34,6 +34,15 @@ export function Header() {
     forceUpdate,
   } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // 현재 경로가 메뉴 항목과 일치하는지 확인하는 함수
+  const isActiveRoute = (path) => {
+    if (path === '/') {
+      return location.pathname === '/'
+    }
+    return location.pathname.startsWith(path)
+  }
 
   useEffect(() => {
     // 초기 테마 적용
@@ -139,19 +148,25 @@ export function Header() {
             {/* 상단 네비게이션 (950px 이상) */}
             {isLargeScreen && (
               <nav className="flex items-center space-x-8">
-                {navigationLinks.map((link) => (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    className={`font-medium ${
-                      link.isHighlighted
-                        ? 'text-blue-700 hover:text-blue-900 dark:text-blue-300 dark:hover:text-blue-400'
-                        : 'text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white'
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+                {navigationLinks.map((link) => {
+                  const isActive = isActiveRoute(link.path)
+                  return (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      className={`relative font-medium transition-colors ${
+                        isActive
+                          ? 'text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
+                          : 'text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white'
+                      }`}
+                    >
+                      {link.label}
+                      {isActive && (
+                        <span className="absolute -bottom-1 left-0 h-0.5 w-full bg-blue-600 dark:bg-blue-400" />
+                      )}
+                    </Link>
+                  )
+                })}
               </nav>
             )}
 
@@ -268,21 +283,24 @@ export function Header() {
           {/* 사이드바 네비게이션 */}
           <nav className="flex-1 overflow-y-auto py-4">
             <ul className="space-y-2 px-4">
-              {navigationLinks.map((link) => (
-                <li key={link.path}>
-                  <Link
-                    to={link.path}
-                    onClick={closeSidebar}
-                    className={`block rounded-lg px-4 py-3 font-medium transition-colors ${
-                      link.isHighlighted
-                        ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-white'
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+              {navigationLinks.map((link) => {
+                const isActive = isActiveRoute(link.path)
+                return (
+                  <li key={link.path}>
+                    <Link
+                      to={link.path}
+                      onClick={closeSidebar}
+                      className={`block rounded-lg px-4 py-3 font-medium transition-colors ${
+                        isActive
+                          ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
+                          : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-white'
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                )
+              })}
             </ul>
           </nav>
 
