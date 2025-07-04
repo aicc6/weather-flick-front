@@ -20,6 +20,7 @@ import {
   Eye,
   MessageSquare,
   Sparkles,
+  X,
 } from '@/components/icons'
 
 export default function TravelCourseDetailPage() {
@@ -31,6 +32,8 @@ export default function TravelCourseDetailPage() {
   const [rating, setRating] = useState(0)
   const [comment, setComment] = useState('')
   const [comments, setComments] = useState([])
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false)
+  const [modalImageIndex, setModalImageIndex] = useState(0)
 
   // 여행 코스 데이터 (실제로는 API에서 가져올 데이터)
   const courseData = {
@@ -41,8 +44,14 @@ export default function TravelCourseDetailPage() {
       region: 'jeju',
       duration: '2박 3일',
       theme: ['자연', '힐링', '드라이브'],
-      mainImage: '/jeju.jpg',
-      images: ['/jeju.jpg', '/jeju.jpg', '/jeju.jpg', '/jeju.jpg'],
+      mainImage:
+        'http://tong.visitkorea.or.kr/cms/resource/82/2944282_image2_1.bmp',
+      images: [
+        'http://tong.visitkorea.or.kr/cms/resource/82/2944282_image2_1.bmp', // 성산일출봉 - UNESCO 세계자연유산, 제주 대표 일출 명소
+        'http://tong.visitkorea.or.kr/cms/resource/98/2870098_image2_1.jpg', // 한라산 - 제주도 최고봉, 한국 최고봉
+        'http://tong.visitkorea.or.kr/cms/resource/68/3011868_image2_1.jpg', // 용두암 - 제주의 대표적인 바위 명소
+        'http://tong.visitkorea.or.kr/cms/resource/55/3354155_image2_1.jpg', // 만장굴 - 제주도 대표 용암동굴, 국가지질공원
+      ],
       rating: 4.8,
       reviewCount: 156,
       likeCount: 234,
@@ -152,8 +161,14 @@ export default function TravelCourseDetailPage() {
       region: 'busan',
       duration: '1박 2일',
       theme: ['도시', '바다', '맛집'],
-      mainImage: '/busan.jpeg',
-      images: ['/busan.jpeg', '/busan.jpeg', '/busan.jpeg'],
+      mainImage:
+        'http://tong.visitkorea.or.kr/cms/resource/34/3090534_image2_1.JPG',
+      images: [
+        'http://tong.visitkorea.or.kr/cms/resource/34/3090534_image2_1.JPG', // 해운대해수욕장 - 부산의 대표적인 해변
+        'http://tong.visitkorea.or.kr/cms/resource/45/3311245_image2_1.jpg', // 광안리해수욕장 - 광안대교 야경으로 유명한 해변
+        'http://tong.visitkorea.or.kr/cms/resource/91/3365491_image2_1.jpg', // 부산 감천문화마을 - 알록달록한 계단식 마을
+        'http://tong.visitkorea.or.kr/cms/resource/63/2918063_image2_1.jpg', // 태종대 - 부산의 대표적인 자연 관광지
+      ],
       rating: 4.6,
       reviewCount: 203,
       likeCount: 189,
@@ -350,6 +365,55 @@ export default function TravelCourseDetailPage() {
     )
   }
 
+  const handleModalPrevImage = () => {
+    setModalImageIndex((prev) =>
+      prev === 0 ? course.images.length - 1 : prev - 1,
+    )
+  }
+
+  const handleModalNextImage = () => {
+    setModalImageIndex((prev) =>
+      prev === course.images.length - 1 ? 0 : prev + 1,
+    )
+  }
+
+  const openImageModal = () => {
+    setModalImageIndex(currentImageIndex)
+    setIsImageModalOpen(true)
+    // 모달이 열렸을 때 스크롤 방지
+    document.body.style.overflow = 'hidden'
+  }
+
+  const closeImageModal = () => {
+    setIsImageModalOpen(false)
+    // 모달이 닫혔을 때 스크롤 복원
+    document.body.style.overflow = 'unset'
+  }
+
+  // ESC 키로 모달 닫기
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape' && isImageModalOpen) {
+        closeImageModal()
+      }
+      if (isImageModalOpen) {
+        if (event.key === 'ArrowLeft') {
+          handleModalPrevImage()
+        }
+        if (event.key === 'ArrowRight') {
+          handleModalNextImage()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      // 컴포넌트 언마운트 시 스크롤 복원
+      document.body.style.overflow = 'unset'
+    }
+  }, [isImageModalOpen])
+
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
@@ -504,12 +568,77 @@ export default function TravelCourseDetailPage() {
                 variant="secondary"
                 size="sm"
                 className="absolute right-4 bottom-4"
+                onClick={openImageModal}
               >
                 <Camera className="mr-2 h-4 w-4" />
                 크게보기
               </Button>
             </div>
           </Card>
+
+          {/* 이미지 모달 */}
+          {isImageModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
+              {/* 모달 배경 클릭으로 닫기 */}
+              <div className="absolute inset-0" onClick={closeImageModal} />
+
+              {/* 모달 콘텐츠 */}
+              <div className="relative z-10 max-h-[90vh] max-w-[90vw]">
+                {/* 닫기 버튼 */}
+                <button
+                  onClick={closeImageModal}
+                  className="absolute top-4 right-4 z-20 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+
+                {/* 이미지 */}
+                <img
+                  src={course.images[modalImageIndex]}
+                  alt={`${course.title} - 이미지 ${modalImageIndex + 1}`}
+                  className="max-h-[90vh] max-w-[90vw] object-contain"
+                />
+
+                {/* 이전/다음 버튼 */}
+                {course.images.length > 1 && (
+                  <>
+                    <button
+                      onClick={handleModalPrevImage}
+                      className="absolute top-1/2 left-4 -translate-y-1/2 rounded-full bg-black/50 p-3 text-white transition-colors hover:bg-black/70"
+                    >
+                      <ChevronLeft className="h-6 w-6" />
+                    </button>
+                    <button
+                      onClick={handleModalNextImage}
+                      className="absolute top-1/2 right-4 -translate-y-1/2 rounded-full bg-black/50 p-3 text-white transition-colors hover:bg-black/70"
+                    >
+                      <ChevronRight className="h-6 w-6" />
+                    </button>
+                  </>
+                )}
+
+                {/* 이미지 인디케이터 */}
+                <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
+                  {course.images.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setModalImageIndex(index)}
+                      className={`h-2 w-2 rounded-full transition-colors ${
+                        index === modalImageIndex ? 'bg-white' : 'bg-white/50'
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                {/* 이미지 정보 */}
+                <div className="absolute bottom-12 left-4 rounded bg-black/50 px-3 py-2 text-white">
+                  <span className="text-sm">
+                    {modalImageIndex + 1} / {course.images.length}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* 코스 설명 */}
           <Card className="mb-8 dark:border-gray-700 dark:bg-gray-800">
