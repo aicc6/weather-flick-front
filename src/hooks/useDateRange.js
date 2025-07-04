@@ -13,7 +13,7 @@ export default function useDateRange() {
 
   const getDatesInRange = useCallback((from, to) => {
     if (!from || !to) return []
-    
+
     const result = []
     let currentDate = new Date(from)
     const endDate = new Date(to)

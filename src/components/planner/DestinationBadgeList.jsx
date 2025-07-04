@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react'
 import { X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -8,7 +9,14 @@ import { motion, AnimatePresence } from 'framer-motion'
  * @param {string[]} props.destinations - 목적지 배열
  * @param {function} props.onRemove - 목적지 제거 함수 (destination) => void
  */
-export default function DestinationBadgeList({ destinations = [], onRemove }) {
+const DestinationBadgeList = memo(({ destinations = [], onRemove }) => {
+  const handleRemove = useCallback(
+    (destination) => {
+      onRemove?.(destination)
+    },
+    [onRemove],
+  )
+
   if (!destinations || destinations.length === 0) {
     return null
   }
@@ -36,7 +44,7 @@ export default function DestinationBadgeList({ destinations = [], onRemove }) {
               <span>{destination}</span>
               <button
                 type="button"
-                onClick={() => onRemove(destination)}
+                onClick={() => handleRemove(destination)}
                 className="ml-1 transition-colors hover:text-red-500"
                 aria-label={`${destination} 제거`}
               >
@@ -48,4 +56,8 @@ export default function DestinationBadgeList({ destinations = [], onRemove }) {
       </motion.div>
     </AnimatePresence>
   )
-}
+})
+
+DestinationBadgeList.displayName = 'DestinationBadgeList'
+
+export default DestinationBadgeList

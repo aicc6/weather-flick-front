@@ -24,12 +24,7 @@ export function Header() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth > 950)
 
-  const {
-    user,
-    isLoggedIn,
-    logout,
-    loading,
-  } = useAuth()
+  const { user, isLoggedIn, logout, loading } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 

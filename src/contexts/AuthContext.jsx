@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
 
   // 상태 업데이트 헬퍼 함수
   const updateAuthState = useCallback((updates) => {
-    setAuthState(prev => ({ ...prev, ...updates }))
+    setAuthState((prev) => ({ ...prev, ...updates }))
   }, [])
 
   // 초기 로드 시 사용자 정보 확인
@@ -85,21 +85,21 @@ export const AuthProvider = ({ children }) => {
   const login = useCallback(async (credentials) => {
     try {
       updateAuthState({ loading: true, error: null })
-      
+
       const response = await authAPI.login(credentials)
       const { user, access_token } = response
-      
+
       // 토큰과 사용자 정보 저장
       tokenManager.setToken(access_token)
       tokenManager.setUserInfo(user)
-      
+
       updateAuthState({
         user,
         isAuthenticated: true,
         loading: false,
         error: null,
       })
-      
+
       return response
     } catch (error) {
       updateAuthState({
@@ -138,9 +138,9 @@ export const AuthProvider = ({ children }) => {
   const updateUserProfile = useCallback(async (userData) => {
     try {
       updateAuthState({ loading: true, error: null })
-      
+
       const updatedUser = await authAPI.updateProfile(userData)
-      
+
       // 토큰 매니저와 상태 동기화
       tokenManager.setUserInfo(updatedUser)
       updateAuthState({
@@ -148,7 +148,7 @@ export const AuthProvider = ({ children }) => {
         loading: false,
         error: null,
       })
-      
+
       return updatedUser
     } catch (error) {
       updateAuthState({
@@ -163,14 +163,14 @@ export const AuthProvider = ({ children }) => {
   const register = useCallback(async (userData) => {
     try {
       updateAuthState({ loading: true, error: null })
-      
+
       const response = await authAPI.register(userData)
-      
+
       updateAuthState({
         loading: false,
         error: null,
       })
-      
+
       return response
     } catch (error) {
       updateAuthState({
@@ -192,14 +192,14 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: authState.isAuthenticated,
     loading: authState.loading,
     error: authState.error,
-    
+
     // 액션 함수들
     login,
     logout,
     register,
     updateUserProfile,
     clearError,
-    
+
     // 편의 함수들 (기존 호환성 유지)
     isLoggedIn: authState.isAuthenticated,
     updateProfile: updateUserProfile,

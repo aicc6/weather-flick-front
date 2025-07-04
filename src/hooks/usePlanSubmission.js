@@ -19,8 +19,8 @@ export default function usePlanSubmission() {
     }
 
     // 목적지가 있는지 확인
-    const hasDestinations = Object.keys(destinationsByDate).some(date => 
-      destinationsByDate[date] && destinationsByDate[date].length > 0
+    const hasDestinations = Object.keys(destinationsByDate).some(
+      (date) => destinationsByDate[date] && destinationsByDate[date].length > 0,
     )
 
     if (!hasDestinations) {
@@ -53,7 +53,7 @@ export default function usePlanSubmission() {
       }
 
       const result = await response.json()
-      
+
       if (result.success && result.plans) {
         setPlans(result.plans)
         toast.success('맞춤 여행 플랜이 생성되었습니다!')

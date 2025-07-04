@@ -13,7 +13,8 @@ export default function useGeolocation() {
       setIsLocating(true)
 
       if (!navigator.geolocation) {
-        const errorMessage = '위치 서비스 미지원: 이 브라우저는 위치 정보를 지원하지 않습니다.'
+        const errorMessage =
+          '위치 서비스 미지원: 이 브라우저는 위치 정보를 지원하지 않습니다.'
         toast.error(errorMessage)
         setIsLocating(false)
         reject(new Error(errorMessage))
@@ -42,7 +43,8 @@ export default function useGeolocation() {
               throw new Error('주소를 찾을 수 없습니다.')
             }
           } catch (error) {
-            const errorMessage = '위치 확인 실패: 위치 정보를 가져오지 못했습니다.'
+            const errorMessage =
+              '위치 확인 실패: 위치 정보를 가져오지 못했습니다.'
             toast.error(errorMessage)
             reject(error)
           } finally {

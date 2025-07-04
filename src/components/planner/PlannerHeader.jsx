@@ -1,10 +1,11 @@
+import { memo } from 'react'
 import { motion } from 'framer-motion'
 
 /**
  * AI 여행 플래너 헤더 컴포넌트
  * 페이지 제목과 설명을 표시하는 정적 컴포넌트
  */
-export default function PlannerHeader() {
+const PlannerHeader = memo(() => {
   return (
     <div className="mb-12 text-center">
       <motion.div
@@ -21,4 +22,8 @@ export default function PlannerHeader() {
       </motion.div>
     </div>
   )
-}
+})
+
+PlannerHeader.displayName = 'PlannerHeader'
+
+export default PlannerHeader

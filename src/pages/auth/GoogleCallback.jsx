@@ -18,9 +18,9 @@ export function GoogleCallbackPage() {
         console.log('이미 처리 중입니다. 중복 요청을 무시합니다.')
         return
       }
-      
+
       isProcessing.current = true
-      
+
       try {
         // URL 파라미터 확인
         const authCode = searchParams.get('auth_code') // 새로운 보안 방식

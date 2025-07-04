@@ -10,9 +10,9 @@ export default function useDestinationManager() {
   const addDestination = useCallback((date, destination) => {
     if (!date || !destination || destination.trim() === '') return
 
-    setDestinationsByDate(prev => {
+    setDestinationsByDate((prev) => {
       const existing = prev[date] || []
-      
+
       // 중복 체크
       if (existing.includes(destination)) {
         return prev
@@ -20,7 +20,7 @@ export default function useDestinationManager() {
 
       return {
         ...prev,
-        [date]: [...existing, destination]
+        [date]: [...existing, destination],
       }
     })
   }, [])
@@ -28,10 +28,10 @@ export default function useDestinationManager() {
   const removeDestination = useCallback((date, destination) => {
     if (!date || !destination) return
 
-    setDestinationsByDate(prev => {
+    setDestinationsByDate((prev) => {
       const existing = prev[date] || []
-      const filtered = existing.filter(dest => dest !== destination)
-      
+      const filtered = existing.filter((dest) => dest !== destination)
+
       if (filtered.length === 0) {
         const { [date]: removed, ...rest } = prev
         return rest
@@ -39,7 +39,7 @@ export default function useDestinationManager() {
 
       return {
         ...prev,
-        [date]: filtered
+        [date]: filtered,
       }
     })
   }, [])
@@ -47,7 +47,7 @@ export default function useDestinationManager() {
   const clearDestinations = useCallback((date) => {
     if (!date) return
 
-    setDestinationsByDate(prev => {
+    setDestinationsByDate((prev) => {
       const { [date]: removed, ...rest } = prev
       return rest
     })
@@ -57,13 +57,16 @@ export default function useDestinationManager() {
     setDestinationsByDate({})
   }, [])
 
-  const getDestinationsForDate = useCallback((date) => {
-    return destinationsByDate[date] || []
-  }, [destinationsByDate])
+  const getDestinationsForDate = useCallback(
+    (date) => {
+      return destinationsByDate[date] || []
+    },
+    [destinationsByDate],
+  )
 
   const hasDestinations = useCallback(() => {
-    return Object.keys(destinationsByDate).some(date => 
-      destinationsByDate[date] && destinationsByDate[date].length > 0
+    return Object.keys(destinationsByDate).some(
+      (date) => destinationsByDate[date] && destinationsByDate[date].length > 0,
     )
   }, [destinationsByDate])
 

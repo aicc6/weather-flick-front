@@ -1,12 +1,7 @@
 'use client'
 
-import { useState, useRef, useCallback, useMemo } from 'react'
-import {
-  CalendarIcon,
-  ChevronDown,
-  MapPin,
-  Plus,
-} from 'lucide-react'
+import { useState, useCallback, useMemo, memo } from 'react'
+import { CalendarIcon, ChevronDown, MapPin, Plus } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import {
   Popover,
@@ -16,7 +11,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -34,23 +28,20 @@ import useDestinationManager from '@/hooks/useDestinationManager'
 import useDestinationSearch from '@/hooks/useDestinationSearch'
 import usePlanSubmission from '@/hooks/usePlanSubmission'
 
-export default function PlannerForm() {
+const PlannerForm = memo(() => {
   // 기본 폼 상태
   const [form, setForm] = useState({
     origin: '',
     dateRange: { from: null, to: null },
   })
-  
+
   const [calendarOpen, setCalendarOpen] = useState(false)
 
   // 커스텀 훅 사용
   const { getCurrentLocation, isLocating } = useGeolocation()
   const { getDatesInRange } = useDateRange()
-  const { 
-    destinationsByDate, 
-    addDestination, 
-    removeDestination 
-  } = useDestinationManager()
+  const { destinationsByDate, addDestination, removeDestination } =
+    useDestinationManager()
   const {
     destInputs,
     destSuggestions,
@@ -60,11 +51,7 @@ export default function PlannerForm() {
     hideDropdown,
     showDropdown,
   } = useDestinationSearch()
-  const { 
-    isSubmitting, 
-    plans, 
-    submitPlan 
-  } = usePlanSubmission()
+  const { isSubmitting, plans, submitPlan } = usePlanSubmission()
 
   // 현재 위치 자동 감지
   const handleAutoLocation = useCallback(async () => {
@@ -76,40 +63,64 @@ export default function PlannerForm() {
     }
   }, [getCurrentLocation])
 
-  // 목적지 자동완성 처리
-  const handleDestinationInput = useCallback((dateStr, value) => {
-    updateDestInput(dateStr, value)
-  }, [updateDestInput])
+  // 목적지 자동완성 처리 - 메모이제이션
+  const handleDestinationInput = useCallback(
+    (dateStr, value) => {
+      updateDestInput(dateStr, value)
+    },
+    [updateDestInput],
+  )
 
-  // 날짜 범위 계산
+  // 날짜 범위 계산 - 메모이제이션
   const dates = useMemo(() => {
     return getDatesInRange(form.dateRange?.from, form.dateRange?.to)
-  }, [form.dateRange, getDatesInRange])
+  }, [form.dateRange?.from, form.dateRange?.to, getDatesInRange])
+
+  // 폼 유효성 검사 - 메모이제이션
+  const isFormValid = useMemo(() => {
+    return (
+      form.origin &&
+      form.dateRange?.from &&
+      form.dateRange?.to &&
+      Object.keys(destinationsByDate).length > 0
+    )
+  }, [
+    form.origin,
+    form.dateRange?.from,
+    form.dateRange?.to,
+    destinationsByDate,
+  ])
 
   // 목적지 추가 (훅의 함수 래핑)
-  const handleAddDestination = useCallback((date, dest) => {
-    addDestination(date, dest)
-    // 입력창 클리어
-    updateDestInput(date, '')
-    hideDropdown(date)
-  }, [addDestination, updateDestInput, hideDropdown])
+  const handleAddDestination = useCallback(
+    (date, dest) => {
+      addDestination(date, dest)
+      // 입력창 클리어
+      updateDestInput(date, '')
+      hideDropdown(date)
+    },
+    [addDestination, updateDestInput, hideDropdown],
+  )
 
   // 목적지 제거 (훅의 함수 직접 사용)
-  const handleRemoveDestination = useCallback((date, dest) => {
-    removeDestination(date, dest)
-  }, [removeDestination])
+  const handleRemoveDestination = useCallback(
+    (date, dest) => {
+      removeDestination(date, dest)
+    },
+    [removeDestination],
+  )
 
   // 폼 제출
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault()
-      
+
       const formData = {
         origin: form.origin,
         dateRange: form.dateRange,
         destinationsByDate,
       }
-      
+
       await submitPlan(formData)
     },
     [form, destinationsByDate, submitPlan],
@@ -182,10 +193,7 @@ export default function PlannerForm() {
                     <label className="text-muted-foreground text-sm font-medium">
                       여행 기간
                     </label>
-                    <Popover
-                      open={calendarOpen}
-                      onOpenChange={setCalendarOpen}
-                    >
+                    <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
@@ -300,13 +308,17 @@ export default function PlannerForm() {
                                 <DestinationAutocomplete
                                   suggestions={destSuggestions[dateStr] || []}
                                   isVisible={showDestDropdown[dateStr] || false}
-                                  onSelect={(suggestion) => handleAddDestination(dateStr, suggestion)}
+                                  onSelect={(suggestion) =>
+                                    handleAddDestination(dateStr, suggestion)
+                                  }
                                 />
                               </div>
 
                               <DestinationBadgeList
                                 destinations={destinationsByDate[dateStr] || []}
-                                onRemove={(destination) => handleRemoveDestination(dateStr, destination)}
+                                onRemove={(destination) =>
+                                  handleRemoveDestination(dateStr, destination)
+                                }
                               />
                             </CardContent>
                           </Card>
@@ -322,12 +334,7 @@ export default function PlannerForm() {
           {/* 제출 버튼 */}
           <SubmitButton
             isSubmitting={isSubmitting}
-            disabled={
-              isSubmitting ||
-              !form.origin ||
-              !form.dateRange?.from ||
-              !form.dateRange?.to
-            }
+            disabled={isSubmitting || !isFormValid}
             onSubmit={handleSubmit}
           />
         </form>
@@ -353,4 +360,8 @@ export default function PlannerForm() {
       </motion.div>
     </div>
   )
-}
+})
+
+PlannerForm.displayName = 'PlannerForm'
+
+export default PlannerForm
