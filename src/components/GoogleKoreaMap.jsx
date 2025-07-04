@@ -161,15 +161,53 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
       if (!coords) return
 
       const isSelected = selectedRegion?.id === city.id
+      const cityName = coords.name
+
+      // 지도 핀 모양의 SVG 마커 생성
+      const createPinIcon = (color, textColor = '#ffffff') => {
+        // 도시 이름 축약 로직 개선
+        let displayName = cityName
+        if (cityName.includes('·')) {
+          // 중점(·)이 있는 경우 첫 번째 부분만 사용
+          displayName = cityName.split('·')[0]
+        }
+        if (displayName.length > 3) {
+          displayName = displayName.substring(0, 3)
+        }
+
+        const svg = `
+          <svg width="50" height="60" viewBox="0 0 50 60" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.3)"/>
+              </filter>
+            </defs>
+            <!-- 핀 모양 -->
+            <path d="M25 0C11.2 0 0 11.2 0 25c0 18.75 25 35 25 35s25-16.25 25-35C50 11.2 38.8 0 25 0z" fill="${color}" filter="url(#shadow)"/>
+            <!-- 내부 원 -->
+            <circle cx="25" cy="25" r="16" fill="#ffffff"/>
+            <!-- 텍스트 배경 -->
+            <circle cx="25" cy="25" r="13" fill="#ffffff"/>
+            <!-- 텍스트 -->
+            <text x="25" y="30" text-anchor="middle" font-family="Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif" font-size="12" font-weight="600" fill="#333333">
+              ${displayName}
+            </text>
+          </svg>
+        `
+        return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg)
+      }
 
       // 마커 아이콘 설정
       const markerIcon = {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: isSelected ? 12 : 8,
-        fillColor: isSelected ? '#2563eb' : '#dc2626',
-        fillOpacity: 1,
-        strokeWeight: 3,
-        strokeColor: '#ffffff',
+        url: createPinIcon(isSelected ? '#2563eb' : '#dc2626', '#ffffff'),
+        scaledSize: new google.maps.Size(
+          isSelected ? 60 : 50,
+          isSelected ? 72 : 60,
+        ),
+        anchor: new google.maps.Point(
+          isSelected ? 30 : 25,
+          isSelected ? 72 : 60,
+        ),
       }
 
       const marker = new google.maps.Marker({
@@ -188,11 +226,18 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
       // 마커 호버 이벤트
       marker.addListener('mouseover', () => {
         setHoveredRegion(city.id)
-        marker.setIcon({
-          ...markerIcon,
-          scale: isSelected ? 12 : 10,
-          fillColor: isSelected ? '#2563eb' : '#3b82f6',
-        })
+        const hoverIcon = {
+          url: createPinIcon(isSelected ? '#2563eb' : '#3b82f6', '#ffffff'),
+          scaledSize: new google.maps.Size(
+            isSelected ? 60 : 55,
+            isSelected ? 72 : 66,
+          ),
+          anchor: new google.maps.Point(
+            isSelected ? 30 : 27.5,
+            isSelected ? 72 : 66,
+          ),
+        }
+        marker.setIcon(hoverIcon)
       })
 
       marker.addListener('mouseout', () => {
@@ -322,13 +367,63 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
               </h4>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded-full border-2 border-white bg-red-600 shadow-sm"></div>
+                  <div className="relative">
+                    <svg
+                      width="25"
+                      height="30"
+                      viewBox="0 0 50 60"
+                      className="text-red-600"
+                    >
+                      <path
+                        d="M25 0C11.2 0 0 11.2 0 25c0 18.75 25 35 25 35s25-16.25 25-35C50 11.2 38.8 0 25 0z"
+                        fill="#dc2626"
+                      />
+                      <circle cx="25" cy="25" r="16" fill="#ffffff" />
+                      <circle cx="25" cy="25" r="13" fill="#ffffff" />
+                      <text
+                        x="25"
+                        y="30"
+                        textAnchor="middle"
+                        fontFamily="Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif"
+                        fontSize="12"
+                        fontWeight="600"
+                        fill="#333333"
+                      >
+                        도시
+                      </text>
+                    </svg>
+                  </div>
                   <span className="text-xs text-gray-600 dark:text-gray-400">
                     선택 가능한 도시
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded-full border-2 border-white bg-blue-600 shadow-sm"></div>
+                  <div className="relative">
+                    <svg
+                      width="25"
+                      height="30"
+                      viewBox="0 0 50 60"
+                      className="text-blue-600"
+                    >
+                      <path
+                        d="M25 0C11.2 0 0 11.2 0 25c0 18.75 25 35 25 35s25-16.25 25-35C50 11.2 38.8 0 25 0z"
+                        fill="#2563eb"
+                      />
+                      <circle cx="25" cy="25" r="16" fill="#ffffff" />
+                      <circle cx="25" cy="25" r="13" fill="#ffffff" />
+                      <text
+                        x="25"
+                        y="30"
+                        textAnchor="middle"
+                        fontFamily="Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif"
+                        fontSize="12"
+                        fontWeight="600"
+                        fill="#333333"
+                      >
+                        선택
+                      </text>
+                    </svg>
+                  </div>
                   <span className="text-xs text-gray-600 dark:text-gray-400">
                     선택된 도시
                   </span>
