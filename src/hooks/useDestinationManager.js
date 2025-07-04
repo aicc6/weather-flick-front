@@ -33,7 +33,7 @@ export default function useDestinationManager() {
       const filtered = existing.filter((dest) => dest !== destination)
 
       if (filtered.length === 0) {
-        const { [date]: removed, ...rest } = prev
+        const { [date]: _removed, ...rest } = prev
         return rest
       }
 
@@ -48,7 +48,7 @@ export default function useDestinationManager() {
     if (!date) return
 
     setDestinationsByDate((prev) => {
-      const { [date]: removed, ...rest } = prev
+      const { [date]: _removed, ...rest } = prev
       return rest
     })
   }, [])

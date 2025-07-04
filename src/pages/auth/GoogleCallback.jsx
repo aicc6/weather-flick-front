@@ -24,7 +24,7 @@ export function GoogleCallbackPage() {
         // URL 파라미터 확인
         const authCode = searchParams.get('auth_code') // 새로운 보안 방식
         const token = searchParams.get('token') // 기존 방식 (호환성)
-        const userId = searchParams.get('user_id') // 기존 방식 (호환성)
+        const _userId = searchParams.get('user_id') // 기존 방식 (호환성)
         const error = searchParams.get('error')
 
         if (error) {
@@ -78,7 +78,7 @@ export function GoogleCallbackPage() {
             setTimeout(() => {
               navigate('/', { replace: true })
             }, 1500)
-          } catch (userError) {
+          } catch {
             // 토큰은 유효하지만 사용자 정보 조회 실패 시에도 로그인 상태로 설정
             setIsAuthenticated(true)
             setStatus('success')
@@ -121,7 +121,7 @@ export function GoogleCallbackPage() {
                 setTimeout(() => {
                   navigate('/', { replace: true })
                 }, 1500)
-              } catch (userError) {
+              } catch {
                 // 토큰은 유효하지만 사용자 정보 조회 실패 시에도 로그인 상태로 설정
                 setIsAuthenticated(true)
                 setStatus('success')

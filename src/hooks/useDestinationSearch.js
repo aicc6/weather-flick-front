@@ -74,15 +74,15 @@ export default function useDestinationSearch() {
 
   const clearDestInput = useCallback((date) => {
     setDestInputs((prev) => {
-      const { [date]: removed, ...rest } = prev
+      const { [date]: _removed, ...rest } = prev
       return rest
     })
     setDestSuggestions((prev) => {
-      const { [date]: removed, ...rest } = prev
+      const { [date]: _removed, ...rest } = prev
       return rest
     })
     setShowDestDropdown((prev) => {
-      const { [date]: removed, ...rest } = prev
+      const { [date]: _removed, ...rest } = prev
       return rest
     })
   }, [])

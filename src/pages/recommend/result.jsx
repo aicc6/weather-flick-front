@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -91,9 +91,9 @@ export default function RecommendResultPage() {
     }
 
     generateRecommendations()
-  }, [region, period, days, who, styles, schedule])
+  }, [region, period, days, who, styles, schedule, generateMockItinerary])
 
-  const generateMockItinerary = () => {
+  const generateMockItinerary = useCallback(() => {
     const daysCount = parseInt(days) || 3
     const itinerary = []
 
@@ -134,7 +134,7 @@ export default function RecommendResultPage() {
     }
 
     return itinerary
-  }
+  }, [days, region])
 
   const handleBack = () => {
     navigate(
@@ -270,7 +270,7 @@ export default function RecommendResultPage() {
           상세 일정
         </h2>
 
-        {recommendations.itinerary.map((dayPlan, index) => (
+        {recommendations.itinerary.map((dayPlan, _index) => (
           <Card
             key={dayPlan.day}
             className="dark:border-gray-700 dark:bg-gray-800"

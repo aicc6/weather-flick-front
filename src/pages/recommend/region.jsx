@@ -9,7 +9,7 @@ import GoogleKoreaMap from '@/components/GoogleKoreaMap'
 
 export default function RecommendRegionPage() {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
+  const [_searchParams] = useSearchParams()
   const [selectedRegion, setSelectedRegion] = useState(null)
   const [viewMode, setViewMode] = useState('google-map') // 'map', 'list', 'google-map'
 

@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
       if (tokenManager.isLoggedIn()) {
         try {
           await authAPI.logout()
-        } catch (error) {
+        } catch {
           // 서버 요청 실패해도 클라이언트 로그아웃은 진행
         }
       }
@@ -73,7 +73,7 @@ export const AuthProvider = ({ children }) => {
               const userInfo = await authAPI.getMe()
               updateAuthState({ user: userInfo })
               tokenManager.setUserInfo(userInfo)
-            } catch (error) {
+            } catch {
               // 저장된 사용자 정보가 유효하므로 에러로 처리하지 않음
             }
           } else {
@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }) => {
             loading: false,
           })
         }
-      } catch (error) {
+      } catch {
         // 토큰이 유효하지 않은 경우 로그아웃 처리
         await logout()
       }
@@ -103,112 +103,130 @@ export const AuthProvider = ({ children }) => {
   }, [updateAuthState, logout])
 
   // 로그인 함수
-  const login = useCallback(async (credentials) => {
-    try {
-      updateAuthState({ loading: true, error: null })
+  const login = useCallback(
+    async (credentials) => {
+      try {
+        updateAuthState({ loading: true, error: null })
 
-      const response = await authAPI.login(credentials)
-      const { user, access_token } = response
+        const response = await authAPI.login(credentials)
+        const { user, access_token } = response
 
-      // 토큰과 사용자 정보 저장
-      tokenManager.setToken(access_token)
-      tokenManager.setUserInfo(user)
+        // 토큰과 사용자 정보 저장
+        tokenManager.setToken(access_token)
+        tokenManager.setUserInfo(user)
 
-      updateAuthState({
-        user,
-        isAuthenticated: true,
-        loading: false,
-        error: null,
-      })
+        updateAuthState({
+          user,
+          isAuthenticated: true,
+          loading: false,
+          error: null,
+        })
 
-      return response
-    } catch (error) {
-      updateAuthState({
-        loading: false,
-        error: error.message,
-      })
-      throw error
-    }
-  }, [])
+        return response
+      } catch (error) {
+        updateAuthState({
+          loading: false,
+          error: error.message,
+        })
+        throw error
+      }
+    },
+    [updateAuthState],
+  )
 
   // 사용자 정보 업데이트 함수
-  const updateUserProfile = useCallback(async (userData) => {
-    try {
-      updateAuthState({ loading: true, error: null })
+  const updateUserProfile = useCallback(
+    async (userData) => {
+      try {
+        updateAuthState({ loading: true, error: null })
 
-      const updatedUser = await authAPI.updateProfile(userData)
+        const updatedUser = await authAPI.updateProfile(userData)
 
-      // 토큰 매니저와 상태 동기화
-      tokenManager.setUserInfo(updatedUser)
-      updateAuthState({
-        user: updatedUser,
-        loading: false,
-        error: null,
-      })
+        // 토큰 매니저와 상태 동기화
+        tokenManager.setUserInfo(updatedUser)
+        updateAuthState({
+          user: updatedUser,
+          loading: false,
+          error: null,
+        })
 
-      return updatedUser
-    } catch (error) {
-      updateAuthState({
-        loading: false,
-        error: error.message,
-      })
-      throw error
-    }
-  }, [])
+        return updatedUser
+      } catch (error) {
+        updateAuthState({
+          loading: false,
+          error: error.message,
+        })
+        throw error
+      }
+    },
+    [updateAuthState],
+  )
 
   // 회원가입 함수
-  const register = useCallback(async (userData) => {
-    try {
-      updateAuthState({ loading: true, error: null })
+  const register = useCallback(
+    async (userData) => {
+      try {
+        updateAuthState({ loading: true, error: null })
 
-      const response = await authAPI.register(userData)
+        const response = await authAPI.register(userData)
 
-      updateAuthState({
-        loading: false,
-        error: null,
-      })
+        updateAuthState({
+          loading: false,
+          error: null,
+        })
 
-      return response
-    } catch (error) {
-      updateAuthState({
-        loading: false,
-        error: error.message,
-      })
-      throw error
-    }
-  }, [])
+        return response
+      } catch (error) {
+        updateAuthState({
+          loading: false,
+          error: error.message,
+        })
+        throw error
+      }
+    },
+    [updateAuthState],
+  )
 
   // 에러 클리어 함수
   const clearError = useCallback(() => {
     updateAuthState({ error: null })
-  }, [])
+  }, [updateAuthState])
 
   // 사용자 정보 직접 설정 함수 (OAuth 콜백 등에서 사용)
-  const setUser = useCallback((userData) => {
-    updateAuthState({ user: userData })
-    if (userData) {
-      tokenManager.setUserInfo(userData)
-    }
-  }, [])
+  const setUser = useCallback(
+    (userData) => {
+      updateAuthState({ user: userData })
+      if (userData) {
+        tokenManager.setUserInfo(userData)
+      }
+    },
+    [updateAuthState],
+  )
 
   // 인증 상태 직접 설정 함수 (OAuth 콜백 등에서 사용)
-  const setIsAuthenticated = useCallback((isAuth) => {
-    updateAuthState({ isAuthenticated: isAuth })
-  }, [])
+  const setIsAuthenticated = useCallback(
+    (isAuth) => {
+      updateAuthState({ isAuthenticated: isAuth })
+    },
+    [updateAuthState],
+  )
 
   // Google OAuth 로그인 성공 후 처리 함수
-  const handleGoogleAuthSuccess = useCallback((userInfo, accessToken) => {
-    // 토큰과 사용자 정보 저장
-    tokenManager.setToken(accessToken)
-    tokenManager.setUserInfo(userInfo)
+  const handleGoogleAuthSuccess = useCallback(
+    (userInfo, accessToken) => {
+      // 토큰과 사용자 정보 저장
+      tokenManager.setToken(accessToken)
+      tokenManager.setUserInfo(userInfo)
 
-    updateAuthState({
-      user: userInfo,
-      isAuthenticated: true,
-      loading: false,
-      error: null,
-    })
-  }, [])
+      updateAuthState({
+        user: userInfo,
+        isAuthenticated: true,
+        loading: false,
+        error: null,
+      })
+    },
+    [updateAuthState],
+  )
 
   const value = {
     // 상태

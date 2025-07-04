@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Loader } from '@googlemaps/js-api-loader'
 import { MapPin } from '@/components/icons'
 
@@ -11,28 +11,31 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
   const markersRef = useRef([])
 
   // 각 도시의 정확한 좌표 (위도, 경도)
-  const cityCoordinates = {
-    seoul: { lat: 37.5665, lng: 126.978, name: '서울' },
-    busan: { lat: 35.1796, lng: 129.0756, name: '부산' },
-    jeju: { lat: 33.4996, lng: 126.5312, name: '제주' },
-    gangneung: { lat: 37.7519, lng: 128.8761, name: '강릉·속초' },
-    gyeongju: { lat: 35.8562, lng: 129.2247, name: '경주' },
-    jeonju: { lat: 35.8242, lng: 127.1479, name: '전주' },
-    yeosu: { lat: 34.7604, lng: 127.6622, name: '여수' },
-    incheon: { lat: 37.4563, lng: 126.7052, name: '인천' },
-    taean: { lat: 36.7455, lng: 126.2983, name: '태안' },
-    pohang: { lat: 36.019, lng: 129.3435, name: '포항·안동' },
-    gapyeong: { lat: 37.8314, lng: 127.5109, name: '가평·양평' },
-    tongyeong: { lat: 34.8543, lng: 128.4331, name: '통영·거제·남해' },
-    daegu: { lat: 35.8714, lng: 128.6014, name: '대구' },
-    gwangju: { lat: 35.1595, lng: 126.8526, name: '광주' },
-    daejeon: { lat: 36.3504, lng: 127.3845, name: '대전' },
-    ulsan: { lat: 35.5384, lng: 129.3114, name: '울산' },
-    chuncheon: { lat: 37.8813, lng: 127.7298, name: '춘천' },
-    mokpo: { lat: 34.8118, lng: 126.3922, name: '목포' },
-    sokcho: { lat: 38.207, lng: 128.5918, name: '속초' },
-    andong: { lat: 36.5684, lng: 128.7294, name: '안동' },
-  }
+  const cityCoordinates = useMemo(
+    () => ({
+      seoul: { lat: 37.5665, lng: 126.978, name: '서울' },
+      busan: { lat: 35.1796, lng: 129.0756, name: '부산' },
+      jeju: { lat: 33.4996, lng: 126.5312, name: '제주' },
+      gangneung: { lat: 37.7519, lng: 128.8761, name: '강릉·속초' },
+      gyeongju: { lat: 35.8562, lng: 129.2247, name: '경주' },
+      jeonju: { lat: 35.8242, lng: 127.1479, name: '전주' },
+      yeosu: { lat: 34.7604, lng: 127.6622, name: '여수' },
+      incheon: { lat: 37.4563, lng: 126.7052, name: '인천' },
+      taean: { lat: 36.7455, lng: 126.2983, name: '태안' },
+      pohang: { lat: 36.019, lng: 129.3435, name: '포항·안동' },
+      gapyeong: { lat: 37.8314, lng: 127.5109, name: '가평·양평' },
+      tongyeong: { lat: 34.8543, lng: 128.4331, name: '통영·거제·남해' },
+      daegu: { lat: 35.8714, lng: 128.6014, name: '대구' },
+      gwangju: { lat: 35.1595, lng: 126.8526, name: '광주' },
+      daejeon: { lat: 36.3504, lng: 127.3845, name: '대전' },
+      ulsan: { lat: 35.5384, lng: 129.3114, name: '울산' },
+      chuncheon: { lat: 37.8813, lng: 127.7298, name: '춘천' },
+      mokpo: { lat: 34.8118, lng: 126.3922, name: '목포' },
+      sokcho: { lat: 38.207, lng: 128.5918, name: '속초' },
+      andong: { lat: 36.5684, lng: 128.7294, name: '안동' },
+    }),
+    [],
+  )
 
   useEffect(() => {
     const initMap = async () => {
@@ -145,37 +148,38 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
     }
 
     initMap()
-  }, [])
+  }, [addCityMarkers])
 
-  const addCityMarkers = (google, mapInstance) => {
-    // 기존 마커 제거
-    markersRef.current.forEach(({ marker }) => {
-      if (marker && marker.setMap) {
-        marker.setMap(null)
-      }
-    })
-    markersRef.current = []
-
-    cities.forEach((city) => {
-      const coords = cityCoordinates[city.id]
-      if (!coords) return
-
-      const isSelected = selectedRegion?.id === city.id
-      const cityName = coords.name
-
-      // 지도 핀 모양의 SVG 마커 생성
-      const createPinIcon = (color, textColor = '#ffffff') => {
-        // 도시 이름 축약 로직 개선
-        let displayName = cityName
-        if (cityName.includes('·')) {
-          // 중점(·)이 있는 경우 첫 번째 부분만 사용
-          displayName = cityName.split('·')[0]
+  const addCityMarkers = useCallback(
+    (google, mapInstance) => {
+      // 기존 마커 제거
+      markersRef.current.forEach(({ marker }) => {
+        if (marker && marker.setMap) {
+          marker.setMap(null)
         }
-        if (displayName.length > 3) {
-          displayName = displayName.substring(0, 3)
-        }
+      })
+      markersRef.current = []
 
-        const svg = `
+      cities.forEach((city) => {
+        const coords = cityCoordinates[city.id]
+        if (!coords) return
+
+        const isSelected = selectedRegion?.id === city.id
+        const cityName = coords.name
+
+        // 지도 핀 모양의 SVG 마커 생성
+        const createPinIcon = (color, _textColor = '#ffffff') => {
+          // 도시 이름 축약 로직 개선
+          let displayName = cityName
+          if (cityName.includes('·')) {
+            // 중점(·)이 있는 경우 첫 번째 부분만 사용
+            displayName = cityName.split('·')[0]
+          }
+          if (displayName.length > 3) {
+            displayName = displayName.substring(0, 3)
+          }
+
+          const svg = `
           <svg width="50" height="60" viewBox="0 0 50 60" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
@@ -194,81 +198,83 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
             </text>
           </svg>
         `
-        return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg)
-      }
+          return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg)
+        }
 
-      // 마커 아이콘 설정
-      const markerIcon = {
-        url: createPinIcon(isSelected ? '#2563eb' : '#dc2626', '#ffffff'),
-        scaledSize: new google.maps.Size(
-          isSelected ? 60 : 50,
-          isSelected ? 72 : 60,
-        ),
-        anchor: new google.maps.Point(
-          isSelected ? 30 : 25,
-          isSelected ? 72 : 60,
-        ),
-      }
-
-      const marker = new google.maps.Marker({
-        position: { lat: coords.lat, lng: coords.lng },
-        map: mapInstance,
-        icon: markerIcon,
-        title: coords.name,
-        animation: isSelected ? google.maps.Animation.BOUNCE : null,
-      })
-
-      // 마커 클릭 이벤트
-      marker.addListener('click', () => {
-        onRegionSelect(city.id, coords.name)
-      })
-
-      // 마커 호버 이벤트
-      marker.addListener('mouseover', () => {
-        setHoveredRegion(city.id)
-        const hoverIcon = {
-          url: createPinIcon(isSelected ? '#2563eb' : '#3b82f6', '#ffffff'),
+        // 마커 아이콘 설정
+        const markerIcon = {
+          url: createPinIcon(isSelected ? '#2563eb' : '#dc2626', '#ffffff'),
           scaledSize: new google.maps.Size(
-            isSelected ? 60 : 55,
-            isSelected ? 72 : 66,
+            isSelected ? 60 : 50,
+            isSelected ? 72 : 60,
           ),
           anchor: new google.maps.Point(
-            isSelected ? 30 : 27.5,
-            isSelected ? 72 : 66,
+            isSelected ? 30 : 25,
+            isSelected ? 72 : 60,
           ),
         }
-        marker.setIcon(hoverIcon)
-      })
 
-      marker.addListener('mouseout', () => {
-        setHoveredRegion(null)
-        marker.setIcon(markerIcon)
-      })
+        const marker = new google.maps.Marker({
+          position: { lat: coords.lat, lng: coords.lng },
+          map: mapInstance,
+          icon: markerIcon,
+          title: coords.name,
+          animation: isSelected ? google.maps.Animation.BOUNCE : null,
+        })
 
-      // InfoWindow 생성
-      const infoWindow = new google.maps.InfoWindow({
-        content: `
+        // 마커 클릭 이벤트
+        marker.addListener('click', () => {
+          onRegionSelect(city.id, coords.name)
+        })
+
+        // 마커 호버 이벤트
+        marker.addListener('mouseover', () => {
+          setHoveredRegion(city.id)
+          const hoverIcon = {
+            url: createPinIcon(isSelected ? '#2563eb' : '#3b82f6', '#ffffff'),
+            scaledSize: new google.maps.Size(
+              isSelected ? 60 : 55,
+              isSelected ? 72 : 66,
+            ),
+            anchor: new google.maps.Point(
+              isSelected ? 30 : 27.5,
+              isSelected ? 72 : 66,
+            ),
+          }
+          marker.setIcon(hoverIcon)
+        })
+
+        marker.addListener('mouseout', () => {
+          setHoveredRegion(null)
+          marker.setIcon(markerIcon)
+        })
+
+        // InfoWindow 생성
+        const infoWindow = new google.maps.InfoWindow({
+          content: `
           <div style="padding: 8px; font-family: 'Pretendard', sans-serif;">
             <h3 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 600; color: #1f2937;">${coords.name}</h3>
             <p style="margin: 0; font-size: 12px; color: #6b7280;">${city.description}</p>
           </div>
         `,
-      })
-
-      // 마커 클릭시 InfoWindow 표시
-      marker.addListener('click', () => {
-        // 다른 InfoWindow 닫기
-        markersRef.current.forEach(({ infoWindow: iw }) => {
-          if (iw && iw.close) {
-            iw.close()
-          }
         })
-        infoWindow.open(mapInstance, marker)
-      })
 
-      markersRef.current.push({ marker, infoWindow })
-    })
-  }
+        // 마커 클릭시 InfoWindow 표시
+        marker.addListener('click', () => {
+          // 다른 InfoWindow 닫기
+          markersRef.current.forEach(({ infoWindow: iw }) => {
+            if (iw && iw.close) {
+              iw.close()
+            }
+          })
+          infoWindow.open(mapInstance, marker)
+        })
+
+        markersRef.current.push({ marker, infoWindow })
+      })
+    },
+    [cities, selectedRegion, onRegionSelect, cityCoordinates],
+  )
 
   // 선택된 지역이 변경될 때 마커 업데이트
   useEffect(() => {
@@ -276,7 +282,7 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
       const google = window.google
       addCityMarkers(google, map)
     }
-  }, [selectedRegion, cities, map, isLoaded])
+  }, [selectedRegion, cities, map, isLoaded, addCityMarkers])
 
   return (
     <div className="mx-auto w-full max-w-7xl p-4">

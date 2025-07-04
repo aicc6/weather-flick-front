@@ -85,7 +85,7 @@ export function LoginPage() {
       if (response.auth_url) {
         window.location.href = response.auth_url
       }
-    } catch (error) {
+    } catch {
       setSubmitError('구글 로그인 URL을 가져오는데 실패했습니다.')
     }
   }

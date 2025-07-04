@@ -46,7 +46,7 @@ const PlannerForm = memo(() => {
     destInputs,
     destSuggestions,
     showDestDropdown,
-    activeDateInput,
+    _activeDateInput,
     updateDestInput,
     hideDropdown,
     showDropdown,
@@ -58,7 +58,7 @@ const PlannerForm = memo(() => {
     try {
       const address = await getCurrentLocation()
       setForm((prev) => ({ ...prev, origin: address }))
-    } catch (error) {
+    } catch {
       // 에러는 훅 내부에서 처리됨
     }
   }, [getCurrentLocation])

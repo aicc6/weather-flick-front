@@ -46,7 +46,7 @@ export function VerifyEmailPage() {
           setStatus('error')
           setMessage(errorMessage)
         }
-      } catch (error) {
+      } catch {
         setStatus('error')
         setMessage('네트워크 오류로 인증에 실패했습니다.')
       }

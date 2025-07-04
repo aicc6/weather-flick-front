@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -29,7 +29,7 @@ export default function TravelCourseDetailPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isLiked, setIsLiked] = useState(false)
   const [isBookmarked, setIsBookmarked] = useState(false)
-  const [rating, setRating] = useState(0)
+  const [_rating, setRating] = useState(0)
   const [comment, setComment] = useState('')
   const [comments, setComments] = useState([])
   const [isImageModalOpen, setIsImageModalOpen] = useState(false)
@@ -783,7 +783,7 @@ export default function TravelCourseDetailPage() {
   useEffect(() => {
     // 페이지 방문 시 조회수 증가 (실제로는 API 호출)
     console.log('조회수 증가:', course.title)
-  }, [id])
+  }, [id, course.title])
 
   const handlePrevImage = () => {
     setCurrentImageIndex((prev) =>
@@ -797,17 +797,17 @@ export default function TravelCourseDetailPage() {
     )
   }
 
-  const handleModalPrevImage = () => {
+  const handleModalPrevImage = useCallback(() => {
     setModalImageIndex((prev) =>
       prev === 0 ? course.images.length - 1 : prev - 1,
     )
-  }
+  }, [course.images.length])
 
-  const handleModalNextImage = () => {
+  const handleModalNextImage = useCallback(() => {
     setModalImageIndex((prev) =>
       prev === course.images.length - 1 ? 0 : prev + 1,
     )
-  }
+  }, [course.images.length])
 
   const openImageModal = () => {
     setModalImageIndex(currentImageIndex)
@@ -844,7 +844,7 @@ export default function TravelCourseDetailPage() {
       // 컴포넌트 언마운트 시 스크롤 복원
       document.body.style.overflow = 'unset'
     }
-  }, [isImageModalOpen])
+  }, [isImageModalOpen, handleModalNextImage, handleModalPrevImage])
 
   const handleShare = () => {
     if (navigator.share) {
