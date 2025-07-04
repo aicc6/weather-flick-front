@@ -3,12 +3,15 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ChevronLeft, MapPin } from '@/components/icons'
+import { ChevronLeft, MapPin, List } from '@/components/icons'
+import KoreaMap from '@/components/KoreaMap'
+import GoogleKoreaMap from '@/components/GoogleKoreaMap'
 
 export default function RecommendRegionPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [selectedRegion, setSelectedRegion] = useState(null)
+  const [viewMode, setViewMode] = useState('google-map') // 'map', 'list', 'google-map'
 
   const regions = {
     domestic: {
@@ -68,22 +71,77 @@ export default function RecommendRegionPage() {
     navigate('/customized-schedule')
   }
 
+  const cycleViewMode = () => {
+    if (viewMode === 'google-map') {
+      setViewMode('map')
+    } else if (viewMode === 'map') {
+      setViewMode('list')
+    } else {
+      setViewMode('google-map')
+    }
+  }
+
+  const getViewModeLabel = () => {
+    switch (viewMode) {
+      case 'google-map':
+        return '실제 지도'
+      case 'map':
+        return 'SVG 지도'
+      case 'list':
+        return '목록 보기'
+      default:
+        return '실제 지도'
+    }
+  }
+
+  const getNextViewModeLabel = () => {
+    switch (viewMode) {
+      case 'google-map':
+        return 'SVG 지도'
+      case 'map':
+        return '목록 보기'
+      case 'list':
+        return '실제 지도'
+      default:
+        return 'SVG 지도'
+    }
+  }
+
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
+    <div className="mx-auto max-w-7xl px-4 py-8">
       {/* 헤더 */}
       <div className="mb-8">
-        <div className="mb-4 flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBack}
-            className="p-2"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-            1/5
-          </span>
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBack}
+              className="p-2"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              1/5
+            </span>
+          </div>
+          {/* 보기 모드 전환 버튼 */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              현재: {getViewModeLabel()}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={cycleViewMode}
+              className="flex items-center gap-2"
+            >
+              {viewMode === 'google-map' && <MapPin className="h-4 w-4" />}
+              {viewMode === 'map' && <MapPin className="h-4 w-4" />}
+              {viewMode === 'list' && <List className="h-4 w-4" />}
+              {getNextViewModeLabel()}
+            </Button>
+          </div>
         </div>
         <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
           떠나고 싶은 도시는?
@@ -93,39 +151,53 @@ export default function RecommendRegionPage() {
         </p>
       </div>
 
-      {/* 지역 선택 */}
-      <div className="space-y-8">
-        {Object.entries(regions).map(([categoryKey, category]) => (
-          <div key={categoryKey}>
-            <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-900 dark:text-white">
-              <MapPin className="h-5 w-5" />
-              {category.title}
-            </h2>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-              {category.cities.map((city) => (
-                <Card
-                  key={city.id}
-                  className={`cursor-pointer transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800 ${
-                    selectedRegion?.id === city.id
-                      ? 'bg-blue-50 ring-2 ring-blue-500 dark:bg-blue-900/20 dark:ring-blue-400'
-                      : 'hover:bg-gray-50 dark:hover:bg-gray-700'
-                  }`}
-                  onClick={() => handleRegionSelect(city.id, city.name)}
-                >
-                  <CardContent className="p-4">
-                    <h3 className="mb-1 font-semibold text-gray-900 dark:text-white">
-                      {city.name}
-                    </h3>
-                    <p className="text-sm leading-tight text-gray-600 dark:text-gray-300">
-                      {city.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
+      {/* 뷰 모드별 컨텐츠 */}
+      {viewMode === 'google-map' ? (
+        <GoogleKoreaMap
+          cities={regions.domestic.cities}
+          selectedRegion={selectedRegion}
+          onRegionSelect={handleRegionSelect}
+        />
+      ) : viewMode === 'map' ? (
+        <KoreaMap
+          cities={regions.domestic.cities}
+          selectedRegion={selectedRegion}
+          onRegionSelect={handleRegionSelect}
+        />
+      ) : (
+        <div className="space-y-8">
+          {Object.entries(regions).map(([categoryKey, category]) => (
+            <div key={categoryKey}>
+              <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-900 dark:text-white">
+                <MapPin className="h-5 w-5" />
+                {category.title}
+              </h2>
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+                {category.cities.map((city) => (
+                  <Card
+                    key={city.id}
+                    className={`cursor-pointer transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800 ${
+                      selectedRegion?.id === city.id
+                        ? 'bg-blue-50 ring-2 ring-blue-500 dark:bg-blue-900/20 dark:ring-blue-400'
+                        : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
+                    onClick={() => handleRegionSelect(city.id, city.name)}
+                  >
+                    <CardContent className="p-4">
+                      <h3 className="mb-1 font-semibold text-gray-900 dark:text-white">
+                        {city.name}
+                      </h3>
+                      <p className="text-sm leading-tight text-gray-600 dark:text-gray-300">
+                        {city.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* 선택된 지역 표시 */}
       {selectedRegion && (
