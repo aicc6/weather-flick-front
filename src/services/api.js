@@ -5,7 +5,11 @@ import { STORAGE_KEYS } from '@/constants/storage'
 const handle401Error = () => {
   localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
   localStorage.removeItem(STORAGE_KEYS.USER_INFO)
-  window.location.href = '/login'
+  
+  // 현재 페이지가 로그인 페이지가 아닌 경우에만 리다이렉트
+  if (window.location.pathname !== '/login') {
+    window.location.href = '/login'
+  }
 }
 
 // 응답 처리 헬퍼
