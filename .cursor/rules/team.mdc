@@ -1,37 +1,992 @@
 ---
-description:
-globs:
-alwaysApply: false
+description: Weather Flick Frontend Development Rules
+globs: ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx", "**/*.css", "**/*.scss", "**/*.json"]
+alwaysApply: true
 ---
-You are a Senior Front-End Developer and an Expert in ReactJS, JavaScript, HTML, CSS and modern UI/UX frameworks (e.g., TailwindCSS, Shadcn, Radix). You are thoughtful, give nuanced answers, and are brilliant at reasoning. You carefully provide accurate, factual, thoughtful answers, and are a genius at reasoning.
 
-- Follow the user’s requirements carefully & to the letter.
-- First think step-by-step - describe your plan for what to build in pseudocode, written out in great detail.
-- Confirm, then write code!
-- Always write correct, best practice, DRY principle (Dont Repeat Yourself), bug free, fully functional and working code also it should be aligned to listed rules down below at Code Implementation Guidelines .
-- Focus on easy and readability code, over being performant.
-- Fully implement all requested functionality.
-- Leave NO todo’s, placeholders or missing pieces.
-- Ensure code is complete! Verify thoroughly finalised.
-- Include all required imports, and ensure proper naming of key components.
-- Be concise Minimize any other prose.
-- If you think there might not be a correct answer, you say so.
-- If you do not know the answer, say so, instead of guessing.
+# Weather Flick Frontend Team Rules
 
-### Coding Environment
-The user asks questions about the following coding languages:
-- ReactJS
-- JavaScript
-- TailwindCSS
-- HTML
-- CSS
+당신은 Weather Flick 프론트엔드 개발의 전문가입니다. React 18, Vite, TailwindCSS, 그리고 현대적인 UI/UX 프레임워크에 능숙합니다.
 
-### Code Implementation Guidelines
-Follow these rules when you write code:
-- Use early returns whenever possible to make the code more readable.
-- Always use Tailwind classes for styling HTML elements; avoid using CSS or tags.
-- Use “class:” instead of the tertiary operator in class tags whenever possible.
-- Use descriptive variable and function/const names. Also, event functions should be named with a “handle” prefix, like “handleClick” for onClick and “handleKeyDown” for onKeyDown.
-- Implement accessibility features on elements. For example, a tag should have a tabindex=“0”, aria-label, on:click, and on:keydown, and similar attributes.
+## 🎯 프로젝트 컨텍스트
 
-- Use consts instead of functions, for example, “const toggle = () =>”. Also, define a type if possible.
+### 역할 및 책임
+- **사용자 웹 애플리케이션**: React 18 기반 여행 날씨 서비스 (포트: 5173)
+- **여행 플래너**: 날씨 기반 여행지 추천 및 계획 도구
+- **반응형 디자인**: 모바일, 태블릿, 데스크탑 최적화
+- **사용자 인터랙션**: 지도 연동, 실시간 날씨, 소셜 로그인
+- **27개 페이지**: 메인, 플래너, 추천, 프로필, 인증 등
+
+### 기술 스택
+- **Framework**: React 18.3.1 + Vite 6.3.5
+- **Styling**: TailwindCSS 4.1.10
+- **UI Components**: shadcn/ui + Radix UI
+- **Router**: React Router DOM 7.6.2
+- **State**: React Context + Redux Toolkit 2.8.2
+- **Forms**: React Hook Form 7.58.1 + Zod 3.25.67
+- **Code Quality**: ESLint + Prettier
+
+## 📁 필수 프로젝트 구조
+
+```
+src/
+├── components/            # 재사용 가능한 컴포넌트
+│   ├── ui/               # shadcn/ui 컴포넌트 (25개)
+│   ├── common/           # 공통 컴포넌트 (3개)
+│   ├── planner/          # 플래너 전용 컴포넌트
+│   └── icons/            # 커스텀 아이콘 (2개)
+├── pages/                # 페이지 컴포넌트 (27개)
+│   ├── auth/             # 인증 관련 페이지
+│   ├── planner/          # 여행 계획 페이지
+│   ├── recommend/        # 추천 관련 페이지
+│   └── profile/          # 프로필 관련 페이지
+├── layouts/              # 레이아웃 컴포넌트
+├── contexts/             # React Context (인증 등)
+├── hooks/                # 커스텀 훅 (6개)
+├── services/             # API 서비스 (2개)
+├── utils/                # 유틸리티 함수
+├── data/                 # 정적 데이터 (5개)
+├── schemas/              # Zod 스키마 (2개)
+└── constants/            # 상수 정의
+```
+
+## 🛠️ 핵심 개발 원칙
+
+### 1. 컴포넌트 작성 패턴 (필수 준수)
+
+```jsx
+import React, { memo, useCallback, useMemo } from 'react'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+
+/**
+ * 사용자 프로필 카드 컴포넌트
+ * 
+ * @param {Object} props - 컴포넌트 props
+ * @param {Object} props.user - 사용자 정보
+ * @param {string} props.className - 추가 CSS 클래스
+ * @param {Function} props.onEdit - 편집 버튼 클릭 핸들러
+ * @returns {JSX.Element} 사용자 프로필 카드
+ */
+const UserProfileCard = memo(({ 
+  user, 
+  className, 
+  onEdit,
+  ...props 
+}) => {
+  // Early Return - 입력 검증
+  if (!user) {
+    return <div className="text-center text-gray-500">사용자 정보가 없습니다</div>
+  }
+
+  // 이벤트 핸들러 메모이제이션 (필수)
+  const handleEditClick = useCallback(() => {
+    onEdit?.(user)
+  }, [user, onEdit])
+
+  const handleKeyDown = useCallback((event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      handleEditClick()
+    }
+  }, [handleEditClick])
+
+  // 계산된 값 메모이제이션 (필수)
+  const displayName = useMemo(() => {
+    return user.nickname || user.email?.split('@')[0] || '이름 없음'
+  }, [user.nickname, user.email])
+
+  const avatarInitials = useMemo(() => {
+    return displayName.charAt(0).toUpperCase()
+  }, [displayName])
+
+  // 메인 렌더링
+  return (
+    <div 
+      className={cn(
+        "flex items-center space-x-4 rounded-lg border bg-card p-4 shadow-sm",
+        "transition-all duration-200 hover:shadow-md",
+        className
+      )}
+      {...props}
+    >
+      {/* 아바타 */}
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+        {user.profileImage ? (
+          <img
+            src={user.profileImage}
+            alt={`${displayName} 프로필`}
+            className="h-full w-full rounded-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <span className="text-lg font-semibold">{avatarInitials}</span>
+        )}
+      </div>
+
+      {/* 사용자 정보 */}
+      <div className="flex-1 min-w-0">
+        <h3 className="truncate text-lg font-semibold">{displayName}</h3>
+        <p className="truncate text-sm text-muted-foreground">{user.email}</p>
+        {user.isVerified && (
+          <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs text-green-800">
+            인증됨
+          </span>
+        )}
+      </div>
+
+      {/* 편집 버튼 */}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleEditClick}
+        onKeyDown={handleKeyDown}
+        aria-label={`${displayName} 프로필 편집`}
+        tabIndex={0}
+      >
+        편집
+      </Button>
+    </div>
+  )
+})
+
+// 컴포넌트 displayName 설정 (필수)
+UserProfileCard.displayName = 'UserProfileCard'
+
+export default UserProfileCard
+```
+
+### 2. 페이지 컴포넌트 패턴 (코드 분할 필수)
+
+```jsx
+// pages/planner/index.jsx
+import React, { lazy, Suspense } from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
+import LoadingSpinner from '@/components/common/LoadingSpinner'
+import ErrorFallback from '@/components/common/ErrorFallback'
+
+// 지연 로딩으로 성능 최적화 (필수)
+const PlannerForm = lazy(() => import('./PlannerForm'))
+const WeatherPreview = lazy(() => import('./WeatherPreview'))
+const PlanRecommendation = lazy(() => import('./PlanRecommendation'))
+
+const PlannerPage = () => {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="mx-auto max-w-4xl space-y-8">
+        {/* 페이지 헤더 */}
+        <header className="text-center">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            여행 계획 세우기
+          </h1>
+          <p className="mt-2 text-lg text-gray-600">
+            날씨를 고려한 완벽한 여행 계획을 세워보세요
+          </p>
+        </header>
+
+        {/* 메인 콘텐츠 */}
+        <main className="grid gap-8 lg:grid-cols-2">
+          {/* 플래너 폼 */}
+          <ErrorBoundary
+            FallbackComponent={ErrorFallback}
+            onError={(error) => console.error('PlannerForm 오류:', error)}
+          >
+            <Suspense fallback={<LoadingSpinner />}>
+              <PlannerForm />
+            </Suspense>
+          </ErrorBoundary>
+
+          {/* 날씨 미리보기 */}
+          <ErrorBoundary
+            FallbackComponent={ErrorFallback}
+            onError={(error) => console.error('WeatherPreview 오류:', error)}
+          >
+            <Suspense fallback={<LoadingSpinner />}>
+              <WeatherPreview />
+            </Suspense>
+          </ErrorBoundary>
+        </main>
+
+        {/* 추천 섹션 */}
+        <section>
+          <ErrorBoundary
+            FallbackComponent={ErrorFallback}
+            onError={(error) => console.error('PlanRecommendation 오류:', error)}
+          >
+            <Suspense fallback={<LoadingSpinner />}>
+              <PlanRecommendation />
+            </Suspense>
+          </ErrorBoundary>
+        </section>
+      </div>
+    </div>
+  )
+}
+
+export default PlannerPage
+```
+
+### 3. 커스텀 훅 패턴 (필수)
+
+```jsx
+// hooks/useDestinationSearch.js
+import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useDebounce } from './useDebounce'
+import * as api from '@/services/api'
+
+/**
+ * 여행지 검색 커스텀 훅
+ * 
+ * @param {string} initialQuery - 초기 검색어
+ * @returns {Object} 검색 상태 및 함수들
+ */
+export const useDestinationSearch = (initialQuery = '') => {
+  // 상태 관리
+  const [query, setQuery] = useState(initialQuery)
+  const [destinations, setDestinations] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  // 디바운스 적용 (성능 최적화)
+  const debouncedQuery = useDebounce(query, 300)
+
+  // 검색 함수 (메모이제이션 필수)
+  const searchDestinations = useCallback(async (searchTerm) => {
+    // Early Return - 빈 검색어 처리
+    if (!searchTerm.trim()) {
+      setDestinations([])
+      return
+    }
+
+    try {
+      setLoading(true)
+      setError(null)
+
+      const response = await api.searchDestinations({
+        query: searchTerm,
+        limit: 10
+      })
+
+      setDestinations(response.data || [])
+    } catch (err) {
+      setError(err.message || '검색 중 오류가 발생했습니다')
+      setDestinations([])
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  // 디바운스된 검색 실행
+  useEffect(() => {
+    searchDestinations(debouncedQuery)
+  }, [debouncedQuery, searchDestinations])
+
+  // 검색어 업데이트 함수
+  const updateQuery = useCallback((newQuery) => {
+    setQuery(newQuery)
+  }, [])
+
+  // 검색 초기화 함수
+  const clearSearch = useCallback(() => {
+    setQuery('')
+    setDestinations([])
+    setError(null)
+  }, [])
+
+  // 필터링된 결과 (메모이제이션)
+  const filteredDestinations = useMemo(() => {
+    return destinations.filter(dest => dest.isActive)
+  }, [destinations])
+
+  return {
+    // 상태
+    query,
+    destinations: filteredDestinations,
+    loading,
+    error,
+    
+    // 함수
+    updateQuery,
+    clearSearch,
+    searchDestinations,
+    
+    // 계산된 값
+    hasResults: filteredDestinations.length > 0,
+    isEmpty: !loading && filteredDestinations.length === 0 && query.trim()
+  }
+}
+```
+
+### 4. 폼 처리 패턴 (React Hook Form + Zod)
+
+```jsx
+// components/auth/LoginForm.jsx
+import React, { memo, useCallback } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { useAuth } from '@/contexts/AuthContext'
+
+// Zod 스키마 정의 (필수)
+const loginSchema = z.object({
+  email: z
+    .string()
+    .min(1, '이메일을 입력해주세요')
+    .email('올바른 이메일 형식이 아닙니다'),
+  password: z
+    .string()
+    .min(1, '비밀번호를 입력해주세요')
+    .min(8, '비밀번호는 8자 이상이어야 합니다'),
+})
+
+const LoginForm = memo(({ onSuccess, className }) => {
+  const { login } = useAuth()
+
+  // React Hook Form 설정
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+    reset
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: ''
+    }
+  })
+
+  // 폼 제출 핸들러
+  const handleFormSubmit = useCallback(async (data) => {
+    try {
+      await login(data)
+      reset()
+      onSuccess?.()
+    } catch (error) {
+      // 서버 오류를 폼에 표시
+      if (error.message.includes('이메일')) {
+        setError('email', { message: error.message })
+      } else if (error.message.includes('비밀번호')) {
+        setError('password', { message: error.message })
+      } else {
+        setError('root', { message: error.message })
+      }
+    }
+  }, [login, reset, onSuccess, setError])
+
+  return (
+    <form 
+      onSubmit={handleSubmit(handleFormSubmit)}
+      className={cn("space-y-4", className)}
+      noValidate
+    >
+      {/* 전역 오류 메시지 */}
+      {errors.root && (
+        <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
+          {errors.root.message}
+        </div>
+      )}
+
+      {/* 이메일 필드 */}
+      <div className="space-y-2">
+        <Label htmlFor="email">이메일</Label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="이메일을 입력하세요"
+          autoComplete="email"
+          aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? "email-error" : undefined}
+          {...register('email')}
+        />
+        {errors.email && (
+          <p id="email-error" className="text-sm text-red-600">
+            {errors.email.message}
+          </p>
+        )}
+      </div>
+
+      {/* 비밀번호 필드 */}
+      <div className="space-y-2">
+        <Label htmlFor="password">비밀번호</Label>
+        <Input
+          id="password"
+          type="password"
+          placeholder="비밀번호를 입력하세요"
+          autoComplete="current-password"
+          aria-invalid={!!errors.password}
+          aria-describedby={errors.password ? "password-error" : undefined}
+          {...register('password')}
+        />
+        {errors.password && (
+          <p id="password-error" className="text-sm text-red-600">
+            {errors.password.message}
+          </p>
+        )}
+      </div>
+
+      {/* 제출 버튼 */}
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={isSubmitting}
+        aria-label={isSubmitting ? "로그인 처리 중" : "로그인"}
+      >
+        {isSubmitting ? '로그인 중...' : '로그인'}
+      </Button>
+    </form>
+  )
+})
+
+LoginForm.displayName = 'LoginForm'
+
+export default LoginForm
+```
+
+### 5. Context 최적화 패턴 (필수)
+
+```jsx
+// contexts/AuthContext.jsx
+import React, { createContext, useContext, useReducer, useCallback, useMemo } from 'react'
+
+// 초기 상태
+const initialState = {
+  user: null,
+  isAuthenticated: false,
+  loading: true,
+  error: null
+}
+
+// 액션 타입
+const AuthActionTypes = {
+  SET_LOADING: 'SET_LOADING',
+  LOGIN_SUCCESS: 'LOGIN_SUCCESS',
+  LOGOUT: 'LOGOUT',
+  SET_ERROR: 'SET_ERROR',
+  CLEAR_ERROR: 'CLEAR_ERROR'
+}
+
+// 리듀서 함수
+const authReducer = (state, action) => {
+  switch (action.type) {
+    case AuthActionTypes.SET_LOADING:
+      return { ...state, loading: action.payload }
+    
+    case AuthActionTypes.LOGIN_SUCCESS:
+      return {
+        ...state,
+        user: action.payload,
+        isAuthenticated: true,
+        loading: false,
+        error: null
+      }
+    
+    case AuthActionTypes.LOGOUT:
+      return {
+        ...initialState,
+        loading: false
+      }
+    
+    case AuthActionTypes.SET_ERROR:
+      return {
+        ...state,
+        error: action.payload,
+        loading: false
+      }
+    
+    case AuthActionTypes.CLEAR_ERROR:
+      return { ...state, error: null }
+    
+    default:
+      return state
+  }
+}
+
+// Context 생성
+const AuthContext = createContext(null)
+
+// Provider 컴포넌트
+export const AuthProvider = ({ children }) => {
+  const [state, dispatch] = useReducer(authReducer, initialState)
+
+  // 액션 생성자들 (메모이제이션 필수)
+  const login = useCallback(async (credentials) => {
+    try {
+      dispatch({ type: AuthActionTypes.SET_LOADING, payload: true })
+      dispatch({ type: AuthActionTypes.CLEAR_ERROR })
+
+      const response = await authApi.login(credentials)
+      const user = response.data
+
+      // 토큰 저장
+      localStorage.setItem('token', user.token)
+      
+      dispatch({ 
+        type: AuthActionTypes.LOGIN_SUCCESS, 
+        payload: user 
+      })
+
+      return user
+    } catch (error) {
+      dispatch({ 
+        type: AuthActionTypes.SET_ERROR, 
+        payload: error.message 
+      })
+      throw error
+    }
+  }, [])
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('token')
+    dispatch({ type: AuthActionTypes.LOGOUT })
+  }, [])
+
+  const clearError = useCallback(() => {
+    dispatch({ type: AuthActionTypes.CLEAR_ERROR })
+  }, [])
+
+  // Context 값 메모이제이션 (필수)
+  const value = useMemo(() => ({
+    // 상태
+    user: state.user,
+    isAuthenticated: state.isAuthenticated,
+    loading: state.loading,
+    error: state.error,
+    
+    // 액션
+    login,
+    logout,
+    clearError
+  }), [state, login, logout, clearError])
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+// 커스텀 훅
+export const useAuth = () => {
+  const context = useContext(AuthContext)
+  
+  if (!context) {
+    throw new Error('useAuth는 AuthProvider 내부에서 사용되어야 합니다')
+  }
+  
+  return context
+}
+```
+
+## 🎨 스타일링 규칙
+
+### 1. TailwindCSS 사용 패턴 (필수)
+
+```jsx
+// ✅ 올바른 TailwindCSS 사용
+const WeatherCard = ({ weather, className }) => {
+  return (
+    <div className={cn(
+      // 기본 스타일
+      "rounded-lg border bg-card p-6 shadow-sm",
+      
+      // 상태별 스타일
+      weather.condition === 'sunny' && "border-yellow-200 bg-yellow-50",
+      weather.condition === 'rainy' && "border-blue-200 bg-blue-50",
+      weather.condition === 'cloudy' && "border-gray-200 bg-gray-50",
+      
+      // 인터랙션 스타일
+      "transition-all duration-200 hover:shadow-md",
+      
+      // 반응형 스타일 (Mobile First)
+      "text-sm md:text-base",
+      "p-4 md:p-6",
+      "space-y-2 md:space-y-4",
+      
+      // 추가 클래스
+      className
+    )}>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">{weather.location}</h3>
+        <span className="text-2xl">{weather.icon}</span>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <span className="text-muted-foreground">온도</span>
+          <p className="font-medium">{weather.temperature}°C</p>
+        </div>
+        <div>
+          <span className="text-muted-foreground">습도</span>
+          <p className="font-medium">{weather.humidity}%</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ❌ 잘못된 인라인 스타일 사용
+const BadComponent = () => (
+  <div style={{ backgroundColor: '#f0f0f0', padding: '16px' }}>
+    {/* 인라인 스타일 사용 금지 */}
+  </div>
+)
+```
+
+### 2. 반응형 디자인 패턴 (Mobile First 필수)
+
+```jsx
+// ✅ Mobile First 반응형 디자인
+const ResponsiveGrid = ({ items }) => {
+  return (
+    <div className="
+      grid grid-cols-1           // 모바일: 1열
+      sm:grid-cols-2             // 작은 화면: 2열
+      md:grid-cols-3             // 중간 화면: 3열
+      lg:grid-cols-4             // 큰 화면: 4열
+      xl:grid-cols-5             // 매우 큰 화면: 5열
+      gap-4 md:gap-6 lg:gap-8    // 반응형 간격
+    ">
+      {items.map(item => (
+        <div key={item.id} className="
+          aspect-square             // 정사각형 비율
+          overflow-hidden
+          rounded-lg
+          bg-gray-100
+          transition-transform
+          hover:scale-105
+        ">
+          <img
+            src={item.image}
+            alt={item.title}
+            className="h-full w-full object-cover"
+            loading="lazy"
+          />
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+## 🚨 성능 최적화 규칙 (필수)
+
+### 1. 메모이제이션 규칙
+
+```jsx
+// ✅ 모든 컴포넌트에 React.memo 적용 (필수)
+const ExpensiveComponent = memo(({ data, onUpdate }) => {
+  // ✅ 계산 집약적인 작업은 useMemo 사용 (필수)
+  const processedData = useMemo(() => {
+    return data.map(item => ({
+      ...item,
+      calculated: complexCalculation(item)
+    }))
+  }, [data])
+
+  // ✅ 이벤트 핸들러는 useCallback 사용 (필수)
+  const handleItemClick = useCallback((itemId) => {
+    onUpdate(itemId)
+  }, [onUpdate])
+
+  return (
+    <div>
+      {processedData.map(item => (
+        <ItemCard
+          key={item.id}
+          item={item}
+          onClick={handleItemClick}
+        />
+      ))}
+    </div>
+  )
+})
+
+ExpensiveComponent.displayName = 'ExpensiveComponent'
+```
+
+### 2. 이미지 최적화
+
+```jsx
+// ✅ 이미지 지연 로딩 및 최적화
+const OptimizedImage = ({ src, alt, className, ...props }) => {
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [error, setError] = useState(false)
+
+  const handleLoad = useCallback(() => {
+    setIsLoaded(true)
+  }, [])
+
+  const handleError = useCallback(() => {
+    setError(true)
+  }, [])
+
+  if (error) {
+    return (
+      <div className={cn("flex items-center justify-center bg-gray-100", className)}>
+        <span className="text-gray-400">이미지를 불러올 수 없습니다</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className={cn("relative overflow-hidden", className)}>
+      {!isLoaded && (
+        <div className="absolute inset-0 animate-pulse bg-gray-200" />
+      )}
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        onLoad={handleLoad}
+        onError={handleError}
+        className={cn(
+          "h-full w-full object-cover transition-opacity duration-300",
+          isLoaded ? "opacity-100" : "opacity-0"
+        )}
+        {...props}
+      />
+    </div>
+  )
+}
+```
+
+## 🔒 보안 및 접근성 규칙
+
+### 1. 접근성 패턴 (필수)
+
+```jsx
+// ✅ 접근성 속성 필수 적용
+const AccessibleButton = ({ 
+  children, 
+  onClick, 
+  disabled, 
+  ariaLabel,
+  className,
+  ...props 
+}) => {
+  const handleKeyDown = useCallback((event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      onClick?.(event)
+    }
+  }, [onClick])
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      onKeyDown={handleKeyDown}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      aria-disabled={disabled}
+      tabIndex={disabled ? -1 : 0}
+      className={cn(
+        "inline-flex items-center justify-center rounded-md px-4 py-2",
+        "text-sm font-medium transition-colors focus-visible:outline-none",
+        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        disabled && "pointer-events-none opacity-50",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  )
+}
+
+// ✅ 폼 접근성
+const AccessibleForm = () => {
+  return (
+    <form>
+      <fieldset>
+        <legend className="sr-only">사용자 정보 입력</legend>
+        
+        <div>
+          <Label htmlFor="user-email">이메일 주소 *</Label>
+          <Input
+            id="user-email"
+            type="email"
+            required
+            aria-describedby="email-help email-error"
+            aria-invalid={!!errors.email}
+          />
+          <div id="email-help" className="text-sm text-gray-600">
+            로그인에 사용할 이메일 주소를 입력하세요
+          </div>
+          {errors.email && (
+            <div id="email-error" role="alert" className="text-sm text-red-600">
+              {errors.email.message}
+            </div>
+          )}
+        </div>
+      </fieldset>
+    </form>
+  )
+}
+```
+
+### 2. XSS 방지
+
+```jsx
+// ✅ 안전한 HTML 렌더링
+import DOMPurify from 'dompurify'
+
+const SafeHTMLContent = ({ htmlContent }) => {
+  const sanitizedHTML = useMemo(() => {
+    return DOMPurify.sanitize(htmlContent)
+  }, [htmlContent])
+
+  return (
+    <div 
+      dangerouslySetInnerHTML={{ __html: sanitizedHTML }}
+      className="prose max-w-none"
+    />
+  )
+}
+
+// ✅ 사용자 입력 검증
+const UserComment = ({ comment }) => {
+  // React는 기본적으로 XSS를 방지하므로 안전
+  return <p className="text-gray-700">{comment}</p>
+}
+```
+
+## 🧪 테스트 작성 규칙
+
+### 1. 컴포넌트 테스트
+
+```jsx
+// __tests__/UserProfileCard.test.jsx
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { UserProfileCard } from '../UserProfileCard'
+
+describe('UserProfileCard', () => {
+  const mockUser = {
+    id: 1,
+    email: 'test@example.com',
+    nickname: 'testuser',
+    isVerified: true
+  }
+
+  const mockOnEdit = jest.fn()
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('사용자 정보를 올바르게 렌더링한다', () => {
+    render(<UserProfileCard user={mockUser} onEdit={mockOnEdit} />)
+    
+    expect(screen.getByText('testuser')).toBeInTheDocument()
+    expect(screen.getByText('test@example.com')).toBeInTheDocument()
+    expect(screen.getByText('인증됨')).toBeInTheDocument()
+  })
+
+  it('편집 버튼 클릭 시 onEdit 콜백을 호출한다', async () => {
+    const user = userEvent.setup()
+    render(<UserProfileCard user={mockUser} onEdit={mockOnEdit} />)
+    
+    const editButton = screen.getByRole('button', { name: /프로필 편집/i })
+    await user.click(editButton)
+    
+    expect(mockOnEdit).toHaveBeenCalledWith(mockUser)
+  })
+
+  it('키보드 접근성이 작동한다', async () => {
+    const user = userEvent.setup()
+    render(<UserProfileCard user={mockUser} onEdit={mockOnEdit} />)
+    
+    const editButton = screen.getByRole('button', { name: /프로필 편집/i })
+    editButton.focus()
+    await user.keyboard('{Enter}')
+    
+    expect(mockOnEdit).toHaveBeenCalledWith(mockUser)
+  })
+
+  it('사용자 정보가 없을 때 적절한 메시지를 표시한다', () => {
+    render(<UserProfileCard user={null} onEdit={mockOnEdit} />)
+    
+    expect(screen.getByText('사용자 정보가 없습니다')).toBeInTheDocument()
+  })
+})
+```
+
+## 🔧 개발 워크플로우
+
+### 1. 커밋 전 체크리스트
+
+```bash
+# 1. 코드 품질 검사
+npm run lint              # ESLint 검사
+npm run lint:fix          # ESLint 자동 수정
+npm run format            # Prettier 포맷팅
+
+# 2. 빌드 테스트
+npm run build             # 프로덕션 빌드
+
+# 3. 타입 검사 (TypeScript 사용 시)
+npm run type-check        # 타입 검사
+
+# 4. 테스트 실행
+npm run test              # 단위 테스트
+npm run test:coverage     # 테스트 커버리지
+```
+
+### 2. 컴포넌트 개발 순서
+
+1. **기본 구조 작성** (props, 기본 렌더링)
+2. **상태 관리 추가** (useState, useReducer)
+3. **이벤트 핸들러 구현** (useCallback으로 메모이제이션)
+4. **성능 최적화** (memo, useMemo 적용)
+5. **접근성 속성 추가** (ARIA, 키보드 지원)
+6. **에러 처리 구현** (ErrorBoundary, 입력 검증)
+7. **스타일링 완성** (TailwindCSS, 반응형)
+8. **테스트 작성** (렌더링, 이벤트, 접근성)
+
+## ❌ 금지 사항
+
+### 코드 스타일
+- ❌ 클래스 컴포넌트 사용
+- ❌ forceUpdate 패턴 사용
+- ❌ 인라인 스타일 과도한 사용
+- ❌ window.location.reload() 직접 호출
+- ❌ document.getElementById() 사용 (ref 사용)
+
+### 성능
+- ❌ memo, useCallback, useMemo 없는 컴포넌트
+- ❌ prop drilling (Context나 Redux 사용)
+- ❌ 불필요한 리렌더링
+- ❌ 지연 로딩 없는 큰 컴포넌트
+
+### 접근성
+- ❌ alt 속성 없는 이미지
+- ❌ aria-label 없는 버튼
+- ❌ 키보드 접근성 무시
+- ❌ 색상만으로 정보 전달
+
+## ✅ 필수 체크리스트
+
+모든 컴포넌트는 다음을 만족해야 합니다:
+
+- [ ] React.memo로 감싸기
+- [ ] useCallback으로 이벤트 핸들러 메모이제이션
+- [ ] useMemo로 계산된 값 메모이제이션
+- [ ] displayName 설정
+- [ ] PropTypes 또는 TypeScript 타입 정의
+- [ ] 접근성 속성 추가 (aria-label, tabIndex 등)
+- [ ] 키보드 네비게이션 지원
+- [ ] 에러 처리 구현
+- [ ] 로딩 상태 관리
+- [ ] 반응형 디자인 적용 (Mobile First)
+- [ ] 테스트 작성
+- [ ] Early Return 패턴 적용
+
+이 규칙들을 엄격히 준수하여 고성능, 접근성, 유지보수성을 모두 갖춘 Weather Flick 프론트엔드를 개발하세요.
