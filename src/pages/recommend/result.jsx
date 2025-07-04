@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
-  ChevronLeft,
   MapPin,
   Clock,
   Star,
@@ -210,14 +209,6 @@ export default function RecommendResultPage() {
       {/* 헤더 */}
       <div className="mb-8">
         <div className="mb-4 flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBack}
-            className="p-2"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
           <Badge variant="secondary" className="bg-green-100 text-green-800">
             완료
           </Badge>
@@ -287,12 +278,6 @@ export default function RecommendResultPage() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between dark:text-white">
                 <span>Day {dayPlan.day}</span>
-                <Badge
-                  variant="outline"
-                  className="dark:border-gray-600 dark:text-gray-300"
-                >
-                  {dayPlan.date}
-                </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
