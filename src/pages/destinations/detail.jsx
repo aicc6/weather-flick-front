@@ -534,12 +534,13 @@ export default function TravelCourseDetailPage() {
       region: 'jeonju',
       duration: '당일',
       theme: ['전통문화', '한옥', '맛집', '체험'],
-      mainImage: '/jeonju.jpeg',
+      mainImage:
+        'http://tong.visitkorea.or.kr/cms/resource/50/3479250_image2_1.jpg',
       images: [
-        '/jeonju.jpeg',
-        '/jeonju-hanok.jpeg',
-        '/jeonju-food.jpeg',
-        '/jeonju-gyeonggijeon.jpeg',
+        'http://tong.visitkorea.or.kr/cms/resource/50/3479250_image2_1.jpg', // 전북 전주 한옥마을 [슬로시티] - 전주의 대표적인 전통문화 관광지
+        'http://tong.visitkorea.or.kr/cms/resource/74/3422574_image2_1.jpg', // 경기전 - 조선 태조 이성계의 어진이 모셔진 곳
+        'http://tong.visitkorea.or.kr/cms/resource/89/2641989_image2_1.jpg', // 전주전동성당 - 아름다운 근대 건축양식의 성당
+        'http://tong.visitkorea.or.kr/cms/resource/17/2653617_image2_1.jpg', // 전주 풍남문 - 전주를 대표하는 조선시대 성문
       ],
       rating: 4.7,
       reviewCount: 312,
@@ -649,8 +650,14 @@ export default function TravelCourseDetailPage() {
       region: 'yeosu',
       duration: '1박 2일',
       theme: ['바다', '야경', '역사'],
-      mainImage: '/yeosu.jpeg',
-      images: ['/yeosu.jpeg', '/yeosu.jpeg', '/yeosu.jpeg'],
+      mainImage:
+        'http://tong.visitkorea.or.kr/cms/resource/07/3351107_image2_1.jpg',
+      images: [
+        'http://tong.visitkorea.or.kr/cms/resource/07/3351107_image2_1.jpg', // 이순신광장 - 여수의 대표적인 관광 명소
+        'http://tong.visitkorea.or.kr/cms/resource/13/3499913_image2_1.jpg', // 한려해상국립공원 (오동도) - 여수의 상징적인 섬
+        'http://tong.visitkorea.or.kr/cms/resource/93/3499893_image2_1.JPG', // 향일암(여수) - 여수의 대표적인 일출 명소
+        'http://tong.visitkorea.or.kr/cms/resource/47/3422947_image2_1.png', // 낭만포차거리 - 여수의 유명한 먹거리 거리
+      ],
       rating: 4.7,
       reviewCount: 312,
       likeCount: 428,
