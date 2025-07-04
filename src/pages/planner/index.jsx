@@ -43,9 +43,6 @@ export default function PlannerPage() {
 
   return (
     <div className="mx-auto max-w-2xl p-4 sm:p-8">
-      <h1 className="mb-4 text-center text-2xl font-bold sm:text-3xl">
-        🌤️ 날씨 기반 여행 플래너
-      </h1>
       <PlannerForm
         formData={formData}
         setFormData={setFormData}
