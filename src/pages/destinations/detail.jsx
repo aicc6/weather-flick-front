@@ -160,8 +160,14 @@ export default function TravelCourseDetailPage() {
       region: 'busan',
       duration: '1박 2일',
       theme: ['도시', '바다', '맛집'],
-      mainImage: '/busan.jpeg',
-      images: ['/busan.jpeg', '/busan.jpeg', '/busan.jpeg'],
+      mainImage:
+        'http://tong.visitkorea.or.kr/cms/resource/34/3090534_image2_1.JPG',
+      images: [
+        'http://tong.visitkorea.or.kr/cms/resource/34/3090534_image2_1.JPG', // 해운대해수욕장 - 부산의 대표적인 해변
+        'http://tong.visitkorea.or.kr/cms/resource/45/3311245_image2_1.jpg', // 광안리해수욕장 - 광안대교 야경으로 유명한 해변
+        'http://tong.visitkorea.or.kr/cms/resource/91/3365491_image2_1.jpg', // 부산 감천문화마을 - 알록달록한 계단식 마을
+        'http://tong.visitkorea.or.kr/cms/resource/63/2918063_image2_1.jpg', // 태종대 - 부산의 대표적인 자연 관광지
+      ],
       rating: 4.6,
       reviewCount: 203,
       likeCount: 189,
@@ -287,8 +293,14 @@ export default function TravelCourseDetailPage() {
       region: 'gangneung',
       duration: '1박 2일',
       theme: ['바다', '커피', '일출'],
-      mainImage: '/gangneung.jpg',
-      images: ['/gangneung.jpg', '/gangneung.jpg', '/gangneung.jpg'],
+      mainImage:
+        'http://tong.visitkorea.or.kr/cms/resource/58/2938658_image2_1.bmp',
+      images: [
+        'http://tong.visitkorea.or.kr/cms/resource/58/2938658_image2_1.bmp', // 경포해수욕장 - 강릉의 대표적인 해수욕장
+        'http://tong.visitkorea.or.kr/cms/resource/69/2688069_image2_1.jpg', // 강릉 오죽헌 - 신사임당과 율곡 이이의 생가
+        'http://tong.visitkorea.or.kr/cms/resource/43/3378343_image2_1.JPG', // 초당순두부마을 - 강릉의 대표 음식문화 체험지
+        'http://tong.visitkorea.or.kr/cms/resource/55/2921955_image2_1.jpg', // 안목해변 - 강릉 커피거리로 유명한 해변
+      ],
       rating: 4.7,
       reviewCount: 178,
       likeCount: 256,
@@ -396,12 +408,13 @@ export default function TravelCourseDetailPage() {
       region: 'gyeongju',
       duration: '1박 2일',
       theme: ['역사', '문화', '유네스코'],
-      mainImage: '/gyeongju.jpg',
+      mainImage:
+        'http://tong.visitkorea.or.kr/cms/resource/03/2678603_image2_1.jpg',
       images: [
-        '/gyeongju.jpg',
-        '/bulguksa.jpg',
-        '/seokguram.jpg',
-        '/cheomseongdae.jpg',
+        'http://tong.visitkorea.or.kr/cms/resource/03/2678603_image2_1.jpg', // 경주 불국사 [유네스코 세계유산] - 신라 불교 예술의 걸작
+        'http://tong.visitkorea.or.kr/cms/resource/62/2612562_image2_1.jpg', // 경주 동궁과 월지 - 신라 왕궁터의 아름다운 연못
+        'http://tong.visitkorea.or.kr/cms/resource/01/2656601_image2_1.jpg', // 경주 첨성대 - 동양 최고(最古)의 천문대
+        'http://tong.visitkorea.or.kr/cms/resource/75/3029075_image2_1.jpg', // 경주 대릉원 일원 - 신라 왕릉군과 천마총
       ],
       rating: 4.9,
       reviewCount: 412,
@@ -1157,7 +1170,7 @@ export default function TravelCourseDetailPage() {
               {/* 댓글 작성 */}
               <div className="space-y-3">
                 <Textarea
-                  placeholder="이 여행 코스에 대한 후기를 남겨주세요..."
+                  placeholder="이 여행 코스에 댓글을 남겨주세요..."
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   className="dark:border-gray-600 dark:bg-gray-700"
