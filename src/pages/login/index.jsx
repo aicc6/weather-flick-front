@@ -60,8 +60,6 @@ export function LoginPage() {
       // 로그인 성공 후 페이지 이동
       navigate(from, { replace: true })
     } catch (error) {
-      console.error('로그인 오류:', error)
-
       // 백엔드에서 오는 에러 메시지 처리
       if (error.response?.data?.detail) {
         const errorMessage = error.response.data.detail
@@ -88,7 +86,6 @@ export function LoginPage() {
         window.location.href = response.auth_url
       }
     } catch (error) {
-      console.error('구글 인증 URL 생성 오류:', error)
       setSubmitError('구글 로그인 URL을 가져오는데 실패했습니다.')
     }
   }

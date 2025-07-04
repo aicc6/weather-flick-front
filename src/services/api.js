@@ -135,8 +135,23 @@ export const tokenManager = {
     return userInfo ? JSON.parse(userInfo) : null
   },
 
+  // 사용자 정보만 별도로 저장 (기존 토큰 유지)
+  setUserInfo: (userInfo) => {
+    if (userInfo) {
+      localStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify(userInfo))
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.USER_INFO)
+    }
+  },
+
   // 토큰 제거
   removeToken: () => {
+    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
+    localStorage.removeItem(STORAGE_KEYS.USER_INFO)
+  },
+
+  // 모든 토큰 및 사용자 정보 제거 (clearTokens 별칭)
+  clearTokens: () => {
     localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
     localStorage.removeItem(STORAGE_KEYS.USER_INFO)
   },

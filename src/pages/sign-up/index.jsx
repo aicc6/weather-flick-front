@@ -100,7 +100,6 @@ export function SignUpPage() {
         window.location.href = response.auth_url
       }
     } catch (error) {
-      console.error('구글 인증 URL 생성 오류:', error)
       setSubmitError('구글 로그인 URL을 가져오는데 실패했습니다.')
     }
   }

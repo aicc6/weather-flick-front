@@ -9,13 +9,12 @@ export function GoogleCallbackPage() {
   const isProcessing = useRef(false) // 중복 요청 방지
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { setUser, setIsAuthenticated } = useAuth()
+  const { handleGoogleAuthSuccess, setUser, setIsAuthenticated } = useAuth()
 
   useEffect(() => {
     const handleCallback = async () => {
       // 중복 요청 방지
       if (isProcessing.current) {
-        console.log('이미 처리 중입니다. 중복 요청을 무시합니다.')
         return
       }
 
@@ -40,19 +39,12 @@ export function GoogleCallbackPage() {
 
         if (authCode) {
           // 새로운 보안 방식: 임시 인증 코드를 JWT 토큰으로 교환
-          console.log(
-            '인증 코드로 토큰 교환 시작:',
-            authCode.substring(0, 10) + '...',
-          )
 
           try {
             const response = await authAPI.exchangeGoogleAuthCode(authCode)
-            console.log('토큰 교환 성공:', response)
 
-            // 토큰 저장
-            tokenManager.setToken(response.access_token, response.user_info)
-            setUser(response.user_info)
-            setIsAuthenticated(true)
+            // AuthContext의 Google 인증 성공 처리 함수 사용
+            handleGoogleAuthSuccess(response.user_info, response.access_token)
 
             setStatus('success')
 
@@ -61,9 +53,6 @@ export function GoogleCallbackPage() {
               navigate('/', { replace: true })
             }, 1500)
           } catch (exchangeError) {
-            console.error('토큰 교환 오류 상세:', exchangeError)
-            console.error('오류 응답:', exchangeError.response?.data)
-            console.error('오류 상태:', exchangeError.response?.status)
             setStatus('error')
             setError(
               exchangeError.response?.data?.detail ||
@@ -73,27 +62,31 @@ export function GoogleCallbackPage() {
           }
         } else if (token) {
           // 기존 방식: URL에서 직접 토큰 추출 (호환성을 위해 유지)
-          console.warn(
-            '기존 방식의 토큰 전달을 사용하고 있습니다. 보안을 위해 새로운 방식 사용을 권장합니다.',
-          )
 
-          tokenManager.setToken(token, null)
-
-          // 사용자 정보 조회
           try {
+            // 토큰 저장
+            tokenManager.setToken(token, null)
+
+            // 사용자 정보 조회
             const userInfo = await authAPI.getMe()
-            tokenManager.setToken(token, userInfo)
-            setUser(userInfo)
-            setIsAuthenticated(true)
+
+            // AuthContext의 Google 인증 성공 처리 함수 사용
+            handleGoogleAuthSuccess(userInfo, token)
+
+            setStatus('success')
+
+            setTimeout(() => {
+              navigate('/', { replace: true })
+            }, 1500)
           } catch (userError) {
+            // 토큰은 유효하지만 사용자 정보 조회 실패 시에도 로그인 상태로 설정
             setIsAuthenticated(true)
+            setStatus('success')
+
+            setTimeout(() => {
+              navigate('/', { replace: true })
+            }, 1500)
           }
-
-          setStatus('success')
-
-          setTimeout(() => {
-            navigate('/', { replace: true })
-          }, 1500)
         } else {
           // 레거시: code, state 파라미터 처리 (완전 호환성)
           const code = searchParams.get('code')
@@ -105,8 +98,6 @@ export function GoogleCallbackPage() {
             return
           }
 
-          console.warn('레거시 OAuth 콜백 방식을 사용하고 있습니다.')
-
           // 백엔드에 인증 코드 전송
           const response = await authAPI.googleCallback(code, state)
 
@@ -115,22 +106,30 @@ export function GoogleCallbackPage() {
             const token = url.searchParams.get('token')
 
             if (token) {
-              tokenManager.setToken(token, null)
-
               try {
+                // 토큰 저장
+                tokenManager.setToken(token, null)
+
+                // 사용자 정보 조회
                 const userInfo = await authAPI.getMe()
-                tokenManager.setToken(token, userInfo)
-                setUser(userInfo)
-                setIsAuthenticated(true)
+
+                // AuthContext의 Google 인증 성공 처리 함수 사용
+                handleGoogleAuthSuccess(userInfo, token)
+
+                setStatus('success')
+
+                setTimeout(() => {
+                  navigate('/', { replace: true })
+                }, 1500)
               } catch (userError) {
+                // 토큰은 유효하지만 사용자 정보 조회 실패 시에도 로그인 상태로 설정
                 setIsAuthenticated(true)
+                setStatus('success')
+
+                setTimeout(() => {
+                  navigate('/', { replace: true })
+                }, 1500)
               }
-
-              setStatus('success')
-
-              setTimeout(() => {
-                navigate('/', { replace: true })
-              }, 1500)
             } else {
               setStatus('error')
               setError('인증 토큰을 받지 못했습니다.')
@@ -141,7 +140,6 @@ export function GoogleCallbackPage() {
           }
         }
       } catch (err) {
-        console.error('구글 콜백 처리 오류:', err)
         setStatus('error')
         setError(err.data?.detail || '로그인 처리 중 오류가 발생했습니다.')
       } finally {
@@ -150,7 +148,13 @@ export function GoogleCallbackPage() {
     }
 
     handleCallback()
-  }, [searchParams, navigate, setUser, setIsAuthenticated])
+  }, [
+    searchParams,
+    navigate,
+    handleGoogleAuthSuccess,
+    setUser,
+    setIsAuthenticated,
+  ])
 
   const renderContent = () => {
     switch (status) {

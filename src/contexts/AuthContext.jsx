@@ -31,6 +31,29 @@ export const AuthProvider = ({ children }) => {
     setAuthState((prev) => ({ ...prev, ...updates }))
   }, [])
 
+  // 로그아웃 함수 (미리 정의)
+  const logout = useCallback(async () => {
+    try {
+      // 서버에 로그아웃 요청 (토큰이 있는 경우에만)
+      if (tokenManager.isLoggedIn()) {
+        try {
+          await authAPI.logout()
+        } catch (error) {
+          // 서버 요청 실패해도 클라이언트 로그아웃은 진행
+        }
+      }
+    } finally {
+      // 클라이언트 상태 정리
+      tokenManager.clearTokens()
+      updateAuthState({
+        user: null,
+        isAuthenticated: false,
+        loading: false,
+        error: null,
+      })
+    }
+  }, [updateAuthState])
+
   // 초기 로드 시 사용자 정보 확인
   useEffect(() => {
     const initializeAuth = async () => {
@@ -51,7 +74,6 @@ export const AuthProvider = ({ children }) => {
               updateAuthState({ user: userInfo })
               tokenManager.setUserInfo(userInfo)
             } catch (error) {
-              console.warn('서버 동기화 실패:', error)
               // 저장된 사용자 정보가 유효하므로 에러로 처리하지 않음
             }
           } else {
@@ -72,14 +94,13 @@ export const AuthProvider = ({ children }) => {
           })
         }
       } catch (error) {
-        console.error('인증 초기화 실패:', error)
         // 토큰이 유효하지 않은 경우 로그아웃 처리
         await logout()
       }
     }
 
     initializeAuth()
-  }, [])
+  }, [updateAuthState, logout])
 
   // 로그인 함수
   const login = useCallback(async (credentials) => {
@@ -107,30 +128,6 @@ export const AuthProvider = ({ children }) => {
         error: error.message,
       })
       throw error
-    }
-  }, [])
-
-  // 로그아웃 함수
-  const logout = useCallback(async () => {
-    try {
-      // 서버에 로그아웃 요청 (토큰이 있는 경우에만)
-      if (tokenManager.isLoggedIn()) {
-        try {
-          await authAPI.logout()
-        } catch (error) {
-          console.warn('서버 로그아웃 실패:', error)
-          // 서버 요청 실패해도 클라이언트 로그아웃은 진행
-        }
-      }
-    } finally {
-      // 클라이언트 상태 정리
-      tokenManager.clearTokens()
-      updateAuthState({
-        user: null,
-        isAuthenticated: false,
-        loading: false,
-        error: null,
-      })
     }
   }, [])
 
@@ -186,6 +183,33 @@ export const AuthProvider = ({ children }) => {
     updateAuthState({ error: null })
   }, [])
 
+  // 사용자 정보 직접 설정 함수 (OAuth 콜백 등에서 사용)
+  const setUser = useCallback((userData) => {
+    updateAuthState({ user: userData })
+    if (userData) {
+      tokenManager.setUserInfo(userData)
+    }
+  }, [])
+
+  // 인증 상태 직접 설정 함수 (OAuth 콜백 등에서 사용)
+  const setIsAuthenticated = useCallback((isAuth) => {
+    updateAuthState({ isAuthenticated: isAuth })
+  }, [])
+
+  // Google OAuth 로그인 성공 후 처리 함수
+  const handleGoogleAuthSuccess = useCallback((userInfo, accessToken) => {
+    // 토큰과 사용자 정보 저장
+    tokenManager.setToken(accessToken)
+    tokenManager.setUserInfo(userInfo)
+
+    updateAuthState({
+      user: userInfo,
+      isAuthenticated: true,
+      loading: false,
+      error: null,
+    })
+  }, [])
+
   const value = {
     // 상태
     user: authState.user,
@@ -199,6 +223,11 @@ export const AuthProvider = ({ children }) => {
     register,
     updateUserProfile,
     clearError,
+
+    // OAuth 관련 함수들
+    setUser,
+    setIsAuthenticated,
+    handleGoogleAuthSuccess,
 
     // 편의 함수들 (기존 호환성 유지)
     isLoggedIn: authState.isAuthenticated,
