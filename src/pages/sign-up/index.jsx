@@ -20,6 +20,7 @@ import { authAPI } from '@/services/api'
 import { useEmailVerification } from '@/hooks/useEmailVerification'
 import { EmailVerification } from './EmailVerification'
 import { SignUpSuccess } from './SignUpSuccess'
+import { extractErrorMessage } from '@/lib/utils'
 
 /**
  * URL: /sign-up
@@ -82,11 +83,10 @@ export function SignUpPage() {
         navigate('/login')
       }, 3000)
     } catch (error) {
-      const errorMessage =
-        error.data?.detail ||
-        error.response?.data?.detail ||
-        error.message ||
-        '회원가입 중 오류가 발생했습니다.'
+      const errorMessage = extractErrorMessage(
+        error,
+        '회원가입 중 오류가 발생했습니다.',
+      )
       setSubmitError(errorMessage)
     } finally {
       setIsLoading(false)
