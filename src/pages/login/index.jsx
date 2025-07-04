@@ -57,14 +57,8 @@ export function LoginPage() {
 
       await login(credentials)
 
-      // 로그인 성공 후 자동 새로고침으로 헤더 상태 강제 업데이트
-      setTimeout(() => {
-        navigate(from, { replace: true })
-        // 페이지 이동 후 자동 새로고침
-        setTimeout(() => {
-          window.location.reload()
-        }, 100)
-      }, 300)
+      // 로그인 성공 후 페이지 이동
+      navigate(from, { replace: true })
     } catch (error) {
       console.error('로그인 오류:', error)
 

@@ -4,7 +4,6 @@ import {
   useState,
   useEffect,
   useCallback,
-  useRef,
 } from 'react'
 import { authAPI, tokenManager } from '@/services/api'
 
@@ -19,16 +18,17 @@ export const useAuth = () => {
 }
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [updateTrigger, setUpdateTrigger] = useState(0)
-  const forceUpdateRef = useRef(0)
+  // 단순화된 상태 관리
+  const [authState, setAuthState] = useState({
+    user: null,
+    isAuthenticated: false,
+    loading: true,
+    error: null,
+  })
 
-  // 강제 업데이트 함수
-  const forceUpdate = useCallback(() => {
-    forceUpdateRef.current += 1
-    setUpdateTrigger((prev) => prev + 1)
+  // 상태 업데이트 헬퍼 함수
+  const updateAuthState = useCallback((updates) => {
+    setAuthState(prev => ({ ...prev, ...updates }))
   }, [])
 
   // 초기 로드 시 사용자 정보 확인
@@ -39,112 +39,171 @@ export const AuthProvider = ({ children }) => {
           // 먼저 localStorage에서 사용자 정보 복원
           const storedUserInfo = tokenManager.getUserInfo()
           if (storedUserInfo) {
-            setUser(storedUserInfo)
-            setIsLoggedIn(true)
-            forceUpdate()
-          }
+            updateAuthState({
+              user: storedUserInfo,
+              isAuthenticated: true,
+              loading: false,
+            })
 
-          // 서버에서 최신 사용자 정보 가져오기
-          try {
+            // 백그라운드에서 서버와 동기화
+            try {
+              const userInfo = await authAPI.getMe()
+              updateAuthState({ user: userInfo })
+              tokenManager.setUserInfo(userInfo)
+            } catch (error) {
+              console.warn('서버 동기화 실패:', error)
+              // 저장된 사용자 정보가 유효하므로 에러로 처리하지 않음
+            }
+          } else {
+            // 토큰은 있지만 사용자 정보가 없는 경우 서버에서 가져오기
             const userInfo = await authAPI.getMe()
-            setUser(userInfo)
-            setIsLoggedIn(true)
-            forceUpdate()
-          } catch (serverError) {
-            // 서버 오류 시 localStorage 정보를 계속 사용
+            updateAuthState({
+              user: userInfo,
+              isAuthenticated: true,
+              loading: false,
+            })
+            tokenManager.setUserInfo(userInfo)
           }
         } else {
-          setIsLoggedIn(false)
+          updateAuthState({
+            user: null,
+            isAuthenticated: false,
+            loading: false,
+          })
         }
       } catch (error) {
-        console.error('사용자 정보 로드 실패:', error)
-        tokenManager.removeToken()
-        setIsLoggedIn(false)
-      } finally {
-        setLoading(false)
+        console.error('인증 초기화 실패:', error)
+        // 토큰이 유효하지 않은 경우 로그아웃 처리
+        await logout()
       }
     }
 
     initializeAuth()
-  }, [forceUpdate])
+  }, [])
 
-  // 로그인
-  const login = useCallback(
-    async (credentials) => {
-      try {
-        const response = await authAPI.login(credentials)
+  // 로그인 함수
+  const login = useCallback(async (credentials) => {
+    try {
+      updateAuthState({ loading: true, error: null })
+      
+      const response = await authAPI.login(credentials)
+      const { user, access_token } = response
+      
+      // 토큰과 사용자 정보 저장
+      tokenManager.setToken(access_token)
+      tokenManager.setUserInfo(user)
+      
+      updateAuthState({
+        user,
+        isAuthenticated: true,
+        loading: false,
+        error: null,
+      })
+      
+      return response
+    } catch (error) {
+      updateAuthState({
+        loading: false,
+        error: error.message,
+      })
+      throw error
+    }
+  }, [])
 
-        // 토큰 저장
-        tokenManager.setToken(response.access_token, response.user_info)
-
-        // 상태 업데이트를 동기적으로 처리
-        setUser(response.user_info)
-        setIsLoggedIn(true)
-        forceUpdate()
-
-        // 상태 업데이트가 완료될 때까지 잠시 대기
-        await new Promise((resolve) => setTimeout(resolve, 150))
-
-        // 한 번 더 강제 업데이트
-        forceUpdate()
-
-        return response
-      } catch (error) {
-        console.error('로그인 오류:', error)
-        throw error
-      }
-    },
-    [forceUpdate],
-  )
-
-  // 로그아웃
+  // 로그아웃 함수
   const logout = useCallback(async () => {
     try {
+      // 서버에 로그아웃 요청 (토큰이 있는 경우에만)
       if (tokenManager.isLoggedIn()) {
-        await authAPI.logout()
+        try {
+          await authAPI.logout()
+        } catch (error) {
+          console.warn('서버 로그아웃 실패:', error)
+          // 서버 요청 실패해도 클라이언트 로그아웃은 진행
+        }
       }
-    } catch (error) {
-      console.error('로그아웃 오류:', error)
     } finally {
-      tokenManager.removeToken()
-      setUser(null)
-      setIsLoggedIn(false)
-      forceUpdate()
+      // 클라이언트 상태 정리
+      tokenManager.clearTokens()
+      updateAuthState({
+        user: null,
+        isAuthenticated: false,
+        loading: false,
+        error: null,
+      })
     }
-  }, [forceUpdate])
+  }, [])
 
-  // 회원가입
-  const register = async (userData) => {
-    const response = await authAPI.register(userData)
-    return response
-  }
+  // 사용자 정보 업데이트 함수
+  const updateUserProfile = useCallback(async (userData) => {
+    try {
+      updateAuthState({ loading: true, error: null })
+      
+      const updatedUser = await authAPI.updateProfile(userData)
+      
+      // 토큰 매니저와 상태 동기화
+      tokenManager.setUserInfo(updatedUser)
+      updateAuthState({
+        user: updatedUser,
+        loading: false,
+        error: null,
+      })
+      
+      return updatedUser
+    } catch (error) {
+      updateAuthState({
+        loading: false,
+        error: error.message,
+      })
+      throw error
+    }
+  }, [])
 
-  // 사용자 정보 업데이트
-  const updateProfile = async (userData) => {
-    const updatedUser = await authAPI.updateProfile(userData)
-    setUser(updatedUser)
-    return updatedUser
-  }
+  // 회원가입 함수
+  const register = useCallback(async (userData) => {
+    try {
+      updateAuthState({ loading: true, error: null })
+      
+      const response = await authAPI.register(userData)
+      
+      updateAuthState({
+        loading: false,
+        error: null,
+      })
+      
+      return response
+    } catch (error) {
+      updateAuthState({
+        loading: false,
+        error: error.message,
+      })
+      throw error
+    }
+  }, [])
 
-  // 프로필 업데이트 (updateProfile의 별칭)
-  const updateUser = async (userData) => {
-    return await updateProfile(userData)
-  }
+  // 에러 클리어 함수
+  const clearError = useCallback(() => {
+    updateAuthState({ error: null })
+  }, [])
 
   const value = {
-    user,
-    loading,
+    // 상태
+    user: authState.user,
+    isAuthenticated: authState.isAuthenticated,
+    loading: authState.loading,
+    error: authState.error,
+    
+    // 액션 함수들
     login,
     logout,
     register,
-    updateProfile,
-    updateUser,
-    setUser,
-    setIsAuthenticated: setIsLoggedIn,
-    isLoggedIn,
-    updateTrigger,
-    forceUpdateRef: forceUpdateRef.current,
-    forceUpdate,
+    updateUserProfile,
+    clearError,
+    
+    // 편의 함수들 (기존 호환성 유지)
+    isLoggedIn: authState.isAuthenticated,
+    updateProfile: updateUserProfile,
+    updateUser: updateUserProfile,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

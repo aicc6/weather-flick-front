@@ -29,9 +29,6 @@ export function Header() {
     isLoggedIn,
     logout,
     loading,
-    updateTrigger,
-    forceUpdateRef,
-    forceUpdate,
   } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
