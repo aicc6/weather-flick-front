@@ -328,6 +328,9 @@ const PlannerForm = memo(() => {
                         날짜별 목적지 선택
                       </h2>
                     </div>
+                    <p className="mt-1 mb-4 text-sm text-gray-400">
+                      14일 이후의 날씨 데이터는 알림으로 알려드립니다.
+                    </p>
 
                     <div className="space-y-6">
                       {dates.map((dateStr, index) => (
