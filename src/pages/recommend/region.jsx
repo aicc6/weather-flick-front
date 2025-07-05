@@ -9,7 +9,7 @@ import {
   getMultipleRegionImages,
   getFallbackImages,
 } from '@/services/pixabayApi'
-import { http } from '@/lib/http'
+import { useGetActiveRegionsQuery } from '@/store/api'
 
 export default function RecommendRegionPage() {
   const navigate = useNavigate()
@@ -18,25 +18,16 @@ export default function RecommendRegionPage() {
   const [viewMode, setViewMode] = useState('google-map') // 'google-map', 'list'
   const [regionImages, setRegionImages] = useState({})
   const [imagesLoading, setImagesLoading] = useState(true)
-  const [cities, setCities] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
 
-  // 백엔드에서 지역 목록 불러오기
-  useEffect(() => {
-    setLoading(true)
-    http
-      .GET('/local/resions')
-      .then((res) => res.json())
-      .then((data) => {
-        setCities(data.regions || [])
-        setLoading(false)
-      })
-      .catch((err) => {
-        setError('지역 목록을 불러오지 못했습니다')
-        setLoading(false)
-      })
-  }, [])
+  // RTK Query를 사용한 지역 데이터 조회
+  const {
+    data: cities = [],
+    isLoading: loading,
+    error: regionsError
+  } = useGetActiveRegionsQuery()
+
+  // 에러 메시지 처리
+  const error = regionsError ? '지역 목록을 불러오지 못했습니다' : null
 
   const handleRegionSelect = (regionCode, regionName) => {
     if (selectedRegion?.id === regionCode) {

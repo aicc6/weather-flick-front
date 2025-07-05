@@ -6,6 +6,7 @@ export { authApi } from './authApi'
 export { travelPlansApi } from './travelPlansApi'
 export { destinationsApi } from './destinationsApi'
 export { weatherApi } from './weatherApi'
+export { regionsApi } from './regionsApi'
 
 // Export all hooks for convenience
 export {
@@ -53,3 +54,13 @@ export {
   useGetHistoricalWeatherQuery,
   useGetWeatherByCoordinatesQuery
 } from './weatherApi'
+
+export {
+  // Regions API hooks
+  useGetRegionsQuery,
+  useGetRegionDetailQuery,
+  useGetRegionStatsQuery,
+  useGetActiveRegionsQuery,
+  useSearchRegionsQuery,
+  useUpdateRegionMutation
+} from './regionsApi'
