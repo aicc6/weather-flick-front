@@ -26,6 +26,7 @@ const DestinationListItem = ({
   desc,
   photoUrl,
   placeId,
+  date,
   onRemove,
   onHover,
   onUnhover,
@@ -37,10 +38,10 @@ const DestinationListItem = ({
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (!placeId) return
+    if (!placeId || !date) return
     setLoading(true)
     setError(null)
-    fetch(`/api/weather/by-place-id?place_id=${placeId}`)
+    fetch(`/api/weather/forecast-by-place-id?place_id=${placeId}&date=${date}`)
       .then((res) => {
         if (!res.ok) throw new Error('날씨 정보 조회 실패')
         return res.json()
@@ -48,7 +49,7 @@ const DestinationListItem = ({
       .then((data) => setWeather(data))
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
-  }, [placeId])
+  }, [placeId, date])
 
   return (
     <div className="mb-2 flex items-center gap-3 rounded-lg bg-blue-100 px-4 py-2 shadow-sm dark:bg-blue-900">
@@ -61,7 +62,7 @@ const DestinationListItem = ({
       </span>
       {/* 썸네일 */}
       {photoUrl && (
-        <span className="relative inline-block">
+        <span className="relative inline-block flex-shrink-0">
           <img
             src={photoUrl}
             alt="장소 사진"
@@ -92,30 +93,39 @@ const DestinationListItem = ({
           )}
         </span>
       )}
-      {/* 주소 */}
-      <span className="flex-1 text-sm break-all text-blue-900 dark:text-blue-100">
-        {desc}
-      </span>
-      {/* 날씨 정보 */}
-      {placeId && (
-        <span className="ml-2 flex min-w-[70px] items-center gap-1 text-xs">
-          {loading && <span>⏳</span>}
-          {error && <span className="text-red-500">날씨 오류</span>}
-          {weather && !loading && !error && (
-            <>
-              {weather.icon && (
-                <img
-                  src={weather.icon}
-                  alt="날씨"
-                  className="inline h-6 w-6 align-middle"
-                />
-              )}
-              <span>{weather.temp}°C</span>
-              <span>{weather.summary}</span>
-            </>
-          )}
+      {/* 텍스트 영역: 주소 + 날씨정보 세로 배치 */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* 주소 (여러 줄, 전체 표시) */}
+        <span className="mb-1 text-base font-semibold break-words whitespace-normal text-blue-900 dark:text-blue-100">
+          {desc.replace(/^대한민국\s*/, '')}
         </span>
-      )}
+        {/* 날씨 정보 (한 줄, compact) */}
+        {placeId && date && (
+          <span className="flex min-w-[120px] items-center gap-2 text-xs whitespace-nowrap">
+            {loading && <span>⏳</span>}
+            {error && <span className="text-red-500">날씨 오류</span>}
+            {weather && !loading && !error && (
+              <>
+                {weather.icon && (
+                  <img
+                    src={weather.icon}
+                    alt="날씨"
+                    className="mr-1 inline h-5 w-5 align-middle"
+                  />
+                )}
+                <span className="font-semibold">{weather.temp}°C</span>
+                <span className="text-gray-500">
+                  / 최고 {weather.max_temp}° / 최저 {weather.min_temp}°
+                </span>
+                <span className="ml-1 text-blue-600">
+                  강수 {weather.chance_of_rain}%
+                </span>
+                <span className="ml-1">{weather.summary}</span>
+              </>
+            )}
+          </span>
+        )}
+      </div>
       {/* 삭제 버튼 */}
       <button
         type="button"
@@ -152,7 +162,7 @@ function SortableListItem({ id, children, ...props }) {
 }
 
 const DestinationBadgeList = memo(
-  ({ destinations = [], onRemove, onReorder }) => {
+  ({ destinations = [], onRemove, onReorder, date }) => {
     const [hoveredIndex, setHoveredIndex] = useState(null)
     const sensors = useSensors(
       useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -198,6 +208,7 @@ const DestinationBadgeList = memo(
                           ? destination.place_id
                           : undefined
                       }
+                      date={date}
                       onRemove={() => onRemove?.(destination)}
                       onHover={() => setHoveredIndex(index)}
                       onUnhover={() => setHoveredIndex(null)}

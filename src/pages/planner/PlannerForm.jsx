@@ -326,6 +326,7 @@ const PlannerForm = memo(() => {
                                 onReorder={(newOrder) =>
                                   reorderDestinations(dateStr, newOrder)
                                 }
+                                date={dateStr}
                               />
                             </CardContent>
                           </Card>
