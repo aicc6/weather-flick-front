@@ -35,7 +35,7 @@ export function Header() {
       isLoggedIn,
       isAuthenticated,
       loading,
-      userExists: !!user
+      userExists: !!user,
     })
   }, [user, isLoggedIn, isAuthenticated, loading])
 

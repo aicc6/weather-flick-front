@@ -13,10 +13,10 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/AuthContextRTK'
 import { GoogleIcon } from '@/components/icons'
 import { loginSchema } from '@/schemas'
-import { authAPI } from '@/services/api'
+import { useLoginMutation, useGetGoogleAuthUrlQuery } from '@/store/api'
 
 /**
  * URL: '/login'
@@ -27,6 +27,10 @@ export function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { login } = useAuth()
+
+  // RTK Query 훅들
+  const [loginMutation] = useLoginMutation()
+  const { data: googleAuthData } = useGetGoogleAuthUrlQuery()
 
   // 리다이렉트된 페이지 정보 가져오기
   const from = location.state?.from?.pathname || '/'
@@ -85,9 +89,10 @@ export function LoginPage() {
 
   const handleGoogleLogin = async () => {
     try {
-      const response = await authAPI.getGoogleAuthUrl()
-      if (response.auth_url) {
-        window.location.href = response.auth_url
+      if (googleAuthData?.auth_url) {
+        window.location.href = googleAuthData.auth_url
+      } else {
+        setSubmitError('구글 로그인 URL을 가져오는데 실패했습니다.')
       }
     } catch {
       setSubmitError('구글 로그인 URL을 가져오는데 실패했습니다.')

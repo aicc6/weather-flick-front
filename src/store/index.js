@@ -1,5 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { authApi, travelPlansApi, destinationsApi, weatherApi, regionsApi } from './api'
+import {
+  authApi,
+  travelPlansApi,
+  destinationsApi,
+  weatherApi,
+  regionsApi,
+} from './api'
 
 // RTK Query 통합 스토어 설정
 export const store = configureStore({
@@ -17,11 +23,11 @@ export const store = configureStore({
         ignoredActions: ['persist/PERSIST'],
       },
     })
-    // RTK Query middleware 추가
-    .concat(authApi.middleware)
-    .concat(travelPlansApi.middleware)
-    .concat(destinationsApi.middleware)
-    .concat(weatherApi.middleware)
-    .concat(regionsApi.middleware),
+      // RTK Query middleware 추가
+      .concat(authApi.middleware)
+      .concat(travelPlansApi.middleware)
+      .concat(destinationsApi.middleware)
+      .concat(weatherApi.middleware)
+      .concat(regionsApi.middleware),
   devTools: import.meta.env.MODE !== 'production',
 })

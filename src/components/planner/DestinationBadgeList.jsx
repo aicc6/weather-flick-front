@@ -35,16 +35,16 @@ const DestinationListItem = ({
   dragHandleProps,
 }) => {
   // RTK Query를 사용한 날씨 정보 조회
-  const { 
-    data: weather, 
-    isLoading: loading, 
-    error 
+  const {
+    data: weather,
+    isLoading: loading,
+    error,
   } = useGetWeatherByPlaceIdQuery(
     { placeId, date },
-    { 
+    {
       skip: !placeId || !date, // placeId나 date가 없으면 쿼리 실행 안함
-      refetchOnMountOrArgChange: true // 컴포넌트 마운트시 새로 요청
-    }
+      refetchOnMountOrArgChange: true, // 컴포넌트 마운트시 새로 요청
+    },
   )
 
   return (

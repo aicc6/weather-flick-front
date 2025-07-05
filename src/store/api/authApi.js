@@ -11,8 +11,8 @@ export const authApi = createApi({
       query: (userData) => ({
         url: 'auth/register',
         method: 'POST',
-        body: userData
-      })
+        body: userData,
+      }),
     }),
 
     // 로그인 (FastAPI OAuth2PasswordRequestForm 형식)
@@ -27,27 +27,27 @@ export const authApi = createApi({
           method: 'POST',
           body: formData,
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
         }
       },
-      invalidatesTags: ['User']
+      invalidatesTags: ['User'],
     }),
 
     // 로그아웃
     logout: builder.mutation({
       query: () => ({
         url: 'auth/logout',
-        method: 'POST'
+        method: 'POST',
       }),
-      invalidatesTags: ['User']
+      invalidatesTags: ['User'],
     }),
 
     // 현재 사용자 정보 조회
     getMe: builder.query({
       query: () => 'auth/me',
       providesTags: ['User'],
-      keepUnusedDataFor: 60 // 1분간 캐싱
+      keepUnusedDataFor: 60, // 1분간 캐싱
     }),
 
     // 사용자 프로필 업데이트
@@ -55,9 +55,9 @@ export const authApi = createApi({
       query: (userData) => ({
         url: 'auth/me',
         method: 'PUT',
-        body: userData
+        body: userData,
       }),
-      invalidatesTags: ['User']
+      invalidatesTags: ['User'],
     }),
 
     // 비밀번호 변경
@@ -65,21 +65,21 @@ export const authApi = createApi({
       query: (passwordData) => ({
         url: 'auth/change-password',
         method: 'POST',
-        body: passwordData
-      })
+        body: passwordData,
+      }),
     }),
 
     // 구글 OAuth 인증 URL 생성
     getGoogleAuthUrl: builder.query({
-      query: () => 'auth/google/auth-url'
+      query: () => 'auth/google/auth-url',
     }),
 
     // OAuth 콜백 처리 (기존 방식 - 호환성을 위해 유지)
     googleCallback: builder.query({
       query: ({ code, state }) => ({
         url: 'auth/google/callback',
-        params: { code, state }
-      })
+        params: { code, state },
+      }),
     }),
 
     // 임시 인증 코드를 JWT 토큰으로 교환 (새로운 보안 방식)
@@ -87,9 +87,9 @@ export const authApi = createApi({
       query: (authCode) => ({
         url: 'auth/google/exchange',
         method: 'POST',
-        body: { auth_code: authCode }
+        body: { auth_code: authCode },
       }),
-      invalidatesTags: ['User']
+      invalidatesTags: ['User'],
     }),
 
     // 비밀번호 찾기 (임시 비밀번호 발급)
@@ -97,8 +97,8 @@ export const authApi = createApi({
       query: (userData) => ({
         url: 'auth/forgot-password',
         method: 'POST',
-        body: { email: userData.email }
-      })
+        body: { email: userData.email },
+      }),
     }),
 
     // 회원탈퇴
@@ -106,11 +106,11 @@ export const authApi = createApi({
       query: (withdrawData) => ({
         url: 'auth/withdraw',
         method: 'DELETE',
-        body: withdrawData
+        body: withdrawData,
       }),
-      invalidatesTags: ['User']
-    })
-  })
+      invalidatesTags: ['User'],
+    }),
+  }),
 })
 
 // Export hooks for usage in functional components
@@ -125,5 +125,5 @@ export const {
   useGoogleCallbackQuery,
   useExchangeGoogleAuthCodeMutation,
   useForgotPasswordMutation,
-  useWithdrawMutation
+  useWithdrawMutation,
 } = authApi

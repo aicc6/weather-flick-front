@@ -16,7 +16,6 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { authAPI } from '@/services/api'
 
-
 /**
  * URL: '/forgot-password'
  */
@@ -55,17 +54,21 @@ export function ForgotPasswordPage() {
       }, 3000)
     } catch (error) {
       console.error('비밀번호 찾기 에러:', error)
-      
+
       if (error.response?.data?.detail) {
         const errorMessage = error.response.data.detail
         console.error('백엔드 에러 메시지:', errorMessage)
-        
-        if (errorMessage.includes('해당 이메일로 등록된 계정을 찾을 수 없습니다')) {
+
+        if (
+          errorMessage.includes('해당 이메일로 등록된 계정을 찾을 수 없습니다')
+        ) {
           setSubmitError('해당 이메일로 등록된 계정을 찾을 수 없습니다.')
         } else if (errorMessage.includes('비활성화된 계정입니다')) {
           setSubmitError('비활성화된 계정입니다. 고객센터에 문의하세요.')
         } else if (errorMessage.includes('소셜 로그인 계정입니다')) {
-          setSubmitError('소셜 로그인 계정입니다. 해당 서비스를 통해 로그인해주세요.')
+          setSubmitError(
+            '소셜 로그인 계정입니다. 해당 서비스를 통해 로그인해주세요.',
+          )
         } else {
           setSubmitError(errorMessage)
         }
@@ -94,7 +97,7 @@ export function ForgotPasswordPage() {
                 <AlertDescription>{successMessage}</AlertDescription>
               </Alert>
               <div className="text-center">
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="mb-4 text-sm text-gray-600">
                   잠시 후 로그인 페이지로 이동됩니다...
                 </p>
                 <Button
@@ -144,11 +147,7 @@ export function ForgotPasswordPage() {
                 )}
               </div>
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-              >
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? '전송 중...' : '임시 비밀번호 발급'}
               </Button>
             </form>

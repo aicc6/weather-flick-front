@@ -11,9 +11,9 @@ export const travelPlansApi = createApi({
       query: (planData) => ({
         url: 'travel-plans',
         method: 'POST',
-        body: planData
+        body: planData,
       }),
-      invalidatesTags: ['TravelPlan']
+      invalidatesTags: ['TravelPlan'],
     }),
 
     // 사용자의 저장된 플랜 목록 조회
@@ -23,19 +23,19 @@ export const travelPlansApi = createApi({
         result
           ? [
               ...result.map(({ id }) => ({ type: 'TravelPlan', id })),
-              { type: 'TravelPlan', id: 'LIST' }
+              { type: 'TravelPlan', id: 'LIST' },
             ]
           : [{ type: 'TravelPlan', id: 'LIST' }],
-      keepUnusedDataFor: 300 // 5분간 캐싱
+      keepUnusedDataFor: 300, // 5분간 캐싱
     }),
 
     // 특정 플랜 조회
     getTravelPlan: builder.query({
       query: (planId) => `travel-plans/${planId}`,
       providesTags: (result, error, planId) => [
-        { type: 'TravelPlan', id: planId }
+        { type: 'TravelPlan', id: planId },
       ],
-      keepUnusedDataFor: 600 // 10분간 캐싱
+      keepUnusedDataFor: 600, // 10분간 캐싱
     }),
 
     // 플랜 수정
@@ -43,24 +43,24 @@ export const travelPlansApi = createApi({
       query: ({ planId, planData }) => ({
         url: `travel-plans/${planId}`,
         method: 'PUT',
-        body: planData
+        body: planData,
       }),
       invalidatesTags: (result, error, { planId }) => [
         { type: 'TravelPlan', id: planId },
-        { type: 'TravelPlan', id: 'LIST' }
-      ]
+        { type: 'TravelPlan', id: 'LIST' },
+      ],
     }),
 
     // 플랜 삭제
     deleteTravelPlan: builder.mutation({
       query: (planId) => ({
         url: `travel-plans/${planId}`,
-        method: 'DELETE'
+        method: 'DELETE',
       }),
       invalidatesTags: (result, error, planId) => [
         { type: 'TravelPlan', id: planId },
-        { type: 'TravelPlan', id: 'LIST' }
-      ]
+        { type: 'TravelPlan', id: 'LIST' },
+      ],
     }),
 
     // 플랜 공유
@@ -68,13 +68,12 @@ export const travelPlansApi = createApi({
       query: ({ planId, shareData }) => ({
         url: `travel-plans/${planId}/share`,
         method: 'POST',
-        body: shareData
+        body: shareData,
       }),
       invalidatesTags: (result, error, { planId }) => [
-        { type: 'TravelPlan', id: planId }
-      ]
+        { type: 'TravelPlan', id: planId },
+      ],
     }),
-
 
     // 여행지 추천 (테마 기반)
     getDestinationRecommendations: builder.query({
@@ -82,13 +81,13 @@ export const travelPlansApi = createApi({
         url: 'destinations/recommend',
         params: {
           theme,
-          weather_conditions: weatherConditions.join(',')
-        }
+          weather_conditions: weatherConditions.join(','),
+        },
       }),
       providesTags: (result, error, { theme }) => [
-        { type: 'Destination', id: `recommend-${theme}` }
+        { type: 'Destination', id: `recommend-${theme}` },
       ],
-      keepUnusedDataFor: 600 // 10분간 캐싱 (추천 데이터는 상대적으로 안정적)
+      keepUnusedDataFor: 600, // 10분간 캐싱 (추천 데이터는 상대적으로 안정적)
     }),
 
     // 플랜 추천 생성 (기존 fetchPlanRecommendation 기능)
@@ -96,10 +95,10 @@ export const travelPlansApi = createApi({
       query: ({ origin, destination, startDate, endDate }) => ({
         url: 'plan/recommend',
         method: 'POST',
-        body: { origin, destination, startDate, endDate }
-      })
-    })
-  })
+        body: { origin, destination, startDate, endDate },
+      }),
+    }),
+  }),
 })
 
 // Export hooks for usage in functional components
@@ -111,5 +110,5 @@ export const {
   useDeleteTravelPlanMutation,
   useShareTravelPlanMutation,
   useGetDestinationRecommendationsQuery,
-  useGeneratePlanRecommendationMutation
+  useGeneratePlanRecommendationMutation,
 } = travelPlansApi

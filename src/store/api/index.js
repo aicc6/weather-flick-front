@@ -21,7 +21,7 @@ export {
   useGoogleCallbackQuery,
   useExchangeGoogleAuthCodeMutation,
   useForgotPasswordMutation,
-  useWithdrawMutation
+  useWithdrawMutation,
 } from './authApi'
 
 export {
@@ -33,7 +33,7 @@ export {
   useDeleteTravelPlanMutation,
   useShareTravelPlanMutation,
   useGetDestinationRecommendationsQuery,
-  useGeneratePlanRecommendationMutation
+  useGeneratePlanRecommendationMutation,
 } from './travelPlansApi'
 
 export {
@@ -41,7 +41,7 @@ export {
   useSearchDestinationsQuery,
   useGetDestinationRecommendationsQuery as useGetDestinationRecommendationsQueryDest,
   useGetDestinationsByRegionQuery,
-  useGetDestinationDetailQuery
+  useGetDestinationDetailQuery,
 } from './destinationsApi'
 
 export {
@@ -52,7 +52,7 @@ export {
   useGetWeatherForecastByCityQuery,
   useGetTravelWeatherScoreQuery,
   useGetHistoricalWeatherQuery,
-  useGetWeatherByCoordinatesQuery
+  useGetWeatherByCoordinatesQuery,
 } from './weatherApi'
 
 export {
@@ -62,5 +62,5 @@ export {
   useGetRegionStatsQuery,
   useGetActiveRegionsQuery,
   useSearchRegionsQuery,
-  useUpdateRegionMutation
+  useUpdateRegionMutation,
 } from './regionsApi'

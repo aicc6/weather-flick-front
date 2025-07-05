@@ -1,14 +1,10 @@
+import { createContext, useContext, useCallback } from 'react'
 import {
-  createContext,
-  useContext,
-  useCallback,
-} from 'react'
-import { 
-  useGetMeQuery, 
-  useLoginMutation, 
+  useGetMeQuery,
+  useLoginMutation,
   useLogoutMutation,
   useRegisterMutation,
-  useUpdateProfileMutation
+  useUpdateProfileMutation,
 } from '@/store/api'
 import { STORAGE_KEYS } from '@/constants/storage'
 
@@ -24,14 +20,26 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   // RTK Query hooks
-  const { data: user, isLoading, error: getUserError, refetch } = useGetMeQuery(undefined, {
+  const {
+    data: user,
+    isLoading,
+    error: getUserError,
+    refetch,
+  } = useGetMeQuery(undefined, {
     skip: !localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN), // 토큰이 없으면 쿼리 실행 안함
   })
 
-  const [loginMutation, { isLoading: loginLoading, error: loginError }] = useLoginMutation()
+  const [loginMutation, { isLoading: loginLoading, error: loginError }] =
+    useLoginMutation()
   const [logoutMutation] = useLogoutMutation()
-  const [registerMutation, { isLoading: registerLoading, error: registerError }] = useRegisterMutation()
-  const [updateProfileMutation, { isLoading: updateLoading, error: updateError }] = useUpdateProfileMutation()
+  const [
+    registerMutation,
+    { isLoading: registerLoading, error: registerError },
+  ] = useRegisterMutation()
+  const [
+    updateProfileMutation,
+    { isLoading: updateLoading, error: updateError },
+  ] = useUpdateProfileMutation()
 
   // 토큰 관리 헬퍼 함수들
   const tokenManager = {
@@ -57,26 +65,29 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
       localStorage.removeItem(STORAGE_KEYS.USER_INFO)
     },
-    isLoggedIn: () => !!localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
+    isLoggedIn: () => !!localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN),
   }
 
   // 로그인 함수
-  const login = useCallback(async (credentials) => {
-    try {
-      const response = await loginMutation(credentials).unwrap()
-      const { user_info, access_token } = response
+  const login = useCallback(
+    async (credentials) => {
+      try {
+        const response = await loginMutation(credentials).unwrap()
+        const { user_info, access_token } = response
 
-      // 토큰과 사용자 정보 저장
-      tokenManager.setToken(access_token, user_info)
+        // 토큰과 사용자 정보 저장
+        tokenManager.setToken(access_token, user_info)
 
-      // RTK Query 캐시 갱신을 위해 쿼리 재실행
-      refetch()
+        // RTK Query 캐시 갱신을 위해 쿼리 재실행
+        refetch()
 
-      return response
-    } catch (error) {
-      throw error
-    }
-  }, [loginMutation, refetch])
+        return response
+      } catch (error) {
+        throw error
+      }
+    },
+    [loginMutation, refetch],
+  )
 
   // 로그아웃 함수
   const logout = useCallback(async () => {
@@ -92,44 +103,53 @@ export const AuthProvider = ({ children }) => {
     } finally {
       // 클라이언트 상태 정리
       tokenManager.clearTokens()
-      
+
       // RTK Query 캐시도 정리 (옵션)
       // 페이지 리로드로 캐시 자동 정리됨
     }
   }, [logoutMutation])
 
   // 회원가입 함수
-  const register = useCallback(async (userData) => {
-    try {
-      const response = await registerMutation(userData).unwrap()
-      return response
-    } catch (error) {
-      throw error
-    }
-  }, [registerMutation])
+  const register = useCallback(
+    async (userData) => {
+      try {
+        const response = await registerMutation(userData).unwrap()
+        return response
+      } catch (error) {
+        throw error
+      }
+    },
+    [registerMutation],
+  )
 
   // 사용자 정보 업데이트 함수
-  const updateUserProfile = useCallback(async (userData) => {
-    try {
-      const updatedUser = await updateProfileMutation(userData).unwrap()
-      
-      // localStorage에도 업데이트된 정보 저장
-      tokenManager.setUserInfo(updatedUser)
-      
-      return updatedUser
-    } catch (error) {
-      throw error
-    }
-  }, [updateProfileMutation])
+  const updateUserProfile = useCallback(
+    async (userData) => {
+      try {
+        const updatedUser = await updateProfileMutation(userData).unwrap()
+
+        // localStorage에도 업데이트된 정보 저장
+        tokenManager.setUserInfo(updatedUser)
+
+        return updatedUser
+      } catch (error) {
+        throw error
+      }
+    },
+    [updateProfileMutation],
+  )
 
   // Google OAuth 로그인 성공 후 처리 함수
-  const handleGoogleAuthSuccess = useCallback((userInfo, accessToken) => {
-    // 토큰과 사용자 정보 저장
-    tokenManager.setToken(accessToken, userInfo)
-    
-    // RTK Query 캐시 갱신
-    refetch()
-  }, [refetch])
+  const handleGoogleAuthSuccess = useCallback(
+    (userInfo, accessToken) => {
+      // 토큰과 사용자 정보 저장
+      tokenManager.setToken(accessToken, userInfo)
+
+      // RTK Query 캐시 갱신
+      refetch()
+    },
+    [refetch],
+  )
 
   // 에러 정리 함수
   const clearError = useCallback(() => {
@@ -137,12 +157,15 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   // 사용자 정보 직접 설정 함수 (OAuth 콜백 등에서 사용)
-  const setUser = useCallback((userData) => {
-    if (userData) {
-      tokenManager.setUserInfo(userData)
-      refetch() // 캐시 갱신
-    }
-  }, [refetch])
+  const setUser = useCallback(
+    (userData) => {
+      if (userData) {
+        tokenManager.setUserInfo(userData)
+        refetch() // 캐시 갱신
+      }
+    },
+    [refetch],
+  )
 
   // 인증 상태 직접 설정 함수 (OAuth 콜백 등에서 사용)
   const setIsAuthenticated = useCallback(() => {
@@ -182,7 +205,7 @@ export const AuthProvider = ({ children }) => {
     updateUser: updateUserProfile,
 
     // 토큰 관리 (기존 호환성)
-    tokenManager
+    tokenManager,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

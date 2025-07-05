@@ -13,10 +13,10 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/AuthContextRTK'
 import { GoogleIcon } from '@/components/icons'
 import { signUpSchema } from '@/schemas'
-import { authAPI } from '@/services/api'
+import { useGetGoogleAuthUrlQuery } from '@/store/api'
 import { useEmailVerification } from '@/hooks/useEmailVerification'
 import { EmailVerification } from './EmailVerification'
 import { SignUpSuccess } from './SignUpSuccess'
@@ -32,6 +32,9 @@ export function SignUpPage() {
   const navigate = useNavigate()
   const { register: registerUser } = useAuth()
   const emailRef = useRef()
+
+  // RTK Query hooks
+  const { data: googleAuthData } = useGetGoogleAuthUrlQuery()
 
   const {
     isEmailVerified,
@@ -95,9 +98,10 @@ export function SignUpPage() {
 
   const handleGoogleLogin = async () => {
     try {
-      const response = await authAPI.getGoogleAuthUrl()
-      if (response.auth_url) {
-        window.location.href = response.auth_url
+      if (googleAuthData?.auth_url) {
+        window.location.href = googleAuthData.auth_url
+      } else {
+        setSubmitError('구글 로그인 URL을 가져오는데 실패했습니다.')
       }
     } catch {
       setSubmitError('구글 로그인 URL을 가져오는데 실패했습니다.')

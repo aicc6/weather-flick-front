@@ -347,7 +347,7 @@ export function ProfilePage() {
       </div>
 
       {/* 회원탈퇴 모달 */}
-      <WithdrawModal 
+      <WithdrawModal
         open={showWithdrawModal}
         onOpenChange={setShowWithdrawModal}
         onWithdrawSuccess={handleWithdrawSuccess}

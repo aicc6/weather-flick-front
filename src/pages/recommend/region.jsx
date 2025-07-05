@@ -23,7 +23,7 @@ export default function RecommendRegionPage() {
   const {
     data: cities = [],
     isLoading: loading,
-    error: regionsError
+    error: regionsError,
   } = useGetActiveRegionsQuery()
 
   // 에러 메시지 처리
