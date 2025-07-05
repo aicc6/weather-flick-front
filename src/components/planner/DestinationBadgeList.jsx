@@ -14,6 +14,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { http } from '@/lib/http'
 
 /**
  * 선택된 목적지들을 뱃지 형태로 표시하는 컴포넌트
@@ -41,7 +42,8 @@ const DestinationListItem = ({
     if (!placeId || !date) return
     setLoading(true)
     setError(null)
-    fetch(`/api/weather/forecast-by-place-id?place_id=${placeId}&date=${date}`)
+    http
+      .GET(`/weather/forecast-by-place-id?place_id=${placeId}&date=${date}`)
       .then((res) => {
         if (!res.ok) throw new Error('날씨 정보 조회 실패')
         return res.json()

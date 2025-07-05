@@ -13,6 +13,7 @@ import {
   Share2,
   RefreshCw,
 } from '@/components/icons'
+import { http } from '@/lib/http'
 
 export default function RecommendResultPage() {
   const navigate = useNavigate()
@@ -78,11 +79,7 @@ export default function RecommendResultPage() {
 
       try {
         // 백엔드 API 호출
-        const response = await fetch('/api/travel-recommendations', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+        const response = await http.POST('/travel-recommendations', {
           body: JSON.stringify({
             region: region || '서울',
             period: period || '2박 3일',

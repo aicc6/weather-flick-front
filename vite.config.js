@@ -10,11 +10,6 @@ export default defineConfig({
     port: 5173,
     allowedHosts: true,
     proxy: {
-      '/api': {
-        target: 'http://localhost:8000',
-        changeOrigin: true,
-        secure: false,
-      },
       '/images': {
         target: 'https://images.unsplash.com',
         changeOrigin: true,

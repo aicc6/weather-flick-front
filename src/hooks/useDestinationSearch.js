@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useMemo } from 'react'
+import { http } from '@/lib/http'
 
 /**
  * 목적지 검색 및 자동완성을 위한 커스텀 훅
@@ -18,8 +19,8 @@ export default function useDestinationSearch() {
     }
 
     try {
-      const response = await fetch(
-        `/api/destinations/search?query=${encodeURIComponent(query)}`,
+      const response = await http.GET(
+        `/destinations/search?query=${encodeURIComponent(query)}`,
       )
       if (!response.ok) {
         throw new Error('검색 실패')

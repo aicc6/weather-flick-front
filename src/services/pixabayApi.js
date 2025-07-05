@@ -3,6 +3,8 @@ const PIXABAY_API_KEY =
   import.meta.env.VITE_PIXABAY_API_KEY || '47458629-86ae2cc2b9a0d70b38372a2ad'
 const PIXABAY_BASE_URL = 'https://pixabay.com/api/'
 
+import { http } from '@/lib/http'
+
 // 지역별 검색 키워드 매핑
 const regionSearchTerms = {
   seoul: ['Seoul Korea', 'Gyeongbokgung Palace', 'Myeongdong Seoul'],
@@ -68,7 +70,7 @@ export const searchImages = async (query, count = 3) => {
       order: 'popular',
     })
 
-    const response = await fetch(`${PIXABAY_BASE_URL}?${params}`)
+    const response = await http.GET(`${PIXABAY_BASE_URL}?${params}`)
 
     if (!response.ok) {
       throw new Error(`Pixabay API 오류: ${response.status}`)

@@ -9,6 +9,7 @@ import {
   getMultipleRegionImages,
   getFallbackImages,
 } from '@/services/pixabayApi'
+import { http } from '@/lib/http'
 
 export default function RecommendRegionPage() {
   const navigate = useNavigate()
@@ -24,7 +25,8 @@ export default function RecommendRegionPage() {
   // 백엔드에서 지역 목록 불러오기
   useEffect(() => {
     setLoading(true)
-    fetch('/api/local/resions_point')
+    http
+      .GET('/local/resions_point')
       .then((res) => res.json())
       .then((data) => {
         setCities(data.regions || [])

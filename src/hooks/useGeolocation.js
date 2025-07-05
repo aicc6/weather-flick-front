@@ -1,3 +1,4 @@
+import { http } from '@/services/api'
 import { useState, useCallback } from 'react'
 import { toast } from 'sonner'
 
@@ -31,8 +32,8 @@ export default function useGeolocation() {
         async (position) => {
           const { latitude: lat, longitude: lng } = position.coords
           try {
-            const res = await fetch(
-              `/api/location/reverse-geocode?lat=${lat}&lng=${lng}`,
+            const res = await http.GET(
+              `/location/reverse-geocode?lat=${lat}&lng=${lng}`,
             )
             const data = await res.json()
 

@@ -1,4 +1,4 @@
-import { http } from '@/lib/http'
+import { http, authHttp } from '@/lib/http'
 
 // 응답 처리 헬퍼
 const handleResponse = async (response) => {
@@ -29,7 +29,7 @@ const handleResponse = async (response) => {
 // 여행 플랜 생성
 export const createTravelPlan = async (planData) => {
   try {
-    const response = await http.POST('/api/travel-plans', { body: planData })
+    const response = await authHttp.POST('/travel-plans', { body: planData })
     return handleResponse(response)
   } catch (error) {
     console.error('여행 플랜 생성 실패:', error)
@@ -40,7 +40,7 @@ export const createTravelPlan = async (planData) => {
 // 사용자의 저장된 플랜 목록 조회
 export const getUserPlans = async () => {
   try {
-    const response = await http.GET('/api/travel-plans/user')
+    const response = await http.GET('/travel-plans/user')
     return handleResponse(response)
   } catch (error) {
     console.error('사용자 플랜 조회 실패:', error)
@@ -51,7 +51,7 @@ export const getUserPlans = async () => {
 // 특정 플랜 조회
 export const getPlanById = async (planId) => {
   try {
-    const response = await http.GET(`/api/travel-plans/${planId}`)
+    const response = await http.GET(`/travel-plans/${planId}`)
     return handleResponse(response)
   } catch (error) {
     console.error('플랜 조회 실패:', error)
@@ -62,7 +62,7 @@ export const getPlanById = async (planId) => {
 // 플랜 수정
 export const updatePlan = async (planId, planData) => {
   try {
-    const response = await http.PUT(`/api/travel-plans/${planId}`, {
+    const response = await http.PUT(`/travel-plans/${planId}`, {
       body: planData,
     })
     return handleResponse(response)
@@ -75,7 +75,7 @@ export const updatePlan = async (planId, planData) => {
 // 플랜 삭제
 export const deletePlan = async (planId) => {
   try {
-    const response = await http.DELETE(`/api/travel-plans/${planId}`)
+    const response = await http.DELETE(`/travel-plans/${planId}`)
     return handleResponse(response)
   } catch (error) {
     console.error('플랜 삭제 실패:', error)
@@ -86,7 +86,7 @@ export const deletePlan = async (planId) => {
 // 날씨 정보 조회 (여행지 기준)
 export const getWeatherInfo = async (destination, startDate, endDate) => {
   try {
-    const response = await http.GET('/api/weather/forecast', {
+    const response = await http.GET('/weather/forecast', {
       params: {
         query: {
           destination,
@@ -108,7 +108,7 @@ export const getDestinationRecommendations = async (
   weatherConditions = [],
 ) => {
   try {
-    const response = await http.GET('/api/destinations/recommend', {
+    const response = await http.GET('/destinations/recommend', {
       params: {
         query: {
           theme,
@@ -126,7 +126,7 @@ export const getDestinationRecommendations = async (
 // 플랜 공유
 export const sharePlan = async (planId, shareData) => {
   try {
-    const response = await http.POST(`/api/travel-plans/${planId}/share`, {
+    const response = await http.POST(`/travel-plans/${planId}/share`, {
       body: shareData,
     })
     return handleResponse(response)
