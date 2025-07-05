@@ -4,15 +4,17 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ChevronLeft, MapPin, List } from '@/components/icons'
-import KoreaMap from '@/components/KoreaMap'
 import GoogleKoreaMap from '@/components/GoogleKoreaMap'
-import { getMultipleRegionImages, getFallbackImages } from '@/services/pixabayApi'
+import {
+  getMultipleRegionImages,
+  getFallbackImages,
+} from '@/services/pixabayApi'
 
 export default function RecommendRegionPage() {
   const navigate = useNavigate()
   const [_searchParams] = useSearchParams()
   const [selectedRegion, setSelectedRegion] = useState(null)
-  const [viewMode, setViewMode] = useState('google-map') // 'map', 'list', 'google-map'
+  const [viewMode, setViewMode] = useState('google-map') // 'google-map', 'list'
   const [regionImages, setRegionImages] = useState({})
   const [imagesLoading, setImagesLoading] = useState(true)
 
@@ -20,18 +22,34 @@ export default function RecommendRegionPage() {
     domestic: {
       title: '🇰🇷 대한민국',
       cities: [
-        { id: 'seoul', name: '서울', description: '한국의 수도, 궁궐과 현대적 명소' },
+        {
+          id: 'seoul',
+          name: '서울',
+          description: '한국의 수도, 궁궐과 현대적 명소',
+        },
         { id: 'busan', name: '부산', description: '해변과 항구의 도시' },
         { id: 'jeju', name: '제주', description: '아름다운 섬, 자연과 휴양' },
-        { id: 'gangneung', name: '강릉·속초', description: '동해안의 바다와 산' },
+        {
+          id: 'gangneung',
+          name: '강릉·속초',
+          description: '동해안의 바다와 산',
+        },
         { id: 'gyeongju', name: '경주', description: '천년 고도, 역사와 문화' },
         { id: 'jeonju', name: '전주', description: '한옥마을과 전통 음식' },
         { id: 'yeosu', name: '여수', description: '아름다운 밤바다와 섬' },
         { id: 'incheon', name: '인천', description: '국제공항과 차이나타운' },
         { id: 'taean', name: '태안', description: '서해안의 해변과 낙조' },
         { id: 'pohang', name: '포항·안동', description: '전통문화와 자연경관' },
-        { id: 'gapyeong', name: '가평·양평', description: '수도권 근교 휴양지' },
-        { id: 'tongyeong', name: '통영·거제·남해', description: '남해안의 아름다운 섬들' },
+        {
+          id: 'gapyeong',
+          name: '가평·양평',
+          description: '수도권 근교 휴양지',
+        },
+        {
+          id: 'tongyeong',
+          name: '통영·거제·남해',
+          description: '남해안의 아름다운 섬들',
+        },
         { id: 'daegu', name: '대구', description: '약령시와 근대골목' },
         { id: 'gwangju', name: '광주', description: '예술과 문화의 도시' },
         { id: 'daejeon', name: '대전', description: '과학기술의 중심지' },
@@ -52,14 +70,14 @@ export default function RecommendRegionPage() {
   useEffect(() => {
     const loadRegionImages = async () => {
       setImagesLoading(true)
-      
+
       try {
-        const regionIds = regions.domestic.cities.map(city => city.id)
+        const regionIds = regions.domestic.cities.map((city) => city.id)
         const images = await getMultipleRegionImages(regionIds, 3)
-        
+
         // API에서 이미지를 가져오지 못한 지역에 대해 폴백 이미지 설정
         const completeImages = {}
-        regionIds.forEach(regionId => {
+        regionIds.forEach((regionId) => {
           if (images[regionId] && images[regionId].length > 0) {
             completeImages[regionId] = images[regionId]
           } else {
@@ -67,14 +85,14 @@ export default function RecommendRegionPage() {
             completeImages[regionId] = getFallbackImages(regionId, 3)
           }
         })
-        
+
         setRegionImages(completeImages)
       } catch (error) {
         console.error('이미지 로드 실패:', error)
-        
+
         // 모든 지역에 폴백 이미지 설정
         const fallbackImages = {}
-        regions.domestic.cities.forEach(city => {
+        regions.domestic.cities.forEach((city) => {
           fallbackImages[city.id] = getFallbackImages(city.id, 3)
         })
         setRegionImages(fallbackImages)
@@ -88,11 +106,15 @@ export default function RecommendRegionPage() {
 
   const getSelectedCityData = () => {
     if (!selectedRegion) return null
-    const cityData = regions.domestic.cities.find(city => city.id === selectedRegion.id)
+    const cityData = regions.domestic.cities.find(
+      (city) => city.id === selectedRegion.id,
+    )
     if (cityData) {
       return {
         ...cityData,
-        images: regionImages[selectedRegion.id] || getFallbackImages(selectedRegion.id, 3)
+        images:
+          regionImages[selectedRegion.id] ||
+          getFallbackImages(selectedRegion.id, 3),
       }
     }
     return null
@@ -114,8 +136,6 @@ export default function RecommendRegionPage() {
 
   const cycleViewMode = () => {
     if (viewMode === 'google-map') {
-      setViewMode('map')
-    } else if (viewMode === 'map') {
       setViewMode('list')
     } else {
       setViewMode('google-map')
@@ -126,8 +146,6 @@ export default function RecommendRegionPage() {
     switch (viewMode) {
       case 'google-map':
         return '실제 지도'
-      case 'map':
-        return 'SVG 지도'
       case 'list':
         return '목록 보기'
       default:
@@ -138,13 +156,11 @@ export default function RecommendRegionPage() {
   const getNextViewModeLabel = () => {
     switch (viewMode) {
       case 'google-map':
-        return 'SVG 지도'
-      case 'map':
         return '목록 보기'
       case 'list':
         return '실제 지도'
       default:
-        return 'SVG 지도'
+        return '목록 보기'
     }
   }
 
@@ -178,7 +194,6 @@ export default function RecommendRegionPage() {
               className="flex items-center gap-2"
             >
               {viewMode === 'google-map' && <MapPin className="h-4 w-4" />}
-              {viewMode === 'map' && <MapPin className="h-4 w-4" />}
               {viewMode === 'list' && <List className="h-4 w-4" />}
               {getNextViewModeLabel()}
             </Button>
@@ -195,12 +210,6 @@ export default function RecommendRegionPage() {
       {/* 뷰 모드별 컨텐츠 */}
       {viewMode === 'google-map' ? (
         <GoogleKoreaMap
-          cities={regions.domestic.cities}
-          selectedRegion={selectedRegion}
-          onRegionSelect={handleRegionSelect}
-        />
-      ) : viewMode === 'map' ? (
-        <KoreaMap
           cities={regions.domestic.cities}
           selectedRegion={selectedRegion}
           onRegionSelect={handleRegionSelect}
@@ -232,18 +241,22 @@ export default function RecommendRegionPage() {
                         </div>
                       ) : (
                         <img
-                          src={getCityImages(city.id)[0]?.url || 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop'}
+                          src={
+                            getCityImages(city.id)[0]?.url ||
+                            'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop'
+                          }
                           alt={`${city.name} 대표사진`}
                           className="h-full w-full object-cover transition-transform hover:scale-110"
                           loading="lazy"
                           onError={(e) => {
-                            e.target.src = 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop'
+                            e.target.src =
+                              'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop'
                           }}
                         />
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                     </div>
-                    
+
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <h3 className="font-semibold text-gray-900 dark:text-white">
@@ -258,11 +271,6 @@ export default function RecommendRegionPage() {
                       <p className="mt-1 text-sm leading-tight text-gray-600 dark:text-gray-300">
                         {city.description}
                       </p>
-                      {!imagesLoading && (
-                        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                          📸 {getCityImages(city.id).length}장의 사진
-                        </p>
-                      )}
                     </CardContent>
                   </Card>
                 ))}
@@ -327,13 +335,16 @@ export default function RecommendRegionPage() {
                           className="h-48 w-full object-cover transition-transform group-hover:scale-110"
                           loading="lazy"
                           onError={(e) => {
-                            e.target.src = 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop'
+                            e.target.src =
+                              'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop'
                           }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
                         <div className="absolute bottom-2 left-2 opacity-0 transition-opacity group-hover:opacity-100">
                           <span className="rounded-full bg-white/90 px-2 py-1 text-xs font-medium text-gray-800">
-                            {image.tags ? `#${image.tags.split(',')[0]}` : `사진 ${index + 1}`}
+                            {image.tags
+                              ? `#${image.tags.split(',')[0]}`
+                              : `사진 ${index + 1}`}
                           </span>
                         </div>
                         {image.user && (
