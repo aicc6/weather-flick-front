@@ -11,9 +11,16 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { format } from 'date-fns'
+import {
+  format,
+  addDays,
+  isBefore,
+  startOfToday,
+  differenceInCalendarDays,
+} from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'sonner'
 
 // 분리된 컴포넌트들
 import PlannerHeader from '@/components/planner/PlannerHeader'
@@ -131,9 +138,9 @@ const PlannerForm = memo(() => {
   )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 py-8 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 px-2 py-2 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <motion.div
-        className="mx-auto max-w-4xl"
+        className="mx-auto w-full max-w-2xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -141,7 +148,7 @@ const PlannerForm = memo(() => {
         {/* 헤더 */}
         <PlannerHeader />
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* 기본 정보 입력 */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -229,14 +236,68 @@ const PlannerForm = memo(() => {
                         <Calendar
                           mode="range"
                           selected={form.dateRange}
-                          onSelect={(range) =>
-                            setForm((prev) => ({
-                              ...prev,
-                              dateRange: range || { from: null, to: null },
-                            }))
-                          }
+                          onSelect={(range) => {
+                            if (range?.from && range?.to) {
+                              const maxEnd = addDays(range.from, 14)
+                              let to = range.to
+                              if (
+                                differenceInCalendarDays(to, range.from) > 14
+                              ) {
+                                to = maxEnd
+                                const isDark =
+                                  document.documentElement.classList.contains(
+                                    'dark',
+                                  )
+                                toast.error(
+                                  '여행 기간은 최대 15일까지 선택할 수 있습니다.',
+                                  {
+                                    duration: 3000,
+                                    position: 'top-center',
+                                    icon: '📅',
+                                    style: isDark
+                                      ? {
+                                          background:
+                                            'linear-gradient(90deg, #1e293b 0%, #334155 100%)',
+                                          color: '#f1f5f9',
+                                          fontWeight: 'bold',
+                                          borderRadius: '12px',
+                                          boxShadow:
+                                            '0 4px 24px 0 rgba(30,41,59,0.30)',
+                                          fontSize: '1.05rem',
+                                          padding: '1rem 1.5rem',
+                                          border: '1px solid #64748b',
+                                        }
+                                      : {
+                                          background:
+                                            'linear-gradient(90deg, #f9fafb 0%, #e0e7ff 100%)',
+                                          color: '#1e293b',
+                                          fontWeight: 'bold',
+                                          borderRadius: '12px',
+                                          boxShadow:
+                                            '0 4px 24px 0 rgba(30,41,59,0.10)',
+                                          fontSize: '1.05rem',
+                                          padding: '1rem 1.5rem',
+                                          border: '1px solid #a5b4fc',
+                                        },
+                                  },
+                                )
+                              }
+                              setForm((prev) => ({
+                                ...prev,
+                                dateRange: { from: range.from, to },
+                              }))
+                            } else {
+                              setForm((prev) => ({
+                                ...prev,
+                                dateRange: range || { from: null, to: null },
+                              }))
+                            }
+                          }}
                           numberOfMonths={2}
                           locale={ko}
+                          disabled={(date) => isBefore(date, startOfToday())}
+                          fromDate={startOfToday()}
+                          toDate={addDays(startOfToday(), 14)}
                         />
                       </PopoverContent>
                     </Popover>
@@ -340,11 +401,13 @@ const PlannerForm = memo(() => {
           </AnimatePresence>
 
           {/* 제출 버튼 */}
-          <SubmitButton
-            isSubmitting={isSubmitting}
-            disabled={isSubmitting || !isFormValid}
-            onSubmit={handleSubmit}
-          />
+          <div className="mt-6 mb-0 flex items-center justify-center pb-0">
+            <SubmitButton
+              isSubmitting={isSubmitting}
+              disabled={isSubmitting || !isFormValid}
+              onSubmit={handleSubmit}
+            />
+          </div>
         </form>
 
         {/* 플랜 결과 표시 영역 */}

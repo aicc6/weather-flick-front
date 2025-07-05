@@ -3,6 +3,7 @@ import { Suspense, lazy } from 'react'
 import { DefaultLayout } from './layouts/default-layout'
 import LoadingSpinner from './components/LoadingSpinner'
 import '@/App.css'
+import { Toaster } from './components/ui/sonner'
 
 // 핵심 페이지는 즉시 로드
 import { MainPage } from './pages/main'
@@ -56,55 +57,61 @@ const TravelCourseDetailPage = lazy(() => import('@/pages/destinations/detail'))
 
 function App() {
   return (
-    <BrowserRouter>
-      <DefaultLayout>
-        <Suspense fallback={<LoadingSpinner />}>
-          <Routes>
-            <Route path="/" element={<MainPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/sign-up" element={<SignUpPage />} />
-            <Route path="/recommend" element={<TravelCoursePage />} />
-            <Route path="/reviews" element={<ReviewsPage />} />
-            <Route path="/reviews/write" element={<ReviewWritePage />} />
-            <Route path="/customized-schedule" element={<RecommendPage />} />
-            <Route
-              path="/customized-schedule/region"
-              element={<RecommendRegionPage />}
-            />
-            <Route
-              path="/customized-schedule/period"
-              element={<RecommendPeriodPage />}
-            />
-            <Route
-              path="/customized-schedule/who"
-              element={<RecommendWhoPage />}
-            />
-            <Route
-              path="/customized-schedule/style"
-              element={<RecommendStylePage />}
-            />
-            <Route
-              path="/customized-schedule/schedule"
-              element={<RecommendSchedulePage />}
-            />
-            <Route
-              path="/customized-schedule/result"
-              element={<RecommendResultPage />}
-            />
-            <Route path="/recommend/:id" element={<TravelCourseDetailPage />} />
-            <Route path="/planner" element={<PlannerPage />} />
-            <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
-            <Route
-              path="/auth/google/callback"
-              element={<GoogleCallbackPage />}
-            />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/profile/edit" element={<ProfileEditPage />} />
-            <Route path="/change-password" element={<ChangePasswordPage />} />
-          </Routes>
-        </Suspense>
-      </DefaultLayout>
-    </BrowserRouter>
+    <>
+      <Toaster />
+      <BrowserRouter>
+        <DefaultLayout>
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              <Route path="/" element={<MainPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/sign-up" element={<SignUpPage />} />
+              <Route path="/recommend" element={<TravelCoursePage />} />
+              <Route path="/reviews" element={<ReviewsPage />} />
+              <Route path="/reviews/write" element={<ReviewWritePage />} />
+              <Route path="/customized-schedule" element={<RecommendPage />} />
+              <Route
+                path="/customized-schedule/region"
+                element={<RecommendRegionPage />}
+              />
+              <Route
+                path="/customized-schedule/period"
+                element={<RecommendPeriodPage />}
+              />
+              <Route
+                path="/customized-schedule/who"
+                element={<RecommendWhoPage />}
+              />
+              <Route
+                path="/customized-schedule/style"
+                element={<RecommendStylePage />}
+              />
+              <Route
+                path="/customized-schedule/schedule"
+                element={<RecommendSchedulePage />}
+              />
+              <Route
+                path="/customized-schedule/result"
+                element={<RecommendResultPage />}
+              />
+              <Route
+                path="/recommend/:id"
+                element={<TravelCourseDetailPage />}
+              />
+              <Route path="/planner" element={<PlannerPage />} />
+              <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
+              <Route
+                path="/auth/google/callback"
+                element={<GoogleCallbackPage />}
+              />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/profile/edit" element={<ProfileEditPage />} />
+              <Route path="/change-password" element={<ChangePasswordPage />} />
+            </Routes>
+          </Suspense>
+        </DefaultLayout>
+      </BrowserRouter>
+    </>
   )
 }
 
