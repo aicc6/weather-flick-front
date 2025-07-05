@@ -5,6 +5,7 @@ export { baseQuery, baseQueryWithReauth } from './baseQuery'
 export { authApi } from './authApi'
 export { travelPlansApi } from './travelPlansApi'
 export { destinationsApi } from './destinationsApi'
+export { weatherApi } from './weatherApi'
 
 // Export all hooks for convenience
 export {
@@ -30,7 +31,6 @@ export {
   useUpdateTravelPlanMutation,
   useDeleteTravelPlanMutation,
   useShareTravelPlanMutation,
-  useGetWeatherInfoQuery,
   useGetDestinationRecommendationsQuery,
   useGeneratePlanRecommendationMutation
 } from './travelPlansApi'
@@ -42,3 +42,14 @@ export {
   useGetDestinationsByRegionQuery,
   useGetDestinationDetailQuery
 } from './destinationsApi'
+
+export {
+  // Weather API hooks
+  useGetWeatherForecastQuery,
+  useGetWeatherByPlaceIdQuery,
+  useGetCurrentWeatherQuery,
+  useGetWeatherForecastByCityQuery,
+  useGetTravelWeatherScoreQuery,
+  useGetHistoricalWeatherQuery,
+  useGetWeatherByCoordinatesQuery
+} from './weatherApi'

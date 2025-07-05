@@ -1,4 +1,4 @@
-import { memo, useState, useEffect } from 'react'
+import { memo, useState } from 'react'
 import { X } from 'lucide-react'
 import {
   DndContext,
@@ -14,7 +14,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { http } from '@/lib/http'
+import { useGetWeatherByPlaceIdQuery } from '@/store/api'
 
 /**
  * 선택된 목적지들을 뱃지 형태로 표시하는 컴포넌트
@@ -34,24 +34,18 @@ const DestinationListItem = ({
   hovered,
   dragHandleProps,
 }) => {
-  const [weather, setWeather] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-
-  useEffect(() => {
-    if (!placeId || !date) return
-    setLoading(true)
-    setError(null)
-    http
-      .GET(`/weather/forecast-by-place-id?place_id=${placeId}&date=${date}`)
-      .then((res) => {
-        if (!res.ok) throw new Error('날씨 정보 조회 실패')
-        return res.json()
-      })
-      .then((data) => setWeather(data))
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false))
-  }, [placeId, date])
+  // RTK Query를 사용한 날씨 정보 조회
+  const { 
+    data: weather, 
+    isLoading: loading, 
+    error 
+  } = useGetWeatherByPlaceIdQuery(
+    { placeId, date },
+    { 
+      skip: !placeId || !date, // placeId나 date가 없으면 쿼리 실행 안함
+      refetchOnMountOrArgChange: true // 컴포넌트 마운트시 새로 요청
+    }
+  )
 
   return (
     <div className="mb-2 flex items-center gap-3 rounded-lg bg-blue-100 px-4 py-2 shadow-sm dark:bg-blue-900">

@@ -75,24 +75,6 @@ export const travelPlansApi = createApi({
       ]
     }),
 
-    // 날씨 정보 조회 (여행지 기준)
-    getWeatherInfo: builder.query({
-      query: ({ destination, startDate, endDate }) => ({
-        url: 'weather/forecast',
-        params: {
-          destination,
-          start_date: startDate,
-          end_date: endDate
-        }
-      }),
-      providesTags: (result, error, { destination, startDate, endDate }) => [
-        { 
-          type: 'Weather', 
-          id: `${destination}-${startDate}-${endDate}` 
-        }
-      ],
-      keepUnusedDataFor: 300 // 5분간 캐싱 (날씨 데이터는 자주 변경됨)
-    }),
 
     // 여행지 추천 (테마 기반)
     getDestinationRecommendations: builder.query({
@@ -128,7 +110,6 @@ export const {
   useUpdateTravelPlanMutation,
   useDeleteTravelPlanMutation,
   useShareTravelPlanMutation,
-  useGetWeatherInfoQuery,
   useGetDestinationRecommendationsQuery,
   useGeneratePlanRecommendationMutation
 } = travelPlansApi
