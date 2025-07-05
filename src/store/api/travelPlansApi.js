@@ -14,6 +14,10 @@ export const travelPlansApi = createApi({
         body: planData,
       }),
       invalidatesTags: ['TravelPlan'],
+      transformResponse: (response) => {
+        // 표준 응답 래퍼 처리: { success: true, data: {...}, error: null }
+        return response.success ? response.data : response
+      },
     }),
 
     // 사용자의 저장된 플랜 목록 조회
@@ -27,6 +31,9 @@ export const travelPlansApi = createApi({
             ]
           : [{ type: 'TravelPlan', id: 'LIST' }],
       keepUnusedDataFor: 300, // 5분간 캐싱
+      transformResponse: (response) => {
+        return response.success ? response.data : response
+      },
     }),
 
     // 특정 플랜 조회
@@ -36,6 +43,9 @@ export const travelPlansApi = createApi({
         { type: 'TravelPlan', id: planId },
       ],
       keepUnusedDataFor: 600, // 10분간 캐싱
+      transformResponse: (response) => {
+        return response.success ? response.data : response
+      },
     }),
 
     // 플랜 수정
@@ -49,6 +59,9 @@ export const travelPlansApi = createApi({
         { type: 'TravelPlan', id: planId },
         { type: 'TravelPlan', id: 'LIST' },
       ],
+      transformResponse: (response) => {
+        return response.success ? response.data : response
+      },
     }),
 
     // 플랜 삭제
@@ -61,6 +74,9 @@ export const travelPlansApi = createApi({
         { type: 'TravelPlan', id: planId },
         { type: 'TravelPlan', id: 'LIST' },
       ],
+      transformResponse: (response) => {
+        return response.success ? response.data : response
+      },
     }),
 
     // 플랜 공유
@@ -73,6 +89,9 @@ export const travelPlansApi = createApi({
       invalidatesTags: (result, error, { planId }) => [
         { type: 'TravelPlan', id: planId },
       ],
+      transformResponse: (response) => {
+        return response.success ? response.data : response
+      },
     }),
 
     // 여행지 추천 (테마 기반)

@@ -46,13 +46,9 @@ export {
 
 export {
   // Weather API hooks
-  useGetWeatherForecastQuery,
   useGetWeatherByPlaceIdQuery,
   useGetCurrentWeatherQuery,
   useGetWeatherForecastByCityQuery,
-  useGetTravelWeatherScoreQuery,
-  useGetHistoricalWeatherQuery,
-  useGetWeatherByCoordinatesQuery,
 } from './weatherApi'
 
 export {
