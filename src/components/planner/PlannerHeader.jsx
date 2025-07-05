@@ -17,7 +17,7 @@ const PlannerHeader = memo(() => {
           🌤️ AI 여행 플래너
         </h1>
         <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
-          날씨와 개인 취향을 고려한 똑똑한 여행 일정을 AI가 추천해드려요
+          14일 이후의 날씨 데이터는 알림으로 알려드립니다.
         </p>
       </motion.div>
     </div>
