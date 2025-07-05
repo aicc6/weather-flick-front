@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import PlannerForm from './PlannerForm'
-import WeatherPreview from './WeatherPreview'
 import PlanRecommendation from './PlanRecommendation'
 import SavePlanButton from './SavePlanButton'
 
@@ -50,7 +49,6 @@ export default function PlannerPage() {
         setPlanResults={setPlanResults}
         setIsLoading={setIsLoading}
       />
-      <WeatherPreview weatherData={weatherData} />
       <PlanRecommendation planResults={planResults} isLoading={isLoading} />
       <SavePlanButton planResults={planResults} />
     </div>
