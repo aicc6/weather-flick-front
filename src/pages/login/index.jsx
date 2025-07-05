@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -26,13 +26,20 @@ export function LoginPage() {
   const [submitError, setSubmitError] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
-  const { login } = useAuth()
+  const { login, isAuthenticated } = useAuth()
 
   // RTK Query 훅들
   const { data: googleAuthData } = useGetGoogleAuthUrlQuery()
 
   // 리다이렉트된 페이지 정보 가져오기
   const from = location.state?.from?.pathname || '/'
+
+  // 이미 로그인된 사용자는 홈으로 리다이렉트
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(from, { replace: true })
+    }
+  }, [isAuthenticated, navigate, from])
 
   const {
     register,
@@ -59,27 +66,27 @@ export function LoginPage() {
       }
 
       const loginResult = await login(credentials)
-      console.log('Login completed, result:', loginResult)
+      console.log('Login completed successfully:', loginResult)
 
-      // 상태 업데이트를 위한 약간의 지연 후 페이지 이동
-      setTimeout(() => {
-        console.log('Navigating to:', from)
-        navigate(from, { replace: true })
-      }, 200)
+      // 로그인 성공 시 즉시 리다이렉트 (useEffect가 처리하므로 따로 navigate 불필요)
+      
     } catch (error) {
-      // 백엔드에서 오는 에러 메시지 처리
-      if (error.response?.data?.detail) {
-        const errorMessage = error.response.data.detail
-
+      console.error('Login error:', error)
+      
+      // RTK Query 에러 처리
+      if (error?.data?.detail) {
+        const errorMessage = error.data.detail
         if (errorMessage.includes('Incorrect email or password')) {
           setSubmitError('이메일 또는 비밀번호가 올바르지 않습니다.')
         } else {
           setSubmitError(errorMessage)
         }
+      } else if (error?.status === 401) {
+        setSubmitError('이메일 또는 비밀번호가 올바르지 않습니다.')
+      } else if (error?.message) {
+        setSubmitError(error.message)
       } else {
-        setSubmitError(
-          '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.',
-        )
+        setSubmitError('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.')
       }
     } finally {
       setIsLoading(false)

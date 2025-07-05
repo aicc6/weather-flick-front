@@ -1,10 +1,12 @@
-import { createContext, useContext, useCallback, useMemo } from 'react'
+import { createContext, useContext, useCallback, useMemo, useState } from 'react'
+import { useDispatch } from 'react-redux'
 import {
   useGetMeQuery,
   useLoginMutation,
   useLogoutMutation,
   useRegisterMutation,
   useUpdateProfileMutation,
+  authApi,
 } from '@/store/api'
 import { STORAGE_KEYS } from '@/constants/storage'
 
@@ -19,6 +21,13 @@ export const useAuth = () => {
 }
 
 export const AuthProvider = ({ children }) => {
+  const dispatch = useDispatch()
+  
+  // 토큰 상태를 React state로 관리
+  const [hasToken, setHasToken] = useState(
+    !!localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
+  )
+
   // RTK Query hooks
   const {
     data: user,
@@ -26,7 +35,7 @@ export const AuthProvider = ({ children }) => {
     error: getUserError,
     refetch,
   } = useGetMeQuery(undefined, {
-    skip: !localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN), // 토큰이 없으면 쿼리 실행 안함
+    skip: !hasToken, // React state 기반으로 skip 결정
   })
 
   const [loginMutation, { isLoading: loginLoading, error: loginError }] =
@@ -46,6 +55,7 @@ export const AuthProvider = ({ children }) => {
     () => ({
       setToken: (token, userInfo) => {
         localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token)
+        setHasToken(true) // React state 업데이트
         if (userInfo) {
           localStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify(userInfo))
         }
@@ -65,10 +75,11 @@ export const AuthProvider = ({ children }) => {
       clearTokens: () => {
         localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
         localStorage.removeItem(STORAGE_KEYS.USER_INFO)
+        setHasToken(false) // React state 업데이트
       },
       isLoggedIn: () => !!localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN),
     }),
-    [],
+    [setHasToken],
   )
 
   // 로그인 함수
@@ -102,11 +113,11 @@ export const AuthProvider = ({ children }) => {
     } finally {
       // 클라이언트 상태 정리
       tokenManager.clearTokens()
-
-      // RTK Query 캐시도 정리 (옵션)
-      // 페이지 리로드로 캐시 자동 정리됨
+      
+      // RTK Query 캐시 리셋 - 사용자 정보 완전 제거
+      dispatch(authApi.util.resetApiState())
     }
-  }, [logoutMutation, tokenManager])
+  }, [logoutMutation, tokenManager, dispatch])
 
   // 회원가입 함수
   const register = useCallback(
@@ -165,7 +176,7 @@ export const AuthProvider = ({ children }) => {
   }, [refetch])
 
   // 현재 인증 상태 계산
-  const isAuthenticated = !!user && tokenManager.isLoggedIn()
+  const isAuthenticated = !!user && hasToken
   const loading = isLoading || loginLoading || registerLoading || updateLoading
 
   // 에러 통합 관리
