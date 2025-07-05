@@ -1,6 +1,21 @@
 // RTK Query Base Query exports
 export { baseQuery, baseQueryWithReauth } from './baseQuery'
 
-// 추후 API 모듈들을 여기에서 export
-// export { authApi } from './authApi'
-// export { weatherApi } from './weatherApi'
+// RTK Query API exports
+export { authApi } from './authApi'
+
+// Export all hooks for convenience
+export {
+  // Auth API hooks
+  useRegisterMutation,
+  useLoginMutation,
+  useLogoutMutation,
+  useGetMeQuery,
+  useUpdateProfileMutation,
+  useChangePasswordMutation,
+  useGetGoogleAuthUrlQuery,
+  useGoogleCallbackQuery,
+  useExchangeGoogleAuthCodeMutation,
+  useForgotPasswordMutation,
+  useWithdrawMutation
+} from './authApi'

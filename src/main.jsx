@@ -1,5 +1,7 @@
 import ReactDOM from 'react-dom/client'
-import { AuthProvider } from './contexts/AuthContext'
+import { Provider } from 'react-redux'
+import { store } from './store'
+import { AuthProvider } from './contexts/AuthContextRTK'
 import App from './App.jsx'
 import './index.css'
 import { Toaster } from './components/ui/sonner'
@@ -7,8 +9,10 @@ import { Toaster } from './components/ui/sonner'
 ReactDOM.createRoot(document.getElementById('root')).render(
   <>
     <Toaster />
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <Provider store={store}>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </Provider>
   </>,
 )
