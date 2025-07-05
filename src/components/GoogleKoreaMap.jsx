@@ -37,10 +37,184 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
     [],
   )
 
+  const addCityMarkers = useCallback(
+    (google, mapInstance) => {
+      // 기존 마커 제거
+      markersRef.current.forEach(({ marker }) => {
+        if (marker) {
+          if (marker.map !== undefined) {
+            // AdvancedMarkerElement
+            marker.map = null
+          } else if (marker.setMap) {
+            // 기존 Marker
+            marker.setMap(null)
+          }
+        }
+      })
+      markersRef.current = []
+
+      cities.forEach((city) => {
+        const coords = cityCoordinates[city.id]
+        if (!coords) return
+
+        const isSelected = selectedRegion?.id === city.id
+        const cityName = coords.name
+
+        // AdvancedMarkerElement용 HTML 마커 생성
+        const createMarkerElement = (color, size = 'normal') => {
+          // 도시 이름 축약 로직 개선
+          let displayName = cityName
+          if (cityName.includes('·')) {
+            // 중점(·)이 있는 경우 첫 번째 부분만 사용
+            displayName = cityName.split('·')[0]
+          }
+          if (displayName.length > 3) {
+            displayName = displayName.substring(0, 3)
+          }
+
+          const markerElement = document.createElement('div')
+          markerElement.className = 'custom-marker'
+          markerElement.style.cssText = `
+            position: relative;
+            cursor: pointer;
+            transform: translateY(-100%);
+            transition: all 0.2s ease;
+            ${isSelected ? 'animation: bounce 1s infinite;' : ''}
+          `
+
+          const width = size === 'large' ? 60 : size === 'medium' ? 55 : 50
+          const height = size === 'large' ? 72 : size === 'medium' ? 66 : 60
+
+          markerElement.innerHTML = `
+            <svg width="${width}" height="${height}" viewBox="0 0 50 60" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <filter id="shadow-${city.id}" x="-50%" y="-50%" width="200%" height="200%">
+                  <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.3)"/>
+                </filter>
+              </defs>
+              <path d="M25 0C11.2 0 0 11.2 0 25c0 18.75 25 35 25 35s25-16.25 25-35C50 11.2 38.8 0 25 0z" 
+                    fill="${color}" filter="url(#shadow-${city.id})"/>
+              <circle cx="25" cy="25" r="16" fill="#ffffff"/>
+              <circle cx="25" cy="25" r="13" fill="#ffffff"/>
+              <text x="25" y="30" text-anchor="middle" 
+                    font-family="Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif" 
+                    font-size="12" font-weight="600" fill="#333333">
+                ${displayName}
+              </text>
+            </svg>
+          `
+
+          // bounce 애니메이션 스타일 추가
+          if (isSelected && !document.querySelector('#bounce-animation')) {
+            const style = document.createElement('style')
+            style.id = 'bounce-animation'
+            style.textContent = `
+              @keyframes bounce {
+                0%, 20%, 50%, 80%, 100% { transform: translateY(-100%); }
+                40% { transform: translateY(-110%); }
+                60% { transform: translateY(-105%); }
+              }
+            `
+            document.head.appendChild(style)
+          }
+
+          return markerElement
+        }
+
+        const markerElement = createMarkerElement(
+          isSelected ? '#2563eb' : '#dc2626',
+          isSelected ? 'large' : 'normal',
+        )
+
+        // Map ID에 따라 마커 타입 결정
+        let marker
+        if (mapInstance.get('mapId')) {
+          // AdvancedMarkerElement 사용 (Map ID가 있는 경우)
+          marker = new google.maps.marker.AdvancedMarkerElement({
+            position: { lat: coords.lat, lng: coords.lng },
+            map: mapInstance,
+            content: markerElement,
+            title: coords.name,
+          })
+        } else {
+          // 기존 Marker 사용 (Map ID가 없는 경우)
+          const svgIcon = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(markerElement.innerHTML)}`
+          marker = new google.maps.Marker({
+            position: { lat: coords.lat, lng: coords.lng },
+            map: mapInstance,
+            icon: {
+              url: svgIcon,
+              scaledSize: new google.maps.Size(
+                isSelected ? 60 : 50,
+                isSelected ? 72 : 60,
+              ),
+              anchor: new google.maps.Point(
+                isSelected ? 30 : 25,
+                isSelected ? 72 : 60,
+              ),
+            },
+            title: coords.name,
+          })
+        }
+
+        // 마커 클릭 이벤트
+        marker.addListener('click', () => {
+          onRegionSelect(city.id, coords.name)
+        })
+
+        // 마커 호버 이벤트 (AdvancedMarkerElement용)
+        markerElement.addEventListener('mouseenter', () => {
+          setHoveredRegion(city.id)
+          // 호버 시 마커 업데이트
+          const hoverElement = createMarkerElement(
+            isSelected ? '#2563eb' : '#3b82f6',
+            isSelected ? 'large' : 'medium',
+          )
+          marker.content = hoverElement
+
+          // 새로운 요소에도 이벤트 리스너 추가
+          hoverElement.addEventListener('mouseleave', () => {
+            setHoveredRegion(null)
+            const normalElement = createMarkerElement(
+              isSelected ? '#2563eb' : '#dc2626',
+              isSelected ? 'large' : 'normal',
+            )
+            marker.content = normalElement
+          })
+        })
+
+        // InfoWindow 생성
+        const infoWindow = new google.maps.InfoWindow({
+          content: `
+          <div style="padding: 8px; font-family: 'Pretendard', sans-serif;">
+            <h3 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 600; color: #1f2937;">${coords.name}</h3>
+            <p style="margin: 0; font-size: 12px; color: #6b7280;">${city.description}</p>
+          </div>
+        `,
+        })
+
+        // 마커 클릭시 InfoWindow 표시
+        marker.addListener('click', () => {
+          // 다른 InfoWindow 닫기
+          markersRef.current.forEach(({ infoWindow: iw }) => {
+            if (iw && iw.close) {
+              iw.close()
+            }
+          })
+          infoWindow.open(mapInstance, marker)
+        })
+
+        markersRef.current.push({ marker, infoWindow })
+      })
+    },
+    [cities, selectedRegion, onRegionSelect, cityCoordinates],
+  )
+
   useEffect(() => {
     const initMap = async () => {
-      // API 키 확인
+      // API 키 및 Map ID 확인
       const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+      const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || 'DEMO_MAP_ID'
 
       if (
         !apiKey ||
@@ -54,10 +228,13 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
         console.log('1. 프로젝트 루트에 .env 파일 생성')
         console.log('2. VITE_GOOGLE_MAPS_API_KEY=your_actual_api_key_here 추가')
         console.log(
-          '3. Google Cloud Console에서 Maps JavaScript API 활성화 및 API 키 발급',
+          '3. VITE_GOOGLE_MAPS_MAP_ID=your_map_id_here 추가 (선택사항)',
         )
         console.log(
-          '4. 자세한 설정 방법은 GOOGLE_MAPS_SETUP.md 파일을 참고하세요.',
+          '4. Google Cloud Console에서 Maps JavaScript API 활성화 및 API 키 발급',
+        )
+        console.log(
+          '5. 자세한 설정 방법은 GOOGLE_MAPS_SETUP.md 파일을 참고하세요.',
         )
         setError(errorMsg)
         return
@@ -66,13 +243,14 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
       const loader = new Loader({
         apiKey: apiKey,
         version: 'weekly',
-        libraries: ['places'],
+        libraries: ['places', 'marker'],
       })
 
       try {
         const google = await loader.load()
 
-        const mapInstance = new google.maps.Map(mapRef.current, {
+        // Map 설정 (Map ID 사용 시 styles 제외)
+        const mapConfig = {
           center: { lat: 36.5, lng: 127.5 }, // 한국 중심부
           zoom: 7,
           restriction: {
@@ -91,7 +269,14 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
           streetViewControl: false,
           rotateControl: false,
           fullscreenControl: false,
-          styles: [
+        }
+
+        // Map ID가 DEMO_MAP_ID가 아닌 경우에만 mapId 설정
+        if (mapId && mapId !== 'DEMO_MAP_ID') {
+          mapConfig.mapId = mapId
+        } else {
+          // Map ID가 없거나 DEMO_MAP_ID인 경우 styles 적용
+          mapConfig.styles = [
             {
               featureType: 'all',
               elementType: 'labels.text.fill',
@@ -122,8 +307,10 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
               elementType: 'all',
               stylers: [{ color: '#46bcec' }, { visibility: 'on' }],
             },
-          ],
-        })
+          ]
+        }
+
+        const mapInstance = new google.maps.Map(mapRef.current, mapConfig)
 
         setMap(mapInstance)
         setIsLoaded(true)
@@ -149,132 +336,6 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
 
     initMap()
   }, [addCityMarkers])
-
-  const addCityMarkers = useCallback(
-    (google, mapInstance) => {
-      // 기존 마커 제거
-      markersRef.current.forEach(({ marker }) => {
-        if (marker && marker.setMap) {
-          marker.setMap(null)
-        }
-      })
-      markersRef.current = []
-
-      cities.forEach((city) => {
-        const coords = cityCoordinates[city.id]
-        if (!coords) return
-
-        const isSelected = selectedRegion?.id === city.id
-        const cityName = coords.name
-
-        // 지도 핀 모양의 SVG 마커 생성
-        const createPinIcon = (color, _textColor = '#ffffff') => {
-          // 도시 이름 축약 로직 개선
-          let displayName = cityName
-          if (cityName.includes('·')) {
-            // 중점(·)이 있는 경우 첫 번째 부분만 사용
-            displayName = cityName.split('·')[0]
-          }
-          if (displayName.length > 3) {
-            displayName = displayName.substring(0, 3)
-          }
-
-          const svg = `
-          <svg width="50" height="60" viewBox="0 0 50 60" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-                <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.3)"/>
-              </filter>
-            </defs>
-            <!-- 핀 모양 -->
-            <path d="M25 0C11.2 0 0 11.2 0 25c0 18.75 25 35 25 35s25-16.25 25-35C50 11.2 38.8 0 25 0z" fill="${color}" filter="url(#shadow)"/>
-            <!-- 내부 원 -->
-            <circle cx="25" cy="25" r="16" fill="#ffffff"/>
-            <!-- 텍스트 배경 -->
-            <circle cx="25" cy="25" r="13" fill="#ffffff"/>
-            <!-- 텍스트 -->
-            <text x="25" y="30" text-anchor="middle" font-family="Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif" font-size="12" font-weight="600" fill="#333333">
-              ${displayName}
-            </text>
-          </svg>
-        `
-          return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg)
-        }
-
-        // 마커 아이콘 설정
-        const markerIcon = {
-          url: createPinIcon(isSelected ? '#2563eb' : '#dc2626', '#ffffff'),
-          scaledSize: new google.maps.Size(
-            isSelected ? 60 : 50,
-            isSelected ? 72 : 60,
-          ),
-          anchor: new google.maps.Point(
-            isSelected ? 30 : 25,
-            isSelected ? 72 : 60,
-          ),
-        }
-
-        const marker = new google.maps.Marker({
-          position: { lat: coords.lat, lng: coords.lng },
-          map: mapInstance,
-          icon: markerIcon,
-          title: coords.name,
-          animation: isSelected ? google.maps.Animation.BOUNCE : null,
-        })
-
-        // 마커 클릭 이벤트
-        marker.addListener('click', () => {
-          onRegionSelect(city.id, coords.name)
-        })
-
-        // 마커 호버 이벤트
-        marker.addListener('mouseover', () => {
-          setHoveredRegion(city.id)
-          const hoverIcon = {
-            url: createPinIcon(isSelected ? '#2563eb' : '#3b82f6', '#ffffff'),
-            scaledSize: new google.maps.Size(
-              isSelected ? 60 : 55,
-              isSelected ? 72 : 66,
-            ),
-            anchor: new google.maps.Point(
-              isSelected ? 30 : 27.5,
-              isSelected ? 72 : 66,
-            ),
-          }
-          marker.setIcon(hoverIcon)
-        })
-
-        marker.addListener('mouseout', () => {
-          setHoveredRegion(null)
-          marker.setIcon(markerIcon)
-        })
-
-        // InfoWindow 생성
-        const infoWindow = new google.maps.InfoWindow({
-          content: `
-          <div style="padding: 8px; font-family: 'Pretendard', sans-serif;">
-            <h3 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 600; color: #1f2937;">${coords.name}</h3>
-            <p style="margin: 0; font-size: 12px; color: #6b7280;">${city.description}</p>
-          </div>
-        `,
-        })
-
-        // 마커 클릭시 InfoWindow 표시
-        marker.addListener('click', () => {
-          // 다른 InfoWindow 닫기
-          markersRef.current.forEach(({ infoWindow: iw }) => {
-            if (iw && iw.close) {
-              iw.close()
-            }
-          })
-          infoWindow.open(mapInstance, marker)
-        })
-
-        markersRef.current.push({ marker, infoWindow })
-      })
-    },
-    [cities, selectedRegion, onRegionSelect, cityCoordinates],
-  )
 
   // 선택된 지역이 변경될 때 마커 업데이트
   useEffect(() => {
