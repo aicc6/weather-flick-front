@@ -24,9 +24,20 @@ export function Header() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth > 950)
 
-  const { user, isLoggedIn, logout, loading } = useAuth()
+  const { user, isLoggedIn, isAuthenticated, logout, loading } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+
+  // 디버깅용 로그 (개발 중에만 사용)
+  useEffect(() => {
+    console.log('Header render - Auth state:', {
+      user: !!user,
+      isLoggedIn,
+      isAuthenticated,
+      loading,
+      userExists: !!user
+    })
+  }, [user, isLoggedIn, isAuthenticated, loading])
 
   // 현재 경로가 메뉴 항목과 일치하는지 확인하는 함수
   const isActiveRoute = (path) => {
@@ -165,7 +176,7 @@ export function Header() {
             <div className="flex items-center space-x-4">
               {loading ? (
                 <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700" />
-              ) : isLoggedIn && user ? (
+              ) : user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -298,7 +309,7 @@ export function Header() {
 
           {/* 사이드바 하단 */}
           <div className="border-t border-gray-200 p-4 dark:border-gray-700">
-            {isLoggedIn && user ? (
+            {user ? (
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
                   <Avatar className="h-8 w-8">

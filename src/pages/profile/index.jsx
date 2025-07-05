@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { WithdrawModal } from '@/components/WithdrawModal'
 import {
   Mail,
   Calendar,
@@ -25,6 +26,7 @@ export function ProfilePage() {
   const [recentPlans, setRecentPlans] = useState([])
   const [favoritePlaces, setFavoritePlaces] = useState([])
   const [loading, setLoading] = useState(true)
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false)
 
   useEffect(() => {
     // 여행 플랜과 즐겨찾기 데이터 로드 (실제 API 호출로 대체)
@@ -71,12 +73,12 @@ export function ProfilePage() {
   }
 
   const handleDeleteAccount = () => {
-    if (
-      window.confirm('정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')
-    ) {
-      // 회원탈퇴 로직 구현
-      console.log('회원탈퇴 처리')
-    }
+    setShowWithdrawModal(true)
+  }
+
+  const handleWithdrawSuccess = () => {
+    // 회원탈퇴 성공 후 홈으로 이동
+    navigate('/')
   }
 
   const formatDate = (dateString) => {
@@ -343,6 +345,13 @@ export function ProfilePage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* 회원탈퇴 모달 */}
+      <WithdrawModal 
+        open={showWithdrawModal}
+        onOpenChange={setShowWithdrawModal}
+        onWithdrawSuccess={handleWithdrawSuccess}
+      />
     </div>
   )
 }

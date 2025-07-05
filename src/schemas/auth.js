@@ -34,6 +34,18 @@ export const loginSchema = z.object({
   password: z.string().min(1, '비밀번호를 입력해주세요.'),
 })
 
+// 비밀번호 찾기 폼 스키마
+export const forgotPasswordSchema = z.object({
+  nickname: z
+    .string()
+    .min(2, '닉네임은 2자 이상이어야 합니다.')
+    .max(50, '닉네임은 50자 이하여야 합니다.'),
+  email: z
+    .string()
+    .min(1, '이메일을 입력해주세요.')
+    .email('올바른 이메일 형식을 입력해주세요.'),
+})
+
 // 에러 메시지 매핑 (인증 관련)
 export const authErrorMessages = {
   'Email already registered': '이미 등록된 이메일입니다.',
