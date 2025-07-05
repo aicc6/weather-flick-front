@@ -23,7 +23,7 @@ alwaysApply: true
 - **Styling**: TailwindCSS 4.1.10
 - **UI Components**: shadcn/ui + Radix UI
 - **Router**: React Router DOM 7.6.2
-- **State**: React Context + Redux Toolkit 2.8.2
+- **State**: Redux Toolkit 2.8.2 + RTK Query (API 상태 관리)
 - **Forms**: React Hook Form 7.58.1 + Zod 3.25.67
 
 ## 📁 필수 프로젝트 구조
@@ -43,7 +43,9 @@ src/
 ├── layouts/              # 레이아웃 컴포넌트
 ├── contexts/             # React Context (인증 등)
 ├── hooks/                # 커스텀 훅 (6개)
-├── services/             # API 서비스 (2개)
+├── store/                # Redux Store + RTK Query APIs
+│   ├── api/              # RTK Query API 모듈 (5개)
+│   └── index.js          # Store 설정
 ├── utils/                # 유틸리티 함수
 ├── data/                 # 정적 데이터 (5개)
 ├── schemas/              # Zod 스키마 (2개)
@@ -446,6 +448,317 @@ const LoginForm = memo(({ onSuccess, className }) => {
 LoginForm.displayName = 'LoginForm'
 
 export default LoginForm
+```
+
+### 6. RTK Query API 패턴 (필수 사용)
+
+**⚠️ 중요: 모든 HTTP 요청은 RTK Query를 사용해야 합니다. fetch, axios 등 직접 사용 금지**
+
+```jsx
+// store/api/destinationsApi.js
+import { createApi } from '@reduxjs/toolkit/query/react'
+import { baseQueryWithReauth } from './baseQuery'
+
+export const destinationsApi = createApi({
+  reducerPath: 'destinationsApi',
+  baseQuery: baseQueryWithReauth,
+  tagTypes: ['Destination'],
+  endpoints: (builder) => ({
+    // 목적지 검색 (백엔드 스펙 준수)
+    searchDestinations: builder.query({
+      query: ({ query, limit = 10 }) => ({
+        url: 'destinations/search',
+        params: { query, limit },
+      }),
+      providesTags: (result, error, { query }) => [
+        { type: 'Destination', id: `search-${query}` },
+      ],
+      keepUnusedDataFor: 300, // 5분간 캐싱
+      transformResponse: (response) => {
+        // 백엔드 응답 구조: { suggestions: [...] }
+        return response.suggestions || []
+      },
+    }),
+
+    // 지역별 목적지 조회
+    getDestinationsByRegion: builder.query({
+      query: ({ regionCode, page = 1, limit = 20 }) => ({
+        url: `destinations/region/${regionCode}`,
+        params: { page, limit },
+      }),
+      providesTags: (result, error, { regionCode }) => [
+        { type: 'Destination', id: `region-${regionCode}` },
+      ],
+      keepUnusedDataFor: 600, // 10분간 캐싱
+      serializeQueryArgs: ({ queryArgs }) => {
+        // 페이지네이션을 위한 직렬화
+        const { regionCode, ...params } = queryArgs
+        return { regionCode, params }
+      },
+      merge: (currentCache, newItems, { arg }) => {
+        // 페이지네이션 병합 로직
+        if (arg.page === 1) {
+          return newItems
+        }
+        return [...currentCache, ...newItems]
+      },
+      forceRefetch: ({ currentArg, previousArg }) => {
+        return currentArg?.page !== previousArg?.page
+      },
+    }),
+
+    // 목적지 상세 정보
+    getDestinationDetail: builder.query({
+      query: (destinationId) => `destinations/${destinationId}`,
+      providesTags: (result, error, destinationId) => [
+        { type: 'Destination', id: destinationId },
+      ],
+      keepUnusedDataFor: 1800, // 30분간 캐싱
+    }),
+  }),
+})
+
+// Hook 내보내기 (필수)
+export const {
+  useSearchDestinationsQuery,
+  useGetDestinationsByRegionQuery,
+  useGetDestinationDetailQuery,
+} = destinationsApi
+```
+
+#### RTK Query 컴포넌트 사용 패턴
+
+```jsx
+// components/DestinationSearch.jsx
+import React, { memo, useState, useCallback } from 'react'
+import { useSearchDestinationsQuery } from '@/store/api'
+import { useDebounce } from '@/hooks/useDebounce'
+
+const DestinationSearch = memo(({ onSelect, className }) => {
+  const [query, setQuery] = useState('')
+  const debouncedQuery = useDebounce(query, 300)
+
+  // RTK Query 훅 사용 (필수 패턴)
+  const {
+    data: destinations = [],
+    error,
+    isLoading,
+    isFetching,
+  } = useSearchDestinationsQuery(
+    { query: debouncedQuery, limit: 10 },
+    {
+      // 빈 검색어일 때 요청 건너뛰기
+      skip: !debouncedQuery.trim(),
+      // 실시간 검색을 위한 폴링 (옵션)
+      pollingInterval: 0,
+      // 캐시 데이터 사용 설정
+      refetchOnMountOrArgChange: 30, // 30초 후 재요청
+    }
+  )
+
+  const handleInputChange = useCallback((e) => {
+    setQuery(e.target.value)
+  }, [])
+
+  const handleDestinationSelect = useCallback((destination) => {
+    onSelect?.(destination)
+    setQuery('')
+  }, [onSelect])
+
+  // 로딩 상태 처리
+  if (isLoading) {
+    return <div className="text-center">검색 중...</div>
+  }
+
+  // 에러 처리
+  if (error) {
+    return (
+      <div className="rounded-md bg-red-50 p-3 text-red-800">
+        검색 중 오류가 발생했습니다: {error.message}
+      </div>
+    )
+  }
+
+  return (
+    <div className={cn("relative", className)}>
+      <Input
+        value={query}
+        onChange={handleInputChange}
+        placeholder="목적지를 검색하세요"
+        className="w-full"
+      />
+      
+      {/* 로딩 인디케이터 (백그라운드 요청) */}
+      {isFetching && (
+        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+        </div>
+      )}
+
+      {/* 검색 결과 */}
+      {destinations.length > 0 && (
+        <div className="absolute top-full z-10 mt-1 w-full rounded-md border bg-white shadow-lg">
+          {destinations.map((destination) => (
+            <button
+              key={destination.place_id}
+              onClick={() => handleDestinationSelect(destination)}
+              className="w-full px-4 py-2 text-left hover:bg-gray-50"
+            >
+              <div className="font-medium">{destination.description}</div>
+              {destination.photo_url && (
+                <img
+                  src={destination.photo_url}
+                  alt={destination.description}
+                  className="mt-1 h-12 w-20 rounded object-cover"
+                  loading="lazy"
+                />
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+})
+
+DestinationSearch.displayName = 'DestinationSearch'
+export default DestinationSearch
+```
+
+#### RTK Query Mutation 패턴
+
+```jsx
+// components/TravelPlanForm.jsx
+import React, { memo, useCallback } from 'react'
+import { useForm } from 'react-hook-form'
+import { useCreateTravelPlanMutation } from '@/store/api'
+import { toast } from 'sonner'
+
+const TravelPlanForm = memo(({ onSuccess }) => {
+  const { register, handleSubmit, reset, formState: { errors } } = useForm()
+
+  // RTK Query Mutation 훅 사용
+  const [createTravelPlan, { 
+    isLoading, 
+    error,
+    isSuccess,
+    isError 
+  }] = useCreateTravelPlanMutation()
+
+  const onSubmit = useCallback(async (formData) => {
+    try {
+      // unwrap()을 사용하여 Promise 형태로 처리 (필수)
+      const result = await createTravelPlan(formData).unwrap()
+      
+      // 성공 처리
+      toast.success('여행 계획이 성공적으로 생성되었습니다!')
+      reset()
+      onSuccess?.(result)
+    } catch (error) {
+      // 에러 처리 (RTK Query 에러 구조)
+      const errorMessage = error.data?.detail || error.message || '생성에 실패했습니다'
+      toast.error(errorMessage)
+      console.error('여행 계획 생성 오류:', error)
+    }
+  }, [createTravelPlan, reset, onSuccess])
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {/* 에러 표시 */}
+      {isError && error && (
+        <div className="rounded-md bg-red-50 p-3 text-red-800">
+          {error.data?.detail || '오류가 발생했습니다'}
+        </div>
+      )}
+
+      <div>
+        <Label htmlFor="title">여행 제목</Label>
+        <Input
+          id="title"
+          {...register('title', { required: '제목을 입력해주세요' })}
+          disabled={isLoading}
+        />
+        {errors.title && (
+          <p className="text-sm text-red-600">{errors.title.message}</p>
+        )}
+      </div>
+
+      <Button
+        type="submit"
+        disabled={isLoading}
+        className="w-full"
+      >
+        {isLoading ? '생성 중...' : '여행 계획 생성'}
+      </Button>
+    </form>
+  )
+})
+
+TravelPlanForm.displayName = 'TravelPlanForm'
+export default TravelPlanForm
+```
+
+#### RTK Query 최적화 패턴
+
+```jsx
+// hooks/useOptimizedDestinations.js
+import { useMemo } from 'react'
+import { useGetDestinationsByRegionQuery } from '@/store/api'
+
+/**
+ * 지역별 목적지 최적화 훅
+ * 캐싱, 필터링, 정렬 등 최적화된 데이터 제공
+ */
+export const useOptimizedDestinations = (regionCode, filters = {}) => {
+  const {
+    data: rawDestinations = [],
+    isLoading,
+    error,
+    refetch,
+  } = useGetDestinationsByRegionQuery(
+    { regionCode, ...filters },
+    {
+      // 지역이 없으면 요청 건너뛰기
+      skip: !regionCode,
+      // 5분 간격으로 백그라운드 업데이트
+      pollingInterval: 300000,
+      // 마운트 시 30초 이내 데이터가 있으면 재요청 안함
+      refetchOnMountOrArgChange: 30,
+    }
+  )
+
+  // 필터링 및 정렬된 목적지 (메모이제이션 필수)
+  const optimizedDestinations = useMemo(() => {
+    if (!rawDestinations?.length) return []
+
+    return rawDestinations
+      .filter(dest => {
+        // 활성화된 목적지만
+        if (!dest.is_active) return false
+        
+        // 카테고리 필터
+        if (filters.category && dest.category !== filters.category) return false
+        
+        // 평점 필터
+        if (filters.minRating && dest.rating < filters.minRating) return false
+        
+        return true
+      })
+      .sort((a, b) => {
+        // 평점 높은 순으로 정렬
+        return b.rating - a.rating
+      })
+  }, [rawDestinations, filters])
+
+  return {
+    destinations: optimizedDestinations,
+    isLoading,
+    error,
+    refetch,
+    hasData: optimizedDestinations.length > 0,
+    isEmpty: !isLoading && optimizedDestinations.length === 0,
+  }
+}
 ```
 
 ### 5. Context 최적화 패턴 (필수)
@@ -938,6 +1251,12 @@ npm run type-check        # 타입 검사
 # 4. 테스트 실행
 npm run test              # 단위 테스트
 npm run test:coverage     # 테스트 커버리지
+
+# 5. RTK Query 검증
+# - 모든 API 호출이 RTK Query 훅을 사용하는지 확인
+# - services/api.js 같은 레거시 모듈이 없는지 확인
+# - fetch, axios 직접 사용이 없는지 확인
+# - 적절한 캐싱 및 에러 처리가 구현되었는지 확인
 ```
 
 ### 2. 컴포넌트 개발 순서
@@ -960,6 +1279,12 @@ npm run test:coverage     # 테스트 커버리지
 - ❌ window.location.reload() 직접 호출
 - ❌ document.getElementById() 사용 (ref 사용)
 
+### API 요청
+- ❌ fetch, axios, 기타 HTTP 클라이언트 직접 사용
+- ❌ services/api.js 같은 레거시 API 모듈 생성
+- ❌ RTK Query 없는 API 상태 관리
+- ❌ 수동 캐싱 및 로딩 상태 관리
+
 ### 성능
 - ❌ memo, useCallback, useMemo 없는 컴포넌트
 - ❌ prop drilling (Context나 Redux 사용)
@@ -974,8 +1299,7 @@ npm run test:coverage     # 테스트 커버리지
 
 ## ✅ 필수 체크리스트
 
-모든 컴포넌트는 다음을 만족해야 합니다:
-
+### 모든 컴포넌트 (기본 요구사항)
 - [ ] React.memo로 감싸기
 - [ ] useCallback으로 이벤트 핸들러 메모이제이션
 - [ ] useMemo로 계산된 값 메모이제이션
@@ -988,5 +1312,25 @@ npm run test:coverage     # 테스트 커버리지
 - [ ] 반응형 디자인 적용 (Mobile First)
 - [ ] 테스트 작성
 - [ ] Early Return 패턴 적용
+
+### API 통신 컴포넌트 (RTK Query 필수)
+- [ ] RTK Query 훅 사용 (useXXXQuery, useXXXMutation)
+- [ ] 적절한 캐싱 전략 설정 (keepUnusedDataFor, refetchOnMountOrArgChange)
+- [ ] skip 옵션으로 조건부 요청 구현
+- [ ] transformResponse로 데이터 정규화
+- [ ] 에러 상태 처리 (error.data?.detail)
+- [ ] 로딩 상태 구분 (isLoading vs isFetching)
+- [ ] Mutation에서 unwrap() 사용
+- [ ] 적절한 태그 기반 캐시 무효화
+
+### RTK Query API 모듈
+- [ ] baseQueryWithReauth 사용
+- [ ] 적절한 tagTypes 정의
+- [ ] providesTags와 invalidatesTags 설정
+- [ ] 백엔드 스펙에 맞는 엔드포인트 URL
+- [ ] 응답 구조에 맞는 transformResponse
+- [ ] 적절한 캐싱 시간 설정
+- [ ] 페이지네이션 지원 (필요시)
+- [ ] 에러 처리 로직
 
 이 규칙들을 엄격히 준수하여 고성능, 접근성, 유지보수성을 모두 갖춘 Weather Flick 프론트엔드를 개발하세요.
