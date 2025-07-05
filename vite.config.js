@@ -10,17 +10,17 @@ export default defineConfig({
     port: 5173,
     allowedHosts: true,
     proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
       '/images': {
-        target: 'https://images.unsplash.com',
+        target: 'https://pixabay.com/api',
         changeOrigin: true,
         secure: true,
         rewrite: (path) => path.replace(/^\/images/, ''),
-      },
-      '/google-api': {
-        target: 'https://www.googleapis.com',
-        changeOrigin: true,
-        secure: true,
-        rewrite: (path) => path.replace(/^\/google-api/, ''),
       },
     },
   },
