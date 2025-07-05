@@ -29,19 +29,36 @@ const DestinationAutocomplete = memo(
           exit={{ opacity: 0, y: -10 }}
           className="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
         >
-          {suggestions.map((suggestion, index) => (
-            <button
-              key={`${suggestion}-${index}`}
-              type="button"
-              className="w-full border-b border-gray-100 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
-              onMouseDown={() => handleSelect(suggestion)}
-            >
-              <div className="flex items-center gap-2">
-                <MapPin className="text-muted-foreground h-4 w-4" />
-                <span className="text-sm">{suggestion}</span>
-              </div>
-            </button>
-          ))}
+          {suggestions.map((suggestion, index) => {
+            // suggestion이 string이면 description으로, 객체면 그대로 사용
+            const desc =
+              typeof suggestion === 'string'
+                ? suggestion
+                : suggestion.description
+            const photoUrl =
+              typeof suggestion === 'object' && suggestion.photo_url
+            return (
+              <button
+                key={desc + '-' + index}
+                type="button"
+                className="w-full border-b border-gray-100 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
+                onMouseDown={() => handleSelect(suggestion)}
+              >
+                <div className="flex items-center gap-2">
+                  {photoUrl ? (
+                    <img
+                      src={photoUrl}
+                      alt="장소 사진"
+                      className="h-7 w-7 rounded border border-gray-200 bg-gray-100 object-cover dark:border-gray-700 dark:bg-gray-700"
+                    />
+                  ) : (
+                    <MapPin className="text-muted-foreground h-5 w-5" />
+                  )}
+                  <span className="text-sm">{desc}</span>
+                </div>
+              </button>
+            )
+          })}
         </motion.div>
       </AnimatePresence>
     )

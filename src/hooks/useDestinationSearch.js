@@ -19,7 +19,7 @@ export default function useDestinationSearch() {
 
     try {
       const response = await fetch(
-        `/api/destinations/search?q=${encodeURIComponent(query)}`,
+        `/api/destinations/search?query=${encodeURIComponent(query)}`,
       )
       if (!response.ok) {
         throw new Error('검색 실패')

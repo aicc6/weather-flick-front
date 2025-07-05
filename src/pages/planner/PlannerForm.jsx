@@ -40,8 +40,12 @@ const PlannerForm = memo(() => {
   // 커스텀 훅 사용
   const { getCurrentLocation, isLocating } = useGeolocation()
   const { getDatesInRange } = useDateRange()
-  const { destinationsByDate, addDestination, removeDestination } =
-    useDestinationManager()
+  const {
+    destinationsByDate,
+    addDestination,
+    removeDestination,
+    reorderDestinations,
+  } = useDestinationManager()
   const {
     destInputs,
     destSuggestions,
@@ -318,6 +322,9 @@ const PlannerForm = memo(() => {
                                 destinations={destinationsByDate[dateStr] || []}
                                 onRemove={(destination) =>
                                   handleRemoveDestination(dateStr, destination)
+                                }
+                                onReorder={(newOrder) =>
+                                  reorderDestinations(dateStr, newOrder)
                                 }
                               />
                             </CardContent>
