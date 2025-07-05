@@ -17,97 +17,67 @@ export default function RecommendRegionPage() {
   const [viewMode, setViewMode] = useState('google-map') // 'google-map', 'list'
   const [regionImages, setRegionImages] = useState({})
   const [imagesLoading, setImagesLoading] = useState(true)
+  const [cities, setCities] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  const regions = {
-    domestic: {
-      title: '🇰🇷 대한민국',
-      cities: [
-        {
-          id: 'seoul',
-          name: '서울',
-          description: '한국의 수도, 궁궐과 현대적 명소',
-        },
-        { id: 'busan', name: '부산', description: '해변과 항구의 도시' },
-        { id: 'jeju', name: '제주', description: '아름다운 섬, 자연과 휴양' },
-        {
-          id: 'gangneung',
-          name: '강릉·속초',
-          description: '동해안의 바다와 산',
-        },
-        { id: 'gyeongju', name: '경주', description: '천년 고도, 역사와 문화' },
-        { id: 'jeonju', name: '전주', description: '한옥마을과 전통 음식' },
-        { id: 'yeosu', name: '여수', description: '아름다운 밤바다와 섬' },
-        { id: 'incheon', name: '인천', description: '국제공항과 차이나타운' },
-        { id: 'taean', name: '태안', description: '서해안의 해변과 낙조' },
-        { id: 'pohang', name: '포항·안동', description: '전통문화와 자연경관' },
-        {
-          id: 'gapyeong',
-          name: '가평·양평',
-          description: '수도권 근교 휴양지',
-        },
-        {
-          id: 'tongyeong',
-          name: '통영·거제·남해',
-          description: '남해안의 아름다운 섬들',
-        },
-        { id: 'daegu', name: '대구', description: '약령시와 근대골목' },
-        { id: 'gwangju', name: '광주', description: '예술과 문화의 도시' },
-        { id: 'daejeon', name: '대전', description: '과학기술의 중심지' },
-        { id: 'ulsan', name: '울산', description: '고래와 산업의 도시' },
-        { id: 'chuncheon', name: '춘천', description: '호수와 닭갈비의 도시' },
-        { id: 'mokpo', name: '목포', description: '서남해안의 항구도시' },
-        { id: 'sokcho', name: '속초', description: '설악산과 동해의 만남' },
-        { id: 'andong', name: '안동', description: '전통문화와 한옥마을' },
-      ],
-    },
-  }
+  // 백엔드에서 지역 목록 불러오기
+  useEffect(() => {
+    setLoading(true)
+    fetch('/api/local/resions_point')
+      .then((res) => res.json())
+      .then((data) => {
+        setCities(data.regions || [])
+        setLoading(false)
+      })
+      .catch((err) => {
+        setError('지역 목록을 불러오지 못했습니다')
+        setLoading(false)
+      })
+  }, [])
 
-  const handleRegionSelect = (regionId, regionName) => {
-    setSelectedRegion({ id: regionId, name: regionName })
+  const handleRegionSelect = (regionCode, regionName) => {
+    setSelectedRegion({ id: regionCode, name: regionName })
   }
 
   // Pixabay API를 사용해 지역별 이미지 로드
   useEffect(() => {
+    if (!cities.length) return
     const loadRegionImages = async () => {
       setImagesLoading(true)
-
       try {
-        const regionIds = regions.domestic.cities.map((city) => city.id)
+        const regionIds = cities.map((city) => city.region_code)
         const images = await getMultipleRegionImages(regionIds, 3)
-
-        // API에서 이미지를 가져오지 못한 지역에 대해 폴백 이미지 설정
         const completeImages = {}
         regionIds.forEach((regionId) => {
           if (images[regionId] && images[regionId].length > 0) {
             completeImages[regionId] = images[regionId]
           } else {
-            // 폴백 이미지 사용
             completeImages[regionId] = getFallbackImages(regionId, 3)
           }
         })
-
         setRegionImages(completeImages)
       } catch (error) {
         console.error('이미지 로드 실패:', error)
-
-        // 모든 지역에 폴백 이미지 설정
         const fallbackImages = {}
-        regions.domestic.cities.forEach((city) => {
-          fallbackImages[city.id] = getFallbackImages(city.id, 3)
+        cities.forEach((city) => {
+          fallbackImages[city.region_code] = getFallbackImages(
+            city.region_code,
+            3,
+          )
         })
         setRegionImages(fallbackImages)
       } finally {
         setImagesLoading(false)
       }
     }
-
     loadRegionImages()
-  }, [])
+  }, [cities])
 
   const getSelectedCityData = () => {
     if (!selectedRegion) return null
-    const cityData = regions.domestic.cities.find(
-      (city) => city.id === selectedRegion.id,
+    const cityData = cities.find(
+      (city) => city.region_code === selectedRegion.id,
     )
     if (cityData) {
       return {
@@ -120,8 +90,8 @@ export default function RecommendRegionPage() {
     return null
   }
 
-  const getCityImages = (cityId) => {
-    return regionImages[cityId] || getFallbackImages(cityId, 3)
+  const getCityImages = (regionCode) => {
+    return regionImages[regionCode] || getFallbackImages(regionCode, 3)
   }
 
   const handleNext = () => {
@@ -163,6 +133,9 @@ export default function RecommendRegionPage() {
         return '목록 보기'
     }
   }
+
+  if (loading) return <div>로딩 중...</div>
+  if (error) return <div className="text-red-500">{error}</div>
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
@@ -210,73 +183,79 @@ export default function RecommendRegionPage() {
       {/* 뷰 모드별 컨텐츠 */}
       {viewMode === 'google-map' ? (
         <GoogleKoreaMap
-          cities={regions.domestic.cities}
+          cities={cities.map((city) => ({
+            id: city.region_code,
+            name: city.region_name,
+            description: city.parent_region_code || '',
+            latitude: city.latitude,
+            longitude: city.longitude,
+          }))}
           selectedRegion={selectedRegion}
-          onRegionSelect={handleRegionSelect}
+          onRegionSelect={(id, name) => handleRegionSelect(id, name)}
         />
       ) : (
         <div className="space-y-8">
-          {Object.entries(regions).map(([categoryKey, category]) => (
-            <div key={categoryKey}>
-              <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-900 dark:text-white">
-                <MapPin className="h-5 w-5" />
-                {category.title}
-              </h2>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {category.cities.map((city) => (
-                  <Card
-                    key={city.id}
-                    className={`cursor-pointer overflow-hidden transition-all hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 ${
-                      selectedRegion?.id === city.id
-                        ? 'bg-blue-50 ring-2 ring-blue-500 dark:bg-blue-900/20 dark:ring-blue-400'
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-700'
-                    }`}
-                    onClick={() => handleRegionSelect(city.id, city.name)}
-                  >
-                    {/* 대표 이미지 */}
-                    <div className="relative h-32 overflow-hidden">
-                      {imagesLoading ? (
-                        <div className="flex h-full w-full items-center justify-center bg-gray-200 dark:bg-gray-700">
-                          <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
-                        </div>
-                      ) : (
-                        <img
-                          src={
-                            getCityImages(city.id)[0]?.url ||
-                            'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop'
-                          }
-                          alt={`${city.name} 대표사진`}
-                          className="h-full w-full object-cover transition-transform hover:scale-110"
-                          loading="lazy"
-                          onError={(e) => {
-                            e.target.src =
-                              'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop'
-                          }}
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                    </div>
-
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-gray-900 dark:text-white">
-                          {city.name}
-                        </h3>
-                        {selectedRegion?.id === city.id && (
-                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500">
-                            <span className="text-xs text-white">✓</span>
-                          </div>
-                        )}
+          <div>
+            <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-900 dark:text-white">
+              <MapPin className="h-5 w-5" />
+              대한민국
+            </h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {cities.map((city) => (
+                <Card
+                  key={city.region_code}
+                  className={`cursor-pointer overflow-hidden transition-all hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 ${
+                    selectedRegion?.id === city.region_code
+                      ? 'bg-blue-50 ring-2 ring-blue-500 dark:bg-blue-900/20 dark:ring-blue-400'
+                      : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                  onClick={() =>
+                    handleRegionSelect(city.region_code, city.region_name)
+                  }
+                >
+                  {/* 대표 이미지 */}
+                  <div className="relative h-32 overflow-hidden">
+                    {imagesLoading ? (
+                      <div className="flex h-full w-full items-center justify-center bg-gray-200 dark:bg-gray-700">
+                        <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
                       </div>
-                      <p className="mt-1 text-sm leading-tight text-gray-600 dark:text-gray-300">
-                        {city.description}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                    ) : (
+                      <img
+                        src={
+                          getCityImages(city.region_code)[0]?.url ||
+                          'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop'
+                        }
+                        alt={`${city.region_name} 대표사진`}
+                        className="h-full w-full object-cover transition-transform hover:scale-110"
+                        loading="lazy"
+                        onError={(e) => {
+                          e.target.src =
+                            'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop'
+                        }}
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                  </div>
+
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-gray-900 dark:text-white">
+                        {city.region_name}
+                      </h3>
+                      {selectedRegion?.id === city.region_code && (
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500">
+                          <span className="text-xs text-white">✓</span>
+                        </div>
+                      )}
+                    </div>
+                    <p className="mt-1 text-sm leading-tight text-gray-600 dark:text-gray-300">
+                      {city.parent_region_code || ''}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       )}
 
@@ -298,7 +277,7 @@ export default function RecommendRegionPage() {
                     {selectedRegion.name}
                   </Badge>
                   <p className="text-sm text-gray-600 dark:text-gray-300">
-                    {getSelectedCityData()?.description}
+                    {getSelectedCityData()?.parent_region_code || ''}
                   </p>
                 </div>
               </div>

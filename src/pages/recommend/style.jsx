@@ -79,6 +79,13 @@ export default function RecommendStylePage() {
       icon: '🍽️',
       examples: '맛집, 로컬 푸드, 시장 음식, 특산물',
     },
+    {
+      id: 'pet',
+      label: '애완동물과 함께',
+      description: '반려동물과 함께 여행하고 싶어요',
+      icon: '🐾',
+      examples: '애견동반 숙소, 펫카페, 반려견 놀이터, 펫프렌들리 여행지',
+    },
   ]
 
   const handleStyleToggle = (styleId) => {

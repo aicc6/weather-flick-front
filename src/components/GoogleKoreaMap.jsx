@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Loader } from '@googlemaps/js-api-loader'
 import { MapPin } from '@/components/icons'
 
@@ -9,33 +9,6 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
   const [error, setError] = useState(null)
   const mapRef = useRef(null)
   const markersRef = useRef([])
-
-  // 각 도시의 정확한 좌표 (위도, 경도)
-  const cityCoordinates = useMemo(
-    () => ({
-      seoul: { lat: 37.5665, lng: 126.978, name: '서울' },
-      busan: { lat: 35.1796, lng: 129.0756, name: '부산' },
-      jeju: { lat: 33.4996, lng: 126.5312, name: '제주' },
-      gangneung: { lat: 37.7519, lng: 128.8761, name: '강릉·속초' },
-      gyeongju: { lat: 35.8562, lng: 129.2247, name: '경주' },
-      jeonju: { lat: 35.8242, lng: 127.1479, name: '전주' },
-      yeosu: { lat: 34.7604, lng: 127.6622, name: '여수' },
-      incheon: { lat: 37.4563, lng: 126.7052, name: '인천' },
-      taean: { lat: 36.7455, lng: 126.2983, name: '태안' },
-      pohang: { lat: 36.019, lng: 129.3435, name: '포항·안동' },
-      gapyeong: { lat: 37.8314, lng: 127.5109, name: '가평·양평' },
-      tongyeong: { lat: 34.8543, lng: 128.4331, name: '통영·거제·남해' },
-      daegu: { lat: 35.8714, lng: 128.6014, name: '대구' },
-      gwangju: { lat: 35.1595, lng: 126.8526, name: '광주' },
-      daejeon: { lat: 36.3504, lng: 127.3845, name: '대전' },
-      ulsan: { lat: 35.5384, lng: 129.3114, name: '울산' },
-      chuncheon: { lat: 37.8813, lng: 127.7298, name: '춘천' },
-      mokpo: { lat: 34.8118, lng: 126.3922, name: '목포' },
-      sokcho: { lat: 38.207, lng: 128.5918, name: '속초' },
-      andong: { lat: 36.5684, lng: 128.7294, name: '안동' },
-    }),
-    [],
-  )
 
   const addCityMarkers = useCallback(
     (google, mapInstance) => {
@@ -54,11 +27,9 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
       markersRef.current = []
 
       cities.forEach((city) => {
-        const coords = cityCoordinates[city.id]
-        if (!coords) return
-
-        const isSelected = selectedRegion?.id === city.id
-        const cityName = coords.name
+        if (!city.latitude || !city.longitude) return
+        const isSelected = selectedRegion?.id === city.region_code
+        const cityName = city.region_name
 
         // AdvancedMarkerElement용 HTML 마커 생성
         const createMarkerElement = (color, size = 'normal') => {
@@ -88,16 +59,16 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
           markerElement.innerHTML = `
             <svg width="${width}" height="${height}" viewBox="0 0 50 60" xmlns="http://www.w3.org/2000/svg">
               <defs>
-                <filter id="shadow-${city.id}" x="-50%" y="-50%" width="200%" height="200%">
+                <filter id="shadow-${city.region_code}" x="-50%" y="-50%" width="200%" height="200%">
                   <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.3)"/>
                 </filter>
               </defs>
-              <path d="M25 0C11.2 0 0 11.2 0 25c0 18.75 25 35 25 35s25-16.25 25-35C50 11.2 38.8 0 25 0z" 
-                    fill="${color}" filter="url(#shadow-${city.id})"/>
+              <path d="M25 0C11.2 0 0 11.2 0 25c0 18.75 25 35 25 35s25-16.25 25-35C50 11.2 38.8 0 25 0z"
+                    fill="${color}" filter="url(#shadow-${city.region_code})"/>
               <circle cx="25" cy="25" r="16" fill="#ffffff"/>
               <circle cx="25" cy="25" r="13" fill="#ffffff"/>
-              <text x="25" y="30" text-anchor="middle" 
-                    font-family="Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif" 
+              <text x="25" y="30" text-anchor="middle"
+                    font-family="Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif"
                     font-size="12" font-weight="600" fill="#333333">
                 ${displayName}
               </text>
@@ -129,18 +100,16 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
         // Map ID에 따라 마커 타입 결정
         let marker
         if (mapInstance.get('mapId')) {
-          // AdvancedMarkerElement 사용 (Map ID가 있는 경우)
           marker = new google.maps.marker.AdvancedMarkerElement({
-            position: { lat: coords.lat, lng: coords.lng },
+            position: { lat: city.latitude, lng: city.longitude },
             map: mapInstance,
             content: markerElement,
-            title: coords.name,
+            title: cityName,
           })
         } else {
-          // 기존 Marker 사용 (Map ID가 없는 경우)
           const svgIcon = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(markerElement.innerHTML)}`
           marker = new google.maps.Marker({
-            position: { lat: coords.lat, lng: coords.lng },
+            position: { lat: city.latitude, lng: city.longitude },
             map: mapInstance,
             icon: {
               url: svgIcon,
@@ -153,18 +122,18 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
                 isSelected ? 72 : 60,
               ),
             },
-            title: coords.name,
+            title: cityName,
           })
         }
 
         // 마커 클릭 이벤트
         marker.addListener('click', () => {
-          onRegionSelect(city.id, coords.name)
+          onRegionSelect(city.region_code, city.region_name)
         })
 
         // 마커 호버 이벤트 (AdvancedMarkerElement용)
         markerElement.addEventListener('mouseenter', () => {
-          setHoveredRegion(city.id)
+          setHoveredRegion(city.region_code)
           // 호버 시 마커 업데이트
           const hoverElement = createMarkerElement(
             isSelected ? '#2563eb' : '#3b82f6',
@@ -187,7 +156,7 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
         const infoWindow = new google.maps.InfoWindow({
           content: `
           <div style="padding: 8px; font-family: 'Pretendard', sans-serif;">
-            <h3 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 600; color: #1f2937;">${coords.name}</h3>
+            <h3 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 600; color: #1f2937;">${cityName}</h3>
             <p style="margin: 0; font-size: 12px; color: #6b7280;">${city.description}</p>
           </div>
         `,
@@ -207,7 +176,7 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
         markersRef.current.push({ marker, infoWindow })
       })
     },
-    [cities, selectedRegion, onRegionSelect, cityCoordinates],
+    [cities, selectedRegion, onRegionSelect],
   )
 
   useEffect(() => {
@@ -520,11 +489,17 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-blue-600" />
               <span className="font-semibold text-blue-800 dark:text-blue-200">
-                {cities.find((city) => city.id === hoveredRegion)?.name}
+                {
+                  cities.find((city) => city.region_code === hoveredRegion)
+                    ?.region_name
+                }
               </span>
             </div>
             <p className="mt-1 text-sm text-blue-700 dark:text-blue-300">
-              {cities.find((city) => city.id === hoveredRegion)?.description}
+              {
+                cities.find((city) => city.region_code === hoveredRegion)
+                  ?.description
+              }
             </p>
           </div>
         )}
