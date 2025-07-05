@@ -115,6 +115,24 @@ export const authAPI = {
     })
     return handleResponse(response)
   },
+
+  // 비밀번호 찾기 (임시 비밀번호 발급)
+  forgotPassword: async (userData) => {
+    // 백엔드가 이메일만 받으므로 임시로 이메일만 전송
+    const requestData = { email: userData.email }
+    const response = await http.POST('auth/forgot-password', {
+      body: requestData,
+    })
+    return handleResponse(response)
+  },
+
+  // 회원탈퇴
+  withdraw: async (withdrawData) => {
+    const response = await authHttp.DELETE('auth/withdraw', {
+      body: withdrawData,
+    })
+    return handleResponse(response)
+  },
 }
 
 // 토큰 관리
