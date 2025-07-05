@@ -17,8 +17,8 @@ import {
 export default function RecommendResultPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const [isLoading, setIsLoading] = useState(true)
   const [recommendations, setRecommendations] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   const region = searchParams.get('region')
   const period = searchParams.get('period')
@@ -26,6 +26,50 @@ export default function RecommendResultPage() {
   const who = searchParams.get('who')
   const styles = searchParams.get('styles')
   const schedule = searchParams.get('schedule')
+
+  // Mock 데이터 생성 함수를 useEffect 위로 이동
+  const generateMockItinerary = useCallback(() => {
+    const daysCount = parseInt(days) || 3
+    const itinerary = []
+
+    for (let day = 1; day <= daysCount; day++) {
+      itinerary.push({
+        day: day,
+        date: `2024-${String(day + 5).padStart(2, '0')}-${String(day + 14).padStart(2, '0')}`,
+        places: [
+          {
+            id: `${day}-1`,
+            name: `${region || '서울'} 대표 명소 ${day}`,
+            category: '관광지',
+            time: '09:00 - 11:00',
+            description: '아름다운 풍경과 포토존으로 유명한 곳',
+            rating: 4.5,
+            tags: ['사진', '관광', '인기'],
+          },
+          {
+            id: `${day}-2`,
+            name: `로컬 맛집 ${day}`,
+            category: '맛집',
+            time: '12:00 - 13:30',
+            description: '현지인들이 추천하는 숨은 맛집',
+            rating: 4.7,
+            tags: ['맛집', '현지', '추천'],
+          },
+          {
+            id: `${day}-3`,
+            name: `힐링 카페 ${day}`,
+            category: '카페',
+            time: '15:00 - 17:00',
+            description: '여유로운 시간을 보내기 좋은 감성 카페',
+            rating: 4.3,
+            tags: ['카페', '힐링', '감성'],
+          },
+        ],
+      })
+    }
+
+    return itinerary
+  }, [days, region])
 
   // 모의 추천 데이터 생성
   useEffect(() => {
@@ -92,49 +136,6 @@ export default function RecommendResultPage() {
 
     generateRecommendations()
   }, [region, period, days, who, styles, schedule, generateMockItinerary])
-
-  const generateMockItinerary = useCallback(() => {
-    const daysCount = parseInt(days) || 3
-    const itinerary = []
-
-    for (let day = 1; day <= daysCount; day++) {
-      itinerary.push({
-        day: day,
-        date: `2024-${String(day + 5).padStart(2, '0')}-${String(day + 14).padStart(2, '0')}`,
-        places: [
-          {
-            id: `${day}-1`,
-            name: `${region || '서울'} 대표 명소 ${day}`,
-            category: '관광지',
-            time: '09:00 - 11:00',
-            description: '아름다운 풍경과 포토존으로 유명한 곳',
-            rating: 4.5,
-            tags: ['사진', '관광', '인기'],
-          },
-          {
-            id: `${day}-2`,
-            name: `로컬 맛집 ${day}`,
-            category: '맛집',
-            time: '12:00 - 13:30',
-            description: '현지인들이 추천하는 숨은 맛집',
-            rating: 4.7,
-            tags: ['맛집', '현지', '추천'],
-          },
-          {
-            id: `${day}-3`,
-            name: `힐링 카페 ${day}`,
-            category: '카페',
-            time: '15:00 - 17:00',
-            description: '여유로운 시간을 보내기 좋은 감성 카페',
-            rating: 4.3,
-            tags: ['카페', '힐링', '감성'],
-          },
-        ],
-      })
-    }
-
-    return itinerary
-  }, [days, region])
 
   const handleBack = () => {
     navigate(
