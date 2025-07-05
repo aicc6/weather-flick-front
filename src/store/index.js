@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { authApi, travelPlansApi } from './api'
+import { authApi, travelPlansApi, destinationsApi } from './api'
 
 // RTK Query 통합 스토어 설정
 export const store = configureStore({
@@ -7,6 +7,7 @@ export const store = configureStore({
     // RTK Query API reducers
     [authApi.reducerPath]: authApi.reducer,
     [travelPlansApi.reducerPath]: travelPlansApi.reducer,
+    [destinationsApi.reducerPath]: destinationsApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -16,6 +17,7 @@ export const store = configureStore({
     })
     // RTK Query middleware 추가
     .concat(authApi.middleware)
-    .concat(travelPlansApi.middleware),
+    .concat(travelPlansApi.middleware)
+    .concat(destinationsApi.middleware),
   devTools: import.meta.env.MODE !== 'production',
 })

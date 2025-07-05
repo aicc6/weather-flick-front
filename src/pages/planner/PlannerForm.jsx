@@ -32,7 +32,7 @@ import SubmitButton from '@/components/planner/SubmitButton'
 import useGeolocation from '@/hooks/useGeolocation'
 import useDateRange from '@/hooks/useDateRange'
 import useDestinationManager from '@/hooks/useDestinationManager'
-import useDestinationSearch from '@/hooks/useDestinationSearch'
+import useDestinationSearchRTK from '@/hooks/useDestinationSearchRTK'
 import usePlanSubmissionRTK from '@/hooks/usePlanSubmissionRTK'
 
 const PlannerForm = memo(() => {
@@ -57,11 +57,13 @@ const PlannerForm = memo(() => {
     destInputs,
     destSuggestions,
     showDestDropdown,
-    _activeDateInput,
+    activeDateInput: _activeDateInput,
     updateDestInput,
     hideDropdown,
     showDropdown,
-  } = useDestinationSearch()
+    isSearching,
+    searchError,
+  } = useDestinationSearchRTK()
   const { isSubmitting, plans, submitPlan, error } = usePlanSubmissionRTK()
 
   // 현재 위치 자동 감지

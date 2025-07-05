@@ -4,6 +4,7 @@ export { baseQuery, baseQueryWithReauth } from './baseQuery'
 // RTK Query API exports
 export { authApi } from './authApi'
 export { travelPlansApi } from './travelPlansApi'
+export { destinationsApi } from './destinationsApi'
 
 // Export all hooks for convenience
 export {
@@ -33,3 +34,11 @@ export {
   useGetDestinationRecommendationsQuery,
   useGeneratePlanRecommendationMutation
 } from './travelPlansApi'
+
+export {
+  // Destinations API hooks
+  useSearchDestinationsQuery,
+  useGetDestinationRecommendationsQuery as useGetDestinationRecommendationsQueryDest,
+  useGetDestinationsByRegionQuery,
+  useGetDestinationDetailQuery
+} from './destinationsApi'
