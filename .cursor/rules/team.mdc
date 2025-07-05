@@ -10,21 +10,21 @@ alwaysApply: true
 
 ## 🎯 프로젝트 컨텍스트
 
+이 파일은 Weather Flick 사용자 웹 애플리케이션의 특화 규칙입니다. 전역 규칙은 워크스페이스 규칙을 참조하세요.
+
 ### 역할 및 책임
 - **사용자 웹 애플리케이션**: React 18 기반 여행 날씨 서비스 (포트: 5173)
 - **여행 플래너**: 날씨 기반 여행지 추천 및 계획 도구
 - **반응형 디자인**: 모바일, 태블릿, 데스크탑 최적화
 - **사용자 인터랙션**: 지도 연동, 실시간 날씨, 소셜 로그인
-- **27개 페이지**: 메인, 플래너, 추천, 프로필, 인증 등
 
-### 기술 스택
+### 기술 스택 (워크스페이스 표준 준수)
 - **Framework**: React 18.3.1 + Vite 6.3.5
 - **Styling**: TailwindCSS 4.1.10
 - **UI Components**: shadcn/ui + Radix UI
 - **Router**: React Router DOM 7.6.2
 - **State**: React Context + Redux Toolkit 2.8.2
 - **Forms**: React Hook Form 7.58.1 + Zod 3.25.67
-- **Code Quality**: ESLint + Prettier
 
 ## 📁 필수 프로젝트 구조
 
