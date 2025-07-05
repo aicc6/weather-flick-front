@@ -13,7 +13,7 @@ export default function PlannerPage() {
     theme: '힐링',
     filters: ['비 안 오는 날'],
   })
-  const [weatherData, setWeatherData] = useState({
+  const [_weatherData, setWeatherData] = useState({
     icon: '☀️',
     summary: '맑음, 쾌적한 날씨',
     temp: 25,

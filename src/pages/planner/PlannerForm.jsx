@@ -61,10 +61,15 @@ const PlannerForm = memo(() => {
     updateDestInput,
     hideDropdown,
     showDropdown,
-    isSearching,
-    searchError,
+    isSearching: _isSearching,
+    searchError: _searchError,
   } = useDestinationSearchRTK()
-  const { isSubmitting, plans, submitPlan, error } = usePlanSubmissionRTK()
+  const {
+    isSubmitting,
+    plans,
+    submitPlan,
+    error: _error,
+  } = usePlanSubmissionRTK()
 
   // 현재 위치 자동 감지
   const handleAutoLocation = useCallback(async () => {

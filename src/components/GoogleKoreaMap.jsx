@@ -251,7 +251,7 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
         setMap(mapInstance)
         setIsLoaded(true)
         setError(null)
-      } catch (error) {
+      } catch {
         setError('Google Maps를 로드할 수 없습니다.')
       }
     }

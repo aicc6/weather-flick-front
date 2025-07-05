@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Sun, Moon, User, LogOut, Settings, Menu, X } from '@/components/icons'
 import { navigationLinks } from '@/data'
 import { useEffect, useState } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/AuthContextRTK'
 import {
   DropdownMenu,
   DropdownMenuContent,

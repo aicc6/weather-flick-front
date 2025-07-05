@@ -26,7 +26,7 @@ const handle401Error = () => {
 // 기본 Base Query
 export const baseQuery = fetchBaseQuery({
   baseUrl: getBaseUrl(),
-  prepareHeaders: (headers, { getState, endpoint }) => {
+  prepareHeaders: (headers, { endpoint }) => {
     // 인증이 필요한 엔드포인트인지 확인
     const authRequiredEndpoints = [
       'getMe',

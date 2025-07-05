@@ -74,6 +74,15 @@ export const regionsApi = createApi({
         'Region',
       ],
     }),
+
+    // 역지오코딩 (좌표 -> 주소)
+    reverseGeocode: builder.mutation({
+      query: ({ lat, lng }) => ({
+        url: 'location/reverse-geocode',
+        method: 'GET',
+        params: { lat, lng },
+      }),
+    }),
   }),
 })
 
@@ -85,4 +94,5 @@ export const {
   useGetActiveRegionsQuery,
   useSearchRegionsQuery,
   useUpdateRegionMutation,
+  useReverseGeocodeMutation,
 } = regionsApi

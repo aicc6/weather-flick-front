@@ -13,11 +13,14 @@ import {
   Shield,
   Check,
 } from '@/components/icons'
-import { authAPI } from '@/services/api'
+import { useChangePasswordMutation } from '@/store/api'
 
 export function ChangePasswordPage() {
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(false)
+
+  // RTK Query hook
+  const [changePassword, { isLoading }] = useChangePasswordMutation()
+
   const [showPasswords, setShowPasswords] = useState({
     current: false,
     new: false,
@@ -93,12 +96,11 @@ export function ChangePasswordPage() {
       return
     }
 
-    setLoading(true)
     try {
-      await authAPI.changePassword({
+      await changePassword({
         current_password: formData.currentPassword,
         new_password: formData.newPassword,
-      })
+      }).unwrap()
 
       setSuccess(true)
       setFormData({
@@ -142,8 +144,6 @@ export function ChangePasswordPage() {
           submit: '비밀번호 변경에 실패했습니다. 잠시 후 다시 시도해주세요.',
         })
       }
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -220,13 +220,13 @@ export function ChangePasswordPage() {
                     }
                     placeholder="현재 비밀번호를 입력하세요"
                     className={`pr-10 ${errors.currentPassword ? 'border-red-500' : ''}`}
-                    disabled={loading || success}
+                    disabled={isLoading || success}
                   />
                   <button
                     type="button"
                     onClick={() => togglePasswordVisibility('current')}
                     className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                    disabled={loading || success}
+                    disabled={isLoading || success}
                   >
                     {showPasswords.current ? (
                       <EyeOff className="h-4 w-4" />
@@ -255,13 +255,13 @@ export function ChangePasswordPage() {
                     }
                     placeholder="새 비밀번호를 입력하세요 (8자 이상)"
                     className={`pr-10 ${errors.newPassword ? 'border-red-500' : ''}`}
-                    disabled={loading || success}
+                    disabled={isLoading || success}
                   />
                   <button
                     type="button"
                     onClick={() => togglePasswordVisibility('new')}
                     className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                    disabled={loading || success}
+                    disabled={isLoading || success}
                   >
                     {showPasswords.new ? (
                       <EyeOff className="h-4 w-4" />
@@ -288,13 +288,13 @@ export function ChangePasswordPage() {
                     }
                     placeholder="새 비밀번호를 다시 입력하세요"
                     className={`pr-10 ${errors.confirmPassword ? 'border-red-500' : ''}`}
-                    disabled={loading || success}
+                    disabled={isLoading || success}
                   />
                   <button
                     type="button"
                     onClick={() => togglePasswordVisibility('confirm')}
                     className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                    disabled={loading || success}
+                    disabled={isLoading || success}
                   >
                     {showPasswords.confirm ? (
                       <EyeOff className="h-4 w-4" />
@@ -361,17 +361,17 @@ export function ChangePasswordPage() {
                   variant="outline"
                   onClick={() => navigate('/profile')}
                   className="flex-1 border-gray-300 hover:border-gray-400 hover:bg-gray-50"
-                  disabled={loading || success}
+                  disabled={isLoading || success}
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   취소
                 </Button>
                 <Button
                   type="submit"
-                  disabled={loading || success}
+                  disabled={isLoading || success}
                   className="flex flex-1 items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 font-semibold shadow-md transition-all hover:from-blue-700 hover:to-blue-800 hover:shadow-lg disabled:from-gray-400 disabled:to-gray-500"
                 >
-                  {loading ? (
+                  {isLoading ? (
                     <>
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                       <span>변경 중...</span>

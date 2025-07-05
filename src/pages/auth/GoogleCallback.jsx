@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { authAPI, tokenManager } from '@/services/api'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/AuthContextRTK'
+import { useExchangeGoogleAuthCodeMutation } from '@/store/api'
 
 export function GoogleCallbackPage() {
   const [status, setStatus] = useState('processing') // processing, success, error
@@ -9,7 +9,10 @@ export function GoogleCallbackPage() {
   const isProcessing = useRef(false) // 중복 요청 방지
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { handleGoogleAuthSuccess, setUser, setIsAuthenticated } = useAuth()
+  const { handleGoogleAuthSuccess } = useAuth()
+
+  // RTK Query hook
+  const [exchangeGoogleAuthCode] = useExchangeGoogleAuthCodeMutation()
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -22,9 +25,7 @@ export function GoogleCallbackPage() {
 
       try {
         // URL 파라미터 확인
-        const authCode = searchParams.get('auth_code') // 새로운 보안 방식
-        const token = searchParams.get('token') // 기존 방식 (호환성)
-        const _userId = searchParams.get('user_id') // 기존 방식 (호환성)
+        const authCode = searchParams.get('auth_code')
         const error = searchParams.get('error')
 
         if (error) {
@@ -38,10 +39,9 @@ export function GoogleCallbackPage() {
         }
 
         if (authCode) {
-          // 새로운 보안 방식: 임시 인증 코드를 JWT 토큰으로 교환
-
+          // 임시 인증 코드를 JWT 토큰으로 교환
           try {
-            const response = await authAPI.exchangeGoogleAuthCode(authCode)
+            const response = await exchangeGoogleAuthCode(authCode).unwrap()
 
             // AuthContext의 Google 인증 성공 처리 함수 사용
             handleGoogleAuthSuccess(response.user_info, response.access_token)
@@ -55,89 +55,13 @@ export function GoogleCallbackPage() {
           } catch (exchangeError) {
             setStatus('error')
             setError(
-              exchangeError.response?.data?.detail ||
-                exchangeError.data?.detail ||
-                '인증 처리 중 오류가 발생했습니다.',
+              exchangeError.data?.detail || '인증 처리 중 오류가 발생했습니다.',
             )
           }
-        } else if (token) {
-          // 기존 방식: URL에서 직접 토큰 추출 (호환성을 위해 유지)
-
-          try {
-            // 토큰 저장
-            tokenManager.setToken(token, null)
-
-            // 사용자 정보 조회
-            const userInfo = await authAPI.getMe()
-
-            // AuthContext의 Google 인증 성공 처리 함수 사용
-            handleGoogleAuthSuccess(userInfo, token)
-
-            setStatus('success')
-
-            setTimeout(() => {
-              navigate('/', { replace: true })
-            }, 1500)
-          } catch {
-            // 토큰은 유효하지만 사용자 정보 조회 실패 시에도 로그인 상태로 설정
-            setIsAuthenticated(true)
-            setStatus('success')
-
-            setTimeout(() => {
-              navigate('/', { replace: true })
-            }, 1500)
-          }
         } else {
-          // 레거시: code, state 파라미터 처리 (완전 호환성)
-          const code = searchParams.get('code')
-          const state = searchParams.get('state')
-
-          if (!code) {
-            setStatus('error')
-            setError('인증 정보가 없습니다.')
-            return
-          }
-
-          // 백엔드에 인증 코드 전송
-          const response = await authAPI.googleCallback(code, state)
-
-          if (response.redirect_url) {
-            const url = new URL(response.redirect_url, window.location.origin)
-            const token = url.searchParams.get('token')
-
-            if (token) {
-              try {
-                // 토큰 저장
-                tokenManager.setToken(token, null)
-
-                // 사용자 정보 조회
-                const userInfo = await authAPI.getMe()
-
-                // AuthContext의 Google 인증 성공 처리 함수 사용
-                handleGoogleAuthSuccess(userInfo, token)
-
-                setStatus('success')
-
-                setTimeout(() => {
-                  navigate('/', { replace: true })
-                }, 1500)
-              } catch {
-                // 토큰은 유효하지만 사용자 정보 조회 실패 시에도 로그인 상태로 설정
-                setIsAuthenticated(true)
-                setStatus('success')
-
-                setTimeout(() => {
-                  navigate('/', { replace: true })
-                }, 1500)
-              }
-            } else {
-              setStatus('error')
-              setError('인증 토큰을 받지 못했습니다.')
-            }
-          } else {
-            setStatus('error')
-            setError('로그인 처리 중 오류가 발생했습니다.')
-          }
+          // authCode가 없는 경우 오류 처리
+          setStatus('error')
+          setError('인증 정보가 없습니다.')
         }
       } catch (err) {
         setStatus('error')
@@ -148,13 +72,7 @@ export function GoogleCallbackPage() {
     }
 
     handleCallback()
-  }, [
-    searchParams,
-    navigate,
-    handleGoogleAuthSuccess,
-    setUser,
-    setIsAuthenticated,
-  ])
+  }, [searchParams, navigate, handleGoogleAuthSuccess, exchangeGoogleAuthCode])
 
   const renderContent = () => {
     switch (status) {
@@ -181,7 +99,7 @@ export function GoogleCallbackPage() {
             <h2 className="mb-2 text-xl font-semibold text-green-600">
               로그인 성공!
             </h2>
-            <p className="text-gray-600">메인 페이지로 이동합니다...</p>
+            <p className="text-gray-600">메인 페이지로 이동하고 있습니다...</p>
           </div>
         )
       case 'error':
@@ -199,10 +117,10 @@ export function GoogleCallbackPage() {
             <h2 className="mb-2 text-xl font-semibold text-red-600">
               로그인 실패
             </h2>
-            <p className="mb-4 text-gray-600">{error}</p>
+            <p className="text-gray-600">{error}</p>
             <button
               onClick={() => navigate('/login')}
-              className="rounded bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
+              className="mt-4 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
             >
               로그인 페이지로 돌아가기
             </button>
@@ -214,8 +132,8 @@ export function GoogleCallbackPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4 dark:from-gray-900 dark:to-gray-800">
-      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md dark:bg-gray-800">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
         {renderContent()}
       </div>
     </div>

@@ -16,7 +16,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '@/contexts/AuthContextRTK'
 import { GoogleIcon } from '@/components/icons'
 import { loginSchema } from '@/schemas'
-import { useLoginMutation, useGetGoogleAuthUrlQuery } from '@/store/api'
+import { useGetGoogleAuthUrlQuery } from '@/store/api'
 
 /**
  * URL: '/login'
@@ -29,7 +29,6 @@ export function LoginPage() {
   const { login } = useAuth()
 
   // RTK Query 훅들
-  const [loginMutation] = useLoginMutation()
   const { data: googleAuthData } = useGetGoogleAuthUrlQuery()
 
   // 리다이렉트된 페이지 정보 가져오기

@@ -63,4 +63,5 @@ export {
   useGetActiveRegionsQuery,
   useSearchRegionsQuery,
   useUpdateRegionMutation,
+  useReverseGeocodeMutation,
 } from './regionsApi'

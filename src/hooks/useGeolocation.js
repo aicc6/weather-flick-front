@@ -1,6 +1,6 @@
-import { http } from '@/services/api'
 import { useState, useCallback } from 'react'
 import { toast } from 'sonner'
+import { useReverseGeocodeMutation } from '@/store/api'
 
 /**
  * 위치 정보를 가져오는 커스텀 훅
@@ -8,6 +8,9 @@ import { toast } from 'sonner'
  */
 export default function useGeolocation() {
   const [isLocating, setIsLocating] = useState(false)
+
+  // RTK Query hook
+  const [reverseGeocode] = useReverseGeocodeMutation()
 
   const getCurrentLocation = useCallback(async () => {
     return new Promise((resolve, reject) => {
@@ -32,10 +35,7 @@ export default function useGeolocation() {
         async (position) => {
           const { latitude: lat, longitude: lng } = position.coords
           try {
-            const res = await http.GET(
-              `/location/reverse-geocode?lat=${lat}&lng=${lng}`,
-            )
-            const data = await res.json()
+            const data = await reverseGeocode({ lat, lng }).unwrap()
 
             if (data.address) {
               toast.success(`위치 확인 완료: 현재 위치: ${data.address}`)
@@ -68,7 +68,7 @@ export default function useGeolocation() {
         options,
       )
     })
-  }, [])
+  }, [reverseGeocode])
 
   return {
     getCurrentLocation,

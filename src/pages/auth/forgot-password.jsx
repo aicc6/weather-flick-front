@@ -14,16 +14,18 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { authAPI } from '@/services/api'
+import { useForgotPasswordMutation } from '@/store/api'
 
 /**
  * URL: '/forgot-password'
  */
 export function ForgotPasswordPage() {
-  const [isLoading, setIsLoading] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const navigate = useNavigate()
+
+  // RTK Query hook
+  const [forgotPassword, { isLoading }] = useForgotPasswordMutation()
 
   const {
     register,
@@ -39,12 +41,11 @@ export function ForgotPasswordPage() {
   })
 
   const onSubmit = async (data) => {
-    setIsLoading(true)
     setSubmitError('')
     setSuccessMessage('')
 
     try {
-      await authAPI.forgotPassword(data)
+      await forgotPassword(data).unwrap()
       setSuccessMessage(
         '임시 비밀번호가 이메일로 전송되었습니다. 이메일을 확인해주세요.',
       )
@@ -55,8 +56,8 @@ export function ForgotPasswordPage() {
     } catch (error) {
       console.error('비밀번호 찾기 에러:', error)
 
-      if (error.response?.data?.detail) {
-        const errorMessage = error.response.data.detail
+      if (error.data?.detail) {
+        const errorMessage = error.data.detail
         console.error('백엔드 에러 메시지:', errorMessage)
 
         if (
@@ -76,8 +77,6 @@ export function ForgotPasswordPage() {
         console.error('요청 실패:', error.message)
         setSubmitError('임시 비밀번호 발급에 실패했습니다. 다시 시도해주세요.')
       }
-    } finally {
-      setIsLoading(false)
     }
   }
 
