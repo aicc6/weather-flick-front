@@ -33,7 +33,7 @@ import useGeolocation from '@/hooks/useGeolocation'
 import useDateRange from '@/hooks/useDateRange'
 import useDestinationManager from '@/hooks/useDestinationManager'
 import useDestinationSearch from '@/hooks/useDestinationSearch'
-import usePlanSubmission from '@/hooks/usePlanSubmission'
+import usePlanSubmissionRTK from '@/hooks/usePlanSubmissionRTK'
 
 const PlannerForm = memo(() => {
   // 기본 폼 상태
@@ -62,7 +62,7 @@ const PlannerForm = memo(() => {
     hideDropdown,
     showDropdown,
   } = useDestinationSearch()
-  const { isSubmitting, plans, submitPlan } = usePlanSubmission()
+  const { isSubmitting, plans, submitPlan, error } = usePlanSubmissionRTK()
 
   // 현재 위치 자동 감지
   const handleAutoLocation = useCallback(async () => {

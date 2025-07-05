@@ -1,0 +1,134 @@
+import { createApi } from '@reduxjs/toolkit/query/react'
+import { baseQueryWithReauth } from './baseQuery'
+
+export const travelPlansApi = createApi({
+  reducerPath: 'travelPlansApi',
+  baseQuery: baseQueryWithReauth,
+  tagTypes: ['TravelPlan', 'Weather', 'Destination'],
+  endpoints: (builder) => ({
+    // 여행 플랜 생성
+    createTravelPlan: builder.mutation({
+      query: (planData) => ({
+        url: 'travel-plans',
+        method: 'POST',
+        body: planData
+      }),
+      invalidatesTags: ['TravelPlan']
+    }),
+
+    // 사용자의 저장된 플랜 목록 조회
+    getUserPlans: builder.query({
+      query: () => 'travel-plans/user',
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({ type: 'TravelPlan', id })),
+              { type: 'TravelPlan', id: 'LIST' }
+            ]
+          : [{ type: 'TravelPlan', id: 'LIST' }],
+      keepUnusedDataFor: 300 // 5분간 캐싱
+    }),
+
+    // 특정 플랜 조회
+    getTravelPlan: builder.query({
+      query: (planId) => `travel-plans/${planId}`,
+      providesTags: (result, error, planId) => [
+        { type: 'TravelPlan', id: planId }
+      ],
+      keepUnusedDataFor: 600 // 10분간 캐싱
+    }),
+
+    // 플랜 수정
+    updateTravelPlan: builder.mutation({
+      query: ({ planId, planData }) => ({
+        url: `travel-plans/${planId}`,
+        method: 'PUT',
+        body: planData
+      }),
+      invalidatesTags: (result, error, { planId }) => [
+        { type: 'TravelPlan', id: planId },
+        { type: 'TravelPlan', id: 'LIST' }
+      ]
+    }),
+
+    // 플랜 삭제
+    deleteTravelPlan: builder.mutation({
+      query: (planId) => ({
+        url: `travel-plans/${planId}`,
+        method: 'DELETE'
+      }),
+      invalidatesTags: (result, error, planId) => [
+        { type: 'TravelPlan', id: planId },
+        { type: 'TravelPlan', id: 'LIST' }
+      ]
+    }),
+
+    // 플랜 공유
+    shareTravelPlan: builder.mutation({
+      query: ({ planId, shareData }) => ({
+        url: `travel-plans/${planId}/share`,
+        method: 'POST',
+        body: shareData
+      }),
+      invalidatesTags: (result, error, { planId }) => [
+        { type: 'TravelPlan', id: planId }
+      ]
+    }),
+
+    // 날씨 정보 조회 (여행지 기준)
+    getWeatherInfo: builder.query({
+      query: ({ destination, startDate, endDate }) => ({
+        url: 'weather/forecast',
+        params: {
+          destination,
+          start_date: startDate,
+          end_date: endDate
+        }
+      }),
+      providesTags: (result, error, { destination, startDate, endDate }) => [
+        { 
+          type: 'Weather', 
+          id: `${destination}-${startDate}-${endDate}` 
+        }
+      ],
+      keepUnusedDataFor: 300 // 5분간 캐싱 (날씨 데이터는 자주 변경됨)
+    }),
+
+    // 여행지 추천 (테마 기반)
+    getDestinationRecommendations: builder.query({
+      query: ({ theme, weatherConditions = [] }) => ({
+        url: 'destinations/recommend',
+        params: {
+          theme,
+          weather_conditions: weatherConditions.join(',')
+        }
+      }),
+      providesTags: (result, error, { theme }) => [
+        { type: 'Destination', id: `recommend-${theme}` }
+      ],
+      keepUnusedDataFor: 600 // 10분간 캐싱 (추천 데이터는 상대적으로 안정적)
+    }),
+
+    // 플랜 추천 생성 (기존 fetchPlanRecommendation 기능)
+    generatePlanRecommendation: builder.mutation({
+      query: ({ origin, destination, startDate, endDate }) => ({
+        url: 'plan/recommend',
+        method: 'POST',
+        body: { origin, destination, startDate, endDate }
+      })
+    })
+  })
+})
+
+// Export hooks for usage in functional components
+export const {
+  useCreateTravelPlanMutation,
+  useGetUserPlansQuery,
+  useGetTravelPlanQuery,
+  useUpdateTravelPlanMutation,
+  useDeleteTravelPlanMutation,
+  useShareTravelPlanMutation,
+  useGetWeatherInfoQuery,
+  useGetDestinationRecommendationsQuery,
+  useGeneratePlanRecommendationMutation
+} = travelPlansApi

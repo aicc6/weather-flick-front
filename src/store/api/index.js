@@ -3,6 +3,7 @@ export { baseQuery, baseQueryWithReauth } from './baseQuery'
 
 // RTK Query API exports
 export { authApi } from './authApi'
+export { travelPlansApi } from './travelPlansApi'
 
 // Export all hooks for convenience
 export {
@@ -19,3 +20,16 @@ export {
   useForgotPasswordMutation,
   useWithdrawMutation
 } from './authApi'
+
+export {
+  // Travel Plans API hooks
+  useCreateTravelPlanMutation,
+  useGetUserPlansQuery,
+  useGetTravelPlanQuery,
+  useUpdateTravelPlanMutation,
+  useDeleteTravelPlanMutation,
+  useShareTravelPlanMutation,
+  useGetWeatherInfoQuery,
+  useGetDestinationRecommendationsQuery,
+  useGeneratePlanRecommendationMutation
+} from './travelPlansApi'

@@ -29,7 +29,8 @@ export const baseQuery = fetchBaseQuery({
   prepareHeaders: (headers, { getState, endpoint }) => {
     // 인증이 필요한 엔드포인트인지 확인
     const authRequiredEndpoints = [
-      'getMe', 'updateProfile', 'changePassword', 'logout', 'withdraw'
+      'getMe', 'updateProfile', 'changePassword', 'logout', 'withdraw',
+      'createTravelPlan', 'getUserPlans', 'updateTravelPlan', 'deleteTravelPlan', 'shareTravelPlan'
     ]
     
     // 인증이 필요한 엔드포인트만 토큰 추가
