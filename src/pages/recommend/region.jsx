@@ -26,7 +26,7 @@ export default function RecommendRegionPage() {
   useEffect(() => {
     setLoading(true)
     http
-      .GET('/local/resions_point')
+      .GET('/local/resions')
       .then((res) => res.json())
       .then((data) => {
         setCities(data.regions || [])
@@ -39,7 +39,11 @@ export default function RecommendRegionPage() {
   }, [])
 
   const handleRegionSelect = (regionCode, regionName) => {
-    setSelectedRegion({ id: regionCode, name: regionName })
+    if (selectedRegion?.id === regionCode) {
+      setSelectedRegion(null) // 이미 선택된 도시를 다시 클릭하면 해제
+    } else {
+      setSelectedRegion({ id: regionCode, name: regionName })
+    }
   }
 
   // Pixabay API를 사용해 지역별 이미지 로드
@@ -186,13 +190,16 @@ export default function RecommendRegionPage() {
       {viewMode === 'google-map' ? (
         <GoogleKoreaMap
           cities={cities
-            .filter((city) => city.latitude && city.longitude)
+            .filter((city) => city.center_latitude && city.center_longitude)
             .map((city) => ({
               id: city.region_code,
               name: city.region_name,
-              description: city.parent_region_code || '',
-              latitude: city.latitude,
-              longitude: city.longitude,
+              name_full: city.region_name_full,
+              name_en: city.region_name_en,
+              latitude: Number(city.center_latitude),
+              longitude: Number(city.center_longitude),
+              administrative_code: city.administrative_code,
+              is_active: city.is_active,
             }))}
           selectedRegion={selectedRegion}
           onRegionSelect={(id, name) => handleRegionSelect(id, name)}
@@ -245,6 +252,14 @@ export default function RecommendRegionPage() {
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold text-gray-900 dark:text-white">
                         {city.region_name}
+                        <span className="block text-xs text-gray-500">
+                          {city.region_name_full}
+                        </span>
+                        {city.region_name_en && (
+                          <span className="block text-xs text-gray-400">
+                            {city.region_name_en}
+                          </span>
+                        )}
                       </h3>
                       {selectedRegion?.id === city.region_code && (
                         <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500">
@@ -253,7 +268,12 @@ export default function RecommendRegionPage() {
                       )}
                     </div>
                     <p className="mt-1 text-sm leading-tight text-gray-600 dark:text-gray-300">
-                      {city.parent_region_code || ''}
+                      행정코드: {city.administrative_code || '-'}
+                      <br />
+                      위도: {city.center_latitude}, 경도:{' '}
+                      {city.center_longitude}
+                      <br />
+                      활성: {city.is_active ? 'O' : 'X'}
                     </p>
                   </CardContent>
                 </Card>
@@ -281,7 +301,12 @@ export default function RecommendRegionPage() {
                     {selectedRegion.name}
                   </Badge>
                   <p className="text-sm text-gray-600 dark:text-gray-300">
-                    {getSelectedCityData()?.parent_region_code || ''}
+                    {getSelectedCityData()?.region_name_full && (
+                      <span>({getSelectedCityData().region_name_full})</span>
+                    )}
+                    {getSelectedCityData()?.region_name_en && (
+                      <span> / {getSelectedCityData().region_name_en}</span>
+                    )}
                   </p>
                 </div>
               </div>

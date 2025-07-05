@@ -109,18 +109,29 @@ export const AuthProvider = ({ children }) => {
         updateAuthState({ loading: true, error: null })
 
         const response = await authAPI.login(credentials)
-        const { user, access_token } = response
+        const { user_info, access_token } = response
 
         // 토큰과 사용자 정보 저장
         tokenManager.setToken(access_token)
-        tokenManager.setUserInfo(user)
+        tokenManager.setUserInfo(user_info)
 
-        updateAuthState({
-          user,
+        // 상태 업데이트를 동기적으로 즉시 반영
+        const newAuthState = {
+          user: user_info,
           isAuthenticated: true,
           loading: false,
           error: null,
-        })
+        }
+        
+        setAuthState(newAuthState)
+
+        // 디버깅용 로그
+        console.log('Login success - Updated auth state:', newAuthState)
+        
+        // 추가 상태 업데이트를 위한 강제 리렌더링
+        setTimeout(() => {
+          setAuthState(prev => ({ ...prev }))
+        }, 0)
 
         return response
       } catch (error) {

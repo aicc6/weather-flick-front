@@ -55,10 +55,14 @@ export function LoginPage() {
         password: data.password,
       }
 
-      await login(credentials)
+      const loginResult = await login(credentials)
+      console.log('Login completed, result:', loginResult)
 
-      // 로그인 성공 후 페이지 이동
-      navigate(from, { replace: true })
+      // 상태 업데이트를 위한 약간의 지연 후 페이지 이동
+      setTimeout(() => {
+        console.log('Navigating to:', from)
+        navigate(from, { replace: true })
+      }, 200)
     } catch (error) {
       // 백엔드에서 오는 에러 메시지 처리
       if (error.response?.data?.detail) {

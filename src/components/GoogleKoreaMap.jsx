@@ -12,20 +12,23 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
 
   const addCityMarkers = useCallback(
     (google, mapInstance) => {
-      // 기존 마커 제거
+      console.log('마커 리셋', selectedRegion)
+      // 기존 마커 제거 (수정된 로직)
       markersRef.current.forEach(({ marker }) => {
         if (marker) {
-          if (marker.map !== undefined) {
-            // AdvancedMarkerElement
-            marker.map = null
-          } else if (marker.setMap) {
-            // 기존 Marker
+          // AdvancedMarkerElement는 remove()로 제거
+          if (typeof marker.remove === 'function') {
+            marker.remove()
+          }
+          // 레거시 Marker는 setMap(null)로 제거
+          else if (typeof marker.setMap === 'function') {
             marker.setMap(null)
           }
         }
       })
-      markersRef.current = []
+      markersRef.current = [] // 마커 배열 비우기
 
+      // 모든 도시 마커 생성, 선택된 도시만 파란색
       cities.forEach((city) => {
         if (!city.latitude || !city.longitude) return
         const isSelected = selectedRegion?.id === city.id
@@ -160,39 +163,17 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
           })
         })
 
-        // InfoWindow 생성
-        const infoWindow = new google.maps.InfoWindow({
-          content: `
-          <div style="padding: 8px; font-family: 'Pretendard', sans-serif;">
-            <h3 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 600; color: #1f2937;">${cityName}</h3>
-            <p style="margin: 0; font-size: 12px; color: #6b7280;">${city.description}</p>
-          </div>
-        `,
-        })
-
-        // 마커 클릭시 InfoWindow 표시
-        marker.addListener('click', () => {
-          // 다른 InfoWindow 닫기
-          markersRef.current.forEach(({ infoWindow: iw }) => {
-            if (iw && iw.close) {
-              iw.close()
-            }
-          })
-          infoWindow.open(mapInstance, marker)
-        })
-
-        markersRef.current.push({ marker, infoWindow })
+        markersRef.current.push({ marker })
       })
     },
     [cities, selectedRegion, onRegionSelect],
   )
 
+  // 지도 초기화 (최초 한 번만 실행)
   useEffect(() => {
     const initMap = async () => {
-      // API 키 및 Map ID 확인
       const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
       const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || 'DEMO_MAP_ID'
-
       if (
         !apiKey ||
         apiKey === 'YOUR_GOOGLE_MAPS_API_KEY_HERE' ||
@@ -200,35 +181,18 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
       ) {
         const errorMsg =
           'Google Maps API 키가 설정되지 않았습니다. .env 파일에 VITE_GOOGLE_MAPS_API_KEY를 설정해주세요.'
-        console.error(errorMsg)
-        console.log('설정 방법:')
-        console.log('1. 프로젝트 루트에 .env 파일 생성')
-        console.log('2. VITE_GOOGLE_MAPS_API_KEY=your_actual_api_key_here 추가')
-        console.log(
-          '3. VITE_GOOGLE_MAPS_MAP_ID=your_map_id_here 추가 (선택사항)',
-        )
-        console.log(
-          '4. Google Cloud Console에서 Maps JavaScript API 활성화 및 API 키 발급',
-        )
-        console.log(
-          '5. 자세한 설정 방법은 GOOGLE_MAPS_SETUP.md 파일을 참고하세요.',
-        )
         setError(errorMsg)
         return
       }
-
       const loader = new Loader({
-        apiKey: apiKey,
+        apiKey,
         version: 'weekly',
         libraries: ['places', 'marker'],
       })
-
       try {
         const google = await loader.load()
-
-        // Map 설정 (Map ID 사용 시 styles 제외)
         const mapConfig = {
-          center: { lat: 36.5, lng: 127.5 }, // 한국 중심부
+          center: { lat: 36.5, lng: 127.5 },
           zoom: 7,
           restriction: {
             latLngBounds: {
@@ -247,12 +211,9 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
           rotateControl: false,
           fullscreenControl: false,
         }
-
-        // Map ID가 DEMO_MAP_ID가 아닌 경우에만 mapId 설정
         if (mapId && mapId !== 'DEMO_MAP_ID') {
           mapConfig.mapId = mapId
         } else {
-          // Map ID가 없거나 DEMO_MAP_ID인 경우 styles 적용
           mapConfig.styles = [
             {
               featureType: 'all',
@@ -286,41 +247,24 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
             },
           ]
         }
-
         const mapInstance = new google.maps.Map(mapRef.current, mapConfig)
-
         setMap(mapInstance)
         setIsLoaded(true)
         setError(null)
-
-        // 도시 마커 추가
-        addCityMarkers(google, mapInstance)
       } catch (error) {
-        console.error('Google Maps 로딩 실패:', error)
-        let errorMessage = 'Google Maps를 로드할 수 없습니다.'
-
-        if (error.message.includes('InvalidKey')) {
-          errorMessage =
-            'Google Maps API 키가 유효하지 않습니다. API 키를 확인해주세요.'
-        } else if (error.message.includes('RefererNotAllowedMapError')) {
-          errorMessage =
-            'API 키의 도메인 제한 설정을 확인해주세요. localhost:5173이 허용되어야 합니다.'
-        }
-
-        setError(errorMessage)
+        setError('Google Maps를 로드할 수 없습니다.')
       }
     }
-
     initMap()
-  }, [addCityMarkers])
+  }, [])
 
-  // 선택된 지역이 변경될 때 마커 업데이트
+  // 마커 업데이트 (지도 로드 완료 및 선택 지역 변경 시 실행)
   useEffect(() => {
     if (map && isLoaded) {
       const google = window.google
       addCityMarkers(google, map)
     }
-  }, [selectedRegion, cities, map, isLoaded, addCityMarkers])
+  }, [map, isLoaded, addCityMarkers])
 
   return (
     <div className="mx-auto w-full max-w-7xl p-4">
