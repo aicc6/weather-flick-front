@@ -183,13 +183,15 @@ export default function RecommendRegionPage() {
       {/* 뷰 모드별 컨텐츠 */}
       {viewMode === 'google-map' ? (
         <GoogleKoreaMap
-          cities={cities.map((city) => ({
-            id: city.region_code,
-            name: city.region_name,
-            description: city.parent_region_code || '',
-            latitude: city.latitude,
-            longitude: city.longitude,
-          }))}
+          cities={cities
+            .filter((city) => city.latitude && city.longitude)
+            .map((city) => ({
+              id: city.region_code,
+              name: city.region_name,
+              description: city.parent_region_code || '',
+              latitude: city.latitude,
+              longitude: city.longitude,
+            }))}
           selectedRegion={selectedRegion}
           onRegionSelect={(id, name) => handleRegionSelect(id, name)}
         />

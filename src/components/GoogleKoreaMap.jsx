@@ -28,20 +28,35 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
 
       cities.forEach((city) => {
         if (!city.latitude || !city.longitude) return
-        const isSelected = selectedRegion?.id === city.region_code
-        const cityName = city.region_name
+        const isSelected = selectedRegion?.id === city.id
+        const cityName = city.name
 
         // AdvancedMarkerElement용 HTML 마커 생성
         const createMarkerElement = (color, size = 'normal') => {
           // 도시 이름 축약 로직 개선
           let displayName = cityName
-          if (cityName.includes('·')) {
+          if (typeof displayName !== 'string') displayName = ''
+          if (typeof displayName === 'string' && displayName.includes('·')) {
             // 중점(·)이 있는 경우 첫 번째 부분만 사용
-            displayName = cityName.split('·')[0]
+            displayName = displayName.split('·')[0]
           }
-          if (displayName.length > 3) {
-            displayName = displayName.substring(0, 3)
+          let textSvg = ''
+          if (displayName.length <= 4) {
+            // 4글자까지는 한 줄 중앙
+            textSvg = `<text x="16.65" y="16.65" text-anchor="middle"
+              font-family="Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif"
+              font-size="8" font-weight="600" fill="#333333" dominant-baseline="middle" alignment-baseline="middle">${displayName}</text>`
+          } else {
+            // 5글자 이상: 앞 2글자만 중앙에 표시
+            const first = displayName.slice(0, 2)
+            textSvg = `<text x="16.65" y="16.65" text-anchor="middle"
+              font-family="Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif"
+              font-size="8" font-weight="600" fill="#333333" dominant-baseline="middle" alignment-baseline="middle">${first}</text>`
           }
+
+          // 마커 크기 2/3로 축소
+          const width = size === 'large' ? 40 : size === 'medium' ? 36.7 : 33.3
+          const height = size === 'large' ? 48 : size === 'medium' ? 44 : 40
 
           const markerElement = document.createElement('div')
           markerElement.className = 'custom-marker'
@@ -53,25 +68,18 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
             ${isSelected ? 'animation: bounce 1s infinite;' : ''}
           `
 
-          const width = size === 'large' ? 60 : size === 'medium' ? 55 : 50
-          const height = size === 'large' ? 72 : size === 'medium' ? 66 : 60
-
           markerElement.innerHTML = `
-            <svg width="${width}" height="${height}" viewBox="0 0 50 60" xmlns="http://www.w3.org/2000/svg">
+            <svg width="${width}" height="${height}" viewBox="0 0 33.3 40" xmlns="http://www.w3.org/2000/svg">
               <defs>
-                <filter id="shadow-${city.region_code}" x="-50%" y="-50%" width="200%" height="200%">
-                  <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.3)"/>
+                <filter id="shadow-${city.id}" x="-50%" y="-50%" width="200%" height="200%">
+                  <feDropShadow dx="0" dy="1.33" stdDeviation="1.33" flood-color="rgba(0,0,0,0.3)"/>
                 </filter>
               </defs>
-              <path d="M25 0C11.2 0 0 11.2 0 25c0 18.75 25 35 25 35s25-16.25 25-35C50 11.2 38.8 0 25 0z"
-                    fill="${color}" filter="url(#shadow-${city.region_code})"/>
-              <circle cx="25" cy="25" r="16" fill="#ffffff"/>
-              <circle cx="25" cy="25" r="13" fill="#ffffff"/>
-              <text x="25" y="30" text-anchor="middle"
-                    font-family="Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif"
-                    font-size="12" font-weight="600" fill="#333333">
-                ${displayName}
-              </text>
+              <path d="M16.65 0C7.47 0 0 7.47 0 16.65c0 12.5 16.65 23.33 16.65 23.33s16.65-10.83 16.65-23.33C33.3 7.47 25.83 0 16.65 0z"
+                    fill="${color}" filter="url(#shadow-${city.id})"/>
+              <circle cx="16.65" cy="16.65" r="10.67" fill="#ffffff"/>
+              <circle cx="16.65" cy="16.65" r="8.67" fill="#ffffff"/>
+              ${textSvg}
             </svg>
           `
 
@@ -128,12 +136,12 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
 
         // 마커 클릭 이벤트
         marker.addListener('click', () => {
-          onRegionSelect(city.region_code, city.region_name)
+          onRegionSelect(city.id, city.name)
         })
 
         // 마커 호버 이벤트 (AdvancedMarkerElement용)
         markerElement.addEventListener('mouseenter', () => {
-          setHoveredRegion(city.region_code)
+          setHoveredRegion(city.id)
           // 호버 시 마커 업데이트
           const hoverElement = createMarkerElement(
             isSelected ? '#2563eb' : '#3b82f6',
@@ -489,17 +497,11 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-blue-600" />
               <span className="font-semibold text-blue-800 dark:text-blue-200">
-                {
-                  cities.find((city) => city.region_code === hoveredRegion)
-                    ?.region_name
-                }
+                {cities.find((city) => city.id === hoveredRegion)?.name}
               </span>
             </div>
             <p className="mt-1 text-sm text-blue-700 dark:text-blue-300">
-              {
-                cities.find((city) => city.region_code === hoveredRegion)
-                  ?.description
-              }
+              {cities.find((city) => city.id === hoveredRegion)?.description}
             </p>
           </div>
         )}
