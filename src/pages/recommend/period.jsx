@@ -4,13 +4,21 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ChevronLeft, Calendar } from '@/components/icons'
+import { useGetActiveRegionsQuery } from '@/store/api/regionsApi'
 
 export default function RecommendPeriodPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [selectedPeriod, setSelectedPeriod] = useState(null)
 
-  const region = searchParams.get('region')
+  const regionCode = searchParams.get('region')
+
+  // 지역 정보 가져오기
+  const { data: regions = [] } = useGetActiveRegionsQuery()
+
+  // 지역 코드로 지역명 찾기
+  const selectedRegion = regions.find((r) => r.region_code === regionCode)
+  const regionName = selectedRegion?.region_name || regionCode
 
   const periods = [
     {
@@ -71,7 +79,7 @@ export default function RecommendPeriodPage() {
   const handleNext = () => {
     if (selectedPeriod) {
       navigate(
-        `/customized-schedule/who?region=${region}&period=${selectedPeriod.id}&days=${selectedPeriod.days}`,
+        `/customized-schedule/who?region=${regionCode}&period=${selectedPeriod.id}&days=${selectedPeriod.days}`,
       )
     }
   }
@@ -106,7 +114,7 @@ export default function RecommendPeriodPage() {
       </div>
 
       {/* 선택된 지역 표시 */}
-      {region && (
+      {regionCode && (
         <div className="mb-6 rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
           <p className="mb-1 text-sm text-gray-600 dark:text-gray-400">
             선택된 여행지
@@ -115,7 +123,7 @@ export default function RecommendPeriodPage() {
             variant="outline"
             className="text-gray-700 dark:border-gray-600 dark:text-gray-300"
           >
-            {region}
+            {regionName}
           </Badge>
         </div>
       )}

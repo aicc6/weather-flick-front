@@ -11,6 +11,26 @@ import {
 } from '@/services/pixabayApi'
 import { useGetActiveRegionsQuery } from '@/store/api'
 
+// 지역별 설명 데이터
+const REGION_DESCRIPTIONS = {
+  11: '역사와 현대가 공존하는 대한민국의 수도',
+  26: '해운대와 광안리가 있는 해양관광도시',
+  27: '근대문화와 섬유패션의 도시',
+  28: '송도와 월미도가 있는 국제도시',
+  29: '첨단과학과 전통이 어우러진 도시',
+  30: '행정수도이자 미래형 계획도시',
+  31: '자연과 문화가 조화로운 수도권의 중심',
+  41: '수려한 자연경관과 휴양지의 천국',
+  42: '태백산맥과 동해안이 만나는 관광지',
+  43: '바다와 산이 어우러진 충청의 보고',
+  44: '백제문화와 서해안의 아름다움',
+  45: '전통문화와 맛있는 음식의 고장',
+  46: '남도의 멋과 맛이 살아있는 도시',
+  47: '영남알프스와 공업이 발달한 도시',
+  48: '한라산과 푸른 바다의 관광천국',
+  50: '세종대왕의 발자취가 남아있는 도시',
+}
+
 export default function RecommendRegionPage() {
   const navigate = useNavigate()
   const [_searchParams] = useSearchParams()
@@ -240,32 +260,23 @@ export default function RecommendRegionPage() {
                   </div>
 
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
+                    <div className="mb-2">
                       <h3 className="font-semibold text-gray-900 dark:text-white">
                         {city.region_name}
-                        <span className="block text-xs text-gray-500">
-                          {city.region_name_full}
-                        </span>
-                        {city.region_name_en && (
-                          <span className="block text-xs text-gray-400">
-                            {city.region_name_en}
-                          </span>
-                        )}
                       </h3>
-                      {selectedRegion?.id === city.region_code && (
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500">
-                          <span className="text-xs text-white">✓</span>
-                        </div>
-                      )}
+                      <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                        {REGION_DESCRIPTIONS[city.region_code] ||
+                          '아름다운 대한민국의 도시'}
+                      </p>
                     </div>
-                    <p className="mt-1 text-sm leading-tight text-gray-600 dark:text-gray-300">
-                      행정코드: {city.administrative_code || '-'}
-                      <br />
-                      위도: {city.center_latitude}, 경도:{' '}
-                      {city.center_longitude}
-                      <br />
-                      활성: {city.is_active ? 'O' : 'X'}
-                    </p>
+                    {selectedRegion?.id === city.region_code && (
+                      <Badge
+                        variant="secondary"
+                        className="mt-2 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                      >
+                        선택됨
+                      </Badge>
+                    )}
                   </CardContent>
                 </Card>
               ))}
