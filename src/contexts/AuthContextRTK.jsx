@@ -1,4 +1,10 @@
-import { createContext, useContext, useCallback, useMemo, useState } from 'react'
+import {
+  createContext,
+  useContext,
+  useCallback,
+  useMemo,
+  useState,
+} from 'react'
 import { useDispatch } from 'react-redux'
 import {
   useGetMeQuery,
@@ -22,10 +28,10 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const dispatch = useDispatch()
-  
+
   // 토큰 상태를 React state로 관리
   const [hasToken, setHasToken] = useState(
-    !!localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
+    !!localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN),
   )
 
   // RTK Query hooks
@@ -91,12 +97,9 @@ export const AuthProvider = ({ children }) => {
       // 토큰과 사용자 정보 저장
       tokenManager.setToken(access_token, user_info)
 
-      // RTK Query 캐시 갱신을 위해 쿼리 재실행
-      refetch()
-
       return response
     },
-    [loginMutation, refetch, tokenManager],
+    [loginMutation, tokenManager],
   )
 
   // 로그아웃 함수
@@ -113,7 +116,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       // 클라이언트 상태 정리
       tokenManager.clearTokens()
-      
+
       // RTK Query 캐시 리셋 - 사용자 정보 완전 제거
       dispatch(authApi.util.resetApiState())
     }
@@ -146,11 +149,8 @@ export const AuthProvider = ({ children }) => {
     (userInfo, accessToken) => {
       // 토큰과 사용자 정보 저장
       tokenManager.setToken(accessToken, userInfo)
-
-      // RTK Query 캐시 갱신
-      refetch()
     },
-    [refetch, tokenManager],
+    [tokenManager],
   )
 
   // 에러 정리 함수
@@ -163,17 +163,15 @@ export const AuthProvider = ({ children }) => {
     (userData) => {
       if (userData) {
         tokenManager.setUserInfo(userData)
-        refetch() // 캐시 갱신
       }
     },
-    [refetch, tokenManager],
+    [tokenManager],
   )
 
   // 인증 상태 직접 설정 함수 (OAuth 콜백 등에서 사용)
   const setIsAuthenticated = useCallback(() => {
     // RTK Query에서는 토큰 존재 여부로 자동 판단
-    refetch()
-  }, [refetch])
+  }, [])
 
   // 현재 인증 상태 계산
   const isAuthenticated = !!user && hasToken

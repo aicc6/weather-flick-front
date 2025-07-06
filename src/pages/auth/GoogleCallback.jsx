@@ -42,9 +42,15 @@ export function GoogleCallbackPage() {
           // 임시 인증 코드를 JWT 토큰으로 교환
           try {
             const response = await exchangeGoogleAuthCode(authCode).unwrap()
+            console.log('Exchange response:', response)
 
             // AuthContext의 Google 인증 성공 처리 함수 사용
-            handleGoogleAuthSuccess(response.user_info, response.access_token)
+            try {
+              handleGoogleAuthSuccess(response.user_info, response.access_token)
+            } catch (authError) {
+              console.warn('Auth context update error:', authError)
+              // 토큰은 이미 저장되었으므로 계속 진행
+            }
 
             setStatus('success')
 
@@ -53,10 +59,15 @@ export function GoogleCallbackPage() {
               navigate('/', { replace: true })
             }, 1500)
           } catch (exchangeError) {
+            console.error('Exchange error:', exchangeError)
+            // RTK Query의 에러 구조 확인
+            const errorMessage = exchangeError?.data?.detail || 
+                               exchangeError?.error?.data?.detail || 
+                               exchangeError?.message || 
+                               '인증 처리 중 오류가 발생했습니다.'
+            
             setStatus('error')
-            setError(
-              exchangeError.data?.detail || '인증 처리 중 오류가 발생했습니다.',
-            )
+            setError(errorMessage)
           }
         } else {
           // authCode가 없는 경우 오류 처리
@@ -64,8 +75,9 @@ export function GoogleCallbackPage() {
           setError('인증 정보가 없습니다.')
         }
       } catch (err) {
+        console.error('Callback error:', err)
         setStatus('error')
-        setError(err.data?.detail || '로그인 처리 중 오류가 발생했습니다.')
+        setError(err.data?.detail || err.message || '로그인 처리 중 오류가 발생했습니다.')
       } finally {
         isProcessing.current = false
       }

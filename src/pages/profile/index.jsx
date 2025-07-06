@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContextRTK'
+import { useGetUserPlansQuery } from '@/store/api/travelPlansApi'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -23,35 +24,27 @@ import {
 export function ProfilePage() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const [recentPlans, setRecentPlans] = useState([])
   const [favoritePlaces, setFavoritePlaces] = useState([])
-  const [loading, setLoading] = useState(true)
   const [showWithdrawModal, setShowWithdrawModal] = useState(false)
+
+  // RTK Query 훅 사용
+  const {
+    data: plansResponse,
+    isLoading,
+    isError,
+    error,
+  } = useGetUserPlansQuery()
+
+  const recentPlans = (plansResponse || [])
+    .slice() // 원본 배열 수정을 방지하기 위해 복사본 생성
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 3) // 최신 3개 항목만 선택
 
   useEffect(() => {
     // 여행 플랜과 즐겨찾기 데이터 로드 (실제 API 호출로 대체)
     const loadUserData = async () => {
       try {
         // 임시 데이터 (실제로는 API에서 가져옴)
-        setRecentPlans([
-          {
-            id: 1,
-            title: '제주도 3박4일',
-            destination: '제주도',
-            startDate: '2025-06-20',
-            endDate: '2025-06-23',
-            status: 'confirmed',
-          },
-          {
-            id: 2,
-            title: '강릉 해변 2박3일',
-            destination: '강릉',
-            startDate: '2025-07-05',
-            endDate: '2025-07-07',
-            status: 'planning',
-          },
-        ])
-
         setFavoritePlaces([
           { id: 1, name: '제주도', type: 'destination' },
           { id: 2, name: '강릉 해변', type: 'destination' },
@@ -59,8 +52,6 @@ export function ProfilePage() {
         ])
       } catch (error) {
         console.error('사용자 데이터 로드 실패:', error)
-      } finally {
-        setLoading(false)
       }
     }
 
@@ -89,12 +80,23 @@ export function ProfilePage() {
     })
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
           <p className="text-gray-600">프로필 정보를 불러오는 중...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center text-red-500">
+          <p>여행 계획을 불러오는 데 실패했습니다.</p>
+          <p className="text-sm">{error.toString()}</p>
         </div>
       </div>
     )
@@ -184,7 +186,7 @@ export function ProfilePage() {
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                최근 여행 플랜
+                여행플래너 생성여행
               </CardTitle>
               <Button
                 variant="ghost"
@@ -201,25 +203,39 @@ export function ProfilePage() {
               <div className="space-y-3">
                 {recentPlans.map((plan) => (
                   <div
-                    key={plan.id}
+                    key={plan.plan_id}
                     className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     <div>
                       <h4 className="font-medium">{plan.title}</h4>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {plan.destination} • {formatDate(plan.startDate)} ~{' '}
-                        {formatDate(plan.endDate)}
+                        {formatDate(plan.start_date)} ~{' '}
+                        {formatDate(plan.end_date)}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge
                         variant={
-                          plan.status === 'confirmed' ? 'default' : 'secondary'
+                          plan.status === 'CONFIRMED' ? 'default' : 'secondary'
                         }
                       >
-                        {plan.status === 'confirmed' ? '확정' : '계획중'}
+                        {plan.status === 'CONFIRMED'
+                          ? '확정'
+                          : plan.status === 'PLANNING'
+                            ? '계획중'
+                            : plan.status === 'IN_PROGRESS'
+                              ? '여행중'
+                              : plan.status === 'COMPLETED'
+                                ? '완료'
+                                : '취소'}
                       </Badge>
-                      <Button variant="ghost" size="sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          navigate(`/travel-plans/${plan.plan_id}`)
+                        }
+                      >
                         <ChevronRight className="h-4 w-4" />
                       </Button>
                     </div>

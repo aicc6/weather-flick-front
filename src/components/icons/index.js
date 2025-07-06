@@ -26,6 +26,9 @@ export {
   Camera,
   List,
   AlertTriangle,
+  PlusCircle,
+  Info,
+  TagIcon as Tag,
 } from 'lucide-react'
 
 // Weather Icons
@@ -52,6 +55,7 @@ export {
   Lock,
   Shield,
   Umbrella,
+  Wallet,
 } from 'lucide-react'
 
 // Communication Icons
