@@ -35,6 +35,24 @@ export default function usePlanSubmissionRTK() {
       }
 
       try {
+        // itinerary의 데이터를 순수한 객체로 변환
+        const sanitizedItinerary = Object.keys(destinationsByDate).reduce(
+          (acc, key) => {
+            const dayNumber = key.match(/Day (\d+)/)?.[1]
+            if (dayNumber) {
+              const destinations = destinationsByDate[key]
+              acc[`Day ${dayNumber}`] = destinations.map((dest) => ({
+                // 백엔드에 필요한 필드만 추출
+                description: dest.description,
+                place_id: dest.place_id,
+                // 필요하다면 다른 필드도 추가 (예: lat, lng)
+              }))
+            }
+            return acc
+          },
+          {},
+        )
+
         // 플랜 저장용 requestBody 구성
         const requestBody = {
           title: formData.title || `${formData.origin} 여행`,
@@ -42,10 +60,10 @@ export default function usePlanSubmissionRTK() {
           start_date: dateRange.from.toISOString().slice(0, 10),
           end_date: dateRange.to.toISOString().slice(0, 10),
           budget: formData.budget || 0,
-          itinerary: destinationsByDate, // 순수 일정 데이터만 전달
+          itinerary: sanitizedItinerary, // 정제된 itinerary 전달
           participants: formData.participants || 1,
           transportation: formData.transportation || '대중교용',
-          start_location: origin, // 필드명 수정 및 최상위 레벨로 이동
+          start_location: origin,
         }
 
         // RTK Query mutation 실행
