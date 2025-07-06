@@ -5,6 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
   Star,
   Search,
   Filter,
@@ -15,12 +22,20 @@ import {
   Navigation,
   Sparkles,
 } from '@/components/icons'
+import { useGetActiveRegionsQuery } from '@/store/api'
 
 export default function TravelCoursePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('all')
   const [selectedMonth, setSelectedMonth] = useState('all')
   const [selectedTheme, setSelectedTheme] = useState('all')
+  
+  // RTK Query를 사용한 지역 데이터 조회
+  const {
+    data: cities = [],
+    isLoading: regionsLoading,
+    error: regionsError,
+  } = useGetActiveRegionsQuery()
 
   // 여행 코스 더미 데이터
   const travelCourses = [
@@ -274,7 +289,12 @@ export default function TravelCoursePage() {
       )
 
     const matchesRegion =
-      selectedRegion === 'all' || course.region === selectedRegion
+      selectedRegion === 'all' || 
+      course.region === selectedRegion ||
+      // region_code로도 매칭 (서버에서 가져온 지역 코드)
+      cities.some(city => city.region_code === selectedRegion && 
+        (city.region_name.includes(regions.find(r => r.value === course.region)?.label) ||
+         regions.find(r => r.value === course.region)?.label.includes(city.region_name)))
 
     const matchesMonth =
       selectedMonth === 'all' ||
@@ -345,17 +365,34 @@ export default function TravelCoursePage() {
             </span>
           </div>
 
-          <select
+          <Select
             value={selectedRegion}
-            onChange={(e) => setSelectedRegion(e.target.value)}
-            className="rounded-md border border-gray-300 px-4 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            onValueChange={setSelectedRegion}
           >
-            {regions.map((region) => (
-              <option key={region.value} value={region.value}>
-                {region.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="지역 선택" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">전체 지역</SelectItem>
+              {regionsLoading ? (
+                <SelectItem value="loading" disabled>
+                  로딩 중...
+                </SelectItem>
+              ) : regionsError ? (
+                <SelectItem value="error" disabled>
+                  지역 목록 로드 실패
+                </SelectItem>
+              ) : (
+                [...cities]
+                  .sort((a, b) => a.region_name.localeCompare(b.region_name, 'ko'))
+                  .map((city) => (
+                    <SelectItem key={city.region_code} value={city.region_code}>
+                      {city.region_name}
+                    </SelectItem>
+                  ))
+              )}
+            </SelectContent>
+          </Select>
 
           <select
             value={selectedMonth}

@@ -3,6 +3,13 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { ChevronLeft, MapPin, List } from '@/components/icons'
 import GoogleKoreaMap from '@/components/GoogleKoreaMap'
 import {
@@ -202,9 +209,35 @@ export default function RecommendRegionPage() {
         <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
           떠나고 싶은 도시는?
         </h1>
-        <p className="text-gray-600 dark:text-gray-300">
+        <p className="text-gray-600 dark:text-gray-300 mb-4">
           도시 1곳을 선택해주세요.
         </p>
+        
+        {/* 지역 선택 Select */}
+        <div className="mb-4">
+          <Select
+            value={selectedRegion?.id || ''}
+            onValueChange={(value) => {
+              const city = cities.find(c => c.region_code === value)
+              if (city) {
+                handleRegionSelect(city.region_code, city.region_name)
+              }
+            }}
+          >
+            <SelectTrigger className="w-[280px]">
+              <SelectValue placeholder="지역을 선택하세요" />
+            </SelectTrigger>
+            <SelectContent>
+              {[...cities]
+                .sort((a, b) => a.region_name.localeCompare(b.region_name, 'ko'))
+                .map((city) => (
+                  <SelectItem key={city.region_code} value={city.region_code}>
+                    {city.region_name}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* 뷰 모드별 컨텐츠 */}
