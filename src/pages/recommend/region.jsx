@@ -32,6 +32,15 @@ const REGION_DESCRIPTIONS = {
   52: '전통문화와 맛있는 음식의 고장', // 전북
 }
 
+// 도시 좌표 데이터
+const CITY_COORDINATES = {
+  36: {
+    // 세종
+    latitude: 36.4800984,
+    longitude: 127.2890354,
+  },
+}
+
 export default function RecommendRegionPage() {
   const navigate = useNavigate()
   const [_searchParams] = useSearchParams()
@@ -202,17 +211,21 @@ export default function RecommendRegionPage() {
       {viewMode === 'google-map' ? (
         <GoogleKoreaMap
           cities={cities
-            .filter((city) => city.center_latitude && city.center_longitude)
             .map((city) => ({
               id: city.region_code,
               name: city.region_name,
               name_full: city.region_name_full,
               name_en: city.region_name_en,
-              latitude: Number(city.center_latitude),
-              longitude: Number(city.center_longitude),
+              latitude:
+                Number(city.center_latitude) ||
+                CITY_COORDINATES[city.region_code]?.latitude,
+              longitude:
+                Number(city.center_longitude) ||
+                CITY_COORDINATES[city.region_code]?.longitude,
               administrative_code: city.administrative_code,
               is_active: city.is_active,
-            }))}
+            }))
+            .filter((city) => city.latitude && city.longitude)}
           selectedRegion={selectedRegion}
           onRegionSelect={(id, name) => handleRegionSelect(id, name)}
         />
