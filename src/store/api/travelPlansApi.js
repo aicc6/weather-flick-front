@@ -22,7 +22,7 @@ export const travelPlansApi = createApi({
 
     // 사용자의 저장된 플랜 목록 조회
     getUserPlans: builder.query({
-      query: () => 'travel-plans/user',
+      query: () => 'travel-plans/',
       providesTags: (result) =>
         result
           ? [
