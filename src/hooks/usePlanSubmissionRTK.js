@@ -37,24 +37,15 @@ export default function usePlanSubmissionRTK() {
       try {
         // 플랜 저장용 requestBody 구성
         const requestBody = {
-          title: formData.title || '맞춤 여행 플랜',
+          title: formData.title || `${formData.origin} 여행`,
           description: formData.description || '',
           start_date: dateRange.from.toISOString().slice(0, 10),
           end_date: dateRange.to.toISOString().slice(0, 10),
           budget: formData.budget || 0,
-          itinerary: {
-            origin,
-            dateRange: {
-              from: dateRange.from.toISOString(),
-              to: dateRange.to.toISOString(),
-            },
-            destinationsByDate,
-            ...(formData.weatherPreview && {
-              weatherPreview: formData.weatherPreview,
-            }),
-          },
-          participants: formData.participants || null,
-          transportation: formData.transportation || null,
+          itinerary: destinationsByDate, // 순수 일정 데이터만 전달
+          participants: formData.participants || 1,
+          transportation: formData.transportation || '대중교용',
+          start_location: origin, // 필드명 수정 및 최상위 레벨로 이동
         }
 
         // RTK Query mutation 실행

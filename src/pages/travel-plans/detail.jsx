@@ -131,6 +131,12 @@ export function TravelPlanDetailPage() {
               <p>{plan.description}</p>
             </div>
           )}
+          {plan.start_location && (
+            <div className="flex items-center text-gray-700">
+              <MapPin className="mr-3 h-5 w-5 text-gray-500" />
+              <span>출발지: {plan.start_location}</span>
+            </div>
+          )}
         </CardContent>
       </Card>
 
