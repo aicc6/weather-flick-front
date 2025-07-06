@@ -34,24 +34,28 @@ export default function usePlanSubmissionRTK() {
         return false
       }
 
+      console.log('Submitting plan with data:', formData)
+      console.log('Destinations by date received:', destinationsByDate)
+
       try {
-        // itinerary의 데이터를 순수한 객체로 변환
-        const sanitizedItinerary = Object.keys(destinationsByDate).reduce(
-          (acc, key) => {
-            const dayNumber = key.match(/Day (\d+)/)?.[1]
-            if (dayNumber) {
-              const destinations = destinationsByDate[key]
-              acc[`Day ${dayNumber}`] = destinations.map((dest) => ({
-                // 백엔드에 필요한 필드만 추출
-                description: dest.description,
-                place_id: dest.place_id,
-                // 필요하다면 다른 필드도 추가 (예: lat, lng)
-              }))
-            }
-            return acc
-          },
-          {},
-        )
+        // 날짜 키를 정렬하여 "Day 1", "Day 2" 순서 보장
+        const sortedDates = Object.keys(destinationsByDate).sort()
+
+        const sanitizedItinerary = sortedDates.reduce((acc, dateKey, index) => {
+          const dayKey = `Day ${index + 1}`
+          const destinations = destinationsByDate[dateKey]
+
+          // 목적지 데이터가 있고, 배열인지 확인
+          if (Array.isArray(destinations) && destinations.length > 0) {
+            acc[dayKey] = destinations.map((dest) => ({
+              description: dest.description,
+              place_id: dest.place_id,
+            }))
+          }
+          return acc
+        }, {})
+
+        console.log('Sanitized itinerary:', sanitizedItinerary)
 
         // 플랜 저장용 requestBody 구성
         const requestBody = {
