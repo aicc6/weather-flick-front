@@ -182,7 +182,7 @@ export function ProfilePage() {
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                최근 여행 플랜
+                여행플래너 생성여행
               </CardTitle>
               <Button
                 variant="ghost"

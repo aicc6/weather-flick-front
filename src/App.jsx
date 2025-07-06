@@ -63,6 +63,11 @@ const TravelPlansPage = lazy(() =>
     default: module.TravelPlansPage,
   })),
 )
+const TravelPlanDetailPage = lazy(() =>
+  import('./pages/travel-plans/detail').then((module) => ({
+    default: module.TravelPlanDetailPage,
+  })),
+)
 
 function App() {
   return (
@@ -105,7 +110,10 @@ function App() {
             <Route path="/recommend/:id" element={<TravelCourseDetailPage />} />
             <Route path="/planner" element={<PlannerPage />} />
             <Route path="/travel-plans" element={<TravelPlansPage />} />
-            <Route path="/travel-plans/:planId" element={<PlannerPage />} />
+            <Route
+              path="/travel-plans/:planId"
+              element={<TravelPlanDetailPage />}
+            />
             <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
             <Route
               path="/auth/google/callback"
