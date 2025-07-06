@@ -26,27 +26,10 @@ const handle401Error = () => {
 // 기본 Base Query
 export const baseQuery = fetchBaseQuery({
   baseUrl: getBaseUrl(),
-  prepareHeaders: (headers, { endpoint }) => {
-    // 인증이 필요한 엔드포인트인지 확인
-    const authRequiredEndpoints = [
-      'getMe',
-      'updateProfile',
-      'changePassword',
-      'logout',
-      'withdraw',
-      'createTravelPlan',
-      'getUserPlans',
-      'updateTravelPlan',
-      'deleteTravelPlan',
-      'shareTravelPlan',
-    ]
-
-    // 인증이 필요한 엔드포인트만 토큰 추가
-    if (authRequiredEndpoints.includes(endpoint)) {
-      const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
-      if (token) {
-        headers.set('authorization', `Bearer ${token}`)
-      }
+  prepareHeaders: (headers) => {
+    const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
+    if (token) {
+      headers.set('authorization', `Bearer ${token}`)
     }
 
     // Content-Type 기본 설정 (FormData가 아닌 경우)
