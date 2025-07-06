@@ -26,6 +26,7 @@ export {
   Camera,
   List,
   AlertTriangle,
+  PlusCircle,
 } from 'lucide-react'
 
 // Weather Icons

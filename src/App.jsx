@@ -58,6 +58,11 @@ const ChangePasswordPage = lazy(() =>
 const PlannerPage = lazy(() => import('./pages/planner'))
 const TravelCoursePage = lazy(() => import('@/pages/destinations'))
 const TravelCourseDetailPage = lazy(() => import('@/pages/destinations/detail'))
+const TravelPlansPage = lazy(() =>
+  import('./pages/travel-plans').then((module) => ({
+    default: module.TravelPlansPage,
+  })),
+)
 
 function App() {
   return (
@@ -99,6 +104,8 @@ function App() {
             />
             <Route path="/recommend/:id" element={<TravelCourseDetailPage />} />
             <Route path="/planner" element={<PlannerPage />} />
+            <Route path="/travel-plans" element={<TravelPlansPage />} />
+            <Route path="/travel-plans/:planId" element={<PlannerPage />} />
             <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
             <Route
               path="/auth/google/callback"

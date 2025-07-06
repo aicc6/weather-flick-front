@@ -74,9 +74,6 @@ export const travelPlansApi = createApi({
         { type: 'TravelPlan', id: planId },
         { type: 'TravelPlan', id: 'LIST' },
       ],
-      transformResponse: (response) => {
-        return response.success ? response.data : response
-      },
     }),
 
     // 플랜 공유
