@@ -35,30 +35,31 @@ const createHttp = ({ baseUrl, headers, fetch = globalThis.fetch }) => {
       }
     }
 
-    const response = await fetch(
-      generateUrl(`${baseUrl}/${url.replace(/^\//, '')}`, options?.params),
-      {
-        method: method.toUpperCase(),
-        ...options,
-        headers: {
-          ...computedHeaders,
-          ...(body &&
-          !(body instanceof FormData) &&
-          !(body instanceof URLSearchParams)
-            ? { 'Content-Type': 'application/json' }
-            : {}),
-          ...options?.headers,
-        },
-        ...(body && {
-          body:
-            body instanceof FormData || body instanceof URLSearchParams
-              ? body
-              : typeof body === 'string'
-                ? body
-                : JSON.stringify(body),
-        }),
+    const fullUrl = url.startsWith('http')
+      ? url
+      : `${baseUrl}/${url.replace(/^\//, '')}`
+
+    const response = await fetch(generateUrl(fullUrl, options?.params), {
+      method: method.toUpperCase(),
+      ...options,
+      headers: {
+        ...computedHeaders,
+        ...(body &&
+        !(body instanceof FormData) &&
+        !(body instanceof URLSearchParams)
+          ? { 'Content-Type': 'application/json' }
+          : {}),
+        ...options?.headers,
       },
-    )
+      ...(body && {
+        body:
+          body instanceof FormData || body instanceof URLSearchParams
+            ? body
+            : typeof body === 'string'
+              ? body
+              : JSON.stringify(body),
+      }),
+    })
 
     return response
   }
