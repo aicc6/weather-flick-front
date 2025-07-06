@@ -35,6 +35,10 @@ export function TravelPlansPage() {
     useDeleteTravelPlanMutation()
   const [planToDelete, setPlanToDelete] = useState(null)
 
+  const sortedPlans = (plans || [])
+    .slice()
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+
   const handleDeleteClick = (plan) => {
     setPlanToDelete(plan)
   }
@@ -78,9 +82,9 @@ export function TravelPlansPage() {
       </div>
 
       <div className="mt-6">
-        {plans && plans.length > 0 ? (
+        {sortedPlans && sortedPlans.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {plans.map((plan) => (
+            {sortedPlans.map((plan) => (
               <Card
                 key={plan.plan_id}
                 className="flex flex-col justify-between transition-all hover:shadow-md"

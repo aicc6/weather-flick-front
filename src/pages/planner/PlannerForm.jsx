@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useMemo, memo } from 'react'
-import { CalendarIcon, ChevronDown, MapPin, Plus } from 'lucide-react'
+import { CalendarIcon, ChevronDown, MapPin } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import {
   Popover,
@@ -36,15 +36,6 @@ import useDestinationSearchRTK from '@/hooks/useDestinationSearchRTK'
 import usePlanSubmissionRTK from '@/hooks/usePlanSubmissionRTK'
 
 const PlannerForm = memo(() => {
-  // 기본 폼 상태
-  const [form, setForm] = useState({
-    origin: '',
-    dateRange: { from: null, to: null },
-    title: '',
-  })
-
-  const [calendarOpen, setCalendarOpen] = useState(false)
-
   // 커스텀 훅 사용
   const { getCurrentLocation, isLocating } = useGeolocation()
   const { getDatesInRange } = useDateRange()
@@ -58,10 +49,10 @@ const PlannerForm = memo(() => {
     destInputs,
     destSuggestions,
     showDestDropdown,
-    activeDateInput: _activeDateInput,
     updateDestInput,
     hideDropdown,
     showDropdown,
+    setFinalDestinationValue,
     isSearching: _isSearching,
     searchError: _searchError,
   } = useDestinationSearchRTK()
@@ -72,22 +63,31 @@ const PlannerForm = memo(() => {
     error: _error,
   } = usePlanSubmissionRTK()
 
+  // 기본 폼 상태 - 출발지를 제거하고 날짜만 관리
+  const [form, setForm] = useState({
+    dateRange: { from: null, to: null },
+    title: '',
+  })
+  const [calendarOpen, setCalendarOpen] = useState(false)
+
   // 현재 위치 자동 감지
   const handleAutoLocation = useCallback(async () => {
     try {
       const address = await getCurrentLocation()
-      setForm((prev) => ({ ...prev, origin: address }))
+      updateDestInput('origin', address)
     } catch {
       // 에러는 훅 내부에서 처리됨
     }
-  }, [getCurrentLocation])
+  }, [getCurrentLocation, updateDestInput])
 
-  // 목적지 자동완성 처리 - 메모이제이션
-  const handleDestinationInput = useCallback(
-    (dateStr, value) => {
-      updateDestInput(dateStr, value)
+  // 출발지 자동완성 선택 처리
+  const handleOriginSelect = useCallback(
+    (suggestion) => {
+      const value =
+        typeof suggestion === 'string' ? suggestion : suggestion.description
+      setFinalDestinationValue('origin', value)
     },
-    [updateDestInput],
+    [setFinalDestinationValue],
   )
 
   // 날짜 범위 계산 - 메모이제이션
@@ -98,19 +98,19 @@ const PlannerForm = memo(() => {
   // 폼 유효성 검사 - 메모이제이션
   const isFormValid = useMemo(() => {
     return (
-      form.origin &&
+      destInputs.origin &&
       form.dateRange?.from &&
       form.dateRange?.to &&
       Object.keys(destinationsByDate).length > 0
     )
   }, [
-    form.origin,
+    destInputs.origin,
     form.dateRange?.from,
     form.dateRange?.to,
     destinationsByDate,
   ])
 
-  // 목적지 추가 (훅의 함수 래핑)
+  // 목적지 추가
   const handleAddDestination = useCallback(
     (date, dest) => {
       addDestination(date, dest)
@@ -135,15 +135,15 @@ const PlannerForm = memo(() => {
       e.preventDefault()
 
       const formData = {
-        title: form.title || `${form.origin} 여행`,
-        origin: form.origin,
+        title: form.title || `${destInputs.origin} 여행`,
+        origin: destInputs.origin,
         dateRange: form.dateRange,
         destinationsByDate,
       }
 
       await submitPlan(formData)
     },
-    [form, destinationsByDate, submitPlan],
+    [form, destInputs, destinationsByDate, submitPlan],
   )
 
   return (
@@ -194,21 +194,23 @@ const PlannerForm = memo(() => {
                   </div>
 
                   <div className="grid gap-6 md:grid-cols-2">
-                    <div className="space-y-2">
+                    <div className="relative space-y-2">
                       <label className="text-muted-foreground text-sm font-medium">
                         출발지
                       </label>
                       <div className="flex gap-2">
                         <Input
-                          value={form.origin}
+                          value={destInputs.origin || ''}
                           onChange={(e) =>
-                            setForm((prev) => ({
-                              ...prev,
-                              origin: e.target.value,
-                            }))
+                            updateDestInput('origin', e.target.value)
+                          }
+                          onFocus={() => showDropdown('origin')}
+                          onBlur={() =>
+                            setTimeout(() => hideDropdown('origin'), 150)
                           }
                           placeholder="출발 도시를 입력하세요"
                           className="flex-1"
+                          autoComplete="off"
                         />
                         <Button
                           type="button"
@@ -225,6 +227,11 @@ const PlannerForm = memo(() => {
                           )}
                         </Button>
                       </div>
+                      <DestinationAutocomplete
+                        isVisible={showDestDropdown.origin}
+                        suggestions={destSuggestions.origin}
+                        onSelect={handleOriginSelect}
+                      />
                     </div>
 
                     <div className="space-y-2">
@@ -386,27 +393,25 @@ const PlannerForm = memo(() => {
                                 </h3>
                               </div>
 
-                              <div className="relative mb-4">
+                              <div className="relative space-y-3">
+                                <label className="text-muted-foreground text-sm font-medium">
+                                  {dateStr} 목적지 추가
+                                </label>
                                 <Input
                                   value={destInputs[dateStr] || ''}
                                   onChange={(e) =>
-                                    handleDestinationInput(
-                                      dateStr,
-                                      e.target.value,
-                                    )
+                                    updateDestInput(dateStr, e.target.value)
                                   }
                                   onFocus={() => showDropdown(dateStr)}
-                                  onBlur={() => {
+                                  onBlur={() =>
                                     setTimeout(() => hideDropdown(dateStr), 150)
-                                  }}
-                                  placeholder="방문할 장소를 입력하세요"
-                                  className="pr-10"
+                                  }
+                                  placeholder="도시, 장소 등을 검색하세요"
+                                  autoComplete="off"
                                 />
-                                <Plus className="text-muted-foreground absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 transform" />
-
                                 <DestinationAutocomplete
-                                  suggestions={destSuggestions[dateStr] || []}
-                                  isVisible={showDestDropdown[dateStr] || false}
+                                  isVisible={showDestDropdown[dateStr]}
+                                  suggestions={destSuggestions[dateStr]}
                                   onSelect={(suggestion) =>
                                     handleAddDestination(dateStr, suggestion)
                                   }

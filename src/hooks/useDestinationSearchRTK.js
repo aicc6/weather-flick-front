@@ -158,6 +158,29 @@ export default function useDestinationSearchRTK() {
     setSearchError(null)
   }, [])
 
+  const setFinalDestinationValue = useCallback((date, value) => {
+    // Update the input field state
+    setDestInputs((prev) => ({
+      ...prev,
+      [date]: value,
+    }))
+
+    // Clear any pending search timer to prevent re-triggering a search
+    if (debounceTimers.current[date]) {
+      clearTimeout(debounceTimers.current[date])
+    }
+
+    // Clear suggestions and hide the dropdown
+    setDestSuggestions((prev) => ({
+      ...prev,
+      [date]: [],
+    }))
+    setShowDestDropdown((prev) => ({
+      ...prev,
+      [date]: false,
+    }))
+  }, [])
+
   const memoizedReturn = useMemo(
     () => ({
       destInputs,
@@ -169,6 +192,7 @@ export default function useDestinationSearchRTK() {
       hideDropdown,
       showDropdown,
       clearAllInputs,
+      setFinalDestinationValue,
       isSearching, // RTK Query 로딩 상태
       searchError, // RTK Query 에러 상태
     }),
@@ -182,6 +206,7 @@ export default function useDestinationSearchRTK() {
       hideDropdown,
       showDropdown,
       clearAllInputs,
+      setFinalDestinationValue,
       isSearching,
       searchError,
     ],

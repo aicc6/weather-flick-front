@@ -34,7 +34,11 @@ export function ProfilePage() {
     isError,
     error,
   } = useGetUserPlansQuery()
-  const recentPlans = plansResponse || []
+
+  const recentPlans = (plansResponse || [])
+    .slice() // 원본 배열 수정을 방지하기 위해 복사본 생성
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 3) // 최신 3개 항목만 선택
 
   useEffect(() => {
     // 여행 플랜과 즐겨찾기 데이터 로드 (실제 API 호출로 대체)
@@ -197,7 +201,7 @@ export function ProfilePage() {
           <CardContent>
             {recentPlans.length > 0 ? (
               <div className="space-y-3">
-                {recentPlans.slice(0, 3).map((plan) => (
+                {recentPlans.map((plan) => (
                   <div
                     key={plan.plan_id}
                     className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
