@@ -9,7 +9,7 @@ export const travelPlansApi = createApi({
     // 여행 플랜 생성
     createTravelPlan: builder.mutation({
       query: (planData) => ({
-        url: 'travel-plans',
+        url: 'travel-plans/',
         method: 'POST',
         body: planData,
       }),
