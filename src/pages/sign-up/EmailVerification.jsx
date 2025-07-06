@@ -73,7 +73,7 @@ export const EmailVerification = forwardRef(function EmailVerification(
         </p>
       )}
 
-      {!verificationMsg && errors.email && (
+      {!verificationMsg && !verificationSent && errors.email && (
         <p className="text-sm text-red-500">{errors.email.message}</p>
       )}
     </div>

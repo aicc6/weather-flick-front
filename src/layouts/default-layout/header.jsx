@@ -117,6 +117,17 @@ export function Header() {
     setIsSidebarOpen(!isSidebarOpen)
   }
 
+  // 모바일 메뉴에서 안전한 네비게이션 처리
+  const handleNavigation = (path) => {
+    // 먼저 사이드바 닫기
+    setIsSidebarOpen(false)
+    
+    // 약간의 지연을 두고 네비게이션 실행 (UI 업데이트 완료 후)
+    setTimeout(() => {
+      navigate(path)
+    }, 100)
+  }
+
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-md dark:border-gray-800 dark:bg-gray-900/80">
@@ -292,7 +303,10 @@ export function Header() {
                   <li key={link.path}>
                     <Link
                       to={link.path}
-                      onClick={closeSidebar}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        handleNavigation(link.path)
+                      }}
                       className={`block rounded-lg px-4 py-3 font-medium transition-colors ${
                         isActive
                           ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
@@ -330,10 +344,7 @@ export function Header() {
                   <Button
                     variant="ghost"
                     className="w-full justify-start"
-                    onClick={() => {
-                      navigate('/profile')
-                      closeSidebar()
-                    }}
+                    onClick={() => handleNavigation('/profile')}
                   >
                     <User className="mr-2 h-4 w-4" />
                     프로필
@@ -341,10 +352,7 @@ export function Header() {
                   <Button
                     variant="ghost"
                     className="w-full justify-start"
-                    onClick={() => {
-                      navigate('/settings')
-                      closeSidebar()
-                    }}
+                    onClick={() => handleNavigation('/settings')}
                   >
                     <Settings className="mr-2 h-4 w-4" />
                     설정
@@ -364,19 +372,13 @@ export function Header() {
                 <Button
                   variant="outline"
                   className="w-full"
-                  onClick={() => {
-                    navigate('/login')
-                    closeSidebar()
-                  }}
+                  onClick={() => handleNavigation('/login')}
                 >
                   로그인
                 </Button>
                 <Button
                   className="w-full"
-                  onClick={() => {
-                    navigate('/sign-up')
-                    closeSidebar()
-                  }}
+                  onClick={() => handleNavigation('/sign-up')}
                 >
                   회원가입
                 </Button>
