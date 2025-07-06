@@ -5,6 +5,40 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ChevronLeft, Clock } from '@/components/icons'
 
+// 동행자 정보 정의
+const companions = [
+  {
+    id: 'solo',
+    label: '혼자',
+    icon: '🧘‍♀️',
+  },
+  {
+    id: 'couple',
+    label: '연인',
+    icon: '💕',
+  },
+  {
+    id: 'family',
+    label: '가족',
+    icon: '👨‍👩‍👧‍👦',
+  },
+  {
+    id: 'friends',
+    label: '친구들',
+    icon: '👫',
+  },
+  {
+    id: 'colleagues',
+    label: '동료/회사',
+    icon: '👔',
+  },
+  {
+    id: 'group',
+    label: '단체',
+    icon: '👥',
+  },
+]
+
 export default function RecommendSchedulePage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -56,6 +90,59 @@ export default function RecommendSchedulePage() {
         '계획성이 부족할 수 있음',
         '시간이 남을 수 있음',
       ],
+    },
+  ]
+
+  const travelStyles = [
+    {
+      id: 'activity',
+      label: '체험·액티비티',
+      icon: '🎯',
+    },
+    {
+      id: 'hotplace',
+      label: 'SNS 핫플레이스',
+      icon: '📸',
+    },
+    {
+      id: 'nature',
+      label: '자연과 함께',
+      icon: '🌿',
+    },
+    {
+      id: 'landmark',
+      label: '유명 관광지는 필수',
+      icon: '🏛️',
+    },
+    {
+      id: 'healing',
+      label: '여유롭게 힐링',
+      icon: '🧘‍♀️',
+    },
+    {
+      id: 'culture',
+      label: '문화·예술·역사',
+      icon: '🎨',
+    },
+    {
+      id: 'local',
+      label: '여행지 느낌 물씬',
+      icon: '🏘️',
+    },
+    {
+      id: 'shopping',
+      label: '쇼핑은 열정적으로',
+      icon: '🛍️',
+    },
+    {
+      id: 'food',
+      label: '관광보다 먹방',
+      icon: '🍽️',
+    },
+    {
+      id: 'pet',
+      label: '애완동물과 함께',
+      icon: '🐾',
     },
   ]
 
@@ -148,9 +235,10 @@ export default function RecommendSchedulePage() {
               </span>
               <Badge
                 variant="outline"
-                className="mt-1 dark:border-gray-600 dark:text-gray-300"
+                className="mt-1 flex items-center gap-1 dark:border-gray-600 dark:text-gray-300"
               >
-                {who}
+                {companions.find((c) => c.id === who)?.icon}
+                {companions.find((c) => c.id === who)?.label || who}
               </Badge>
             </div>
           )}
@@ -159,12 +247,21 @@ export default function RecommendSchedulePage() {
               <span className="block text-xs text-gray-500 dark:text-gray-400">
                 스타일
               </span>
-              <Badge
-                variant="outline"
-                className="mt-1 dark:border-gray-600 dark:text-gray-300"
-              >
-                {styles.split(',').length}개 선택
-              </Badge>
+              <div className="mt-1 flex flex-wrap gap-1">
+                {styles.split(',').map((styleId) => {
+                  const style = travelStyles.find((s) => s.id === styleId)
+                  return (
+                    <Badge
+                      key={styleId}
+                      variant="outline"
+                      className="flex items-center gap-1 dark:border-gray-600 dark:text-gray-300"
+                    >
+                      <span>{style?.icon}</span>
+                      {style?.label || styleId}
+                    </Badge>
+                  )
+                })}
+              </div>
             </div>
           )}
         </div>

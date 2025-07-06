@@ -15,6 +15,94 @@ import {
 } from '@/components/icons'
 import { http } from '@/lib/http'
 
+// 여행 스타일 정의
+const travelStyles = [
+  {
+    id: 'activity',
+    label: '체험·액티비티',
+    icon: '🎯',
+  },
+  {
+    id: 'hotplace',
+    label: 'SNS 핫플레이스',
+    icon: '📸',
+  },
+  {
+    id: 'nature',
+    label: '자연과 함께',
+    icon: '🌿',
+  },
+  {
+    id: 'landmark',
+    label: '유명 관광지는 필수',
+    icon: '🏛️',
+  },
+  {
+    id: 'healing',
+    label: '여유롭게 힐링',
+    icon: '🧘‍♀️',
+  },
+  {
+    id: 'culture',
+    label: '문화·예술·역사',
+    icon: '🎨',
+  },
+  {
+    id: 'local',
+    label: '여행지 느낌 물씬',
+    icon: '🏘️',
+  },
+  {
+    id: 'shopping',
+    label: '쇼핑은 열정적으로',
+    icon: '🛍️',
+  },
+  {
+    id: 'food',
+    label: '관광보다 먹방',
+    icon: '🍽️',
+  },
+  {
+    id: 'pet',
+    label: '애완동물과 함께',
+    icon: '🐾',
+  },
+]
+
+// 동행자 정보 정의
+const companions = [
+  {
+    id: 'solo',
+    label: '혼자',
+    icon: '🧘‍♀️',
+  },
+  {
+    id: 'couple',
+    label: '연인',
+    icon: '💕',
+  },
+  {
+    id: 'family',
+    label: '가족',
+    icon: '👨‍👩‍👧‍👦',
+  },
+  {
+    id: 'friends',
+    label: '친구들',
+    icon: '👫',
+  },
+  {
+    id: 'colleagues',
+    label: '동료/회사',
+    icon: '👔',
+  },
+  {
+    id: 'group',
+    label: '단체',
+    icon: '👥',
+  },
+]
+
 export default function RecommendResultPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -246,16 +334,39 @@ export default function RecommendResultPage() {
             <div className="rounded-lg bg-purple-50 p-3 text-center dark:bg-purple-900/20">
               <Users className="mx-auto mb-1 h-5 w-5 text-purple-600 dark:text-purple-400" />
               <p className="text-xs text-gray-600 dark:text-gray-400">동행자</p>
-              <p className="font-semibold dark:text-white">
-                {recommendations.summary.who}
-              </p>
+              <div className="flex items-center justify-center gap-1">
+                <span>
+                  {
+                    companions.find((c) => c.id === recommendations.summary.who)
+                      ?.icon
+                  }
+                </span>
+                <p className="font-semibold dark:text-white">
+                  {companions.find((c) => c.id === recommendations.summary.who)
+                    ?.label || recommendations.summary.who}
+                </p>
+              </div>
             </div>
-            <div className="rounded-lg bg-orange-50 p-3 text-center dark:bg-orange-900/20">
+            <div className="rounded-lg bg-orange-50 p-3 dark:bg-orange-900/20">
               <Heart className="mx-auto mb-1 h-5 w-5 text-orange-600 dark:text-orange-400" />
-              <p className="text-xs text-gray-600 dark:text-gray-400">스타일</p>
-              <p className="font-semibold dark:text-white">
-                {recommendations.summary.styles.length}개
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                선호 스타일
               </p>
+              <div className="mt-1 flex flex-wrap gap-1">
+                {recommendations.summary.styles.map((styleId) => {
+                  const style = travelStyles.find((s) => s.id === styleId)
+                  return (
+                    <Badge
+                      key={styleId}
+                      variant="outline"
+                      className="flex items-center gap-1 dark:border-gray-600 dark:text-gray-300"
+                    >
+                      <span>{style?.icon}</span>
+                      {style?.label || styleId}
+                    </Badge>
+                  )
+                })}
+              </div>
             </div>
           </div>
         </CardContent>

@@ -5,6 +5,40 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ChevronLeft, Heart } from '@/components/icons'
 
+// 동행자 정보 정의
+const companions = [
+  {
+    id: 'solo',
+    label: '혼자',
+    icon: '🧘‍♀️',
+  },
+  {
+    id: 'couple',
+    label: '연인',
+    icon: '💕',
+  },
+  {
+    id: 'family',
+    label: '가족',
+    icon: '👨‍👩‍👧‍👦',
+  },
+  {
+    id: 'friends',
+    label: '친구들',
+    icon: '👫',
+  },
+  {
+    id: 'colleagues',
+    label: '동료/회사',
+    icon: '👔',
+  },
+  {
+    id: 'group',
+    label: '단체',
+    icon: '👥',
+  },
+]
+
 export default function RecommendStylePage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -91,7 +125,7 @@ export default function RecommendStylePage() {
   const handleStyleToggle = (styleId) => {
     setSelectedStyles((prev) =>
       prev.includes(styleId)
-        ? prev.filter((id) => id !== styleId)
+        ? prev.filter((label) => label !== styleId)
         : [...prev, styleId],
     )
   }
@@ -174,7 +208,8 @@ export default function RecommendStylePage() {
                 variant="outline"
                 className="ml-2 dark:border-gray-600 dark:text-gray-300"
               >
-                {who}
+                {companions.find((c) => c.id === who)?.icon}{' '}
+                {companions.find((c) => c.id === who)?.label || who}
               </Badge>
             </div>
           )}
