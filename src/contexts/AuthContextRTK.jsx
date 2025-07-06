@@ -147,8 +147,13 @@ export const AuthProvider = ({ children }) => {
       // 토큰과 사용자 정보 저장
       tokenManager.setToken(accessToken, userInfo)
 
-      // RTK Query 캐시 갱신
-      refetch()
+      // RTK Query 캐시 갱신 - 토큰이 설정된 후 약간의 딜레이를 주고 refetch
+      // 이는 React state 업데이트가 비동기이기 때문
+      setTimeout(() => {
+        if (tokenManager.isLoggedIn()) {
+          refetch()
+        }
+      }, 100)
     },
     [refetch, tokenManager],
   )
