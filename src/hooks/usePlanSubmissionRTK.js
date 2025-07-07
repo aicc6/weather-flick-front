@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useCreateTravelPlanMutation } from '@/store/api'
 
@@ -8,6 +9,7 @@ import { useCreateTravelPlanMutation } from '@/store/api'
  */
 export default function usePlanSubmissionRTK() {
   const [plans, setPlans] = useState([])
+  const navigate = useNavigate()
 
   // RTK Query mutation hook
   const [createTravelPlan, { isLoading: isSubmitting, error }] =
@@ -74,8 +76,17 @@ export default function usePlanSubmissionRTK() {
         const result = await createTravelPlan(requestBody).unwrap()
 
         // 성공 처리
-        toast.success('여행 플랜이 성공적으로 저장되었습니다!')
+        toast.success('여행 플랜이 성공적으로 저장되었습니다!', {
+          duration: 2000,
+          position: 'top-center',
+        })
         setPlans([result])
+
+        // 여행 계획 목록 페이지로 이동
+        setTimeout(() => {
+          navigate('/travel-plans')
+        }, 1500) // 토스트 메시지를 잠깐 보여준 후 이동
+
         return true
       } catch (error) {
         console.error('플랜 제출 오류:', error)
@@ -91,7 +102,7 @@ export default function usePlanSubmissionRTK() {
         return false
       }
     },
-    [createTravelPlan],
+    [createTravelPlan, navigate],
   )
 
   const clearPlans = useCallback(() => {
