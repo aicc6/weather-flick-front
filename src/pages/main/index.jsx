@@ -10,15 +10,15 @@ import { useScrollFadeIn } from '@/hooks/useScrollFadeIn'
  * URL: '/'
  */
 export function MainPage() {
-  const [searchData, setSearchData] = useState({
+  const [_searchData, _setSearchData] = useState({
     departure: '',
     date: null,
     theme: '',
   })
 
-  const handleSearch = () => {
+  const _handleSearch = () => {
     // TODO: 검색 로직 구현
-    console.log('검색 데이터:', searchData)
+    console.log('검색 데이터:', _searchData)
   }
 
   // 각 서비스별 설명 데이터

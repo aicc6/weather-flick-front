@@ -42,7 +42,6 @@ export function GoogleCallbackPage() {
           // 임시 인증 코드를 JWT 토큰으로 교환
           try {
             const response = await exchangeGoogleAuthCode(authCode).unwrap()
-            console.log('Exchange response:', response)
 
             // AuthContext의 Google 인증 성공 처리 함수 사용
             try {

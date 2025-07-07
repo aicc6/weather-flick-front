@@ -21,7 +21,7 @@ const validateAndSanitizeResponse = (response, expectedStructure = {}) => {
 
     // 데이터 구조 검증 및 기본값 설정
     if (expectedStructure && typeof expectedStructure === 'object') {
-      Object.keys(expectedStructure).forEach(key => {
+      Object.keys(expectedStructure).forEach((key) => {
         if (response && typeof response === 'object' && !(key in response)) {
           response[key] = expectedStructure[key]
         }
@@ -87,14 +87,17 @@ export const travelPlansApi = createApi({
           : [{ type: 'TravelPlan', id: 'LIST' }],
       keepUnusedDataFor: 300, // 5분간 캐싱
       transformResponse: (response) => {
-        const validatedResponse = validateAndSanitizeResponse(response, TRAVEL_PLANS_LIST_DEFAULTS)
+        const validatedResponse = validateAndSanitizeResponse(
+          response,
+          TRAVEL_PLANS_LIST_DEFAULTS,
+        )
         // 배열이 아니면 빈 배열 반환 (안전장치)
         if (!Array.isArray(validatedResponse)) {
           console.warn('여행 계획 목록이 배열이 아님:', validatedResponse)
           return []
         }
         // 각 항목에 기본값 적용
-        return validatedResponse.map(plan => ({
+        return validatedResponse.map((plan) => ({
           ...TRAVEL_PLAN_DEFAULTS,
           ...plan,
           // 필수 필드 검증
@@ -106,7 +109,9 @@ export const travelPlansApi = createApi({
         return {
           status: response.status,
           data: response.data,
-          message: response.data?.message || '여행 계획 목록을 불러오는 중 오류가 발생했습니다',
+          message:
+            response.data?.message ||
+            '여행 계획 목록을 불러오는 중 오류가 발생했습니다',
         }
       },
     }),

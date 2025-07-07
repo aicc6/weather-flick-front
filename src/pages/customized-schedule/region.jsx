@@ -57,7 +57,9 @@ export default function CustomizedScheduleRegionPage() {
   const { regionCode, regionName } = useSelector(
     (state) => state.customizedSchedule,
   )
-  const selectedRegion = regionCode ? { id: regionCode, name: regionName } : null
+  const selectedRegion = regionCode
+    ? { id: regionCode, name: regionName }
+    : null
   const [viewMode, setViewMode] = useState('google-map') // 'google-map', 'list'
   const [regionImages, setRegionImages] = useState({})
   const [imagesLoading, setImagesLoading] = useState(true)
@@ -116,15 +118,11 @@ export default function CustomizedScheduleRegionPage() {
 
   const getSelectedCityData = () => {
     if (!regionCode) return null
-    const cityData = cities.find(
-      (city) => city.region_code === regionCode,
-    )
+    const cityData = cities.find((city) => city.region_code === regionCode)
     if (cityData) {
       return {
         ...cityData,
-        images:
-          regionImages[regionCode] ||
-          getFallbackImages(regionCode, 3),
+        images: regionImages[regionCode] || getFallbackImages(regionCode, 3),
       }
     }
     return null
@@ -452,4 +450,3 @@ export default function CustomizedScheduleRegionPage() {
     </div>
   )
 }
-

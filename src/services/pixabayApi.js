@@ -1,6 +1,5 @@
 // Pixabay API 서비스
-const PIXABAY_API_KEY =
-  import.meta.env.VITE_PIXABAY_API_KEY || '47458629-86ae2cc2b9a0d70b38372a2ad'
+const PIXABAY_API_KEY = import.meta.env.VITE_PIXABAY_API_KEY
 const PIXABAY_BASE_URL = 'https://pixabay.com/api/'
 
 import { http } from '@/lib/http'
@@ -57,6 +56,10 @@ const regionCodeToKeyword = {
 // Pixabay에서 이미지 검색
 export const searchImages = async (query, count = 3) => {
   try {
+    if (!PIXABAY_API_KEY) {
+      console.warn('Pixabay API 키가 설정되지 않았습니다.')
+      return []
+    }
     const params = new URLSearchParams({
       key: PIXABAY_API_KEY,
       q: query,

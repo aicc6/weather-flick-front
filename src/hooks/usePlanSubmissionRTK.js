@@ -36,9 +36,6 @@ export default function usePlanSubmissionRTK() {
         return false
       }
 
-      console.log('Submitting plan with data:', formData)
-      console.log('Destinations by date received:', destinationsByDate)
-
       try {
         // 날짜 키를 정렬하여 "Day 1", "Day 2" 순서 보장
         const sortedDates = Object.keys(destinationsByDate).sort()
@@ -56,8 +53,6 @@ export default function usePlanSubmissionRTK() {
           }
           return acc
         }, {})
-
-        console.log('Sanitized itinerary:', sanitizedItinerary)
 
         // 플랜 저장용 requestBody 구성
         const requestBody = {
