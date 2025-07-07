@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom'
 import { useGetTravelPlanQuery } from '@/store/api/travelPlansApi'
 import LoadingSpinner from '@/components/LoadingSpinner'
+import WeatherInfo from '@/components/WeatherInfo'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -80,6 +81,10 @@ export function TravelPlanDetailPage() {
     return <div className="text-center">해당 여행 계획을 찾을 수 없습니다.</div>
   }
 
+  // 디버깅용 로그
+  console.log('Travel plan data:', plan)
+  console.log('Weather info from plan:', plan.weather_info)
+
   const itineraryDays = plan.itinerary ? Object.keys(plan.itinerary) : []
 
   return (
@@ -139,6 +144,11 @@ export function TravelPlanDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* 날씨 정보 */}
+      <div className="mb-6">
+        <WeatherInfo weatherInfo={plan.weather_info} />
+      </div>
 
       <Card>
         <CardHeader>
