@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import { recommendedDestinations } from '@/data'
 import { Chatbot } from '@/components/common/chatbot'
@@ -48,6 +49,9 @@ export function MainPage() {
   const imageBoxClass =
     'flex-shrink-0 flex items-center justify-center w-44 h-44 md:w-52 md:h-52 bg-white rounded-2xl shadow-lg overflow-hidden'
 
+  // 각 서비스별 링크 경로
+  const serviceLinks = ['/recommend', '/customized-schedule', '/planner']
+
   return (
     <div className="relative h-full">
       {/* Hero Section with Background Image - 다크모드 영향받지 않음 */}
@@ -65,10 +69,10 @@ export function MainPage() {
 
         {/* Content */}
         <div className="relative z-10">
-          <h1 className="mb-2 text-4xl font-bold text-white drop-shadow-lg">
+          <h1 className="mb-2 text-6xl font-bold text-white drop-shadow-lg">
             &quot;날씨 기반 스마트 여행 플래너&quot;
           </h1>
-          <p className="mb-8 text-lg text-white/90 drop-shadow-md">
+          <p className="mb-8 text-2xl text-white/90 drop-shadow-md">
             실시간 날씨 정보를 기반으로 최적의 여행지를 추천해드립니다
           </p>
         </div>
@@ -90,14 +94,23 @@ export function MainPage() {
         <div className="mt-32 space-y-32 pb-32">
           {serviceSections.map((sec, idx) => {
             const fadeProps = serviceFadeIns[idx]
+            const link = serviceLinks[idx]
             return (
-              <section
+              <Link
+                to={link}
                 key={sec.title}
                 ref={fadeProps.ref}
                 style={fadeProps.style}
-                className="mx-auto flex max-w-4xl flex-col items-center gap-10 px-4 md:flex-row"
+                className="group mx-auto flex max-w-4xl cursor-pointer flex-col items-center gap-10 px-4 focus:ring-2 focus:ring-blue-400 focus:outline-none md:flex-row"
+                tabIndex={0}
+                aria-label={sec.title + ' 서비스로 이동'}
               >
-                <div className={imageBoxClass}>
+                <div
+                  className={
+                    imageBoxClass +
+                    ' transition-transform duration-200 group-hover:scale-105'
+                  }
+                >
                   {sec.img ? (
                     <img
                       src={sec.img}
@@ -109,12 +122,14 @@ export function MainPage() {
                   )}
                 </div>
                 <div className="flex-1 text-left md:pl-6">
-                  <h2 className="mb-3 text-3xl font-bold">{sec.title}</h2>
+                  <h2 className="mb-3 text-3xl font-bold transition-colors duration-200 group-hover:text-blue-600">
+                    {sec.title}
+                  </h2>
                   <p className="text-lg leading-relaxed text-gray-600">
                     {sec.desc}
                   </p>
                 </div>
-              </section>
+              </Link>
             )
           })}
         </div>
