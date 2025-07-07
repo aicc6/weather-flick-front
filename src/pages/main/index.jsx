@@ -5,6 +5,7 @@ import { recommendedDestinations, travelThemes } from '@/data'
 import { Chatbot } from '@/components/common/chatbot'
 import { Button } from '@/components/ui/button'
 import { RecommendedDestCarousel } from './RecommendedDestCarousel'
+import PlaneFollower from '@/components/common/PlaneFollower'
 
 /**
  * URL: '/'
@@ -23,6 +24,9 @@ export function MainPage() {
 
   return (
     <div className="relative h-full">
+      {/* 마우스 따라다니는 비행기 애니메이션 */}
+      <PlaneFollower />
+
       {/* Hero Section with Background Image - 다크모드 영향받지 않음 */}
       <section
         className="relative flex min-h-[80vh] flex-col justify-center pt-12 pb-8 text-center"

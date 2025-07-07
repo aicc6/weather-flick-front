@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -117,11 +118,15 @@ export default function CustomizedScheduleResultPage() {
   const styles = searchParams.get('styles')
   const schedule = searchParams.get('schedule')
 
+  const { regionName: displayedRegionName } = useSelector(
+    (state) => state.customizedSchedule,
+  )
+
   useEffect(() => {
     if (!region) return
     // 관광지 이름 불러오기
     http
-      .GET(`/attractions/by-region?region=${encodeURIComponent(region)}`)
+      .GET(`/attractions/by-region?region_code=${encodeURIComponent(region)}`)
       .then((res) => res.json())
       .then((data) => setAttractionNames(data))
       .catch(() => setAttractionNames([]))
@@ -337,7 +342,7 @@ export default function CustomizedScheduleResultPage() {
               <MapPin className="mx-auto mb-1 h-5 w-5 text-blue-600 dark:text-blue-400" />
               <p className="text-xs text-gray-600 dark:text-gray-400">여행지</p>
               <p className="font-semibold dark:text-white">
-                {recommendations.summary.region}
+                {displayedRegionName}
               </p>
             </div>
             <div className="rounded-lg bg-green-50 p-3 text-center dark:bg-green-900/20">

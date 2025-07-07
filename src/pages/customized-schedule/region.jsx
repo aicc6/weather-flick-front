@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -17,6 +18,7 @@ import {
   getFallbackImages,
 } from '@/services/pixabayApi'
 import { useGetActiveRegionsQuery } from '@/store/api'
+import { setRegion } from '@/store/slices/customizedScheduleSlice'
 
 // 지역별 설명 데이터
 const REGION_DESCRIPTIONS = {
@@ -51,7 +53,11 @@ const CITY_COORDINATES = {
 export default function CustomizedScheduleRegionPage() {
   const navigate = useNavigate()
   const [_searchParams] = useSearchParams()
-  const [selectedRegion, setSelectedRegion] = useState(null)
+  const dispatch = useDispatch()
+  const { regionCode, regionName } = useSelector(
+    (state) => state.customizedSchedule,
+  )
+  const selectedRegion = regionCode ? { id: regionCode, name: regionName } : null
   const [viewMode, setViewMode] = useState('google-map') // 'google-map', 'list'
   const [regionImages, setRegionImages] = useState({})
   const [imagesLoading, setImagesLoading] = useState(true)
@@ -66,11 +72,11 @@ export default function CustomizedScheduleRegionPage() {
   // 에러 메시지 처리
   const error = regionsError ? '지역 목록을 불러오지 못했습니다' : null
 
-  const handleRegionSelect = (regionCode, regionName) => {
-    if (selectedRegion?.id === regionCode) {
-      setSelectedRegion(null) // 이미 선택된 도시를 다시 클릭하면 해제
+  const handleRegionSelect = (code, name) => {
+    if (regionCode === code) {
+      dispatch(setRegion({ code: null, name: null })) // 이미 선택된 도시를 다시 클릭하면 해제
     } else {
-      setSelectedRegion({ id: regionCode, name: regionName })
+      dispatch(setRegion({ code: code, name: name }))
     }
   }
 
@@ -109,28 +115,28 @@ export default function CustomizedScheduleRegionPage() {
   }, [cities])
 
   const getSelectedCityData = () => {
-    if (!selectedRegion) return null
+    if (!regionCode) return null
     const cityData = cities.find(
-      (city) => city.region_code === selectedRegion.id,
+      (city) => city.region_code === regionCode,
     )
     if (cityData) {
       return {
         ...cityData,
         images:
-          regionImages[selectedRegion.id] ||
-          getFallbackImages(selectedRegion.id, 3),
+          regionImages[regionCode] ||
+          getFallbackImages(regionCode, 3),
       }
     }
     return null
   }
 
-  const getCityImages = (regionCode) => {
-    return regionImages[regionCode] || getFallbackImages(regionCode, 3)
+  const getCityImages = (code) => {
+    return regionImages[code] || getFallbackImages(code, 3)
   }
 
   const handleNext = () => {
-    if (selectedRegion) {
-      navigate(`/customized-schedule/period?region=${selectedRegion.id}`)
+    if (regionCode) {
+      navigate(`/customized-schedule/period?region=${regionCode}`)
     }
   }
 
@@ -216,7 +222,7 @@ export default function CustomizedScheduleRegionPage() {
         {/* 지역 선택 Select */}
         <div className="mb-4">
           <Select
-            value={selectedRegion?.id || ''}
+            value={regionCode || ''}
             onValueChange={(value) => {
               const city = cities.find((c) => c.region_code === value)
               if (city) {
@@ -276,7 +282,7 @@ export default function CustomizedScheduleRegionPage() {
                 <Card
                   key={city.region_code}
                   className={`cursor-pointer overflow-hidden transition-all hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 ${
-                    selectedRegion?.id === city.region_code
+                    regionCode === city.region_code
                       ? 'bg-blue-50 ring-2 ring-blue-500 dark:bg-blue-900/20 dark:ring-blue-400'
                       : 'hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
@@ -324,10 +330,10 @@ export default function CustomizedScheduleRegionPage() {
                           '아름다운 대한민국의 도시'}
                       </p>
                     </div>
-                    {selectedRegion?.id === city.region_code && (
+                    {regionCode === city.region_code && (
                       <Badge
                         variant="secondary"
-                        className="mt-2 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                        className="mt-2 bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:ring-blue-400"
                       >
                         선택됨
                       </Badge>
@@ -341,7 +347,7 @@ export default function CustomizedScheduleRegionPage() {
       )}
 
       {/* 선택된 지역 표시 및 이미지 갤러리 */}
-      {selectedRegion && (
+      {regionCode && (
         <div className="mt-8 space-y-6">
           {/* 선택된 지역 정보 */}
           <div className="rounded-lg bg-blue-50 p-6 dark:bg-blue-900/20">
@@ -355,7 +361,7 @@ export default function CustomizedScheduleRegionPage() {
                     variant="secondary"
                     className="bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200"
                   >
-                    {selectedRegion.name}
+                    {regionName}
                   </Badge>
                   <p className="text-sm text-gray-600 dark:text-gray-300">
                     {getSelectedCityData()?.region_name_full && (
@@ -374,7 +380,7 @@ export default function CustomizedScheduleRegionPage() {
             {getSelectedCityData()?.images && (
               <div>
                 <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  🖼️ {selectedRegion.name} 대표 사진
+                  🖼️ {regionName} 대표 사진
                 </h3>
                 {imagesLoading ? (
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -396,7 +402,7 @@ export default function CustomizedScheduleRegionPage() {
                       >
                         <img
                           src={image.url || image}
-                          alt={`${selectedRegion.name} 대표사진 ${index + 1}`}
+                          alt={`${regionName} 대표사진 ${index + 1}`}
                           className="h-48 w-full object-cover transition-transform group-hover:scale-110"
                           loading="lazy"
                           onError={(e) => {
@@ -436,7 +442,7 @@ export default function CustomizedScheduleRegionPage() {
       <div className="mt-12 flex justify-center">
         <Button
           onClick={handleNext}
-          disabled={!selectedRegion}
+          disabled={!regionCode}
           className="rounded-lg bg-blue-600 px-8 py-3 text-white hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-600"
           size="lg"
         >
@@ -446,3 +452,4 @@ export default function CustomizedScheduleRegionPage() {
     </div>
   )
 }
+

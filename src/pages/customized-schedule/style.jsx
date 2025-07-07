@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -44,10 +45,14 @@ export default function CustomizedScheduleStylePage() {
   const [searchParams] = useSearchParams()
   const [selectedStyles, setSelectedStyles] = useState([])
 
-  const region = searchParams.get('region')
+  const region = searchParams.get('region') // This is regionCode
   const period = searchParams.get('period')
   const days = searchParams.get('days')
   const who = searchParams.get('who')
+
+  const { regionName: displayedRegionName } = useSelector(
+    (state) => state.customizedSchedule,
+  )
 
   const travelStyles = [
     {
@@ -182,7 +187,7 @@ export default function CustomizedScheduleStylePage() {
                 variant="outline"
                 className="ml-2 dark:border-gray-600 dark:text-gray-300"
               >
-                {region}
+                {displayedRegionName}
               </Badge>
             </div>
           )}

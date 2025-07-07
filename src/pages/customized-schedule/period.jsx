@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ChevronLeft, Calendar } from '@/components/icons'
-import { useGetActiveRegionsQuery } from '@/store/api/regionsApi'
 
 export default function CustomizedSchedulePeriodPage() {
   const navigate = useNavigate()
@@ -12,13 +12,10 @@ export default function CustomizedSchedulePeriodPage() {
   const [selectedPeriod, setSelectedPeriod] = useState(null)
 
   const regionCode = searchParams.get('region')
-
-  // 지역 정보 가져오기
-  const { data: regions = [] } = useGetActiveRegionsQuery()
-
-  // 지역 코드로 지역명 찾기
-  const selectedRegion = regions.find((r) => r.region_code === regionCode)
-  const regionName = selectedRegion?.region_name || regionCode
+  const { regionName: storedRegionName } = useSelector(
+    (state) => state.customizedSchedule,
+  )
+  const regionName = storedRegionName || regionCode // Fallback to regionCode if name is not in store
 
   const periods = [
     {
@@ -79,7 +76,7 @@ export default function CustomizedSchedulePeriodPage() {
   const handleNext = () => {
     if (selectedPeriod) {
       navigate(
-        `/customized-schedule/who?region=${regionName}&period=${selectedPeriod.label}&days=${selectedPeriod.days}`,
+        `/customized-schedule/who?region=${regionCode}&period=${selectedPeriod.label}&days=${selectedPeriod.days}`,
       )
     }
   }

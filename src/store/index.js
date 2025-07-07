@@ -6,6 +6,7 @@ import {
   weatherApi,
   regionsApi,
 } from './api'
+import customizedScheduleReducer from './slices/customizedScheduleSlice'
 
 // RTK Query 통합 스토어 설정
 export const store = configureStore({
@@ -16,6 +17,7 @@ export const store = configureStore({
     [destinationsApi.reducerPath]: destinationsApi.reducer,
     [weatherApi.reducerPath]: weatherApi.reducer,
     [regionsApi.reducerPath]: regionsApi.reducer,
+    customizedSchedule: customizedScheduleReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
