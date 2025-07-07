@@ -69,10 +69,10 @@ export function MainPage() {
 
         {/* Content */}
         <div className="relative z-10">
-          <h1 className="mb-2 text-6xl font-bold text-white drop-shadow-lg">
+          <h1 className="mb-5 text-5xl font-bold text-white drop-shadow-lg">
             &quot;날씨 기반 스마트 여행 플래너&quot;
           </h1>
-          <p className="mb-8 text-2xl text-white/90 drop-shadow-md">
+          <p className="mb-8 text-lg text-white/90 drop-shadow-md">
             실시간 날씨 정보를 기반으로 최적의 여행지를 추천해드립니다
           </p>
         </div>
