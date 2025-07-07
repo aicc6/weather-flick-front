@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { ChevronLeft, Calendar } from '@/components/icons'
 import { useGetActiveRegionsQuery } from '@/store/api/regionsApi'
 
-export default function RecommendPeriodPage() {
+export default function CustomizedSchedulePeriodPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [selectedPeriod, setSelectedPeriod] = useState(null)

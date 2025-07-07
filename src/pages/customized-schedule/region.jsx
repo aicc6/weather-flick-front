@@ -48,7 +48,7 @@ const CITY_COORDINATES = {
   },
 }
 
-export default function RecommendRegionPage() {
+export default function CustomizedScheduleRegionPage() {
   const navigate = useNavigate()
   const [_searchParams] = useSearchParams()
   const [selectedRegion, setSelectedRegion] = useState(null)

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { MapPin, Calendar, Users, Heart, Star } from '@/components/icons'
 
-export default function RecommendPage() {
+export default function CustomizedSchedulePage() {
   const navigate = useNavigate()
 
   const features = [

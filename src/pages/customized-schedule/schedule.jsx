@@ -39,7 +39,7 @@ const companions = [
   },
 ]
 
-export default function RecommendSchedulePage() {
+export default function CustomizedScheduleSchedulePage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [selectedSchedule, setSelectedSchedule] = useState(null)

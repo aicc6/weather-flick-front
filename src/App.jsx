@@ -25,13 +25,27 @@ const ReviewWritePage = lazy(() =>
     default: module.ReviewWritePage,
   })),
 )
-const RecommendPage = lazy(() => import('./pages/recommend'))
-const RecommendRegionPage = lazy(() => import('./pages/recommend/region'))
-const RecommendPeriodPage = lazy(() => import('./pages/recommend/period'))
-const RecommendWhoPage = lazy(() => import('./pages/recommend/who'))
-const RecommendStylePage = lazy(() => import('./pages/recommend/style'))
-const RecommendSchedulePage = lazy(() => import('./pages/recommend/schedule'))
-const RecommendResultPage = lazy(() => import('./pages/recommend/result'))
+const CustomizedSchedulePage = lazy(
+  () => import('./pages/customized-schedule/customized-schedule'),
+)
+const CustomizedScheduleRegionPage = lazy(
+  () => import('./pages/customized-schedule/region'),
+)
+const CustomizedSchedulePeriodPage = lazy(
+  () => import('./pages/customized-schedule/period'),
+)
+const CustomizedScheduleWhoPage = lazy(
+  () => import('./pages/customized-schedule/who'),
+)
+const CustomizedScheduleStylePage = lazy(
+  () => import('./pages/customized-schedule/style'),
+)
+const CustomizedScheduleSchedulePage = lazy(
+  () => import('./pages/customized-schedule/schedule'),
+)
+const CustomizedScheduleResultPage = lazy(
+  () => import('./pages/customized-schedule/result'),
+)
 const VerifyEmailPage = lazy(() =>
   import('./pages/auth/verify-email').then((module) => ({
     default: module.VerifyEmailPage,
@@ -82,30 +96,33 @@ function App() {
             <Route path="/recommend" element={<TravelCoursePage />} />
             <Route path="/reviews" element={<ReviewsPage />} />
             <Route path="/reviews/write" element={<ReviewWritePage />} />
-            <Route path="/customized-schedule" element={<RecommendPage />} />
+            <Route
+              path="/customized-schedule"
+              element={<CustomizedSchedulePage />}
+            />
             <Route
               path="/customized-schedule/region"
-              element={<RecommendRegionPage />}
+              element={<CustomizedScheduleRegionPage />}
             />
             <Route
               path="/customized-schedule/period"
-              element={<RecommendPeriodPage />}
+              element={<CustomizedSchedulePeriodPage />}
             />
             <Route
               path="/customized-schedule/who"
-              element={<RecommendWhoPage />}
+              element={<CustomizedScheduleWhoPage />}
             />
             <Route
               path="/customized-schedule/style"
-              element={<RecommendStylePage />}
+              element={<CustomizedScheduleStylePage />}
             />
             <Route
               path="/customized-schedule/schedule"
-              element={<RecommendSchedulePage />}
+              element={<CustomizedScheduleSchedulePage />}
             />
             <Route
               path="/customized-schedule/result"
-              element={<RecommendResultPage />}
+              element={<CustomizedScheduleResultPage />}
             />
             <Route path="/recommend/:id" element={<TravelCourseDetailPage />} />
             <Route path="/planner" element={<PlannerPage />} />

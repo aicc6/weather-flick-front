@@ -39,7 +39,7 @@ const companions = [
   },
 ]
 
-export default function RecommendStylePage() {
+export default function CustomizedScheduleStylePage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [selectedStyles, setSelectedStyles] = useState([])

@@ -103,11 +103,12 @@ const companions = [
   },
 ]
 
-export default function RecommendResultPage() {
+export default function CustomizedScheduleResultPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [recommendations, setRecommendations] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [attractionNames, setAttractionNames] = useState([])
 
   const region = searchParams.get('region')
   const period = searchParams.get('period')
@@ -116,19 +117,34 @@ export default function RecommendResultPage() {
   const styles = searchParams.get('styles')
   const schedule = searchParams.get('schedule')
 
-  // Mock 데이터 생성 함수를 useEffect 위로 이동
+  useEffect(() => {
+    if (!region) return
+    // 관광지 이름 불러오기
+    http
+      .GET(`/attractions/by-region?region=${encodeURIComponent(region)}`)
+      .then((res) => res.json())
+      .then((data) => setAttractionNames(data))
+      .catch(() => setAttractionNames([]))
+  }, [region])
+
   const generateMockItinerary = useCallback(() => {
-    const daysCount = parseInt(days) || 3
+    const daysCount = parseInt(days)
     const itinerary = []
 
     for (let day = 1; day <= daysCount; day++) {
+      // 랜덤 관광지 이름 선택
+      const randomAttraction =
+        attractionNames.length > 0
+          ? attractionNames[Math.floor(Math.random() * attractionNames.length)]
+          : `${region} 대표 명소 ${day}`
+
       itinerary.push({
         day: day,
         date: `2024-${String(day + 5).padStart(2, '0')}-${String(day + 14).padStart(2, '0')}`,
         places: [
           {
             id: `${day}-1`,
-            name: `${region || '서울'} 대표 명소 ${day}`,
+            name: randomAttraction,
             category: '관광지',
             time: '09:00 - 11:00',
             description: '아름다운 풍경과 포토존으로 유명한 곳',
@@ -158,7 +174,7 @@ export default function RecommendResultPage() {
     }
 
     return itinerary
-  }, [days, region])
+  }, [days, region, attractionNames])
 
   // 모의 추천 데이터 생성
   useEffect(() => {

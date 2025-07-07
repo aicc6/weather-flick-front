@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ChevronLeft, Users } from '@/components/icons'
 
-export default function RecommendWhoPage() {
+export default function CustomizedScheduleWhoPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [selectedCompanion, setSelectedCompanion] = useState(null)
