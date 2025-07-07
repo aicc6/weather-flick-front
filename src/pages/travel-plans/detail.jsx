@@ -65,15 +65,25 @@ export function TravelPlanDetailPage() {
   // } = useGetCurrentWeatherQuery('Seoul', {
   //   skip: !plan,
   // })
-  
+
   // 위치 정보에서 도시명 추출
   const extractCityFromLocation = (description) => {
     if (!description) return '서울'
-    
+
     try {
       // 한국 주요 도시명 매핑
       const cityMap = {
-        서울: ['서울', 'Seoul', '강남', '홍대', '명동', '종로', '구로', '신도림', '영등포'],
+        서울: [
+          '서울',
+          'Seoul',
+          '강남',
+          '홍대',
+          '명동',
+          '종로',
+          '구로',
+          '신도림',
+          '영등포',
+        ],
         부산: ['부산', 'Busan', '해운대', '광안리', '서면'],
         대구: ['대구', 'Daegu'],
         인천: ['인천', 'Incheon'],
@@ -89,12 +99,12 @@ export function TravelPlanDetailPage() {
         전남: ['전남', '목포', '순천', '여수'],
         경북: ['경북', '포항', '경주', '안동'],
         경남: ['경남', '창원', '진주', '통영'],
-        세종: ['세종']
+        세종: ['세종'],
       }
 
       // 설명에서 도시명 찾기
       for (const [city, keywords] of Object.entries(cityMap)) {
-        if (keywords.some(keyword => description.includes(keyword))) {
+        if (keywords.some((keyword) => description.includes(keyword))) {
           return city
         }
       }
@@ -109,7 +119,7 @@ export function TravelPlanDetailPage() {
   // 일차별 위치 기반 날씨 예보 생성
   const generateLocationBasedWeatherForecast = (startDate, itinerary) => {
     if (!startDate || !itinerary) return []
-    
+
     try {
       const start = new Date(startDate)
       const days = Object.keys(itinerary)
@@ -122,21 +132,23 @@ export function TravelPlanDetailPage() {
         제주: { tempOffset: 5, conditionMod: 2 },
         대구: { tempOffset: 1, conditionMod: 0 },
         광주: { tempOffset: 2, conditionMod: 1 },
-        강원: { tempOffset: -3, conditionMod: 0 }
+        강원: { tempOffset: -3, conditionMod: 0 },
       }
 
       days.forEach((day, index) => {
         const date = new Date(start.getTime() + index * 86400000)
         const dayItinerary = itinerary[day]
-        
+
         // 해당 일차의 첫 번째 위치를 기준으로 도시 결정
         let city = '서울'
         if (dayItinerary && dayItinerary.length > 0) {
           city = extractCityFromLocation(dayItinerary[0].description)
         }
 
-        const variation = cityWeatherVariation[city] || cityWeatherVariation['서울']
-        const conditionIndex = (index + variation.conditionMod) % conditions.length
+        const variation =
+          cityWeatherVariation[city] || cityWeatherVariation['서울']
+        const conditionIndex =
+          (index + variation.conditionMod) % conditions.length
         const condition = conditions[conditionIndex]
 
         forecast.push({
@@ -144,12 +156,19 @@ export function TravelPlanDetailPage() {
           condition,
           city,
           temperature: {
-            min: Math.max(5, Math.floor(Math.random() * 10) + 10 + variation.tempOffset),
-            max: Math.min(35, Math.floor(Math.random() * 10) + 20 + variation.tempOffset),
+            min: Math.max(
+              5,
+              Math.floor(Math.random() * 10) + 10 + variation.tempOffset,
+            ),
+            max: Math.min(
+              35,
+              Math.floor(Math.random() * 10) + 20 + variation.tempOffset,
+            ),
           },
-          precipitation: condition === '비' ? 
-            Math.floor(Math.random() * 30) + 60 : 
-            Math.floor(Math.random() * 30),
+          precipitation:
+            condition === '비'
+              ? Math.floor(Math.random() * 30) + 60
+              : Math.floor(Math.random() * 30),
         })
       })
 
@@ -164,34 +183,33 @@ export function TravelPlanDetailPage() {
     ? (() => {
         try {
           const forecast = generateLocationBasedWeatherForecast(
-            plan.start_date, 
-            plan.itinerary
+            plan.start_date,
+            plan.itinerary,
           )
-          
+
           // 여러 도시를 방문하는지 확인
-          const cities = [...new Set(forecast.map(f => f.city))]
+          const cities = [...new Set(forecast.map((f) => f.city))]
           const isMultiCity = cities.length > 1
-          
+
           return {
             forecast,
-            recommendation: isMultiCity 
+            recommendation: isMultiCity
               ? `${cities.join(', ')} 지역을 여행하시네요. 각 지역의 날씨를 확인하고 적절한 옷차림을 준비하세요.`
               : `${cities[0]} 지역 여행입니다. 전반적으로 여행하기 좋은 날씨입니다.`,
-            isMultiCity
+            isMultiCity,
           }
         } catch (error) {
           console.warn('날씨 데이터 생성 중 오류:', error)
           // 오류 발생 시 기본 날씨 데이터 반환
           return {
             forecast: [],
-            recommendation: '날씨 정보를 불러올 수 없습니다. 여행 전 날씨를 확인해 주세요.',
-            isMultiCity: false
+            recommendation:
+              '날씨 정보를 불러올 수 없습니다. 여행 전 날씨를 확인해 주세요.',
+            isMultiCity: false,
           }
         }
       })()
     : null
-  const isWeatherLoading = false
-  const isWeatherError = false
 
   if (isLoading) {
     return <LoadingSpinner />
@@ -319,7 +337,9 @@ export function TravelPlanDetailPage() {
                         </div>
                         <div className="text-sm text-gray-600">
                           {forecast.city && forecast.city !== '서울' && (
-                            <span className="mr-2 text-blue-600">📍{forecast.city}</span>
+                            <span className="mr-2 text-blue-600">
+                              📍{forecast.city}
+                            </span>
                           )}
                           {forecast.condition}
                         </div>
@@ -347,8 +367,10 @@ export function TravelPlanDetailPage() {
               )}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-500 mb-2">날씨 정보를 불러올 수 없습니다</p>
+            <div className="py-8 text-center">
+              <p className="mb-2 text-gray-500">
+                날씨 정보를 불러올 수 없습니다
+              </p>
               <p className="text-sm text-gray-400">
                 여행 전 각 지역의 날씨를 확인해 주세요
               </p>
@@ -398,7 +420,9 @@ export function TravelPlanDetailPage() {
                             </div>
                             {/* 개별 장소의 날씨 정보 */}
                             {(() => {
-                              const city = extractCityFromLocation(item.description)
+                              const city = extractCityFromLocation(
+                                item.description,
+                              )
                               const getWeatherIcon = (condition) => {
                                 const iconMap = {
                                   맑음: '☀️',
@@ -411,11 +435,13 @@ export function TravelPlanDetailPage() {
                                 }
                                 return iconMap[condition] || '☀️'
                               }
-                              
+
                               // 해당 일차의 날씨 정보 가져오기
-                              const dayIndex = parseInt(day.replace('Day ', '')) - 1
-                              const dayWeather = weatherData?.forecast?.[dayIndex]
-                              
+                              const dayIndex =
+                                parseInt(day.replace('Day ', '')) - 1
+                              const dayWeather =
+                                weatherData?.forecast?.[dayIndex]
+
                               if (dayWeather) {
                                 // 도시별 날씨 변화 적용
                                 const cityWeatherVariation = {
@@ -424,27 +450,52 @@ export function TravelPlanDetailPage() {
                                   제주: { tempOffset: 5, conditionOffset: 2 },
                                   대구: { tempOffset: 1, conditionOffset: 0 },
                                   광주: { tempOffset: 2, conditionOffset: 1 },
-                                  강원: { tempOffset: -3, conditionOffset: 0 }
+                                  강원: { tempOffset: -3, conditionOffset: 0 },
                                 }
-                                
-                                const variation = cityWeatherVariation[city] || cityWeatherVariation['서울']
-                                const conditions = ['맑음', '구름조금', '구름많음', '흐림', '비']
-                                const adjustedConditionIndex = (conditions.indexOf(dayWeather.condition) + variation.conditionOffset) % conditions.length
-                                const adjustedCondition = conditions[adjustedConditionIndex]
-                                
+
+                                const variation =
+                                  cityWeatherVariation[city] ||
+                                  cityWeatherVariation['서울']
+                                const conditions = [
+                                  '맑음',
+                                  '구름조금',
+                                  '구름많음',
+                                  '흐림',
+                                  '비',
+                                ]
+                                const adjustedConditionIndex =
+                                  (conditions.indexOf(dayWeather.condition) +
+                                    variation.conditionOffset) %
+                                  conditions.length
+                                const adjustedCondition =
+                                  conditions[adjustedConditionIndex]
+
                                 const adjustedTemp = {
-                                  min: Math.max(5, dayWeather.temperature.min + variation.tempOffset),
-                                  max: Math.min(35, dayWeather.temperature.max + variation.tempOffset)
+                                  min: Math.max(
+                                    5,
+                                    dayWeather.temperature.min +
+                                      variation.tempOffset,
+                                  ),
+                                  max: Math.min(
+                                    35,
+                                    dayWeather.temperature.max +
+                                      variation.tempOffset,
+                                  ),
                                 }
-                                
+
                                 return (
                                   <div className="ml-4 text-right">
                                     <div className="flex items-center text-xs text-gray-500">
-                                      <span className="mr-1">{getWeatherIcon(adjustedCondition)}</span>
-                                      <span className="mr-1 text-blue-600">📍{city}</span>
+                                      <span className="mr-1">
+                                        {getWeatherIcon(adjustedCondition)}
+                                      </span>
+                                      <span className="mr-1 text-blue-600">
+                                        📍{city}
+                                      </span>
                                     </div>
-                                    <div className="text-xs text-gray-600 mt-1">
-                                      {adjustedCondition} {adjustedTemp.min}°~{adjustedTemp.max}°
+                                    <div className="mt-1 text-xs text-gray-600">
+                                      {adjustedCondition} {adjustedTemp.min}°~
+                                      {adjustedTemp.max}°
                                     </div>
                                   </div>
                                 )

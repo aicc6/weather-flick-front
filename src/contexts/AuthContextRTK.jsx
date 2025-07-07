@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
     data: user,
     isLoading,
     error: getUserError,
-    refetch,
+    refetch: _refetch,
   } = useGetMeQuery(undefined, {
     skip: !hasToken, // React state 기반으로 skip 결정
   })

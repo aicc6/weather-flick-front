@@ -32,7 +32,16 @@ export {
 } from 'lucide-react'
 
 // Weather Icons
-export { Sun, Moon, Cloud, CloudRain, CloudSnow, Wind, Thermometer, Droplets } from 'lucide-react'
+export {
+  Sun,
+  Moon,
+  Cloud,
+  CloudRain,
+  CloudSnow,
+  Wind,
+  Thermometer,
+  Droplets,
+} from 'lucide-react'
 
 // User & Social Icons
 export {

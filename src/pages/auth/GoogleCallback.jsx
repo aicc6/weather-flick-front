@@ -61,11 +61,12 @@ export function GoogleCallbackPage() {
           } catch (exchangeError) {
             console.error('Exchange error:', exchangeError)
             // RTK Query의 에러 구조 확인
-            const errorMessage = exchangeError?.data?.detail || 
-                               exchangeError?.error?.data?.detail || 
-                               exchangeError?.message || 
-                               '인증 처리 중 오류가 발생했습니다.'
-            
+            const errorMessage =
+              exchangeError?.data?.detail ||
+              exchangeError?.error?.data?.detail ||
+              exchangeError?.message ||
+              '인증 처리 중 오류가 발생했습니다.'
+
             setStatus('error')
             setError(errorMessage)
           }
@@ -77,7 +78,11 @@ export function GoogleCallbackPage() {
       } catch (err) {
         console.error('Callback error:', err)
         setStatus('error')
-        setError(err.data?.detail || err.message || '로그인 처리 중 오류가 발생했습니다.')
+        setError(
+          err.data?.detail ||
+            err.message ||
+            '로그인 처리 중 오류가 발생했습니다.',
+        )
       } finally {
         isProcessing.current = false
       }

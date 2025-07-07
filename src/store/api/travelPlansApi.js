@@ -16,8 +16,12 @@ export const travelPlansApi = createApi({
       invalidatesTags: ['TravelPlan'],
       transformResponse: (response) => {
         // 표준 응답 래퍼 처리: { success: true, data: {...}, error: null }
-        if (!response || typeof response !== 'object' || !response.hasOwnProperty('success')) {
-          return response;
+        if (
+          !response ||
+          typeof response !== 'object' ||
+          !Object.prototype.hasOwnProperty.call(response, 'success')
+        ) {
+          return response
         }
         return response.success ? response.data : response
       },
@@ -35,8 +39,12 @@ export const travelPlansApi = createApi({
           : [{ type: 'TravelPlan', id: 'LIST' }],
       keepUnusedDataFor: 300, // 5분간 캐싱
       transformResponse: (response) => {
-        if (!response || typeof response !== 'object' || !response.hasOwnProperty('success')) {
-          return response;
+        if (
+          !response ||
+          typeof response !== 'object' ||
+          !Object.prototype.hasOwnProperty.call(response, 'success')
+        ) {
+          return response
         }
         return response.success ? response.data : response
       },
@@ -50,8 +58,12 @@ export const travelPlansApi = createApi({
       ],
       keepUnusedDataFor: 600, // 10분간 캐싱
       transformResponse: (response) => {
-        if (!response || typeof response !== 'object' || !response.hasOwnProperty('success')) {
-          return response;
+        if (
+          !response ||
+          typeof response !== 'object' ||
+          !Object.prototype.hasOwnProperty.call(response, 'success')
+        ) {
+          return response
         }
         return response.success ? response.data : response
       },
@@ -69,8 +81,12 @@ export const travelPlansApi = createApi({
         { type: 'TravelPlan', id: 'LIST' },
       ],
       transformResponse: (response) => {
-        if (!response || typeof response !== 'object' || !response.hasOwnProperty('success')) {
-          return response;
+        if (
+          !response ||
+          typeof response !== 'object' ||
+          !Object.prototype.hasOwnProperty.call(response, 'success')
+        ) {
+          return response
         }
         return response.success ? response.data : response
       },
@@ -99,8 +115,12 @@ export const travelPlansApi = createApi({
         { type: 'TravelPlan', id: planId },
       ],
       transformResponse: (response) => {
-        if (!response || typeof response !== 'object' || !response.hasOwnProperty('success')) {
-          return response;
+        if (
+          !response ||
+          typeof response !== 'object' ||
+          !Object.prototype.hasOwnProperty.call(response, 'success')
+        ) {
+          return response
         }
         return response.success ? response.data : response
       },

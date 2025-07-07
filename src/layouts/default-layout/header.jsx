@@ -121,7 +121,7 @@ export function Header() {
   const handleNavigation = (path) => {
     // 먼저 사이드바 닫기
     setIsSidebarOpen(false)
-    
+
     // 약간의 지연을 두고 네비게이션 실행 (UI 업데이트 완료 후)
     setTimeout(() => {
       navigate(path)

@@ -69,10 +69,9 @@ export function LoginPage() {
       console.log('Login completed successfully:', loginResult)
 
       // 로그인 성공 시 즉시 리다이렉트 (useEffect가 처리하므로 따로 navigate 불필요)
-      
     } catch (error) {
       console.error('Login error:', error)
-      
+
       // RTK Query 에러 처리
       if (error?.data?.detail) {
         const errorMessage = error.data.detail
@@ -86,7 +85,9 @@ export function LoginPage() {
       } else if (error?.message) {
         setSubmitError(error.message)
       } else {
-        setSubmitError('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.')
+        setSubmitError(
+          '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.',
+        )
       }
     } finally {
       setIsLoading(false)

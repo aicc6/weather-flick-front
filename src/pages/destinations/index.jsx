@@ -29,7 +29,7 @@ export default function TravelCoursePage() {
   const [selectedRegion, setSelectedRegion] = useState('all')
   const [selectedMonth, setSelectedMonth] = useState('all')
   const [selectedTheme, setSelectedTheme] = useState('all')
-  
+
   // RTK Query를 사용한 지역 데이터 조회
   const {
     data: cities = [],
@@ -289,12 +289,19 @@ export default function TravelCoursePage() {
       )
 
     const matchesRegion =
-      selectedRegion === 'all' || 
+      selectedRegion === 'all' ||
       course.region === selectedRegion ||
       // region_code로도 매칭 (서버에서 가져온 지역 코드)
-      cities.some(city => city.region_code === selectedRegion && 
-        (city.region_name.includes(regions.find(r => r.value === course.region)?.label) ||
-         regions.find(r => r.value === course.region)?.label.includes(city.region_name)))
+      cities.some(
+        (city) =>
+          city.region_code === selectedRegion &&
+          (city.region_name.includes(
+            regions.find((r) => r.value === course.region)?.label,
+          ) ||
+            regions
+              .find((r) => r.value === course.region)
+              ?.label.includes(city.region_name)),
+      )
 
     const matchesMonth =
       selectedMonth === 'all' ||
@@ -365,10 +372,7 @@ export default function TravelCoursePage() {
             </span>
           </div>
 
-          <Select
-            value={selectedRegion}
-            onValueChange={setSelectedRegion}
-          >
+          <Select value={selectedRegion} onValueChange={setSelectedRegion}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="지역 선택" />
             </SelectTrigger>
@@ -384,7 +388,9 @@ export default function TravelCoursePage() {
                 </SelectItem>
               ) : (
                 [...cities]
-                  .sort((a, b) => a.region_name.localeCompare(b.region_name, 'ko'))
+                  .sort((a, b) =>
+                    a.region_name.localeCompare(b.region_name, 'ko'),
+                  )
                   .map((city) => (
                     <SelectItem key={city.region_code} value={city.region_code}>
                       {city.region_name}
