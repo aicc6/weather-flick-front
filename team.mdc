@@ -1,3 +1,8 @@
+---
+description:
+globs:
+alwaysApply: false
+---
 # Weather Flick Frontend - Cursor Team Rules
 
 ## 프로젝트 개요
@@ -5,7 +10,7 @@ Weather Flick 프론트엔드는 React 18과 Vite를 기반으로 한 여행 날
 
 ## 기술 스택
 - **Framework**: React 18.3.1
-- **Build Tool**: Vite 6.3.5  
+- **Build Tool**: Vite 6.3.5
 - **Styling**: Tailwind CSS 4.1.10
 - **Router**: React Router DOM 7.6.2
 - **UI Components**: Radix UI
@@ -62,7 +67,7 @@ const UserCard = memo(({ user, onEdit }) => {
   const handleEdit = useCallback(() => {
     onEdit(user.id)
   }, [user.id, onEdit])
-  
+
   // ✅ 필수: useMemo로 값 메모이제이션
   const displayName = useMemo(() => {
     return `${user.firstName} ${user.lastName}`
@@ -77,9 +82,9 @@ UserCard.displayName = 'UserCard'
 #### 3. 코드 스플리팅 적용
 ```jsx
 // ✅ 페이지 컴포넌트는 lazy loading 필수
-const ProfilePage = lazy(() => 
-  import('./pages/profile').then(module => ({ 
-    default: module.ProfilePage 
+const ProfilePage = lazy(() =>
+  import('./pages/profile').then(module => ({
+    default: module.ProfilePage
   }))
 )
 
@@ -242,7 +247,7 @@ describe('UserProfile', () => {
 ```
 src/components/user/
 ├── UserProfile.jsx          # 메인 컴포넌트
-├── UserAvatar.jsx          # 아바타 컴포넌트  
+├── UserAvatar.jsx          # 아바타 컴포넌트
 ├── UserEditForm.jsx        # 편집 폼
 ├── index.js                # 배럴 익스포트
 └── __tests__/              # 테스트 파일
@@ -262,7 +267,7 @@ src/components/user/
 
 ## 필수 체크리스트
 - [ ] 컴포넌트에 React.memo 적용
-- [ ] 이벤트 핸들러에 useCallback 적용  
+- [ ] 이벤트 핸들러에 useCallback 적용
 - [ ] 계산된 값에 useMemo 적용
 - [ ] displayName 설정
 - [ ] PropTypes 또는 TypeScript 타입 정의

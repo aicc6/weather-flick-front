@@ -169,12 +169,12 @@ export default function RecommendResultPage() {
         // 백엔드 API 호출
         const response = await http.POST('/travel-recommendations', {
           body: JSON.stringify({
-            region: region || '서울',
-            period: period || '2박 3일',
-            days: days || '3',
-            who: who || '연인',
-            styles: styles || 'hotplace,food',
-            schedule: schedule || 'relaxed',
+            region: region,
+            period: period,
+            days: days,
+            who: who,
+            styles: styles,
+            schedule: schedule,
           }),
         })
 
@@ -195,12 +195,12 @@ export default function RecommendResultPage() {
         // API 실패 시 모의 데이터 사용
         const mockData = {
           summary: {
-            region: region || '서울',
-            period: period || '2박 3일',
-            days: parseInt(days) || 3,
-            who: who || '연인',
-            styles: styles?.split(',') || ['hotplace', 'food'],
-            schedule: schedule || 'relaxed',
+            region: region,
+            period: period,
+            days: parseInt(days),
+            who: who,
+            styles: styles?.split(','),
+            schedule: schedule,
           },
           itinerary: generateMockItinerary(),
           weather_info: {
@@ -442,21 +442,6 @@ export default function RecommendResultPage() {
           </Card>
         ))}
       </div>
-
-      {/* 날씨 정보 */}
-      <Card className="mb-8 dark:border-gray-700 dark:bg-gray-800">
-        <CardHeader>
-          <CardTitle className="dark:text-white">🌤️ 날씨 정보</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="mb-2 text-gray-700 dark:text-gray-300">
-            {recommendations.weather_info.forecast}
-          </p>
-          <p className="text-sm text-green-600 dark:text-green-400">
-            {recommendations.weather_info.recommendation}
-          </p>
-        </CardContent>
-      </Card>
 
       {/* 여행 팁 */}
       <Card className="mb-8 dark:border-gray-700 dark:bg-gray-800">
