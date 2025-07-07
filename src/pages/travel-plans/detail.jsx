@@ -12,6 +12,7 @@ import {
   MapPin,
   Tag,
 } from '@/components/icons'
+import { toast } from 'sonner'
 
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
@@ -203,26 +204,121 @@ export function TravelPlanDetailPage() {
     : null
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return (
+      <div className="container mx-auto max-w-4xl p-4 md:p-6">
+        <div className="flex flex-col items-center justify-center py-12">
+          <LoadingSpinner />
+          <p className="mt-4 text-gray-600">여행 계획을 불러오는 중...</p>
+          <p className="mt-1 text-sm text-gray-400">잠시만 기다려 주세요</p>
+        </div>
+      </div>
+    )
   }
 
   if (isError) {
     return (
-      <div className="text-center text-red-500">
-        <p>여행 계획을 불러오는 데 실패했습니다.</p>
-        <p className="text-sm">{error.toString()}</p>
+      <div className="container mx-auto max-w-4xl p-4 md:p-6">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
+          <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-red-100 p-3">
+            <svg
+              className="h-6 w-6 text-red-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+              />
+            </svg>
+          </div>
+          <h3 className="mb-2 text-lg font-semibold text-red-800">
+            여행 계획을 불러올 수 없습니다
+          </h3>
+          <p className="mb-4 text-red-700">
+            일시적인 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.
+          </p>
+          <div className="space-x-4">
+            <button
+              onClick={() => window.location.reload()}
+              className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+            >
+              새로고침
+            </button>
+            <button
+              onClick={() => window.history.back()}
+              className="rounded-md bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
+            >
+              뒤로가기
+            </button>
+          </div>
+          {/* eslint-disable-next-line no-undef */}
+          {process.env.NODE_ENV === 'development' && (
+            <details className="mt-4 text-left">
+              <summary className="cursor-pointer text-sm text-red-600">
+                개발자 정보
+              </summary>
+              <pre className="mt-2 overflow-auto rounded bg-red-100 p-2 text-xs text-red-800">
+                {JSON.stringify(error, null, 2)}
+              </pre>
+            </details>
+          )}
+        </div>
       </div>
     )
   }
 
   if (!plan) {
-    return <div className="text-center">해당 여행 계획을 찾을 수 없습니다.</div>
+    return (
+      <div className="container mx-auto max-w-4xl p-4 md:p-6">
+        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-6 text-center">
+          <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-yellow-100 p-3">
+            <svg
+              className="h-6 w-6 text-yellow-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+          </div>
+          <h3 className="mb-2 text-lg font-semibold text-yellow-800">
+            여행 계획을 찾을 수 없습니다
+          </h3>
+          <p className="mb-4 text-yellow-700">
+            요청하신 여행 계획이 존재하지 않거나 삭제되었을 수 있습니다.
+          </p>
+          <Link
+            to="/travel-plans"
+            className="inline-flex items-center rounded-md bg-yellow-600 px-4 py-2 text-sm font-medium text-white hover:bg-yellow-700"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            여행 계획 목록으로
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   // 개발용 디버깅 로그 (필요시 주석 해제)
   // console.log('Travel plan loaded successfully:', !!plan)
 
   const itineraryDays = plan.itinerary ? Object.keys(plan.itinerary) : []
+
+  // 수정 페이지로 이동 시 사용자 안내
+  const handleEditClick = () => {
+    toast.info('수정 페이지로 이동합니다', {
+      duration: 2000,
+      position: 'bottom-right',
+    })
+  }
 
   return (
     <div className="container mx-auto max-w-4xl p-4 md:p-6">
@@ -248,7 +344,7 @@ export function TravelPlanDetailPage() {
                 {plan.status}
               </Badge>
             </div>
-            <Button asChild>
+            <Button asChild onClick={handleEditClick}>
               <Link to={`/planner?planId=${planId}`}>
                 <Edit className="mr-2 h-4 w-4" />
                 수정하기
@@ -286,6 +382,12 @@ export function TravelPlanDetailPage() {
         <CardContent>
           {weatherData && weatherData.forecast ? (
             <div className="space-y-3">
+              <div className="mb-4 rounded-md border border-blue-200 bg-blue-50 p-3">
+                <p className="text-sm text-blue-700">
+                  🌤️ 날씨 정보는 예측 데이터이며, 여행 전 최신 날씨를 확인해
+                  주세요
+                </p>
+              </div>
               {weatherData.forecast.map((forecast, index) => {
                 const getWeatherIcon = (condition) => {
                   const iconMap = {
@@ -355,12 +457,33 @@ export function TravelPlanDetailPage() {
             </div>
           ) : (
             <div className="py-8 text-center">
-              <p className="mb-2 text-gray-500">
-                날씨 정보를 불러올 수 없습니다
+              <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-orange-100 p-3">
+                <svg
+                  className="h-6 w-6 text-orange-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
+                  />
+                </svg>
+              </div>
+              <h4 className="mb-2 font-medium text-gray-800">
+                날씨 정보 서비스 준비중
+              </h4>
+              <p className="mb-3 text-gray-600">
+                현재 날씨 서비스가 일시적으로 이용 불가합니다
               </p>
-              <p className="text-sm text-gray-400">
-                여행 전 각 지역의 날씨를 확인해 주세요
-              </p>
+              <div className="rounded-md border border-yellow-200 bg-yellow-50 p-3">
+                <p className="text-sm text-yellow-700">
+                  🌤️ 여행 전 기상청이나 날씨 앱에서 각 지역의 날씨를 확인해
+                  주세요
+                </p>
+              </div>
             </div>
           )}
         </CardContent>

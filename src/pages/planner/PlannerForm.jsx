@@ -70,13 +70,24 @@ const PlannerForm = memo(() => {
   })
   const [calendarOpen, setCalendarOpen] = useState(false)
 
-  // 현재 위치 자동 감지
+  // 현재 위치 자동 감지 (피드백 개선)
   const handleAutoLocation = useCallback(async () => {
     try {
       const address = await getCurrentLocation()
       updateDestInput('origin', address)
-    } catch {
-      // 에러는 훅 내부에서 처리됨
+
+      // 성공 피드백
+      toast.success('현재 위치가 설정되었습니다', {
+        duration: 2000,
+        position: 'bottom-right',
+      })
+    } catch (error) {
+      // 에러는 훅 내부에서 처리되지만 추가 사용자 안내
+      console.warn('위치 감지 실패:', error)
+      toast.error('위치를 가져올 수 없습니다. 직접 입력해 주세요', {
+        duration: 3000,
+        position: 'top-center',
+      })
     }
   }, [getCurrentLocation, updateDestInput])
 
@@ -95,14 +106,57 @@ const PlannerForm = memo(() => {
     return getDatesInRange(form.dateRange?.from, form.dateRange?.to)
   }, [form.dateRange?.from, form.dateRange?.to, getDatesInRange])
 
-  // 폼 유효성 검사 - 메모이제이션
-  const isFormValid = useMemo(() => {
-    return (
-      destInputs.origin &&
-      form.dateRange?.from &&
-      form.dateRange?.to &&
-      Object.keys(destinationsByDate).length > 0
-    )
+  // 폼 유효성 검사 - 메모이제이션 (안전장치 추가)
+  const formValidation = useMemo(() => {
+    const validation = {
+      isValid: false,
+      missingFields: [],
+      hasDestinations: false,
+      hasValidDates: false,
+    }
+
+    try {
+      // 출발지 검증
+      const hasOrigin = destInputs.origin && destInputs.origin.trim().length > 0
+      if (!hasOrigin) {
+        validation.missingFields.push('출발지')
+      }
+
+      // 날짜 검증 (안전장치)
+      const hasValidDates =
+        form.dateRange?.from &&
+        form.dateRange?.to &&
+        form.dateRange.from instanceof Date &&
+        form.dateRange.to instanceof Date &&
+        !isNaN(form.dateRange.from.getTime()) &&
+        !isNaN(form.dateRange.to.getTime())
+
+      validation.hasValidDates = hasValidDates
+      if (!hasValidDates) {
+        validation.missingFields.push('여행 기간')
+      }
+
+      // 목적지 검증 (안전장치)
+      const destinationCount = Object.keys(destinationsByDate || {}).length
+      const hasDestinations = destinationCount > 0
+      validation.hasDestinations = hasDestinations
+      if (!hasDestinations) {
+        validation.missingFields.push('여행 목적지')
+      }
+
+      // 전체 유효성 (기존 로직 유지)
+      validation.isValid = hasOrigin && hasValidDates && hasDestinations
+
+      return validation
+    } catch (error) {
+      console.warn('폼 검증 중 오류:', error)
+      return {
+        isValid: false,
+        missingFields: ['폼 데이터'],
+        hasDestinations: false,
+        hasValidDates: false,
+      }
+    }
   }, [
     destInputs.origin,
     form.dateRange?.from,
@@ -110,40 +164,96 @@ const PlannerForm = memo(() => {
     destinationsByDate,
   ])
 
-  // 목적지 추가
+  // 기존 호환성을 위한 isFormValid (기존 코드와 동일한 동작)
+  const isFormValid = formValidation.isValid
+
+  // 목적지 추가 (사용자 피드백 개선)
   const handleAddDestination = useCallback(
     (date, dest) => {
-      addDestination(date, dest)
-      // 입력창 클리어
-      updateDestInput(date, '')
-      hideDropdown(date)
+      try {
+        addDestination(date, dest)
+        // 입력창 클리어
+        updateDestInput(date, '')
+        hideDropdown(date)
+
+        // 성공 피드백 (간단하고 방해되지 않게)
+        const destinationName =
+          typeof dest === 'string' ? dest : dest.description
+        toast.success(`"${destinationName}" 목적지가 추가되었습니다`, {
+          duration: 2000,
+          position: 'bottom-right',
+        })
+      } catch (error) {
+        console.error('목적지 추가 중 오류:', error)
+        toast.error('목적지 추가 중 문제가 발생했습니다', {
+          duration: 3000,
+          position: 'top-center',
+        })
+      }
     },
     [addDestination, updateDestInput, hideDropdown],
   )
 
-  // 목적지 제거 (훅의 함수 직접 사용)
+  // 목적지 제거 (사용자 피드백 개선)
   const handleRemoveDestination = useCallback(
     (date, dest) => {
-      removeDestination(date, dest)
+      try {
+        removeDestination(date, dest)
+
+        // 제거 피드백
+        const destinationName =
+          typeof dest === 'string' ? dest : dest.description
+        toast.info(`"${destinationName}" 목적지가 제거되었습니다`, {
+          duration: 2000,
+          position: 'bottom-right',
+        })
+      } catch (error) {
+        console.error('목적지 제거 중 오류:', error)
+        toast.error('목적지 제거 중 문제가 발생했습니다', {
+          duration: 3000,
+          position: 'top-center',
+        })
+      }
     },
     [removeDestination],
   )
 
-  // 폼 제출
+  // 폼 제출 (안전장치 추가)
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault()
 
-      const formData = {
-        title: form.title || `${destInputs.origin} 여행`,
-        origin: destInputs.origin,
-        dateRange: form.dateRange,
-        destinationsByDate,
+      // 제출 전 최종 검증 (안전장치)
+      if (!formValidation.isValid) {
+        const missingFieldsText = formValidation.missingFields.join(', ')
+        toast.error(`다음 항목을 확인해 주세요: ${missingFieldsText}`, {
+          duration: 4000,
+          position: 'top-center',
+        })
+        return
       }
 
-      await submitPlan(formData)
+      try {
+        const formData = {
+          title: form.title || `${destInputs.origin} 여행`,
+          origin: destInputs.origin,
+          dateRange: form.dateRange,
+          destinationsByDate,
+        }
+
+        await submitPlan(formData)
+      } catch (error) {
+        console.error('플랜 제출 중 오류:', error)
+        toast.error(
+          '여행 계획 생성 중 문제가 발생했습니다. 다시 시도해 주세요.',
+          {
+            duration: 4000,
+            position: 'top-center',
+          },
+        )
+      }
     },
-    [form, destInputs, destinationsByDate, submitPlan],
+    [form, destInputs, destinationsByDate, submitPlan, formValidation],
   )
 
   return (
@@ -441,11 +551,29 @@ const PlannerForm = memo(() => {
 
           {/* 제출 버튼 */}
           <div className="mt-6 mb-0 flex items-center justify-center pb-0">
-            <SubmitButton
-              isSubmitting={isSubmitting}
-              disabled={isSubmitting || !isFormValid}
-              onSubmit={handleSubmit}
-            />
+            <div className="w-full max-w-md">
+              {/* 폼 완성도 안내 (사용자 친화적 피드백) */}
+              {!formValidation.isValid &&
+                formValidation.missingFields.length > 0 && (
+                  <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-center">
+                    <p className="text-sm text-blue-700">
+                      <span className="font-medium">
+                        아직 {formValidation.missingFields.length}개 항목이
+                        남았어요!
+                      </span>
+                    </p>
+                    <p className="mt-1 text-xs text-blue-600">
+                      {formValidation.missingFields.join(', ')}을 입력해 주세요
+                    </p>
+                  </div>
+                )}
+
+              <SubmitButton
+                isSubmitting={isSubmitting}
+                disabled={isSubmitting || !isFormValid}
+                onSubmit={handleSubmit}
+              />
+            </div>
           </div>
         </form>
 

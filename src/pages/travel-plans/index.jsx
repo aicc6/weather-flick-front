@@ -40,7 +40,16 @@ export function TravelPlansPage() {
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
 
   const handleDeleteClick = (plan) => {
+    // 삭제 확인 전 사용자 안내
     setPlanToDelete(plan)
+
+    // 선택적 안내 메시지 (너무 빈번한 알림 방지)
+    if (plan.status === 'IN_PROGRESS') {
+      toast.info('여행 중인 계획을 삭제하려고 합니다', {
+        duration: 2000,
+        position: 'bottom-right',
+      })
+    }
   }
 
   const handleConfirmDelete = async () => {
@@ -48,24 +57,92 @@ export function TravelPlansPage() {
 
     try {
       await deleteTravelPlan(planToDelete.plan_id).unwrap()
-      toast.success(`'${planToDelete.title}' 여행 계획이 삭제되었습니다.`)
+
+      // 성공 피드백 개선
+      toast.success(`"${planToDelete.title}" 여행 계획이 삭제되었습니다`, {
+        duration: 3000,
+        position: 'top-center',
+        icon: '🗑️',
+      })
       setPlanToDelete(null)
     } catch (err) {
-      toast.error('여행 계획 삭제에 실패했습니다.')
+      // 에러 피드백 개선
+      const errorMessage = err?.data?.message || '여행 계획 삭제에 실패했습니다'
+      toast.error(errorMessage, {
+        duration: 4000,
+        position: 'top-center',
+        icon: '⚠️',
+        description: '잠시 후 다시 시도해 주세요',
+      })
       console.error('Failed to delete the plan: ', err)
       setPlanToDelete(null)
     }
   }
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return (
+      <div className="container mx-auto p-4 md:p-6">
+        <div className="flex flex-col items-center justify-center py-12">
+          <LoadingSpinner />
+          <p className="mt-4 text-gray-600">여행 계획 목록을 불러오는 중...</p>
+          <p className="mt-1 text-sm text-gray-400">잠시만 기다려 주세요</p>
+        </div>
+      </div>
+    )
   }
 
   if (isError) {
     return (
-      <div className="text-center text-red-500">
-        <p>여행 계획을 불러오는 데 실패했습니다.</p>
-        <p className="text-sm">{error.toString()}</p>
+      <div className="container mx-auto p-4 md:p-6">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
+          <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-red-100 p-3">
+            <svg
+              className="h-6 w-6 text-red-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+              />
+            </svg>
+          </div>
+          <h3 className="mb-2 text-lg font-semibold text-red-800">
+            여행 계획을 불러올 수 없습니다
+          </h3>
+          <p className="mb-4 text-red-700">
+            일시적인 문제가 발생했습니다. 네트워크 연결을 확인하고 다시 시도해
+            주세요.
+          </p>
+          <div className="space-x-4">
+            <button
+              onClick={() => window.location.reload()}
+              className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+            >
+              새로고침
+            </button>
+            <Link
+              to="/planner"
+              className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />새 플랜 만들기
+            </Link>
+          </div>
+          {/* eslint-disable-next-line no-undef */}
+          {process.env.NODE_ENV === 'development' && (
+            <details className="mt-4 text-left">
+              <summary className="cursor-pointer text-sm text-red-600">
+                개발자 정보
+              </summary>
+              <pre className="mt-2 overflow-auto rounded bg-red-100 p-2 text-xs text-red-800">
+                {JSON.stringify(error, null, 2)}
+              </pre>
+            </details>
+          )}
+        </div>
       </div>
     )
   }
@@ -87,7 +164,7 @@ export function TravelPlansPage() {
             {sortedPlans.map((plan) => (
               <Card
                 key={plan.plan_id}
-                className="flex flex-col justify-between transition-all hover:shadow-md"
+                className="flex flex-col justify-between transition-all hover:scale-[1.02] hover:shadow-md"
               >
                 <div>
                   <CardHeader>
@@ -142,8 +219,31 @@ export function TravelPlansPage() {
           </div>
         ) : (
           <div className="py-20 text-center text-gray-500">
-            <h2 className="text-xl">저장된 여행 플랜이 없습니다.</h2>
-            <p className="mt-2">새로운 여행을 계획해보세요!</p>
+            <div className="mx-auto mb-6 h-16 w-16 rounded-full bg-blue-100 p-4">
+              <svg
+                className="h-8 w-8 text-blue-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+                />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-700">
+              아직 여행 계획이 없어요
+            </h2>
+            <p className="mt-2 text-gray-500">첫 번째 여행을 계획해보세요!</p>
+            <Button asChild className="mt-4">
+              <Link to="/planner">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                지금 시작하기
+              </Link>
+            </Button>
           </div>
         )}
       </div>
