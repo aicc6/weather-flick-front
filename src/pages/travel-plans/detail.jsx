@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
   Calendar,
-  Wallet,
   Info,
   Edit,
   ArrowLeft,
@@ -21,14 +20,6 @@ const formatDate = (dateString) => {
     month: 'long',
     day: 'numeric',
   })
-}
-
-const formatCurrency = (amount) => {
-  if (amount === null || amount === undefined) return 'N/A'
-  return new Intl.NumberFormat('ko-KR', {
-    style: 'currency',
-    currency: 'KRW',
-  }).format(amount)
 }
 
 // Google Place API 'types'를 한글 카테고리명으로 변환
@@ -265,26 +256,22 @@ export function TravelPlanDetailPage() {
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <CardContent className="space-y-4">
           <div className="flex items-center text-gray-700">
-            <Calendar className="mr-3 h-5 w-5 text-gray-500" />
-            <span>
+            <Calendar className="mr-3 h-5 w-5 text-white" />
+            <span className="text-white">
               {formatDate(plan.start_date)} ~ {formatDate(plan.end_date)}
             </span>
           </div>
-          <div className="flex items-center text-gray-700">
-            <Wallet className="mr-3 h-5 w-5 text-gray-500" />
-            <span>예산: {formatCurrency(plan.budget)}</span>
-          </div>
           {plan.description && (
-            <div className="flex items-start text-gray-700 md:col-span-2">
+            <div className="flex items-start text-gray-700">
               <Info className="mt-1 mr-3 h-5 w-5 flex-shrink-0 text-gray-500" />
               <p>{plan.description}</p>
             </div>
           )}
           {plan.start_location && (
-            <div className="flex items-center text-gray-700">
-              <MapPin className="mr-3 h-5 w-5 text-gray-500" />
+            <div className="flex items-center">
+              <MapPin className="mr-3 h-5 w-5" />
               <span>출발지: {plan.start_location}</span>
             </div>
           )}
