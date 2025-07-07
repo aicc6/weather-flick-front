@@ -93,9 +93,46 @@ const WeatherAlert = ({ alert }) => (
 )
 
 // 메인 날씨 정보 컴포넌트
-const WeatherInfo = ({ weatherInfo }) => {
-  // 디버깅용 로그
-  console.log('WeatherInfo received data:', weatherInfo)
+const WeatherInfo = ({ weatherInfo, isLoading, isError }) => {
+  // 개발용 디버깅 로그 (필요시 주석 해제)
+  // console.log('WeatherInfo received data:', weatherInfo)
+  
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Sun className="mr-2 h-5 w-5" />
+            날씨 정보
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-500 text-center">날씨 정보를 불러오는 중...</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (isError) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Sun className="mr-2 h-5 w-5" />
+            날씨 정보
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Alert className="border-yellow-200 bg-yellow-50">
+            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+            <AlertDescription className="text-yellow-800">
+              현재 날씨 서비스에 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    )
+  }
   
   if (!weatherInfo) {
     return (
@@ -107,7 +144,13 @@ const WeatherInfo = ({ weatherInfo }) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-gray-500 text-center">날씨 정보가 없습니다.</p>
+          <div className="text-center py-8">
+            <Sun className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+            <p className="text-gray-500 mb-2">날씨 정보 서비스 준비중</p>
+            <p className="text-sm text-gray-400">
+              곧 여행지의 날씨 정보를 제공할 예정입니다.
+            </p>
+          </div>
         </CardContent>
       </Card>
     )
