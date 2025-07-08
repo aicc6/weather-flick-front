@@ -74,14 +74,6 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  to="/faq"
-                  className="transition-colors hover:text-gray-900 dark:hover:text-white"
-                >
-                  자주 묻는 질문
-                </Link>
-              </li>
-              <li>
-                <Link
                   to="/contact"
                   className="transition-colors hover:text-gray-900 dark:hover:text-white"
                 >
