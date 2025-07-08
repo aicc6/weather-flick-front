@@ -84,6 +84,7 @@ const TravelPlanDetailPage = lazy(() =>
 )
 const HelpPage = lazy(() => import('./pages/help/help'))
 const ContactPage = lazy(() => import('./pages/contact'))
+const TermsPage = lazy(() => import('./pages/terms'))
 
 function App() {
   return (
@@ -143,6 +144,7 @@ function App() {
             <Route path="/change-password" element={<ChangePasswordPage />} />
             <Route path="/help" element={<HelpPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/terms" element={<TermsPage />} />
           </Routes>
         </Suspense>
       </DefaultLayout>
