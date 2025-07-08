@@ -123,7 +123,7 @@ export function MainPage() {
         </section>
 
         {/* 서비스별 설명 섹션 (메인 하단, 스크롤 시 fade-in) */}
-        <div className="mt-32 space-y-32 pb-32">
+        <div className="mt-5 space-y-16 pb-16">
           {serviceSections.map((sec, idx) => {
             const fadeProps = serviceFadeIns[idx]
             const link = serviceLinks[idx]
