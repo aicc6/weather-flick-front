@@ -39,75 +39,117 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Weather Theme Colors */
+  --color-sky-blue-light: var(--sky-blue-light);
+  --color-sky-blue: var(--sky-blue);
+  --color-sky-blue-dark: var(--sky-blue-dark);
+  --color-sunshine-yellow-light: var(--sunshine-yellow-light);
+  --color-sunshine-yellow: var(--sunshine-yellow);
+  --color-sunshine-yellow-dark: var(--sunshine-yellow-dark);
+  --color-cloud-white: var(--cloud-white);
+  --color-cloud-gray-light: var(--cloud-gray-light);
+  --color-cloud-gray: var(--cloud-gray);
+  --color-storm-gray: var(--storm-gray);
+  --color-storm-gray-dark: var(--storm-gray-dark);
+  --color-sunset-orange-light: var(--sunset-orange-light);
+  --color-sunset-orange: var(--sunset-orange);
+  --color-sunset-orange-dark: var(--sunset-orange-dark);
 }
 
+/* ===================== */
+/* 🌤️ 날씨 테마 색상 시스템 */
+/* ===================== */
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: #fff;
-  --primary-foreground: #fff;
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --radius: 0.75rem;
+
+  /* 🌈 메인 5색 - 날씨 테마 */
+  --sky-blue-light: #dbeafe;
+  --sky-blue: #60a5fa;
+  --sky-blue-dark: #3b82f6;
+
+  --sunshine-yellow-light: #fef3c7;
+  --sunshine-yellow: #fcd34d;
+  --sunshine-yellow-dark: #f59e0b;
+
+  --cloud-white: #f8fafc;
+  --cloud-gray-light: #e2e8f0;
+  --cloud-gray: #cbd5e1;
+
+  --storm-gray: #64748b;
+  --storm-gray-dark: #374151;
+
+  --sunset-orange-light: #fed7aa;
+  --sunset-orange: #fb923c;
+  --sunset-orange-dark: #ea580c;
+
+  /* 🌤️ 라이트 모드 - 화사한 날씨 테마 */
+  --background: var(--cloud-white);
+  --foreground: var(--storm-gray-dark);
+  --card: #ffffff;
+  --card-foreground: var(--storm-gray-dark);
+  --popover: #ffffff;
+  --popover-foreground: var(--storm-gray-dark);
+  --primary: var(--sky-blue-dark);
+  --primary-foreground: #ffffff;
+  --secondary: var(--sunshine-yellow);
+  --secondary-foreground: var(--storm-gray-dark);
+  --muted: var(--cloud-gray-light);
+  --muted-foreground: var(--storm-gray);
+  --accent: var(--sunshine-yellow-light);
+  --accent-foreground: var(--storm-gray-dark);
+  --destructive: #ef4444;
+  --border: var(--cloud-gray);
+  --input: #ffffff;
+  --ring: var(--sky-blue);
+  --chart-1: var(--sky-blue);
+  --chart-2: var(--sunshine-yellow);
+  --chart-3: var(--sunset-orange);
+  --chart-4: var(--storm-gray);
+  --chart-5: var(--cloud-gray);
+  --sidebar: var(--cloud-white);
+  --sidebar-foreground: var(--storm-gray-dark);
+  --sidebar-primary: var(--sky-blue-dark);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--sunshine-yellow-light);
+  --sidebar-accent-foreground: var(--storm-gray-dark);
+  --sidebar-border: var(--cloud-gray);
+  --sidebar-ring: var(--sky-blue);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: #60a5fa;
-  --primary-foreground: #1e293b;
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* 🌙 다크 모드 - 밤하늘 테마 */
+  --background: #0f172a;
+  --foreground: var(--cloud-white);
+  --card: #1e293b;
+  --card-foreground: var(--cloud-white);
+  --popover: #1e293b;
+  --popover-foreground: var(--cloud-white);
+  --primary: var(--sky-blue);
+  --primary-foreground: #0f172a;
+  --secondary: var(--sunset-orange);
+  --secondary-foreground: #0f172a;
+  --muted: #334155;
+  --muted-foreground: var(--cloud-gray);
+  --accent: #334155;
+  --accent-foreground: var(--sunshine-yellow);
+  --destructive: #ef4444;
+  --border: #334155;
+  --input: #334155;
+  --ring: var(--sky-blue);
+  --chart-1: var(--sky-blue);
+  --chart-2: var(--sunshine-yellow);
+  --chart-3: var(--sunset-orange);
+  --chart-4: var(--cloud-gray);
+  --chart-5: var(--storm-gray);
+  --sidebar: #1e293b;
+  --sidebar-foreground: var(--cloud-white);
+  --sidebar-primary: var(--sky-blue);
+  --sidebar-primary-foreground: #0f172a;
+  --sidebar-accent: #334155;
+  --sidebar-accent-foreground: var(--sunshine-yellow);
+  --sidebar-border: #334155;
+  --sidebar-ring: var(--sky-blue);
 }
 
 @layer base {
@@ -116,5 +158,273 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', 'Noto Sans KR', system-ui, sans-serif;
+    /* 미세한 그라데이션 배경 */
+    background-image: linear-gradient(
+      135deg,
+      var(--background) 0%,
+      color-mix(in srgb, var(--background) 95%, var(--sky-blue-light) 5%) 100%
+    );
+    min-height: 100vh;
+  }
+
+  /* 헤딩 폰트 최적화 */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Inter', 'Noto Sans KR', system-ui, sans-serif;
+    font-weight: 600;
+    color: var(--foreground);
+  }
+}
+
+/* ===================== */
+/* 🎨 날씨 컴포넌트 스타일 */
+/* ===================== */
+@layer components {
+  /* Weather Card - 날씨 카드 */
+  .weather-card {
+    @apply bg-card border-border rounded-xl border shadow-sm backdrop-blur-sm;
+    background: linear-gradient(
+      135deg,
+      var(--card) 0%,
+      color-mix(in srgb, var(--card) 98%, var(--sky-blue-light) 2%) 100%
+    );
+    transition: all 0.3s ease;
+  }
+
+  .weather-card:hover {
+    @apply shadow-lg;
+    transform: translateY(-2px);
+    border-color: var(--sky-blue);
+    box-shadow: 0 10px 25px
+      color-mix(in srgb, var(--sky-blue) 20%, transparent 80%);
+  }
+
+  /* Weather Button - 날씨 테마 버튼 */
+  .weather-button {
+    background: linear-gradient(
+      135deg,
+      var(--sky-blue-dark) 0%,
+      var(--sky-blue) 100%
+    );
+    @apply text-white transition-all duration-300 hover:shadow-lg;
+  }
+
+  .weather-button:hover {
+    background: linear-gradient(
+      135deg,
+      var(--sky-blue) 0%,
+      var(--sky-blue-light) 100%
+    );
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px
+      color-mix(in srgb, var(--sky-blue) 30%, transparent 70%);
+  }
+
+  /* Sunny Button - 햇빛 버튼 */
+  .sunny-button {
+    background: linear-gradient(
+      135deg,
+      var(--sunshine-yellow-dark) 0%,
+      var(--sunshine-yellow) 100%
+    );
+    @apply text-storm-gray-dark transition-all duration-300 hover:shadow-lg;
+  }
+
+  .sunny-button:hover {
+    background: linear-gradient(
+      135deg,
+      var(--sunshine-yellow) 0%,
+      var(--sunshine-yellow-light) 100%
+    );
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px
+      color-mix(in srgb, var(--sunshine-yellow) 30%, transparent 70%);
+  }
+
+  /* Sunset Button - 노을 버튼 */
+  .sunset-button {
+    background: linear-gradient(
+      135deg,
+      var(--sunset-orange-dark) 0%,
+      var(--sunset-orange) 100%
+    );
+    @apply text-white transition-all duration-300 hover:shadow-lg;
+  }
+
+  .sunset-button:hover {
+    background: linear-gradient(
+      135deg,
+      var(--sunset-orange) 0%,
+      var(--sunset-orange-light) 100%
+    );
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px
+      color-mix(in srgb, var(--sunset-orange) 30%, transparent 70%);
+  }
+
+  /* Glass Effect - 구름 글래스 효과 */
+  .glass-effect {
+    @apply border-border/50 border backdrop-blur-md;
+    background: color-mix(in srgb, var(--card) 80%, transparent 20%);
+  }
+
+  /* Weather Status - 날씨 상태 */
+  .weather-sunny {
+    @apply bg-sunshine-yellow-light text-storm-gray-dark border-sunshine-yellow border;
+  }
+
+  .weather-cloudy {
+    @apply bg-cloud-gray-light text-storm-gray-dark border-cloud-gray border;
+  }
+
+  .weather-rainy {
+    @apply bg-sky-blue-light text-sky-blue-dark border-sky-blue border;
+  }
+
+  .weather-stormy {
+    @apply bg-storm-gray border-storm-gray-dark border text-white;
+  }
+
+  .weather-sunset {
+    @apply bg-sunset-orange-light text-sunset-orange-dark border-sunset-orange border;
+  }
+
+  /* Dark mode weather status */
+  .dark .weather-sunny {
+    @apply bg-sunshine-yellow/20 text-sunshine-yellow border-sunshine-yellow/50;
+  }
+
+  .dark .weather-cloudy {
+    @apply bg-cloud-gray/20 text-cloud-gray border-cloud-gray/50;
+  }
+
+  .dark .weather-rainy {
+    @apply bg-sky-blue/20 text-sky-blue border-sky-blue/50;
+  }
+
+  .dark .weather-stormy {
+    @apply bg-storm-gray/40 text-cloud-white border-storm-gray;
+  }
+
+  .dark .weather-sunset {
+    @apply bg-sunset-orange/20 text-sunset-orange border-sunset-orange/50;
+  }
+
+  /* Form Controls - 폼 요소 */
+  .weather-input {
+    @apply dark:bg-card border-cloud-gray dark:border-border bg-white;
+    @apply text-storm-gray-dark dark:text-foreground;
+    @apply placeholder:text-storm-gray dark:placeholder:text-muted-foreground;
+    @apply focus:border-sky-blue dark:focus:border-primary;
+    @apply focus:ring-sky-blue/20 dark:focus:ring-primary/20;
+  }
+
+  /* Alert Styles - 알림 스타일 */
+  .alert-success {
+    @apply bg-sunshine-yellow-light border-sunshine-yellow text-storm-gray-dark;
+  }
+
+  .alert-warning {
+    @apply bg-sunset-orange-light border-sunset-orange text-sunset-orange-dark;
+  }
+
+  .alert-error {
+    @apply border-red-200 bg-red-50 text-red-800;
+  }
+
+  .alert-info {
+    @apply bg-sky-blue-light border-sky-blue text-sky-blue-dark;
+  }
+
+  /* Dark mode alerts */
+  .dark .alert-success {
+    @apply bg-sunshine-yellow/20 border-sunshine-yellow/50 text-sunshine-yellow;
+  }
+
+  .dark .alert-warning {
+    @apply bg-sunset-orange/20 border-sunset-orange/50 text-sunset-orange;
+  }
+
+  .dark .alert-error {
+    @apply border-red-500/50 bg-red-900/20 text-red-400;
+  }
+
+  .dark .alert-info {
+    @apply bg-sky-blue/20 border-sky-blue/50 text-sky-blue;
+  }
+}
+
+/* ===================== */
+/* 🌈 날씨 애니메이션 */
+/* ===================== */
+@layer utilities {
+  .weather-bounce {
+    animation: weather-bounce 2s ease-in-out infinite;
+  }
+
+  .weather-float {
+    animation: weather-float 3s ease-in-out infinite;
+  }
+
+  .weather-glow {
+    box-shadow: 0 0 20px
+      color-mix(in srgb, var(--sky-blue) 40%, transparent 60%);
+    animation: weather-glow 2s ease-in-out infinite alternate;
+  }
+
+  .sunshine-glow {
+    box-shadow: 0 0 20px
+      color-mix(in srgb, var(--sunshine-yellow) 40%, transparent 60%);
+    animation: sunshine-glow 2s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes weather-bounce {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes weather-float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-5px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(5px) rotate(-1deg);
+  }
+}
+
+@keyframes weather-glow {
+  0% {
+    box-shadow: 0 0 20px
+      color-mix(in srgb, var(--sky-blue) 30%, transparent 70%);
+  }
+  100% {
+    box-shadow: 0 0 30px
+      color-mix(in srgb, var(--sky-blue) 50%, transparent 50%);
+  }
+}
+
+@keyframes sunshine-glow {
+  0% {
+    box-shadow: 0 0 20px
+      color-mix(in srgb, var(--sunshine-yellow) 30%, transparent 70%);
+  }
+  100% {
+    box-shadow: 0 0 30px
+      color-mix(in srgb, var(--sunshine-yellow) 50%, transparent 50%);
   }
 }

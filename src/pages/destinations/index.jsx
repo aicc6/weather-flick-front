@@ -15,27 +15,18 @@ import {
   Star,
   Search,
   Filter,
-  Calendar,
   Clock,
   Heart,
   Camera,
   Navigation,
   Sparkles,
 } from '@/components/icons'
-import { useGetActiveRegionsQuery } from '@/store/api'
 
 export default function TravelCoursePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('all')
   const [selectedMonth, setSelectedMonth] = useState('all')
   const [selectedTheme, setSelectedTheme] = useState('all')
-
-  // RTK Query를 사용한 지역 데이터 조회
-  const {
-    data: cities = [],
-    isLoading: regionsLoading,
-    error: regionsError,
-  } = useGetActiveRegionsQuery()
 
   // 여행 코스 더미 데이터
   const travelCourses = [
@@ -78,6 +69,8 @@ export default function TravelCoursePage() {
         },
       ],
       tags: ['인스타감성', '자연치유', '드라이브'],
+      weather: '☀️ 맑음',
+      temperature: '22°C',
     },
     {
       id: 2,
@@ -112,6 +105,8 @@ export default function TravelCoursePage() {
         },
       ],
       tags: ['도시여행', '야경감상', '맛집투어'],
+      weather: '🌤️ 구름조금',
+      temperature: '19°C',
     },
     {
       id: 3,
@@ -146,6 +141,8 @@ export default function TravelCoursePage() {
         },
       ],
       tags: ['커피여행', '일출명소', '해변산책'],
+      weather: '🌊 바람',
+      temperature: '16°C',
     },
     {
       id: 4,
@@ -175,6 +172,8 @@ export default function TravelCoursePage() {
         },
       ],
       tags: ['문화재탐방', '역사교육', '전통체험'],
+      weather: '🌅 노을',
+      temperature: '18°C',
     },
     {
       id: 5,
@@ -200,472 +199,361 @@ export default function TravelCoursePage() {
             '경기전',
             '전주비빔밥',
             '한지공예체험',
-            '오목대',
+            '야경투어',
           ],
         },
       ],
-      tags: ['한옥체험', '전통음식', '문화체험'],
-    },
-    {
-      id: 6,
-      title: '여수 밤바다 낭만 여행',
-      subtitle: '아름다운 남해안의 보석',
-      region: 'yeosu',
-      duration: '1박 2일',
-      theme: ['야경', '바다', '섬'],
-      mainImage: '/yeosu.jpg',
-      rating: 4.7,
-      reviewCount: 124,
-      likeCount: 167,
-      price: '200,000원',
-      bestMonths: [4, 5, 6, 9, 10],
-      summary: '여수 밤바다의 환상적인 야경과 오동도의 자연을 만끽하는 코스',
-      highlights: ['여수 밤바다', '오동도', '향일암', '돌산대교'],
-      itinerary: [
-        {
-          day: 1,
-          title: '여수 시내 & 야경',
-          activities: [
-            '오동도',
-            '여수해상케이블카',
-            '돌산대교 야경',
-            '여수밤바다',
-          ],
-        },
-        {
-          day: 2,
-          title: '향일암 & 해안 드라이브',
-          activities: ['향일암', '금오도', '여수수산시장', '여수역'],
-        },
-      ],
-      tags: ['야경명소', '케이블카', '섬여행'],
+      tags: ['전통문화', '미식여행', '체험활동'],
+      weather: '☁️ 흐림',
+      temperature: '20°C',
     },
   ]
 
-  const regions = [
-    { value: 'all', label: '전체 지역' },
-    { value: 'jeju', label: '제주도' },
-    { value: 'busan', label: '부산' },
-    { value: 'gangneung', label: '강릉' },
-    { value: 'gyeongju', label: '경주' },
-    { value: 'jeonju', label: '전주' },
-    { value: 'yeosu', label: '여수' },
+  // 지역 이름 매핑
+  const regionNames = {
+    all: '전체',
+    seoul: '서울',
+    busan: '부산',
+    incheon: '인천',
+    daegu: '대구',
+    daejeon: '대전',
+    gwangju: '광주',
+    ulsan: '울산',
+    sejong: '세종',
+    gyeonggi: '경기',
+    gangwon: '강원',
+    chungbuk: '충북',
+    chungnam: '충남',
+    jeonbuk: '전북',
+    jeonnam: '전남',
+    gyeongbuk: '경북',
+    gyeongnam: '경남',
+    jeju: '제주',
+    gangneung: '강릉',
+    gyeongju: '경주',
+    jeonju: '전주',
+  }
+
+  // 월 이름 배열
+  const monthNames = [
+    '전체',
+    '1월',
+    '2월',
+    '3월',
+    '4월',
+    '5월',
+    '6월',
+    '7월',
+    '8월',
+    '9월',
+    '10월',
+    '11월',
+    '12월',
   ]
 
-  const months = [
-    { value: 'all', label: '전체 월' },
-    { value: '1', label: '1월' },
-    { value: '2', label: '2월' },
-    { value: '3', label: '3월' },
-    { value: '4', label: '4월' },
-    { value: '5', label: '5월' },
-    { value: '6', label: '6월' },
-    { value: '7', label: '7월' },
-    { value: '8', label: '8월' },
-    { value: '9', label: '9월' },
-    { value: '10', label: '10월' },
-    { value: '11', label: '11월' },
-    { value: '12', label: '12월' },
-  ]
-
-  const themes = [
+  // 테마 옵션
+  const themeOptions = [
     { value: 'all', label: '전체 테마' },
-    { value: '자연', label: '자연/힐링' },
-    { value: '도시', label: '도시 여행' },
-    { value: '역사', label: '역사/문화' },
-    { value: '바다', label: '바다/해변' },
-    { value: '맛집', label: '맛집 투어' },
-    { value: '야경', label: '야경/풍경' },
-    { value: '전통', label: '전통 체험' },
+    { value: 'nature', label: '🌿 자연' },
+    { value: 'city', label: '🏙️ 도시' },
+    { value: 'beach', label: '🏖️ 바다' },
+    { value: 'history', label: '🏛️ 역사' },
+    { value: 'food', label: '🍜 맛집' },
+    { value: 'healing', label: '😌 힐링' },
+    { value: 'activity', label: '🏃 액티비티' },
   ]
 
-  // 필터링된 여행 코스
+  // 필터링 로직
   const filteredCourses = travelCourses.filter((course) => {
     const matchesSearch =
+      searchQuery === '' ||
       course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.highlights.some((highlight) =>
-        highlight.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
+      course.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.summary.toLowerCase().includes(searchQuery.toLowerCase())
 
     const matchesRegion =
-      selectedRegion === 'all' ||
-      course.region === selectedRegion ||
-      // region_code로도 매칭 (서버에서 가져온 지역 코드)
-      cities.some(
-        (city) =>
-          city.region_code === selectedRegion &&
-          (city.region_name.includes(
-            regions.find((r) => r.value === course.region)?.label,
-          ) ||
-            regions
-              .find((r) => r.value === course.region)
-              ?.label.includes(city.region_name)),
-      )
+      selectedRegion === 'all' || course.region === selectedRegion
 
     const matchesMonth =
       selectedMonth === 'all' ||
       course.bestMonths.includes(parseInt(selectedMonth))
 
     const matchesTheme =
-      selectedTheme === 'all' || course.theme.includes(selectedTheme)
+      selectedTheme === 'all' ||
+      course.theme.some((theme) =>
+        theme.toLowerCase().includes(selectedTheme.toLowerCase()),
+      )
 
     return matchesSearch && matchesRegion && matchesMonth && matchesTheme
   })
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
-      {/* 헤더 */}
-      <div className="mb-8 text-center">
-        <h1 className="mb-4 text-4xl font-bold text-gray-900 dark:text-white">
-          🗺️ 여행 코스 추천
-        </h1>
-        <p className="text-xl text-gray-600 dark:text-gray-300">
-          전국의 검증된 여행 코스로 완벽한 여행을 계획해보세요
-        </p>
-      </div>
+    <div className="bg-background min-h-screen">
+      {/* Hero Section */}
+      <section className="from-sky-blue-light/30 via-sunshine-yellow-light/20 to-sunset-orange-light/30 dark:from-sky-blue/10 dark:via-sunshine-yellow/5 dark:to-sunset-orange/10 relative bg-gradient-to-br py-16">
+        {/* Floating weather elements */}
+        <div className="bg-sunshine-yellow/20 weather-float absolute top-8 left-8 h-16 w-16 rounded-full"></div>
+        <div className="bg-sky-blue/30 weather-bounce absolute top-20 right-20 h-12 w-12 rounded-full"></div>
+        <div className="bg-sunset-orange/25 weather-float absolute bottom-10 left-1/4 h-8 w-8 rounded-full"></div>
 
-      {/* AI 플래너 배너 */}
-      <div className="mb-8 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 p-6 dark:from-blue-900/20 dark:to-indigo-900/20">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="rounded-full bg-blue-600 p-3">
-              <Sparkles className="h-8 w-8 text-white" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                AI 맞춤 플래너
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                빅데이터 기반으로 나만의 맞춤형 여행 코스를 추천받아보세요
-              </p>
-            </div>
-          </div>
-          <Link to="/customized-schedule">
-            <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-              AI 추천받기
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* 검색 및 필터 */}
-      <div className="mb-8 space-y-4 rounded-lg bg-gray-50 p-6 dark:bg-gray-800">
-        {/* 검색바 */}
-        <div className="relative">
-          <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="여행 코스명이나 지역, 키워드로 검색해보세요..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12 text-lg dark:border-gray-600 dark:bg-gray-700"
-          />
-        </div>
-
-        {/* 필터 */}
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Filter className="h-5 w-5 text-gray-500" />
-            <span className="font-medium text-gray-700 dark:text-gray-300">
-              필터:
-            </span>
+        <div className="container mx-auto px-4 text-center">
+          <div className="mb-8">
+            <h1 className="text-foreground weather-glow mb-4 text-4xl font-bold">
+              🌤️ 날씨 맞춤 여행지 추천
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              실시간 날씨 정보를 기반으로 완벽한 여행지를 찾아보세요
+            </p>
           </div>
 
-          <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="지역 선택" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">전체 지역</SelectItem>
-              {regionsLoading ? (
-                <SelectItem value="loading" disabled>
-                  로딩 중...
-                </SelectItem>
-              ) : regionsError ? (
-                <SelectItem value="error" disabled>
-                  지역 목록 로드 실패
-                </SelectItem>
-              ) : (
-                [...cities]
-                  .sort((a, b) =>
-                    a.region_name.localeCompare(b.region_name, 'ko'),
-                  )
-                  .map((city) => (
-                    <SelectItem key={city.region_code} value={city.region_code}>
-                      {city.region_name}
-                    </SelectItem>
-                  ))
-              )}
-            </SelectContent>
-          </Select>
-
-          <select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="rounded-md border border-gray-300 px-4 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          >
-            {months.map((month) => (
-              <option key={month.value} value={month.value}>
-                {month.label}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={selectedTheme}
-            onChange={(e) => setSelectedTheme(e.target.value)}
-            className="rounded-md border border-gray-300 px-4 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          >
-            {themes.map((theme) => (
-              <option key={theme.value} value={theme.value}>
-                {theme.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* 검색 결과 헤더 */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <p className="text-lg text-gray-600 dark:text-gray-400">
-            총{' '}
-            <span className="font-bold text-blue-600">
-              {filteredCourses.length}
-            </span>
-            개의 여행 코스
-          </p>
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            ※ 인기순은 최근 3개월 조회수 기준입니다
-          </span>
-        </div>
-      </div>
-
-      {/* 여행 코스 카드 그리드 */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        {filteredCourses.map((course) => (
-          <Card
-            key={course.id}
-            className="overflow-hidden transition-all hover:shadow-xl dark:border-gray-700 dark:bg-gray-800"
-          >
-            {/* 메인 이미지 */}
-            <div className="relative">
-              <img
-                src={course.mainImage}
-                alt={course.title}
-                className="h-64 w-full object-cover"
-              />
-              <div className="absolute top-3 right-3 flex gap-2">
-                <Badge
-                  variant="secondary"
-                  className="bg-white/90 text-gray-800"
-                >
-                  {course.duration}
-                </Badge>
-                <Badge variant="secondary" className="bg-blue-600 text-white">
-                  인기
-                </Badge>
-              </div>
-              <button className="absolute top-3 left-3 rounded-full bg-white/80 p-2 transition-colors hover:bg-white">
-                <Heart className="h-5 w-5 text-gray-600" />
-              </button>
-            </div>
-
-            <CardHeader className="pb-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="mb-2 text-xl dark:text-white">
-                    {course.title}
-                  </CardTitle>
-                  <p className="mb-3 text-sm text-gray-600 dark:text-gray-300">
-                    {course.subtitle}
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-medium">
-                        {course.rating}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        ({course.reviewCount})
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Heart className="h-4 w-4 text-red-400" />
-                      <span className="text-sm text-gray-500">
-                        {course.likeCount}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    1인 기준
-                  </p>
-                  <p className="text-lg font-bold text-blue-600">
-                    {course.price}
-                  </p>
-                </div>
-              </div>
-            </CardHeader>
-
-            <CardContent className="space-y-5">
-              {/* 코스 요약 */}
-              <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
-                {course.summary}
-              </p>
-
-              {/* 테마 및 태그 */}
-              <div className="flex flex-wrap gap-2">
-                {course.theme.map((theme, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {theme}
-                  </Badge>
-                ))}
-                {course.tags.map((tag, index) => (
-                  <Badge
-                    key={index}
-                    className="bg-blue-100 text-xs text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                  >
-                    #{tag}
-                  </Badge>
-                ))}
+          {/* Search and Filter Section */}
+          <div className="weather-card glass-effect mx-auto max-w-4xl p-6">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+              {/* Search Input */}
+              <div className="relative">
+                <Search className="text-sky-blue absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                <Input
+                  placeholder="여행지나 키워드 검색"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="weather-input pl-10"
+                />
               </div>
 
-              {/* 주요 하이라이트 */}
-              <div>
-                <h4 className="mb-2 text-sm font-semibold text-gray-800 dark:text-gray-200">
-                  🎯 주요 명소
-                </h4>
-                <div className="flex flex-wrap gap-1">
-                  {course.highlights.map((highlight, index) => (
-                    <span
+              {/* Region Filter */}
+              <Select value={selectedRegion} onValueChange={setSelectedRegion}>
+                <SelectTrigger className="weather-input">
+                  <SelectValue placeholder="지역 선택" />
+                </SelectTrigger>
+                <SelectContent className="weather-card">
+                  <SelectItem value="all">전체 지역</SelectItem>
+                  {Object.entries(regionNames)
+                    .slice(1)
+                    .map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+
+              {/* Month Filter */}
+              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                <SelectTrigger className="weather-input">
+                  <SelectValue placeholder="여행 시기" />
+                </SelectTrigger>
+                <SelectContent className="weather-card">
+                  {monthNames.map((month, index) => (
+                    <SelectItem
                       key={index}
-                      className="text-xs text-blue-600 dark:text-blue-400"
+                      value={index === 0 ? 'all' : index.toString()}
                     >
-                      {highlight}
-                      {index < course.highlights.length - 1 && ' • '}
-                    </span>
+                      {month}
+                    </SelectItem>
                   ))}
-                </div>
-              </div>
+                </SelectContent>
+              </Select>
 
-              {/* 일정 미리보기 */}
-              <div>
-                <h4 className="mb-2 text-sm font-semibold text-gray-800 dark:text-gray-200">
-                  📅 일정 미리보기
-                </h4>
-                <div className="space-y-2">
-                  {course.itinerary.slice(0, 2).map((day, index) => (
-                    <div key={index} className="flex items-start gap-3 text-sm">
-                      <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
-                        {day.day}
+              {/* Theme Filter */}
+              <Select value={selectedTheme} onValueChange={setSelectedTheme}>
+                <SelectTrigger className="weather-input">
+                  <SelectValue placeholder="여행 테마" />
+                </SelectTrigger>
+                <SelectContent className="weather-card">
+                  {themeOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Filter Summary */}
+            <div className="mt-4 flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">
+                총 {filteredCourses.length}개의 여행 코스를 찾았습니다
+              </span>
+              {(selectedRegion !== 'all' ||
+                selectedMonth !== 'all' ||
+                selectedTheme !== 'all' ||
+                searchQuery) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearchQuery('')
+                    setSelectedRegion('all')
+                    setSelectedMonth('all')
+                    setSelectedTheme('all')
+                  }}
+                  className="border-cloud-gray hover:bg-sky-blue-light"
+                >
+                  <Filter className="mr-2 h-4 w-4" />
+                  필터 초기화
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Courses Grid */}
+      <section className="container mx-auto px-4 py-12">
+        {filteredCourses.length === 0 ? (
+          <div className="weather-card mx-auto max-w-md p-8 text-center">
+            <div className="mb-6 flex justify-center">
+              <div className="bg-sky-blue-light dark:bg-sky-blue/20 flex h-20 w-20 items-center justify-center rounded-full">
+                <Search className="text-sky-blue weather-float h-10 w-10" />
+              </div>
+            </div>
+            <h3 className="text-foreground mb-2 text-xl font-semibold">
+              검색 결과가 없습니다
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              다른 검색어나 필터를 시도해보세요
+            </p>
+            <Button
+              onClick={() => {
+                setSearchQuery('')
+                setSelectedRegion('all')
+                setSelectedMonth('all')
+                setSelectedTheme('all')
+              }}
+              className="sunny-button font-semibold"
+            >
+              전체 코스 보기
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {filteredCourses.map((course) => (
+              <Card
+                key={course.id}
+                className="weather-card group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl"
+              >
+                <Link to={`/recommend/${course.id}`} className="block">
+                  {/* Image Section */}
+                  <div className="relative h-48 overflow-hidden rounded-t-xl">
+                    <img
+                      src={course.mainImage}
+                      alt={course.title}
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      loading="lazy"
+                    />
+                    {/* Weather overlay */}
+                    <div className="weather-sunny absolute top-3 right-3 rounded-full px-3 py-1 text-xs font-semibold">
+                      {course.weather}
+                    </div>
+                    {/* Temperature */}
+                    <div className="dark:bg-card/90 text-sky-blue-dark absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-sm font-bold">
+                      {course.temperature}
+                    </div>
+                    {/* Like Button */}
+                    <button className="dark:bg-card/90 dark:hover:bg-card absolute top-3 left-3 rounded-full bg-white/90 p-2 transition-colors hover:bg-white">
+                      <Heart className="text-sunset-orange h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-foreground group-hover:text-sky-blue-dark line-clamp-1 text-lg font-bold transition-colors">
+                          {course.title}
+                        </CardTitle>
+                        <p className="text-muted-foreground mt-1 line-clamp-1 text-sm">
+                          {course.subtitle}
+                        </p>
                       </div>
-                      <div>
-                        <p className="font-medium text-gray-800 dark:text-gray-200">
-                          {day.title}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {day.activities.slice(0, 3).join(' → ')}
-                          {day.activities.length > 3 && ' ...'}
-                        </p>
+                      <div className="flex items-center gap-1">
+                        <Star className="text-sunshine-yellow h-4 w-4 fill-current" />
+                        <span className="text-foreground text-sm font-medium">
+                          {course.rating}
+                        </span>
                       </div>
                     </div>
-                  ))}
-                  {course.itinerary.length > 2 && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      외 {course.itinerary.length - 2}일 더...
+
+                    {/* Tags */}
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {course.theme.slice(0, 3).map((tag, index) => (
+                        <Badge key={index} className="weather-cloudy text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="pt-0">
+                    <p className="text-muted-foreground mb-4 line-clamp-2 text-sm">
+                      {course.summary}
                     </p>
-                  )}
-                </div>
-              </div>
 
-              {/* 여행 정보 */}
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-green-600" />
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {course.duration}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-orange-600" />
-                  <span className="text-gray-600 dark:text-gray-400">
-                    연중 추천
-                  </span>
-                </div>
-              </div>
+                    {/* Course Info */}
+                    <div className="mb-4 space-y-2">
+                      <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                        <Clock className="text-sky-blue h-4 w-4" />
+                        <span>{course.duration}</span>
+                      </div>
+                      <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                        <Navigation className="text-sky-blue h-4 w-4" />
+                        <span>
+                          {regionNames[course.region] || course.region}
+                        </span>
+                      </div>
+                    </div>
 
-              {/* 액션 버튼 */}
-              <div className="flex gap-3 pt-2">
-                <Link to={`/recommend/${course.id}`} className="flex-1">
-                  <Button variant="outline" size="sm" className="w-full">
-                    <Navigation className="mr-2 h-4 w-4" />
-                    상세보기
-                  </Button>
+                    {/* Bottom Info */}
+                    <div className="border-cloud-gray flex items-center justify-between border-t pt-3">
+                      <div className="text-sunset-orange-dark text-lg font-bold">
+                        {course.price}
+                      </div>
+                      <div className="text-muted-foreground flex items-center gap-4 text-xs">
+                        <span className="flex items-center gap-1">
+                          <Heart className="h-3 w-3" />
+                          {course.likeCount}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Camera className="h-3 w-3" />
+                          {course.reviewCount}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
                 </Link>
-                <Link
-                  to={`/customized-schedule?region=${course.region}`}
-                  className="flex-1"
-                >
-                  <Button
-                    size="sm"
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                  >
-                    <Camera className="mr-2 h-4 w-4" />
-                    맞춤 일정
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
 
-      {/* 검색 결과가 없을 때 */}
-      {filteredCourses.length === 0 && (
-        <div className="py-16 text-center">
-          <div className="mb-6 text-8xl">🔍</div>
-          <h3 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
-            검색 결과가 없습니다
-          </h3>
-          <p className="mb-6 text-gray-600 dark:text-gray-300">
-            다른 키워드나 필터로 다시 검색해보세요
-          </p>
-          <Button
-            onClick={() => {
-              setSearchQuery('')
-              setSelectedRegion('all')
-              setSelectedMonth('all')
-              setSelectedTheme('all')
-            }}
-            variant="outline"
-          >
-            필터 초기화
-          </Button>
+      {/* Bottom CTA Section */}
+      <section className="from-sky-blue-light/20 via-sunshine-yellow-light/15 to-sunset-orange-light/20 dark:from-sky-blue/5 dark:via-sunshine-yellow/3 dark:to-sunset-orange/5 bg-gradient-to-br py-16">
+        <div className="container mx-auto px-4 text-center">
+          <div className="weather-card glass-effect mx-auto max-w-2xl p-8">
+            <Sparkles className="text-sunshine-yellow sunshine-glow mx-auto mb-4 h-16 w-16" />
+            <h2 className="text-foreground mb-4 text-3xl font-bold">
+              나만의 여행 계획을 세워보세요!
+            </h2>
+            <p className="text-muted-foreground mb-8 text-lg">
+              AI가 도와주는 맞춤형 여행 일정으로 완벽한 여행을 준비하세요
+            </p>
+            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+              <Link
+                to="/customized-schedule"
+                className="sunny-button rounded-full px-8 py-3 font-semibold transition-all duration-300 hover:scale-105"
+              >
+                🎯 맞춤 일정 만들기
+              </Link>
+              <Link
+                to="/planner"
+                className="weather-button rounded-full px-8 py-3 font-semibold text-white transition-all duration-300 hover:scale-105"
+              >
+                📋 직접 계획하기
+              </Link>
+            </div>
+          </div>
         </div>
-      )}
-
-      {/* 하단 CTA */}
-      <div className="mt-16 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-center text-white">
-        <h3 className="mb-4 text-3xl font-bold">
-          아직 마음에 드는 코스를 찾지 못하셨나요?
-        </h3>
-        <p className="mb-6 text-lg opacity-90">
-          AI가 당신의 취향과 일정에 맞는 완벽한 여행 코스를 만들어드립니다
-        </p>
-        <Link to="/customized-schedule">
-          <Button
-            size="lg"
-            variant="secondary"
-            className="bg-white text-blue-600 hover:bg-gray-100"
-          >
-            <Sparkles className="mr-2 h-5 w-5" />
-            AI 맞춤 여행 코스 만들기
-          </Button>
-        </Link>
-      </div>
+      </section>
     </div>
   )
 }
