@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from '@/components/icons'
 export function RecommendedDestCarousel({ destinations = [] }) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+  const [imageLoadStates, setImageLoadStates] = useState({})
 
   const itemsToShow = 3
   const maxIndex = Math.max(0, destinations.length - itemsToShow)
@@ -15,6 +16,22 @@ export function RecommendedDestCarousel({ destinations = [] }) {
   const goToNext = useCallback(() => {
     setCurrentIndex((prev) => Math.min(maxIndex, prev + 1))
   }, [maxIndex])
+
+  // Handle image load success
+  const handleImageLoad = useCallback((destinationId) => {
+    setImageLoadStates((prev) => ({
+      ...prev,
+      [destinationId]: { loaded: true, error: false },
+    }))
+  }, [])
+
+  // Handle image load error
+  const handleImageError = useCallback((destinationId) => {
+    setImageLoadStates((prev) => ({
+      ...prev,
+      [destinationId]: { loaded: false, error: true },
+    }))
+  }, [])
 
   // Auto-play functionality
   useEffect(() => {
@@ -82,84 +99,123 @@ export function RecommendedDestCarousel({ destinations = [] }) {
 
         {/* Carousel Content */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {visibleDestinations.map((destination, index) => (
-            <div
-              key={`${destination.name}-${currentIndex + index}`}
-              className="weather-card group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl"
-              onClick={() => {
-                // TODO: Navigate to destination detail
-                console.log('Clicked destination:', destination.name)
-              }}
-            >
-              {/* Icon Display instead of Image */}
-              <div className="relative h-48 w-full overflow-hidden rounded-t-xl">
-                <div className="from-sky-blue-light/80 via-sunshine-yellow-light/60 to-sunset-orange-light/80 dark:from-sky-blue/20 dark:via-sunshine-yellow/10 dark:to-sunset-orange/20 flex h-full w-full items-center justify-center bg-gradient-to-br">
-                  <div className="text-center">
-                    <div className="mb-4 text-6xl">
-                      {destination.icon || '🏞️'}
+          {visibleDestinations.map((destination, index) => {
+            const imageState = imageLoadStates[destination.id] || {
+              loaded: false,
+              error: false,
+            }
+            const hasImage = destination.image && !imageState.error
+            const showImageOverlays = hasImage && imageState.loaded
+
+            return (
+              <div
+                key={`${destination.name}-${currentIndex + index}`}
+                className="weather-card group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                onClick={() => {
+                  // Navigate to destination detail page
+                  // window.location.href = `/destinations/${destination.id}`
+                }}
+              >
+                {/* Image or Icon Display */}
+                <div className="relative h-48 w-full overflow-hidden rounded-t-xl">
+                  {hasImage && !imageState.error ? (
+                    <>
+                      <img
+                        src={destination.image}
+                        alt={destination.name}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        loading="lazy"
+                        onLoad={() => handleImageLoad(destination.id)}
+                        onError={() => handleImageError(destination.id)}
+                      />
+                      {!imageState.loaded && (
+                        <div className="from-sky-blue-light/80 via-sunshine-yellow-light/60 to-sunset-orange-light/80 dark:from-sky-blue/20 dark:via-sunshine-yellow/10 dark:to-sunset-orange/20 absolute inset-0 flex items-center justify-center bg-gradient-to-br">
+                          <div className="text-center">
+                            <div className="mb-2 text-4xl">
+                              {destination.icon || '🏞️'}
+                            </div>
+                            <p className="text-muted-foreground text-sm">
+                              로딩 중...
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    // Fallback to icon when no image or image failed
+                    <div className="from-sky-blue-light/80 via-sunshine-yellow-light/60 to-sunset-orange-light/80 dark:from-sky-blue/20 dark:via-sunshine-yellow/10 dark:to-sunset-orange/20 flex h-full w-full items-center justify-center bg-gradient-to-br">
+                      <div className="text-center">
+                        <div className="mb-4 text-6xl">
+                          {destination.icon || '🏞️'}
+                        </div>
+                        <h3 className="text-foreground text-xl font-bold">
+                          {destination.name}
+                        </h3>
+                      </div>
                     </div>
-                    <h3 className="text-foreground text-xl font-bold">
+                  )}
+
+                  {/* Weather overlay - only show when image is loaded or no image */}
+                  {(showImageOverlays || !hasImage) && (
+                    <div className="weather-sunny absolute top-3 right-3 rounded-full px-3 py-1 text-xs font-semibold">
+                      {destination.weather || '☀️ 맑음'}
+                    </div>
+                  )}
+
+                  {/* Temperature with proper unit - only show when image is loaded or no image */}
+                  {(showImageOverlays || !hasImage) && (
+                    <div className="dark:bg-card/90 text-sky-blue-dark absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-sm font-bold">
+                      🌡️ {destination.temperature || 22}°C
+                    </div>
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <h4 className="text-foreground group-hover:text-sky-blue-dark text-lg font-bold transition-colors">
                       {destination.name}
-                    </h3>
+                    </h4>
+                    <div className="flex items-center gap-1">
+                      <span className="text-sunshine-yellow">⭐</span>
+                      <span className="text-muted-foreground text-sm font-medium">
+                        {destination.rating || '4.5'}
+                      </span>
+                    </div>
                   </div>
-                </div>
 
-                {/* Weather overlay */}
-                <div className="weather-sunny absolute top-3 right-3 rounded-full px-3 py-1 text-xs font-semibold">
-                  {destination.weather || '☀️ 맑음'}
-                </div>
+                  <p className="text-muted-foreground mb-3 line-clamp-2 text-sm">
+                    {destination.description ||
+                      '아름다운 자연과 완벽한 날씨를 즐길 수 있는 최고의 여행지입니다.'}
+                  </p>
 
-                {/* Temperature with proper unit */}
-                <div className="dark:bg-card/90 text-sky-blue-dark absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-sm font-bold">
-                  🌡️ {destination.temperature || 22}°C
-                </div>
-              </div>
+                  {/* Tags */}
+                  <div className="mb-3 flex flex-wrap gap-2">
+                    {(destination.tags || ['자연', '관광'])
+                      .slice(0, 2)
+                      .map((tag, tagIndex) => (
+                        <span
+                          key={tagIndex}
+                          className="weather-cloudy rounded-full px-2 py-1 text-xs font-medium"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                  </div>
 
-              {/* Content */}
-              <div className="p-4">
-                <div className="mb-2 flex items-center justify-between">
-                  <h4 className="text-foreground group-hover:text-sky-blue-dark text-lg font-bold transition-colors">
-                    {destination.name}
-                  </h4>
-                  <div className="flex items-center gap-1">
-                    <span className="text-sunshine-yellow">⭐</span>
-                    <span className="text-muted-foreground text-sm font-medium">
-                      {destination.rating || '4.5'}
+                  {/* Distance & Duration */}
+                  <div className="text-muted-foreground flex items-center justify-between text-xs">
+                    <span className="flex items-center gap-1">
+                      🚗 {destination.distance || '2시간 거리'}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      💰 {destination.budget || '10만원대'}
                     </span>
                   </div>
                 </div>
-
-                <p className="text-muted-foreground mb-3 line-clamp-2 text-sm">
-                  {destination.description ||
-                    '아름다운 자연과 완벽한 날씨를 즐길 수 있는 최고의 여행지입니다.'}
-                </p>
-
-                {/* Tags */}
-                <div className="mb-3 flex flex-wrap gap-2">
-                  {(destination.tags || ['자연', '관광'])
-                    .slice(0, 2)
-                    .map((tag, tagIndex) => (
-                      <span
-                        key={tagIndex}
-                        className="weather-cloudy rounded-full px-2 py-1 text-xs font-medium"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                </div>
-
-                {/* Distance & Duration */}
-                <div className="text-muted-foreground flex items-center justify-between text-xs">
-                  <span className="flex items-center gap-1">
-                    🚗 {destination.distance || '2시간 거리'}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    💰 {destination.budget || '10만원대'}
-                  </span>
-                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* Indicators */}
