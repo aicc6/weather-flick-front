@@ -6,26 +6,20 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import { WithdrawModal } from '@/components/WithdrawModal'
 import {
   Mail,
   Calendar,
   MapPin,
   Heart,
   Settings,
-  LogOut,
-  Trash2,
-  Bell,
   ChevronRight,
   Edit,
 } from '@/components/icons'
 
 export function ProfilePage() {
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const [favoritePlaces, setFavoritePlaces] = useState([])
-  const [showWithdrawModal, setShowWithdrawModal] = useState(false)
 
   // RTK Query 훅 사용
   const {
@@ -57,20 +51,6 @@ export function ProfilePage() {
 
     loadUserData()
   }, [])
-
-  const handleLogout = async () => {
-    await logout()
-    navigate('/')
-  }
-
-  const handleDeleteAccount = () => {
-    setShowWithdrawModal(true)
-  }
-
-  const handleWithdrawSuccess = () => {
-    // 회원탈퇴 성공 후 홈으로 이동
-    navigate('/')
-  }
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('ko-KR', {
@@ -292,82 +272,7 @@ export function ProfilePage() {
             )}
           </CardContent>
         </Card>
-
-        {/* 알림 설정 */}
-        <Card className="bg-white shadow-lg dark:bg-gray-800">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="h-5 w-5" />
-              알림 설정
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">날씨 변화 알림</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    비 예보 시 대체 플랜 자동 알림
-                  </p>
-                </div>
-                <Badge variant="default">ON</Badge>
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">이메일 알림</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    여행 관련 업데이트 및 추천
-                  </p>
-                </div>
-                <Badge variant="secondary">OFF</Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 계정 관리 */}
-        <Card className="bg-white shadow-lg dark:bg-gray-800">
-          <CardHeader>
-            <CardTitle>계정 관리</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button
-                variant="outline"
-                className="flex items-center gap-2"
-                onClick={() => navigate('/change-password')}
-              >
-                <Settings className="h-4 w-4" />
-                비밀번호 변경
-              </Button>
-              <Button
-                variant="outline"
-                className="flex items-center gap-2"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-4 w-4" />
-                로그아웃
-              </Button>
-              <Button
-                variant="destructive"
-                className="flex items-center gap-2"
-                onClick={handleDeleteAccount}
-              >
-                <Trash2 className="h-4 w-4" />
-                회원탈퇴
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
       </div>
-
-      {/* 회원탈퇴 모달 */}
-      <WithdrawModal
-        open={showWithdrawModal}
-        onOpenChange={setShowWithdrawModal}
-        onWithdrawSuccess={handleWithdrawSuccess}
-      />
     </div>
   )
 }
