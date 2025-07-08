@@ -83,8 +83,8 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 dark:from-gray-900 dark:to-gray-800">
-      <div className="mx-auto max-w-4xl space-y-6">
+    <div className="bg-gray-50/50 px-4 py-6 dark:bg-gray-900">
+      <div className="mx-auto max-w-3xl space-y-8">
         {/* 헤더 */}
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -102,8 +102,16 @@ export function ProfilePage() {
         </div>
 
         {/* 기본 정보 카드 */}
-        <Card className="bg-white shadow-lg dark:bg-gray-800">
-          <CardHeader className="pb-4">
+        <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <CardContent className="p-6">
+            <div className="mb-6 flex items-center gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md">
+                <span className="text-sm font-bold text-white">👤</span>
+              </div>
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+                프로필 정보
+              </h2>
+            </div>
             <div className="flex items-start justify-between">
               <div className="flex items-center space-x-4">
                 <Avatar className="h-20 w-20">
@@ -113,9 +121,9 @@ export function ProfilePage() {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <CardTitle className="text-2xl">
+                  <h3 className="text-2xl font-bold">
                     {user?.nickname || '사용자'}
-                  </CardTitle>
+                  </h3>
                   <div className="mt-1 flex items-center space-x-2 text-gray-600 dark:text-gray-400">
                     <Mail className="h-4 w-4" />
                     <span>{user?.email}</span>
@@ -129,16 +137,14 @@ export function ProfilePage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 rounded-xl"
                 onClick={() => navigate('/profile/edit')}
               >
                 <Edit className="h-4 w-4" />
                 편집
               </Button>
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
               {user?.preferred_region && user.preferred_region !== 'none' && (
                 <Badge variant="secondary" className="flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
@@ -161,13 +167,17 @@ export function ProfilePage() {
         </Card>
 
         {/* 최근 여행 플랜 */}
-        <Card className="bg-white shadow-lg dark:bg-gray-800">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                여행플래너 생성여행
-              </CardTitle>
+        <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <CardContent className="p-6">
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-pink-600 shadow-md">
+                  <Calendar className="h-5 w-5 text-white" />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+                  여행플래너 생성여행
+                </h2>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
@@ -177,14 +187,12 @@ export function ProfilePage() {
                 <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
             </div>
-          </CardHeader>
-          <CardContent>
             {recentPlans.length > 0 ? (
               <div className="space-y-3">
                 {recentPlans.map((plan) => (
                   <div
                     key={plan.plan_id}
-                    className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
+                    className="flex items-center justify-between rounded-xl border border-gray-200/50 p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     <div>
                       <h4 className="font-medium">{plan.title}</h4>
@@ -228,7 +236,7 @@ export function ProfilePage() {
                 <p>아직 여행 플랜이 없습니다.</p>
                 <Button
                   variant="outline"
-                  className="mt-2"
+                  className="mt-2 rounded-xl"
                   onClick={() => navigate('/travel-plans/create')}
                 >
                   첫 여행 플랜 만들기
@@ -239,20 +247,22 @@ export function ProfilePage() {
         </Card>
 
         {/* 저장한 여행지 */}
-        <Card className="bg-white shadow-lg dark:bg-gray-800">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Heart className="h-5 w-5" />
-                저장한 여행지
-              </CardTitle>
+        <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <CardContent className="p-6">
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-teal-600 shadow-md">
+                  <Heart className="h-5 w-5 text-white" />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+                  저장한 여행지
+                </h2>
+              </div>
               <Button variant="ghost" size="sm">
                 전체보기
                 <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
             </div>
-          </CardHeader>
-          <CardContent>
             {favoritePlaces.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {favoritePlaces.map((place) => (

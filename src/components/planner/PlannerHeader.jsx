@@ -13,8 +13,11 @@ const PlannerHeader = memo(() => {
         animate={{ scale: 1 }}
         transition={{ delay: 0.2, duration: 0.3 }}
       >
-        <h1 className="mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-4xl font-bold text-transparent md:text-5xl">
-          🌤️ AI 여행 플래너
+        <h1 className="mb-4 text-4xl font-bold md:text-5xl">
+          🌤️
+          <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            날씨 플래너
+          </span>
         </h1>
         <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
           14일 이후의 날씨 데이터는 알림으로 알려드립니다.

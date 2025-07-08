@@ -34,16 +34,14 @@ const SubmitButton = memo(
             <div className="flex items-center gap-2">
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
               <span>
-                {isEditMode
-                  ? '여행 플랜을 수정하고 있어요...'
-                  : 'AI가 플랜을 생성하고 있어요...'}
+                {isEditMode ? '플랜 수정 중...' : '여행 계획 생성 중...'}
               </span>
             </div>
           ) : (
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5" />
               <span>
-                {isEditMode ? '여행 플랜 수정하기' : '맞춤 여행 플랜 생성하기'}
+                {isEditMode ? '플랜 수정하기' : '여행 계획 만들기'}
               </span>
             </div>
           )}
