@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 import { recommendedDestinations } from '@/data'
@@ -15,6 +15,37 @@ export function MainPage() {
     date: null,
     theme: '',
   })
+
+  // 배경 위치 상태
+  const [bgPos, setBgPos] = useState('center')
+  const heroRef = useRef(null)
+  const animationFrame = useRef(null)
+
+  // 마우스 이동 핸들러
+  const handleMouseMove = useCallback((e) => {
+    if (!heroRef.current) return
+    const { left, width } = heroRef.current.getBoundingClientRect()
+    const x = e.clientX - left
+    const percent = Math.max(0, Math.min(1, x / width))
+    // 0% ~ 100%로 변환 (이미지 좌우 끝까지 움직이게)
+    const bgPercent = percent * 90
+    setBgPos(`${bgPercent}% center`)
+  }, [])
+
+  // requestAnimationFrame으로 부드럽게
+  const onMouseMove = useCallback(
+    (e) => {
+      if (animationFrame.current) cancelAnimationFrame(animationFrame.current)
+      animationFrame.current = requestAnimationFrame(() => handleMouseMove(e))
+    },
+    [handleMouseMove],
+  )
+
+  useEffect(() => {
+    return () => {
+      if (animationFrame.current) cancelAnimationFrame(animationFrame.current)
+    }
+  }, [])
 
   const handleSearch = () => {
     // TODO: 검색 로직 구현
@@ -56,12 +87,15 @@ export function MainPage() {
     <div className="relative h-full">
       {/* Hero Section with Background Image - 다크모드 영향받지 않음 */}
       <section
+        ref={heroRef}
+        onMouseMove={onMouseMove}
         className="relative flex min-h-[80vh] flex-col justify-center pt-12 pb-8 text-center"
         style={{
           backgroundImage: 'url(/home-background.jpg)',
           backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundPosition: bgPos,
           backgroundRepeat: 'no-repeat',
+          transition: 'background-position 0.2s cubic-bezier(0.4,0,0.2,1)',
         }}
       >
         {/* Overlay for better text readability */}
