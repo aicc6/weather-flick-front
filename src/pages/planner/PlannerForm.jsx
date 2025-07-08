@@ -796,10 +796,12 @@ const PlannerForm = memo(() => {
               {/* 폼 완성도 안내 (사용자 친화적 피드백) */}
               {!formValidation.isValid &&
                 formValidation.missingFields.length > 0 && (
-                  <div className="mb-6 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4 text-center shadow-sm">
-                    <div className="mb-2 flex items-center justify-center gap-2">
-                      <span className="text-lg">📝</span>
-                      <p className="text-sm font-semibold text-amber-800">
+                  <div className="mb-6 rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-5 text-center shadow-sm">
+                    <div className="mb-4 flex items-center justify-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 shadow-sm">
+                        <span className="text-sm font-bold text-white">!</span>
+                      </div>
+                      <p className="text-sm font-semibold text-blue-800">
                         아직 {formValidation.missingFields.length}개 항목이
                         남았어요!
                       </p>
@@ -808,7 +810,7 @@ const PlannerForm = memo(() => {
                       {formValidation.missingFields.map((field, _index) => (
                         <span
                           key={field}
-                          className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700"
+                          className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700"
                         >
                           {field}
                         </span>

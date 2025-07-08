@@ -38,8 +38,8 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 dark:from-gray-900 dark:to-gray-800">
-      <div className="mx-auto max-w-2xl space-y-6">
+    <div className="bg-gray-50/50 px-4 py-6 dark:bg-gray-900">
+      <div className="mx-auto max-w-3xl space-y-8">
         {/* 헤더 */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -59,14 +59,16 @@ export function SettingsPage() {
         </div>
 
         {/* 계정 정보 */}
-        <Card className="bg-white shadow-lg dark:bg-gray-800">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              계정 정보
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <CardContent className="p-6">
+            <div className="mb-6 flex items-center gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md">
+                <User className="h-5 w-5 text-white" />
+              </div>
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+                계정 정보
+              </h2>
+            </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -100,18 +102,20 @@ export function SettingsPage() {
         </Card>
 
         {/* 보안 설정 */}
-        <Card className="bg-white shadow-lg dark:bg-gray-800">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              보안 설정
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <CardContent className="p-6">
+            <div className="mb-6 flex items-center gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-pink-600 shadow-md">
+                <Shield className="h-5 w-5 text-white" />
+              </div>
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+                보안 설정
+              </h2>
+            </div>
             <div className="space-y-3">
               <Button
                 variant="outline"
-                className="w-full justify-start gap-2"
+                className="w-full justify-start gap-2 rounded-xl"
                 onClick={() => navigate('/profile/change-password')}
               >
                 <Lock className="h-4 w-4" />
@@ -119,7 +123,7 @@ export function SettingsPage() {
               </Button>
               <Button
                 variant="outline"
-                className="w-full justify-start gap-2"
+                className="w-full justify-start gap-2 rounded-xl"
                 onClick={() => navigate('/profile/edit')}
               >
                 <User className="h-4 w-4" />
@@ -130,14 +134,16 @@ export function SettingsPage() {
         </Card>
 
         {/* 알림 설정 */}
-        <Card className="bg-white shadow-lg dark:bg-gray-800">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="h-5 w-5" />
-              알림 설정
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <CardContent className="p-6">
+            <div className="mb-6 flex items-center gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-teal-600 shadow-md">
+                <Bell className="h-5 w-5 text-white" />
+              </div>
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+                알림 설정
+              </h2>
+            </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
@@ -173,18 +179,20 @@ export function SettingsPage() {
         </Card>
 
         {/* 계정 관리 */}
-        <Card className="bg-white shadow-lg dark:bg-gray-800">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
-              계정 관리
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <CardContent className="p-6">
+            <div className="mb-6 flex items-center gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-orange-500 to-red-600 shadow-md">
+                <Settings className="h-5 w-5 text-white" />
+              </div>
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+                계정 관리
+              </h2>
+            </div>
             <div className="space-y-3">
               <Button
                 variant="outline"
-                className="w-full justify-start gap-2"
+                className="w-full justify-start gap-2 rounded-xl"
                 onClick={handleLogout}
               >
                 <LogOut className="h-4 w-4" />
@@ -192,7 +200,7 @@ export function SettingsPage() {
               </Button>
               <Button
                 variant="destructive"
-                className="w-full justify-start gap-2"
+                className="w-full justify-start gap-2 rounded-xl"
                 onClick={handleDeleteAccount}
               >
                 <Trash2 className="h-4 w-4" />
@@ -203,11 +211,16 @@ export function SettingsPage() {
         </Card>
 
         {/* 앱 정보 */}
-        <Card className="bg-white shadow-lg dark:bg-gray-800">
-          <CardHeader>
-            <CardTitle>앱 정보</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <CardContent className="p-6">
+            <div className="mb-6 flex items-center gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 shadow-md">
+                <span className="text-sm font-bold text-white">ℹ️</span>
+              </div>
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+                앱 정보
+              </h2>
+            </div>
             <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <p>버전: 1.0.0</p>
               <p>© 2024 Weather Flick. All rights reserved.</p>

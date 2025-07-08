@@ -1,53 +1,70 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '@/contexts/AuthContextRTK'
-import { useGetUserPlansQuery } from '@/store/api/travelPlansApi'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
-  Mail,
   Calendar,
-  MapPin,
+  Edit,
   Heart,
+  Mail,
+  MapPin,
   Settings,
   ChevronRight,
-  Edit,
-  User,
   Star,
 } from '@/components/icons'
 
-export function ProfilePage() {
-  const { user } = useAuth()
+export default function ProfilePage() {
   const navigate = useNavigate()
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [recentPlans, setRecentPlans] = useState([])
   const [favoritePlaces, setFavoritePlaces] = useState([])
 
-  // RTK Query 훅 사용
-  const {
-    data: plansResponse,
-    isLoading,
-    isError,
-    error,
-  } = useGetUserPlansQuery()
-
-  const recentPlans = (plansResponse || [])
-    .slice() // 원본 배열 수정을 방지하기 위해 복사본 생성
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-    .slice(0, 3) // 최신 3개 항목만 선택
-
+  // Temporary mock data - replace with actual API calls
   useEffect(() => {
-    // 여행 플랜과 즐겨찾기 데이터 로드 (실제 API 호출로 대체)
     const loadUserData = async () => {
       try {
-        // 임시 데이터 (실제로는 API에서 가져옴)
+        // Mock user data
+        setUser({
+          id: 1,
+          nickname: '여행러버',
+          email: 'traveler@example.com',
+          profile_image: null,
+          preferred_region: '제주도',
+          preferred_theme: '자연관광',
+          created_at: '2024-01-15T00:00:00Z',
+        })
+
+        // Mock recent plans
+        setRecentPlans([
+          {
+            plan_id: 1,
+            title: '제주도 힐링 여행',
+            start_date: '2024-03-15',
+            end_date: '2024-03-18',
+            status: 'CONFIRMED',
+          },
+          {
+            plan_id: 2,
+            title: '부산 해안 드라이브',
+            start_date: '2024-04-20',
+            end_date: '2024-04-22',
+            status: 'PLANNING',
+          },
+        ])
+
+        // Mock favorite places
         setFavoritePlaces([
-          { id: 1, name: '제주도', type: 'destination', rating: 4.8 },
-          { id: 2, name: '강릉 해변', type: 'destination', rating: 4.5 },
-          { id: 3, name: '부산 해운대', type: 'destination', rating: 4.6 },
+          { id: 1, name: '한라산' },
+          { id: 2, name: '성산일출봉' },
+          { id: 3, name: '해운대해수욕장' },
         ])
       } catch (error) {
         console.error('사용자 데이터 로드 실패:', error)
+      } finally {
+        setLoading(false)
       }
     }
 
@@ -62,35 +79,44 @@ export function ProfilePage() {
     })
   }
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="bg-background flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="bg-sky-blue-light dark:bg-sky-blue/20 weather-glow mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
-            <User className="text-sky-blue-dark h-6 w-6 animate-pulse" />
+      <div className="bg-background min-h-screen">
+        <div className="container mx-auto px-4 py-8">
+          <div className="mx-auto max-w-4xl space-y-8">
+            <div className="weather-card animate-pulse">
+              <div className="p-8">
+                <div className="mb-4 h-8 w-32 rounded bg-gray-300"></div>
+                <div className="flex items-center space-x-4">
+                  <div className="h-20 w-20 rounded-full bg-gray-300"></div>
+                  <div className="space-y-2">
+                    <div className="h-6 w-48 rounded bg-gray-300"></div>
+                    <div className="h-4 w-64 rounded bg-gray-300"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <p className="text-muted-foreground">프로필 정보를 불러오는 중...</p>
         </div>
       </div>
     )
   }
 
-  if (isError) {
+  if (!user) {
     return (
-      <div className="bg-background flex min-h-screen items-center justify-center">
-        <div className="weather-card alert-error max-w-md p-8 text-center">
-          <h3 className="mb-2 text-lg font-semibold">
-            프로필 정보를 불러올 수 없습니다
-          </h3>
-          <p className="text-muted-foreground mb-4 text-sm">
-            {error.toString()}
-          </p>
-          <Button
-            onClick={() => window.location.reload()}
-            className="sunset-button font-semibold"
-          >
-            다시 시도
-          </Button>
+      <div className="bg-background min-h-screen">
+        <div className="container mx-auto px-4 py-8">
+          <div className="mx-auto max-w-4xl">
+            <div className="weather-card alert-error p-8 text-center">
+              <h2 className="mb-2 text-xl font-bold">사용자 정보 로드 실패</h2>
+              <p className="mb-4 text-red-600">
+                사용자 정보를 불러올 수 없습니다.
+              </p>
+              <Button onClick={() => window.location.reload()}>
+                다시 시도
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -283,27 +309,26 @@ export function ProfilePage() {
                           </div>
                           <div className="flex items-center gap-3">
                             <Badge
-                              className={`${
+                              variant={
+                                plan.status === 'CONFIRMED'
+                                  ? 'default'
+                                  : 'secondary'
+                              }
+                              className={
                                 plan.status === 'CONFIRMED'
                                   ? 'weather-sunny'
-                                  : plan.status === 'PLANNING'
-                                    ? 'weather-cloudy'
-                                    : plan.status === 'IN_PROGRESS'
-                                      ? 'weather-rainy'
-                                      : plan.status === 'COMPLETED'
-                                        ? 'weather-sunset'
-                                        : 'weather-stormy'
-                              }`}
+                                  : 'weather-cloudy'
+                              }
                             >
                               {plan.status === 'CONFIRMED'
-                                ? '☀️ 확정'
+                                ? '확정'
                                 : plan.status === 'PLANNING'
-                                  ? '☁️ 계획중'
+                                  ? '계획중'
                                   : plan.status === 'IN_PROGRESS'
-                                    ? '🌧️ 여행중'
+                                    ? '여행중'
                                     : plan.status === 'COMPLETED'
-                                      ? '🌅 완료'
-                                      : '⛈️ 취소'}
+                                      ? '완료'
+                                      : '취소'}
                             </Badge>
                             <ChevronRight className="text-muted-foreground h-4 w-4" />
                           </div>
@@ -313,86 +338,63 @@ export function ProfilePage() {
                   ))}
                 </div>
               ) : (
-                <div className="py-8 text-center">
-                  <div className="mb-4 flex justify-center">
-                    <div className="bg-sky-blue-light dark:bg-sky-blue/20 flex h-16 w-16 items-center justify-center rounded-full">
-                      <Calendar className="text-sky-blue weather-float h-8 w-8" />
-                    </div>
-                  </div>
-                  <h3 className="text-foreground mb-2 text-lg font-semibold">
-                    아직 여행 플랜이 없어요
-                  </h3>
-                  <p className="text-muted-foreground mb-6">
-                    첫 번째 여행을 계획해보세요!
-                  </p>
+                <div className="text-muted-foreground py-8 text-center">
+                  <Calendar className="mx-auto mb-4 h-12 w-12 opacity-50" />
+                  <p className="mb-2">아직 여행 플랜이 없습니다.</p>
                   <Button
+                    variant="outline"
+                    className="weather-input"
                     onClick={() => navigate('/planner')}
-                    className="sunny-button font-semibold"
                   >
-                    여행 계획 세우기
+                    <Calendar className="mr-2 h-4 w-4" />첫 여행 계획 만들기
                   </Button>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* 즐겨찾기 장소 */}
+          {/* 저장한 여행지 */}
           <Card className="weather-card">
             <CardHeader>
-              <CardTitle className="text-foreground flex items-center gap-2">
-                <Heart className="text-sunset-orange h-5 w-5" />
-                즐겨찾기 장소
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-foreground flex items-center gap-2">
+                  <Heart className="text-sunset-orange h-5 w-5" />
+                  저장한 여행지
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-sky-blue-dark hover:text-sky-blue hover:bg-sky-blue-light/50"
+                >
+                  전체보기
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {favoritePlaces.length > 0 ? (
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="flex flex-wrap gap-2">
                   {favoritePlaces.map((place) => (
-                    <div
+                    <Badge
                       key={place.id}
-                      className="weather-card group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                      variant="outline"
+                      className="weather-cloudy cursor-pointer transition-all duration-300 hover:scale-105"
                     >
-                      <div className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="bg-sunset-orange-light dark:bg-sunset-orange/20 flex h-10 w-10 items-center justify-center rounded-full">
-                              <MapPin className="text-sunset-orange-dark h-5 w-5" />
-                            </div>
-                            <div>
-                              <h4 className="text-foreground group-hover:text-sunset-orange-dark font-medium transition-colors">
-                                {place.name}
-                              </h4>
-                              <div className="mt-1 flex items-center gap-1">
-                                <Star className="text-sunshine-yellow h-3 w-3 fill-current" />
-                                <span className="text-muted-foreground text-xs">
-                                  {place.rating}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <Heart className="text-sunset-orange h-4 w-4 fill-current" />
-                        </div>
-                      </div>
-                    </div>
+                      <Heart className="mr-1 h-3 w-3" />
+                      {place.name}
+                    </Badge>
                   ))}
                 </div>
               ) : (
-                <div className="py-8 text-center">
-                  <div className="mb-4 flex justify-center">
-                    <div className="bg-sunset-orange-light dark:bg-sunset-orange/20 flex h-16 w-16 items-center justify-center rounded-full">
-                      <Heart className="text-sunset-orange weather-float h-8 w-8" />
-                    </div>
-                  </div>
-                  <h3 className="text-foreground mb-2 text-lg font-semibold">
-                    아직 즐겨찾기한 장소가 없어요
-                  </h3>
-                  <p className="text-muted-foreground mb-6">
-                    여행지를 둘러보고 마음에 드는 곳을 저장해보세요!
-                  </p>
+                <div className="text-muted-foreground py-8 text-center">
+                  <Heart className="mx-auto mb-4 h-12 w-12 opacity-50" />
+                  <p className="mb-2">저장한 여행지가 없습니다.</p>
                   <Button
-                    onClick={() => navigate('/recommend')}
-                    className="weather-button font-semibold text-white"
+                    variant="outline"
+                    className="weather-input"
+                    onClick={() => navigate('/destinations')}
                   >
+                    <MapPin className="mr-2 h-4 w-4" />
                     여행지 둘러보기
                   </Button>
                 </div>
@@ -400,32 +402,31 @@ export function ProfilePage() {
             </CardContent>
           </Card>
 
-          {/* Quick Actions */}
+          {/* 계정 관리 */}
           <Card className="weather-card">
             <CardHeader>
-              <CardTitle className="text-foreground">빠른 작업</CardTitle>
+              <CardTitle className="text-foreground flex items-center gap-2">
+                <Settings className="text-sky-blue h-5 w-5" />
+                계정 관리
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-3">
                 <Button
-                  onClick={() => navigate('/planner')}
-                  className="sunny-button h-auto justify-start p-4 font-semibold"
+                  variant="outline"
+                  className="weather-input w-full justify-start"
+                  onClick={() => navigate('/profile/edit')}
                 >
-                  <Calendar className="mr-3 h-5 w-5" />
-                  <div className="text-left">
-                    <div>새 여행 계획</div>
-                    <div className="text-xs opacity-80">직접 계획하기</div>
-                  </div>
+                  <Edit className="mr-2 h-4 w-4" />
+                  프로필 편집
                 </Button>
                 <Button
-                  onClick={() => navigate('/customized-schedule')}
-                  className="weather-button h-auto justify-start p-4 font-semibold text-white"
+                  variant="outline"
+                  className="weather-input w-full justify-start"
+                  onClick={() => navigate('/profile/change-password')}
                 >
-                  <Star className="mr-3 h-5 w-5" />
-                  <div className="text-left">
-                    <div>맞춤 일정</div>
-                    <div className="text-xs opacity-80">AI 추천받기</div>
-                  </div>
+                  <Settings className="mr-2 h-4 w-4" />
+                  비밀번호 변경
                 </Button>
               </div>
             </CardContent>
