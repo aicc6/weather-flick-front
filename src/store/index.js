@@ -7,6 +7,7 @@ import {
   regionsApi,
 } from './api'
 import { localInfoApi } from './api/localInfoApi'
+import { chatbotApi } from './api/chatbotApi'
 import customizedScheduleReducer from './slices/customizedScheduleSlice'
 
 // RTK Query 통합 스토어 설정
@@ -19,6 +20,7 @@ export const store = configureStore({
     [weatherApi.reducerPath]: weatherApi.reducer,
     [regionsApi.reducerPath]: regionsApi.reducer,
     [localInfoApi.reducerPath]: localInfoApi.reducer,
+    [chatbotApi.reducerPath]: chatbotApi.reducer,
     customizedSchedule: customizedScheduleReducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -33,6 +35,7 @@ export const store = configureStore({
       .concat(destinationsApi.middleware)
       .concat(weatherApi.middleware)
       .concat(regionsApi.middleware)
-      .concat(localInfoApi.middleware),
+      .concat(localInfoApi.middleware)
+      .concat(chatbotApi.middleware),
   devTools: import.meta.env.MODE !== 'production',
 })
