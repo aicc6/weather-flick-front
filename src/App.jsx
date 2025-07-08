@@ -69,6 +69,11 @@ const ChangePasswordPage = lazy(() =>
     default: module.ChangePasswordPage,
   })),
 )
+const SettingsPage = lazy(() =>
+  import('./pages/settings').then((module) => ({
+    default: module.SettingsPage,
+  })),
+)
 const PlannerPage = lazy(() => import('./pages/planner'))
 const TravelCoursePage = lazy(() => import('@/pages/destinations'))
 const TravelCourseDetailPage = lazy(() => import('@/pages/destinations/detail'))
@@ -142,6 +147,7 @@ function App() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/profile/edit" element={<ProfileEditPage />} />
             <Route path="/change-password" element={<ChangePasswordPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="/help" element={<HelpPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/terms" element={<TermsPage />} />
