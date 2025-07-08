@@ -39,119 +39,273 @@ export default function TravelCourseDetailPage() {
   const courseData = {
     1: {
       id: 1,
-      title: '제주도 감성 힐링 코스',
-      subtitle: '자연과 함께하는 제주 여행',
+      title: '제주도 완벽 여행',
+      subtitle: '관광지, 맛집, 숙소가 모두 포함된 제주 여행',
       region: 'jeju',
       duration: '2박 3일',
-      theme: ['자연', '힐링', '드라이브'],
+      theme: ['자연', '맛집', '힐링'],
       mainImage:
-        'http://tong.visitkorea.or.kr/cms/resource/82/2944282_image2_1.bmp',
+        'http://tong.visitkorea.or.kr/cms/resource/35/3403535_image2_1.jpg',
       images: [
-        'http://tong.visitkorea.or.kr/cms/resource/82/2944282_image2_1.bmp', // 성산일출봉 - UNESCO 세계자연유산, 제주 대표 일출 명소
-        'http://tong.visitkorea.or.kr/cms/resource/98/2870098_image2_1.jpg', // 한라산 - 제주도 최고봉, 한국 최고봉
-        'http://tong.visitkorea.or.kr/cms/resource/68/3011868_image2_1.jpg', // 용두암 - 제주의 대표적인 바위 명소
-        'http://tong.visitkorea.or.kr/cms/resource/55/3354155_image2_1.jpg', // 만장굴 - 제주도 대표 용암동굴, 국가지질공원
+        'http://tong.visitkorea.or.kr/cms/resource/35/3403535_image2_1.jpg', // 관덕정
+        'http://tong.visitkorea.or.kr/cms/resource/30/3053130_image2_1.jpg', // 곽지해수욕장
+        'http://tong.visitkorea.or.kr/cms/resource/99/3053499_image2_1.jpg', // 사라봉
+        'http://tong.visitkorea.or.kr/cms/resource/63/3056163_image2_1.jpg', // 관곶
       ],
-      rating: 4.8,
-      reviewCount: 156,
-      likeCount: 234,
-      viewCount: 1247,
-      price: '280,000원',
+      rating: 4.9,
+      reviewCount: 324,
+      likeCount: 567,
+      viewCount: 2847,
+      price: '350,000원',
       bestMonths: [3, 4, 5, 9, 10, 11],
       summary:
-        '한라산 트레킹부터 해변 카페까지, 제주도의 자연을 만끽하는 힐링 코스',
-      description: `제주도의 아름다운 자연을 만끽할 수 있는 완벽한 힐링 코스입니다.
-      한라산의 웅장함부터 애월의 카페 거리, 그리고 에메랄드빛 바다까지
-      제주도가 선사하는 모든 매력을 느껴보세요.
+        '제주공항에서 시작해 관광지, 전통 맛집, 카페, 숙소까지 완벽하게 구성된 제주 여행',
+      description: `제주도의 아름다운 자연과 맛있는 음식, 편안한 숙소를 모두 경험할 수 있는 완벽한 여행 코스입니다.
+      한국관광공사 데이터를 기반으로 한 실제 관광지와 맛집, 숙소 정보로 구성되어 있어 더욱 신뢰할 수 있습니다.
 
-      특히 일출과 일몰 명소를 포함하여 인스타그램에 올릴 완벽한 사진도 건질 수 있습니다.
-      현지인만 아는 숨은 맛집과 카페도 함께 소개해드립니다.`,
-      highlights: ['한라산 어리목 탐방로', '애월 카페거리', '협재해변', '우도'],
+      제주 서부의 곽지해수욕장부터 제주시 중심가의 역사적 명소,
+      그리고 동부의 백약이오름까지 제주도 전체를 둘러보는 알찬 일정입니다.
+
+      특히 제주 흑돼지, 해장국 등 제주 대표 음식과 감성 카페들도 포함되어 있어
+      미각과 시각을 모두 만족시키는 여행이 될 것입니다.`,
+      highlights: [
+        '관음사',
+        '곽지해수욕장',
+        '구시물 일몰',
+        '사라봉',
+        '관덕정',
+        '감수굴 밭담길',
+        '백약이오름',
+      ],
       itinerary: [
         {
           day: 1,
-          title: '제주 시내 & 동부',
+          title: '제주 서부 자연 & 맛집 투어',
           activities: [
             {
-              time: '10:00',
+              time: '09:00',
               place: '제주공항',
               description: '제주공항 도착 및 렌터카 픽업',
+              type: 'transport',
+              address: '제주특별자치도 제주시 공항로 2',
+              duration: 60,
             },
             {
-              time: '11:30',
-              place: '성산일출봉',
-              description: '유네스코 세계자연유산 탐방',
+              time: '10:30',
+              place: '관음사(제주)',
+              description:
+                '제주도 대표 사찰, 한라산 중턱의 고즈넉한 분위기를 만끽하며 여행의 시작을 알리는 명소',
+              type: 'attraction',
+              address: '제주특별자치도 제주시 산록북로 660',
+              duration: 120,
+            },
+            {
+              time: '12:30',
+              place: '흑돈가 제주',
+              description:
+                '제주 흑돼지 전문점에서 점심식사. 제주의 대표 먹거리인 흑돼지를 맛볼 수 있는 곳',
+              type: 'restaurant',
+              address: '제주특별자치도 제주시 한라대학로 11',
+              phone: '064-747-0088',
+              duration: 60,
             },
             {
               time: '14:00',
-              place: '우도',
-              description: '배를 타고 우도 관광',
+              place: '곽지해수욕장',
+              description:
+                '에메랄드빛 바다와 하얀 모래사장이 아름다운 제주 서부 대표 해수욕장',
+              type: 'attraction',
+              address: '제주특별자치도 제주시 애월읍 곽지리 1565',
+              duration: 120,
+            },
+            {
+              time: '16:30',
+              place: 'salon de lavant',
+              description:
+                '애월 근처의 감성 카페에서 바다를 바라보며 여유로운 커피 타임',
+              type: 'cafe',
+              address: '제주특별자치도 제주시 하가로 146-9',
+              duration: 60,
             },
             {
               time: '18:00',
-              place: '성산포항',
-              description: '신선한 해산물 저녁 식사',
+              place: '구시물',
+              description:
+                '제주 서해안의 아름다운 일몰 명소. 제주도에서 가장 로맨틱한 일몰을 감상할 수 있는 곳',
+              type: 'attraction',
+              address: '제주특별자치도 제주시 애월읍 상귀리',
+              duration: 120,
+            },
+            {
+              time: '20:30',
+              place: '회춘 애월점',
+              description:
+                '애월 지역 맛집에서 제주 바다의 신선한 해산물로 저녁식사',
+              type: 'restaurant',
+              address: '제주특별자치도 제주시 가문동길 80',
+              duration: 60,
+            },
+            {
+              time: '22:00',
+              place: '그랜드 하얏트 제주',
+              description:
+                '제주시 중심가의 프리미엄 호텔에서 숙박. 최고급 시설과 서비스를 제공하는 5성급 호텔',
+              type: 'accommodation',
+              address: '제주특별자치도 제주시 노연로 12 (노형동)',
+              duration: 600,
             },
           ],
         },
         {
           day: 2,
-          title: '서부 해안 드라이브',
+          title: '제주 시내 문화 & 역사 탐방',
           activities: [
             {
-              time: '09:00',
-              place: '협재해변',
-              description: '에메랄드빛 바다 감상',
+              time: '08:00',
+              place: '88로스터즈',
+              description:
+                '아침 커피와 가벼운 브런치로 하루를 시작하는 로컬 카페',
+              type: 'cafe',
+              address: '제주특별자치도 제주시 금산5길 35-1',
+              duration: 60,
             },
             {
-              time: '11:00',
-              place: '애월 카페거리',
-              description: '바다 뷰 카페에서 브런치',
+              time: '09:30',
+              place: '사라봉',
+              description:
+                '제주시내를 한눈에 조망할 수 있는 오름. 제주항과 제주시 전경이 한눈에 보이는 전망 명소',
+              type: 'attraction',
+              address: '제주특별자치도 제주시 사라봉동길 61',
+              duration: 120,
+            },
+            {
+              time: '12:00',
+              place: '24시제주해장국',
+              description:
+                '제주 전통 해장국으로 점심식사. 제주도만의 특별한 해장국 맛을 경험할 수 있는 곳',
+              type: 'restaurant',
+              address: '제주특별자치도 제주시 삼무로 45',
+              phone: '064-711-8687',
+              duration: 60,
             },
             {
               time: '14:00',
-              place: '한림공원',
-              description: '야자수길과 협재굴 탐방',
+              place: '관덕정(제주)',
+              description:
+                '조선시대 제주목 관아의 중심 건물. 제주의 역사와 문화를 느낄 수 있는 중요한 문화재',
+              type: 'attraction',
+              address: '제주특별자치도 제주시 관덕로 19',
+              duration: 120,
             },
             {
-              time: '17:00',
-              place: '곽지해변',
-              description: '제주도 일몰 명소',
+              time: '16:30',
+              place: 'ABC 에이팩토리베이커리카페',
+              description:
+                '제주시내 중심가의 베이커리 카페에서 달콤한 디저트와 커피를 즐기는 시간',
+              type: 'cafe',
+              address: '제주특별자치도 제주시 관덕로7길 39',
+              duration: 60,
+            },
+            {
+              time: '18:00',
+              place: '감수굴 밭담길',
+              description:
+                '제주 전통 밭담과 자연경관을 감상할 수 있는 걷기 좋은 길',
+              type: 'attraction',
+              address: '제주특별자치도 제주시 구좌읍 평대7길 34',
+              duration: 120,
+            },
+            {
+              time: '20:30',
+              place: '라마다 프라자 제주 호텔',
+              description:
+                '제주시 중심가의 편리한 위치에 있는 호텔에서 숙박. 주요 관광지와 가까운 접근성이 좋은 호텔',
+              type: 'accommodation',
+              address: '제주특별자치도 제주시 탑동로 66',
+              duration: 600,
             },
           ],
         },
         {
           day: 3,
-          title: '중산간 자연 탐방',
+          title: '제주 동부 자연 & 마무리',
           activities: [
             {
-              time: '08:00',
-              place: '한라산 어리목',
-              description: '한라산 트레킹 (영실코스)',
+              time: '08:30',
+              place: '5L2F',
+              description:
+                '조용한 마을의 아침 카페에서 여행 마지막 날을 시작하는 여유로운 시간',
+              type: 'cafe',
+              address: '제주특별자치도 제주시 와흘상길 30',
+              duration: 60,
             },
             {
-              time: '12:00',
-              place: '1100고지',
-              description: '고지대에서 점심식사',
+              time: '10:00',
+              place: '백약이오름',
+              description:
+                '제주 동부의 아름다운 오름. 제주도의 화산 지형과 자연을 체험할 수 있는 트레킹 코스',
+              type: 'attraction',
+              address: '제주특별자치도 서귀포시 표선면 성읍리 산1',
+              duration: 120,
             },
-            { time: '15:00', place: '천지연폭포', description: '폭포 트레킹' },
             {
-              time: '17:00',
+              time: '12:30',
+              place: '흑본오겹 함덕점',
+              description:
+                '제주 흑돼지 전문점에서 마지막 점심식사. 여행의 마무리를 제주 특산품으로',
+              type: 'restaurant',
+              address: '제주특별자치도 제주시 신북로 454',
+              duration: 60,
+            },
+            {
+              time: '14:00',
+              place: '함덕해수욕장 주변',
+              description:
+                '백사장과 에메랄드빛 바다를 배경으로 제주 여행의 마지막 추억 만들기',
+              type: 'attraction',
+              address: '제주특별자치도 제주시 조천읍 함덕리',
+              duration: 120,
+            },
+            {
+              time: '16:30',
               place: '제주공항',
-              description: '공항 이동 및 출발',
+              description: '렌터카 반납 및 체크인. 제주 여행의 아쉬운 마무리',
+              type: 'transport',
+              address: '제주특별자치도 제주시 공항로 2',
+              duration: 60,
+            },
+            {
+              time: '18:00',
+              place: '제주공항 출발',
+              description: '제주도 여행 완료 및 본토 복귀',
+              type: 'transport',
+              address: '제주특별자치도 제주시 공항로 2',
+              duration: 0,
             },
           ],
         },
       ],
       tips: [
-        '렌터카 예약은 최소 2주 전에 미리 해주세요',
-        '한라산 트레킹 시 방한용품 필수',
-        '우도 배편은 날씨에 따라 운항이 중단될 수 있습니다',
-        '애월 카페거리는 주말에 매우 붐비니 평일 방문 추천',
+        '렌터카 예약은 최소 2주 전에 미리 해주세요 (제주도는 렌터카 수요가 매우 높음)',
+        '제주 흑돼지는 현지에서만 맛볼 수 있는 특별한 맛이니 꼭 드셔보세요',
+        '일몰 시간을 미리 확인하고 구시물에서 제주도 최고의 일몰을 감상하세요',
+        '오름 트레킹 시 편한 신발과 물을 준비해주세요',
+        '제주도 날씨는 변화가 심하니 겉옷을 챙겨주세요',
+        '카페들은 주말에 매우 붐비니 평일 방문을 추천합니다',
       ],
-      includes: ['숙박 2박', '렌터카', '주요 관광지 입장료', '가이드북'],
-      excludes: ['항공료', '식사비', '개인 경비', '여행자 보험'],
-      tags: ['인스타감성', '자연치유', '드라이브'],
+      includes: [
+        '숙박 2박 (그랜드 하얏트 제주)',
+        '렌터카 3일',
+        '주요 관광지 입장료',
+        '여행 가이드북',
+      ],
+      excludes: [
+        '항공료',
+        '식사비 (맛집 정보 제공)',
+        '개인 경비',
+        '여행자 보험',
+      ],
+      tags: ['실제데이터', '완벽일정', '제주맛집', '자연힐링'],
     },
     2: {
       id: 2,
@@ -1097,22 +1251,91 @@ export default function TravelCourseDetailPage() {
                   <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
                     Day {day.day}: {day.title}
                   </h3>
-                  <div className="space-y-3">
-                    {day.activities.map((activity, actIndex) => (
-                      <div key={actIndex} className="flex gap-4">
-                        <div className="flex-shrink-0 rounded bg-blue-100 px-2 py-1 text-sm font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                          {activity.time}
+                  <div className="space-y-4">
+                    {day.activities.map((activity, actIndex) => {
+                      // 활동 타입에 따른 아이콘과 색상 설정
+                      const getActivityIcon = (type) => {
+                        switch (type) {
+                          case 'transport':
+                            return '✈️'
+                          case 'attraction':
+                            return '🏛️'
+                          case 'restaurant':
+                            return '🍽️'
+                          case 'cafe':
+                            return '☕'
+                          case 'accommodation':
+                            return '🏨'
+                          default:
+                            return '📍'
+                        }
+                      }
+
+                      const getActivityColor = (type) => {
+                        switch (type) {
+                          case 'transport':
+                            return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                          case 'attraction':
+                            return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                          case 'restaurant':
+                            return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+                          case 'cafe':
+                            return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
+                          case 'accommodation':
+                            return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+                          default:
+                            return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                        }
+                      }
+
+                      return (
+                        <div
+                          key={actIndex}
+                          className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-600 dark:bg-gray-700"
+                        >
+                          <div className="flex gap-4">
+                            <div
+                              className={`flex-shrink-0 rounded px-3 py-1 text-sm font-medium ${getActivityColor(activity.type)}`}
+                            >
+                              {activity.time}
+                            </div>
+                            <div className="flex-1">
+                              <div className="mb-2 flex items-center gap-2">
+                                <span className="text-lg">
+                                  {getActivityIcon(activity.type)}
+                                </span>
+                                <h4 className="font-semibold text-gray-900 dark:text-white">
+                                  {activity.place}
+                                </h4>
+                                {activity.duration && (
+                                  <Badge variant="outline" className="ml-auto">
+                                    <Clock className="mr-1 h-3 w-3" />
+                                    {activity.duration >= 60
+                                      ? `${Math.floor(activity.duration / 60)}시간`
+                                      : `${activity.duration}분`}
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">
+                                {activity.description}
+                              </p>
+                              {activity.address && (
+                                <div className="mb-1 flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                                  <MapPin className="h-3 w-3" />
+                                  <span>{activity.address}</span>
+                                </div>
+                              )}
+                              {activity.phone && (
+                                <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                                  <span>📞</span>
+                                  <span>{activity.phone}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">
-                            {activity.place}
-                          </h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {activity.description}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
               ))}
