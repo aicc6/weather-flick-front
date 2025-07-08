@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@/contexts/AuthContextRTK'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -17,26 +18,16 @@ import {
 
 export default function ProfilePage() {
   const navigate = useNavigate()
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const { user: authUser, loading: authLoading } = useAuth()
   const [recentPlans, setRecentPlans] = useState([])
   const [favoritePlaces, setFavoritePlaces] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  // Temporary mock data - replace with actual API calls
+  // Load additional user data (travel plans, favorites, etc.)
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        // Mock user data
-        setUser({
-          id: 1,
-          nickname: '여행러버',
-          email: 'traveler@example.com',
-          profile_image: null,
-          preferred_region: '제주도',
-          preferred_theme: '자연관광',
-          created_at: '2024-01-15T00:00:00Z',
-        })
-
+        // TODO: Replace with actual API calls for travel plans and favorites
         // Mock recent plans
         setRecentPlans([
           {
@@ -68,8 +59,12 @@ export default function ProfilePage() {
       }
     }
 
-    loadUserData()
-  }, [])
+    if (authUser) {
+      loadUserData()
+    } else if (!authLoading) {
+      setLoading(false)
+    }
+  }, [authUser, authLoading])
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('ko-KR', {
@@ -79,7 +74,7 @@ export default function ProfilePage() {
     })
   }
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="bg-background min-h-screen">
         <div className="container mx-auto px-4 py-8">
@@ -102,7 +97,7 @@ export default function ProfilePage() {
     )
   }
 
-  if (!user) {
+  if (!authUser) {
     return (
       <div className="bg-background min-h-screen">
         <div className="container mx-auto px-4 py-8">
@@ -154,12 +149,12 @@ export default function ProfilePage() {
                 <div className="relative">
                   <Avatar className="ring-sky-blue-light dark:ring-sky-blue/30 h-24 w-24 ring-4">
                     <AvatarImage
-                      src={user?.profile_image}
-                      alt={user?.nickname}
+                      src={authUser?.profile_image}
+                      alt={authUser?.nickname}
                     />
                     <AvatarFallback className="bg-sky-blue-light text-sky-blue-dark text-xl font-bold">
-                      {user?.nickname?.charAt(0) ||
-                        user?.email?.charAt(0) ||
+                      {authUser?.nickname?.charAt(0) ||
+                        authUser?.email?.charAt(0) ||
                         'U'}
                     </AvatarFallback>
                   </Avatar>
@@ -170,37 +165,37 @@ export default function ProfilePage() {
 
                 <div className="flex-1">
                   <CardTitle className="text-foreground mb-2 text-2xl">
-                    {user?.nickname || '사용자'}님
+                    {authUser?.nickname || '사용자'}님
                   </CardTitle>
                   <div className="space-y-2">
                     <div className="text-muted-foreground flex items-center gap-2">
                       <Mail className="text-sky-blue h-4 w-4" />
-                      <span>{user?.email}</span>
+                      <span>{authUser?.email}</span>
                     </div>
                     <div className="text-muted-foreground flex items-center gap-2">
                       <Calendar className="text-sky-blue h-4 w-4" />
-                      <span>가입일: {formatDate(user?.created_at)}</span>
+                      <span>가입일: {formatDate(authUser?.created_at)}</span>
                     </div>
                   </div>
 
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {user?.preferred_region &&
-                      user.preferred_region !== 'none' && (
+                    {authUser?.preferred_region &&
+                      authUser.preferred_region !== 'none' && (
                         <Badge className="weather-cloudy">
                           <MapPin className="mr-1 h-3 w-3" />
-                          선호 지역: {user.preferred_region}
+                          선호 지역: {authUser.preferred_region}
                         </Badge>
                       )}
-                    {user?.preferred_theme &&
-                      user.preferred_theme !== 'none' && (
+                    {authUser?.preferred_theme &&
+                      authUser.preferred_theme !== 'none' && (
                         <Badge className="weather-sunny">
-                          선호 테마: {user.preferred_theme}
+                          선호 테마: {authUser.preferred_theme}
                         </Badge>
                       )}
-                    {(!user?.preferred_region ||
-                      user.preferred_region === 'none') &&
-                      (!user?.preferred_theme ||
-                        user.preferred_theme === 'none') && (
+                    {(!authUser?.preferred_region ||
+                      authUser.preferred_region === 'none') &&
+                      (!authUser?.preferred_theme ||
+                        authUser.preferred_theme === 'none') && (
                         <p className="text-muted-foreground text-sm">
                           선호 설정을 추가해보세요! ✨
                         </p>
