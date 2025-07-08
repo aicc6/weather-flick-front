@@ -5,6 +5,7 @@ import { recommendedDestinations } from '@/data'
 import { Chatbot } from '@/components/common/chatbot'
 import { RecommendedDestCarousel } from './RecommendedDestCarousel'
 import { useScrollFadeIn } from '@/hooks/useScrollFadeIn'
+import RestaurantTest from '@/components/RestaurantTest'
 
 /**
  * URL: '/'
@@ -144,6 +145,13 @@ export function MainPage() {
                 />
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* 레스토랑 API 테스트 섹션 (임시) */}
+        <section className="border-t border-gray-200 py-8 dark:border-gray-700">
+          <div className="container mx-auto px-4">
+            <RestaurantTest />
           </div>
         </section>
 
