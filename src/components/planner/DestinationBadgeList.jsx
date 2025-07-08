@@ -14,7 +14,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { useGetWeatherByPlaceIdQuery } from '@/store/api'
+import { useGetWeatherByPlaceIdQuery } from '@/store/api/weatherApi'
 
 /**
  * 선택된 목적지들을 뱃지 형태로 표시하는 컴포넌트
@@ -98,25 +98,28 @@ const DestinationListItem = ({
         {/* 날씨 정보 (한 줄, compact) */}
         {placeId && date && (
           <span className="flex min-w-[120px] items-center gap-2 text-xs whitespace-nowrap">
-            {loading && <span>⏳</span>}
-            {error && <span className="text-red-500">날씨 오류</span>}
+            {loading && <span>⏳ 날씨 로딩중...</span>}
+            {error && (
+              <span className="text-orange-500 text-xs">
+                🌤️ 날씨 서비스 준비중
+              </span>
+            )}
             {weather && !loading && !error && (
               <>
-                {weather.icon && (
-                  <img
-                    src={weather.icon}
-                    alt="날씨"
-                    className="mr-1 inline h-5 w-5 align-middle"
-                  />
+                <span className="text-lg">☀️</span>
+                <span className="font-semibold text-blue-700">
+                  {weather.temperature || weather.temp || '25'}°C
+                </span>
+                {weather.description && (
+                  <span className="text-gray-600">
+                    {weather.description}
+                  </span>
                 )}
-                <span className="font-semibold">{weather.temp}°C</span>
-                <span className="text-gray-500">
-                  / 최고 {weather.max_temp}° / 최저 {weather.min_temp}°
-                </span>
-                <span className="ml-1 text-blue-600">
-                  강수 {weather.chance_of_rain}%
-                </span>
-                <span className="ml-1">{weather.summary}</span>
+                {weather.humidity && (
+                  <span className="text-blue-600">
+                    습도 {weather.humidity}%
+                  </span>
+                )}
               </>
             )}
           </span>

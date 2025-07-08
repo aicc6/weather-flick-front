@@ -10,7 +10,8 @@ import { useScrollFadeIn } from '@/hooks/useScrollFadeIn'
  * URL: '/'
  */
 export function MainPage() {
-  const [searchData, setSearchData] = useState({
+  // 검색 데이터(현재 미사용)
+  const [_searchData, _setSearchData] = useState({
     departure: '',
     date: null,
     theme: '',
@@ -49,7 +50,7 @@ export function MainPage() {
 
   const handleSearch = () => {
     // TODO: 검색 로직 구현
-    console.log('검색 데이터:', searchData)
+    console.log('검색 데이터:', _searchData)
   }
 
   // 각 서비스별 설명 데이터
@@ -100,7 +101,6 @@ export function MainPage() {
       >
         {/* Overlay for better text readability */}
         <div className="absolute inset-0 bg-black/40 dark:bg-gray-900/60"></div>
-
         {/* Content */}
         <div className="relative z-10">
           <h1 className="mb-5 text-5xl font-bold text-white drop-shadow-lg">

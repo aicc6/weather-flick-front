@@ -24,20 +24,9 @@ export function Header() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth > 950)
 
-  const { user, isLoggedIn, isAuthenticated, logout, loading } = useAuth()
+  const { user, logout, loading } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-
-  // 디버깅용 로그 (개발 중에만 사용)
-  useEffect(() => {
-    console.log('Header render - Auth state:', {
-      user: !!user,
-      isLoggedIn,
-      isAuthenticated,
-      loading,
-      userExists: !!user,
-    })
-  }, [user, isLoggedIn, isAuthenticated, loading])
 
   // 현재 경로가 메뉴 항목과 일치하는지 확인하는 함수
   const isActiveRoute = (path) => {

@@ -65,8 +65,7 @@ export function LoginPage() {
         password: data.password,
       }
 
-      const loginResult = await login(credentials)
-      console.log('Login completed successfully:', loginResult)
+      await login(credentials)
 
       // 로그인 성공 시 즉시 리다이렉트 (useEffect가 처리하므로 따로 navigate 불필요)
     } catch (error) {

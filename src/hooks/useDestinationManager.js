@@ -90,6 +90,38 @@ export default function useDestinationManager() {
     }))
   }, [])
 
+  // 초기 데이터 설정 (편집 모드용)
+  const setInitialDestinations = useCallback((initialData) => {
+    if (initialData && typeof initialData === 'object') {
+      setDestinationsByDate(initialData)
+    }
+  }, [])
+
+  // 과거 날짜 삭제 기능 추가
+  const removePastDates = useCallback(() => {
+    const today = new Date()
+    const todayString = today.toISOString().split('T')[0]
+    
+    setDestinationsByDate((prev) => {
+      const filtered = {}
+      Object.entries(prev).forEach(([date, destinations]) => {
+        // 오늘 이후의 날짜만 유지
+        if (date >= todayString) {
+          filtered[date] = destinations
+        }
+      })
+      return filtered
+    })
+  }, [])
+
+  // 과거 날짜 개수 확인 함수
+  const getPastDatesCount = useCallback(() => {
+    const today = new Date()
+    const todayString = today.toISOString().split('T')[0]
+    
+    return Object.keys(destinationsByDate).filter(date => date < todayString).length
+  }, [destinationsByDate])
+
   return {
     destinationsByDate,
     addDestination,
@@ -99,5 +131,8 @@ export default function useDestinationManager() {
     getDestinationsForDate,
     hasDestinations,
     reorderDestinations,
+    setInitialDestinations,
+    removePastDates,
+    getPastDatesCount,
   }
 }

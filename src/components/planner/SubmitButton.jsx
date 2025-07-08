@@ -9,9 +9,15 @@ import { motion } from 'framer-motion'
  * @param {boolean} props.isSubmitting - 제출 중 상태
  * @param {boolean} props.disabled - 버튼 비활성화 여부
  * @param {function} props.onSubmit - 제출 함수
+ * @param {boolean} props.isEditMode - 편집 모드 여부
  */
 const SubmitButton = memo(
-  ({ isSubmitting = false, disabled = false, onSubmit }) => {
+  ({
+    isSubmitting = false,
+    disabled = false,
+    onSubmit,
+    isEditMode = false,
+  }) => {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -27,12 +33,18 @@ const SubmitButton = memo(
           {isSubmitting ? (
             <div className="flex items-center gap-2">
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              <span>AI가 플랜을 생성하고 있어요...</span>
+              <span>
+                {isEditMode
+                  ? '여행 플랜을 수정하고 있어요...'
+                  : 'AI가 플랜을 생성하고 있어요...'}
+              </span>
             </div>
           ) : (
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5" />
-              <span>맞춤 여행 플랜 생성하기</span>
+              <span>
+                {isEditMode ? '여행 플랜 수정하기' : '맞춤 여행 플랜 생성하기'}
+              </span>
             </div>
           )}
         </Button>
