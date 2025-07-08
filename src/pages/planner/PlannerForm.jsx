@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useCallback, useMemo, memo } from 'react'
+import { useState, useCallback, useMemo, memo, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { CalendarIcon, ChevronDown, MapPin } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import {
@@ -34,8 +35,23 @@ import useDateRange from '@/hooks/useDateRange'
 import useDestinationManager from '@/hooks/useDestinationManager'
 import useDestinationSearchRTK from '@/hooks/useDestinationSearchRTK'
 import usePlanSubmissionRTK from '@/hooks/usePlanSubmissionRTK'
+import { useGetTravelPlanQuery } from '@/store/api/travelPlansApi'
 
 const PlannerForm = memo(() => {
+  // URL 파라미터로 편집 모드 확인
+  const [searchParams] = useSearchParams()
+  const planId = searchParams.get('planId')
+  const isEditMode = !!planId
+
+  // 기존 플랜 데이터 로드 (편집 모드인 경우)
+  const {
+    data: existingPlan,
+    isLoading: isLoadingPlan,
+    isError: isPlanError,
+  } = useGetTravelPlanQuery(planId, {
+    skip: !planId, // planId가 없으면 API 호출하지 않음
+  })
+
   // 커스텀 훅 사용
   const { getCurrentLocation, isLocating } = useGeolocation()
   const { getDatesInRange } = useDateRange()
@@ -44,6 +60,10 @@ const PlannerForm = memo(() => {
     addDestination,
     removeDestination,
     reorderDestinations,
+    setInitialDestinations,
+    removePastDates,
+    getPastDatesCount,
+    clearDestinations,
   } = useDestinationManager()
   const {
     destInputs,
@@ -69,6 +89,78 @@ const PlannerForm = memo(() => {
     title: '',
   })
   const [calendarOpen, setCalendarOpen] = useState(false)
+
+
+  // 편집 모드에서 기존 데이터 로드
+  useEffect(() => {
+    if (isEditMode && existingPlan && !isLoadingPlan) {
+      try {
+        // 기본 정보 설정
+        setForm({
+          title: existingPlan.title || '',
+          dateRange: {
+            from: existingPlan.start_date
+              ? new Date(existingPlan.start_date)
+              : null,
+            to: existingPlan.end_date ? new Date(existingPlan.end_date) : null,
+          },
+        })
+
+        // 출발지 설정
+        if (existingPlan.start_location) {
+          updateDestInput('origin', existingPlan.start_location)
+        }
+
+        // 일정 데이터 변환 및 설정
+        if (
+          existingPlan.itinerary &&
+          typeof existingPlan.itinerary === 'object'
+        ) {
+          const startDate = new Date(existingPlan.start_date)
+          const convertedDestinations = {}
+
+          Object.entries(existingPlan.itinerary).forEach(
+            ([dayKey, destinations]) => {
+              // "Day 1", "Day 2" 형태를 실제 날짜로 변환
+              const dayNumber = parseInt(dayKey.replace('Day ', '')) - 1
+              const currentDate = new Date(startDate)
+              currentDate.setDate(startDate.getDate() + dayNumber)
+              const dateString = currentDate.toISOString().split('T')[0]
+
+              // 목적지 데이터 변환
+              if (Array.isArray(destinations) && destinations.length > 0) {
+                convertedDestinations[dateString] = destinations.map(
+                  (dest) => ({
+                    description: dest.description,
+                    place_id: dest.place_id || null,
+                  }),
+                )
+              }
+            },
+          )
+
+          setInitialDestinations(convertedDestinations)
+        }
+
+        toast.success('기존 여행 계획을 불러왔습니다', {
+          duration: 2000,
+          position: 'bottom-right',
+        })
+      } catch (error) {
+        console.error('플랜 데이터 로드 중 오류:', error)
+        toast.error('플랜 데이터를 불러오는 중 문제가 발생했습니다', {
+          duration: 3000,
+          position: 'top-center',
+        })
+      }
+    }
+  }, [
+    isEditMode,
+    existingPlan,
+    isLoadingPlan,
+    updateDestInput,
+    setInitialDestinations,
+  ])
 
   // 현재 위치 자동 감지 (피드백 개선)
   const handleAutoLocation = useCallback(async () => {
@@ -102,9 +194,17 @@ const PlannerForm = memo(() => {
   )
 
   // 날짜 범위 계산 - 메모이제이션
-  const dates = useMemo(() => {
+  const allDates = useMemo(() => {
     return getDatesInRange(form.dateRange?.from, form.dateRange?.to)
   }, [form.dateRange?.from, form.dateRange?.to, getDatesInRange])
+
+  // 과거 날짜 필터링된 날짜 목록 (편집 모드에서만 적용)
+  const dates = useMemo(() => {
+    if (!isEditMode) return allDates
+    
+    const today = new Date().toISOString().split('T')[0]
+    return allDates.filter(date => date >= today)
+  }, [allDates, isEditMode])
 
   // 폼 유효성 검사 - 메모이제이션 (안전장치 추가)
   const formValidation = useMemo(() => {
@@ -241,7 +341,7 @@ const PlannerForm = memo(() => {
           destinationsByDate,
         }
 
-        await submitPlan(formData)
+        await submitPlan(formData, planId)
       } catch (error) {
         console.error('플랜 제출 중 오류:', error)
         toast.error(
@@ -253,8 +353,47 @@ const PlannerForm = memo(() => {
         )
       }
     },
-    [form, destInputs, destinationsByDate, submitPlan, formValidation],
+    [form, destInputs, destinationsByDate, submitPlan, formValidation, planId],
   )
+
+  // 로딩 상태 처리
+  if (isLoadingPlan) {
+    return (
+      <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 px-2 py-2 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="mx-auto w-full max-w-2xl">
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+            <p className="mt-4 text-gray-600">여행 계획을 불러오는 중...</p>
+            <p className="mt-1 text-sm text-gray-400">잠시만 기다려 주세요</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // 편집 모드에서 플랜을 찾을 수 없는 경우
+  if (isEditMode && isPlanError) {
+    return (
+      <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 px-2 py-2 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="mx-auto w-full max-w-2xl">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
+            <h3 className="mb-2 text-lg font-semibold text-red-800">
+              여행 계획을 찾을 수 없습니다
+            </h3>
+            <p className="mb-4 text-red-700">
+              요청하신 여행 계획이 존재하지 않거나 접근 권한이 없습니다.
+            </p>
+            <button
+              onClick={() => window.history.back()}
+              className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+            >
+              뒤로가기
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 px-2 py-2 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -264,6 +403,17 @@ const PlannerForm = memo(() => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
       >
+        {/* 편집 모드 표시 */}
+        {isEditMode && (
+          <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-center">
+            <p className="text-sm text-blue-700">
+              <span className="font-medium">편집 모드</span> - 기존 여행 계획을
+              수정하고 있습니다
+            </p>
+          </div>
+        )}
+
+
         {/* 헤더 */}
         <PlannerHeader />
 
@@ -479,53 +629,125 @@ const PlannerForm = memo(() => {
                     <p className="mt-1 mb-4 text-sm text-gray-400">
                       14일 이후의 날씨 데이터는 알림으로 알려드립니다.
                     </p>
+                    
+                    {/* 과거 날짜 알림 및 삭제 버튼 */}
+                    {getPastDatesCount() > 0 && (
+                      <div className="mb-4 rounded-lg border border-orange-200 bg-orange-50 p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-100">
+                              <span className="text-sm">⚠️</span>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-orange-800">
+                                과거 날짜 감지됨
+                              </p>
+                              <p className="text-xs text-orange-600">
+                                {getPastDatesCount()}개의 과거 날짜가 있습니다. 날씨 정보를 가져올 수 없어요.
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              removePastDates()
+                              toast.success('과거 날짜가 삭제되었습니다', {
+                                duration: 2000,
+                                position: 'bottom-right',
+                              })
+                            }}
+                            className="bg-orange-100 text-orange-700 hover:bg-orange-200"
+                          >
+                            과거 날짜 삭제
+                          </Button>
+                        </div>
+                      </div>
+                    )}
 
                     <div className="space-y-6">
-                      {dates.map((dateStr, index) => (
-                        <motion.div
-                          key={dateStr}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1, duration: 0.3 }}
-                        >
-                          <Card className="border border-gray-200 dark:border-gray-700">
-                            <CardContent className="p-6">
-                              <div className="mb-4 flex items-center gap-2">
-                                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
-                                  <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
-                                    {index + 1}
-                                  </span>
+                      {dates.map((dateStr, index) => {
+                        const isPastDate = dateStr < new Date().toISOString().split('T')[0]
+                        return (
+                          <motion.div
+                            key={dateStr}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.1, duration: 0.3 }}
+                          >
+                            <Card className={`border ${isPastDate ? 'border-orange-200 bg-orange-50/50' : 'border-gray-200'} dark:border-gray-700`}>
+                              <CardContent className="p-6">
+                                <div className="mb-4 flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <div className={`flex h-6 w-6 items-center justify-center rounded-full ${isPastDate ? 'bg-orange-100 dark:bg-orange-900' : 'bg-blue-100 dark:bg-blue-900'}`}>
+                                      <span className={`text-xs font-bold ${isPastDate ? 'text-orange-600 dark:text-orange-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                                        {index + 1}
+                                      </span>
+                                    </div>
+                                    <h3 className="font-medium">
+                                      {format(new Date(dateStr), 'M월 d일 (E)', {
+                                        locale: ko,
+                                      })}
+                                    </h3>
+                                    {isPastDate && (
+                                      <span className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded">
+                                        과거 날짜
+                                      </span>
+                                    )}
+                                  </div>
+                                  {isPastDate && (
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        clearDestinations(dateStr)
+                                        toast.info(`${format(new Date(dateStr), 'M월 d일', { locale: ko })} 목적지가 삭제되었습니다`, {
+                                          duration: 2000,
+                                          position: 'bottom-right',
+                                        })
+                                      }}
+                                      className="text-orange-600 hover:text-orange-700 hover:bg-orange-100"
+                                    >
+                                      삭제
+                                    </Button>
+                                  )}
                                 </div>
-                                <h3 className="font-medium">
-                                  {format(new Date(dateStr), 'M월 d일 (E)', {
-                                    locale: ko,
-                                  })}
-                                </h3>
-                              </div>
 
                               <div className="relative space-y-3">
                                 <label className="text-muted-foreground text-sm font-medium">
                                   {dateStr} 목적지 추가
                                 </label>
-                                <Input
-                                  value={destInputs[dateStr] || ''}
-                                  onChange={(e) =>
-                                    updateDestInput(dateStr, e.target.value)
-                                  }
-                                  onFocus={() => showDropdown(dateStr)}
-                                  onBlur={() =>
-                                    setTimeout(() => hideDropdown(dateStr), 150)
-                                  }
-                                  placeholder="도시, 장소 등을 검색하세요"
-                                  autoComplete="off"
-                                />
-                                <DestinationAutocomplete
-                                  isVisible={showDestDropdown[dateStr]}
-                                  suggestions={destSuggestions[dateStr]}
-                                  onSelect={(suggestion) =>
-                                    handleAddDestination(dateStr, suggestion)
-                                  }
-                                />
+                                {isPastDate ? (
+                                  <div className="rounded-md border border-orange-200 bg-orange-50 p-3">
+                                    <p className="text-sm text-orange-700">
+                                      과거 날짜입니다. 목적지를 추가할 수 없습니다.
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <Input
+                                      value={destInputs[dateStr] || ''}
+                                      onChange={(e) =>
+                                        updateDestInput(dateStr, e.target.value)
+                                      }
+                                      onFocus={() => showDropdown(dateStr)}
+                                      onBlur={() =>
+                                        setTimeout(() => hideDropdown(dateStr), 150)
+                                      }
+                                      placeholder="도시, 장소 등을 검색하세요"
+                                      autoComplete="off"
+                                    />
+                                    <DestinationAutocomplete
+                                      isVisible={showDestDropdown[dateStr]}
+                                      suggestions={destSuggestions[dateStr]}
+                                      onSelect={(suggestion) =>
+                                        handleAddDestination(dateStr, suggestion)
+                                      }
+                                    />
+                                  </>
+                                )}
                               </div>
 
                               <DestinationBadgeList
@@ -541,7 +763,8 @@ const PlannerForm = memo(() => {
                             </CardContent>
                           </Card>
                         </motion.div>
-                      ))}
+                        )
+                      })}
                     </div>
                   </CardContent>
                 </Card>
@@ -572,6 +795,7 @@ const PlannerForm = memo(() => {
                 isSubmitting={isSubmitting}
                 disabled={isSubmitting || !isFormValid}
                 onSubmit={handleSubmit}
+                isEditMode={isEditMode}
               />
             </div>
           </div>

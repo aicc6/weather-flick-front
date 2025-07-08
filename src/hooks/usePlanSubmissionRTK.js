@@ -1,7 +1,10 @@
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { useCreateTravelPlanMutation } from '@/store/api'
+import {
+  useCreateTravelPlanMutation,
+  useUpdateTravelPlanMutation,
+} from '@/store/api'
 
 /**
  * 여행 플랜 제출을 위한 RTK Query 기반 커스텀 훅
@@ -11,13 +14,20 @@ export default function usePlanSubmissionRTK() {
   const [plans, setPlans] = useState([])
   const navigate = useNavigate()
 
-  // RTK Query mutation hook
-  const [createTravelPlan, { isLoading: isSubmitting, error }] =
+  // RTK Query mutation hooks
+  const [createTravelPlan, { isLoading: isCreating, error: createError }] =
     useCreateTravelPlanMutation()
+  const [updateTravelPlan, { isLoading: isUpdating, error: updateError }] =
+    useUpdateTravelPlanMutation()
+
+  // 통합 로딩 상태
+  const isSubmitting = isCreating || isUpdating
+  const error = createError || updateError
 
   const submitPlan = useCallback(
-    async (formData) => {
+    async (formData, editPlanId = null) => {
       const { origin, dateRange, destinationsByDate } = formData
+      const isEditMode = !!editPlanId
 
       // 유효성 검증
       if (!origin || !dateRange?.from || !dateRange?.to) {
@@ -67,19 +77,35 @@ export default function usePlanSubmissionRTK() {
           start_location: origin,
         }
 
-        // RTK Query mutation 실행
-        const result = await createTravelPlan(requestBody).unwrap()
+        // RTK Query mutation 실행 (편집 모드에 따라 분기)
+        let result
+        if (isEditMode) {
+          result = await updateTravelPlan({
+            planId: editPlanId,
+            planData: requestBody,
+          }).unwrap()
+        } else {
+          result = await createTravelPlan(requestBody).unwrap()
+        }
 
         // 성공 처리
-        toast.success('여행 플랜이 성공적으로 저장되었습니다!', {
+        const successMessage = isEditMode
+          ? '여행 플랜이 성공적으로 수정되었습니다!'
+          : '여행 플랜이 성공적으로 저장되었습니다!'
+
+        toast.success(successMessage, {
           duration: 2000,
           position: 'top-center',
         })
         setPlans([result])
 
-        // 여행 계획 목록 페이지로 이동
+        // 페이지 이동 (편집 모드일 때는 상세 페이지로, 생성 모드일 때는 목록으로)
         setTimeout(() => {
-          navigate('/travel-plans')
+          if (isEditMode) {
+            navigate(`/travel-plans/${editPlanId}`)
+          } else {
+            navigate('/travel-plans')
+          }
         }, 1500) // 토스트 메시지를 잠깐 보여준 후 이동
 
         return true
@@ -87,17 +113,21 @@ export default function usePlanSubmissionRTK() {
         console.error('플랜 제출 오류:', error)
 
         // RTK Query 에러 처리
+        const defaultErrorMessage = isEditMode
+          ? '플랜 수정 중 오류가 발생했습니다.'
+          : '플랜 저장 중 오류가 발생했습니다.'
+
         const errorMessage =
           error?.data?.message ||
           error?.data?.detail ||
           error?.message ||
-          '플랜 저장 중 오류가 발생했습니다.'
+          defaultErrorMessage
 
         toast.error(errorMessage)
         return false
       }
     },
-    [createTravelPlan, navigate],
+    [createTravelPlan, updateTravelPlan, navigate],
   )
 
   const clearPlans = useCallback(() => {
