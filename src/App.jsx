@@ -82,6 +82,7 @@ const TravelPlanDetailPage = lazy(() =>
     default: module.TravelPlanDetailPage,
   })),
 )
+const HelpPage = lazy(() => import('./pages/help/help'))
 
 function App() {
   return (
@@ -139,6 +140,7 @@ function App() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/profile/edit" element={<ProfileEditPage />} />
             <Route path="/change-password" element={<ChangePasswordPage />} />
+            <Route path="/help" element={<HelpPage />} />
           </Routes>
         </Suspense>
       </DefaultLayout>
