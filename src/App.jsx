@@ -56,9 +56,7 @@ const GoogleCallbackPage = lazy(() =>
     default: module.GoogleCallbackPage,
   })),
 )
-const ProfilePage = lazy(() =>
-  import('./pages/profile').then((module) => ({ default: module.ProfilePage })),
-)
+const ProfilePage = lazy(() => import('./pages/profile/index.jsx'))
 const ProfileEditPage = lazy(() =>
   import('./pages/profile/edit').then((module) => ({
     default: module.ProfileEditPage,

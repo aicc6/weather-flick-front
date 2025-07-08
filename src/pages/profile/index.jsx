@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@/contexts/AuthContextRTK'
+import { useGetUserPlansQuery } from '@/store/api/travelPlansApi'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -17,44 +19,30 @@ import {
 
 export default function ProfilePage() {
   const navigate = useNavigate()
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [recentPlans, setRecentPlans] = useState([])
+  const { user: authUser, loading: authLoading, isAuthenticated } = useAuth()
   const [favoritePlaces, setFavoritePlaces] = useState([])
+  const [loading, setLoading] = useState(true)
+  
+  // 사용자 여행 플랜 데이터 가져오기
+  const {
+    data: userPlans = [],
+    isLoading: plansLoading,
+    error: plansError,
+  } = useGetUserPlansQuery(undefined, {
+    skip: !isAuthenticated, // 인증된 사용자만 요청
+  })
 
-  // Temporary mock data - replace with actual API calls
+  // 최근 여행 플랜 데이터 가공 (최신순으로 정렬하고 최대 5개만)
+  const recentPlans = userPlans
+    ?.slice()
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 5) || []
+
+  // Load additional user data (favorites, etc.)
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        // Mock user data
-        setUser({
-          id: 1,
-          nickname: '여행러버',
-          email: 'traveler@example.com',
-          profile_image: null,
-          preferred_region: '제주도',
-          preferred_theme: '자연관광',
-          created_at: '2024-01-15T00:00:00Z',
-        })
-
-        // Mock recent plans
-        setRecentPlans([
-          {
-            plan_id: 1,
-            title: '제주도 힐링 여행',
-            start_date: '2024-03-15',
-            end_date: '2024-03-18',
-            status: 'CONFIRMED',
-          },
-          {
-            plan_id: 2,
-            title: '부산 해안 드라이브',
-            start_date: '2024-04-20',
-            end_date: '2024-04-22',
-            status: 'PLANNING',
-          },
-        ])
-
+        // TODO: Replace with actual API calls for favorites
         // Mock favorite places
         setFavoritePlaces([
           { id: 1, name: '한라산' },
@@ -68,18 +56,28 @@ export default function ProfilePage() {
       }
     }
 
-    loadUserData()
-  }, [])
+    if (authUser) {
+      loadUserData()
+    } else if (!authLoading) {
+      setLoading(false)
+    }
+  }, [authUser, authLoading])
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
+    if (!dateString) return '날짜 없음'
+    try {
+      return new Date(dateString).toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    } catch (error) {
+      console.warn('날짜 형식 오류:', dateString)
+      return '잘못된 날짜'
+    }
   }
 
-  if (loading) {
+  if (loading || authLoading || plansLoading) {
     return (
       <div className="bg-background min-h-screen">
         <div className="container mx-auto px-4 py-8">
@@ -102,7 +100,7 @@ export default function ProfilePage() {
     )
   }
 
-  if (!user) {
+  if (!authUser) {
     return (
       <div className="bg-background min-h-screen">
         <div className="container mx-auto px-4 py-8">
@@ -154,12 +152,12 @@ export default function ProfilePage() {
                 <div className="relative">
                   <Avatar className="ring-sky-blue-light dark:ring-sky-blue/30 h-24 w-24 ring-4">
                     <AvatarImage
-                      src={user?.profile_image}
-                      alt={user?.nickname}
+                      src={authUser?.profile_image}
+                      alt={authUser?.nickname}
                     />
                     <AvatarFallback className="bg-sky-blue-light text-sky-blue-dark text-xl font-bold">
-                      {user?.nickname?.charAt(0) ||
-                        user?.email?.charAt(0) ||
+                      {authUser?.nickname?.charAt(0) ||
+                        authUser?.email?.charAt(0) ||
                         'U'}
                     </AvatarFallback>
                   </Avatar>
@@ -170,37 +168,37 @@ export default function ProfilePage() {
 
                 <div className="flex-1">
                   <CardTitle className="text-foreground mb-2 text-2xl">
-                    {user?.nickname || '사용자'}님
+                    {authUser?.nickname || '사용자'}님
                   </CardTitle>
                   <div className="space-y-2">
                     <div className="text-muted-foreground flex items-center gap-2">
                       <Mail className="text-sky-blue h-4 w-4" />
-                      <span>{user?.email}</span>
+                      <span>{authUser?.email}</span>
                     </div>
                     <div className="text-muted-foreground flex items-center gap-2">
                       <Calendar className="text-sky-blue h-4 w-4" />
-                      <span>가입일: {formatDate(user?.created_at)}</span>
+                      <span>가입일: {formatDate(authUser?.created_at)}</span>
                     </div>
                   </div>
 
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {user?.preferred_region &&
-                      user.preferred_region !== 'none' && (
+                    {authUser?.preferred_region &&
+                      authUser.preferred_region !== 'none' && (
                         <Badge className="weather-cloudy">
                           <MapPin className="mr-1 h-3 w-3" />
-                          선호 지역: {user.preferred_region}
+                          선호 지역: {authUser.preferred_region}
                         </Badge>
                       )}
-                    {user?.preferred_theme &&
-                      user.preferred_theme !== 'none' && (
+                    {authUser?.preferred_theme &&
+                      authUser.preferred_theme !== 'none' && (
                         <Badge className="weather-sunny">
-                          선호 테마: {user.preferred_theme}
+                          선호 테마: {authUser.preferred_theme}
                         </Badge>
                       )}
-                    {(!user?.preferred_region ||
-                      user.preferred_region === 'none') &&
-                      (!user?.preferred_theme ||
-                        user.preferred_theme === 'none') && (
+                    {(!authUser?.preferred_region ||
+                      authUser.preferred_region === 'none') &&
+                      (!authUser?.preferred_theme ||
+                        authUser.preferred_theme === 'none') && (
                         <p className="text-muted-foreground text-sm">
                           선호 설정을 추가해보세요! ✨
                         </p>
@@ -229,7 +227,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div className="text-foreground mb-1 text-2xl font-bold">
-                  {recentPlans.length}
+                  {userPlans.length}
                 </div>
                 <div className="text-muted-foreground text-sm">
                   생성한 여행 플랜
@@ -288,7 +286,15 @@ export default function ProfilePage() {
               </div>
             </CardHeader>
             <CardContent>
-              {recentPlans.length > 0 ? (
+              {plansError ? (
+                <div className="text-muted-foreground py-8 text-center">
+                  <Calendar className="mx-auto mb-4 h-12 w-12 opacity-50" />
+                  <p className="mb-2">여행 플랜을 불러올 수 없습니다.</p>
+                  <p className="text-sm text-red-500">
+                    {plansError.data?.message || '네트워크 오류가 발생했습니다.'}
+                  </p>
+                </div>
+              ) : recentPlans.length > 0 ? (
                 <div className="space-y-4">
                   {recentPlans.map((plan) => (
                     <div
@@ -300,7 +306,7 @@ export default function ProfilePage() {
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
                             <h4 className="text-foreground mb-1 font-semibold">
-                              {plan.title}
+                              {plan.title || '제목 없는 여행 플랜'}
                             </h4>
                             <p className="text-muted-foreground text-sm">
                               {formatDate(plan.start_date)} ~{' '}
@@ -310,12 +316,12 @@ export default function ProfilePage() {
                           <div className="flex items-center gap-3">
                             <Badge
                               variant={
-                                plan.status === 'CONFIRMED'
+                                plan.status === 'CONFIRMED' || plan.status === 'COMPLETED'
                                   ? 'default'
                                   : 'secondary'
                               }
                               className={
-                                plan.status === 'CONFIRMED'
+                                plan.status === 'CONFIRMED' || plan.status === 'COMPLETED'
                                   ? 'weather-sunny'
                                   : 'weather-cloudy'
                               }
@@ -328,7 +334,9 @@ export default function ProfilePage() {
                                     ? '여행중'
                                     : plan.status === 'COMPLETED'
                                       ? '완료'
-                                      : '취소'}
+                                      : plan.status === 'CANCELLED'
+                                        ? '취소'
+                                        : plan.status || '계획중'}
                             </Badge>
                             <ChevronRight className="text-muted-foreground h-4 w-4" />
                           </div>
