@@ -7,6 +7,7 @@ export { travelPlansApi } from './travelPlansApi'
 export { destinationsApi } from './destinationsApi'
 export { weatherApi } from './weatherApi'
 export { regionsApi } from './regionsApi'
+export { localInfoApi } from './localInfoApi'
 
 // Export all hooks for convenience
 export {
@@ -61,3 +62,17 @@ export {
   useUpdateRegionMutation,
   useReverseGeocodeMutation,
 } from './regionsApi'
+
+export {
+  // Local Info API hooks
+  useGetAllRestaurantsQuery,
+  useSearchRestaurantsQuery,
+  useSearchTransportationQuery,
+  useSearchAccommodationsQuery,
+  useGetNearbyPlacesQuery,
+  useGetCategoriesQuery,
+  useGetSupportedCitiesQuery,
+  useGetCityInfoQuery,
+  useGetUnifiedRegionsLevel1Query,
+  useGetRegionsPointQuery,
+} from './localInfoApi'
