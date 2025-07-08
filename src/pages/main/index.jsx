@@ -114,15 +114,13 @@ export function MainPage() {
 
       {/* Rest of the content with responsive background - 다크모드 적용 */}
       <div className="bg-white transition-colors duration-300 dark:bg-gray-900">
-        <section className="mb-12 py-8">
+        <section className="py-8">
           <div className="flex justify-center">
             <div className="w-full max-w-5xl">
               <RecommendedDestCarousel destinations={recommendedDestinations} />
             </div>
           </div>
         </section>
-
-        <section className="mx-auto grid max-w-5xl grid-cols-1 gap-6 px-4 pb-16 md:grid-cols-3"></section>
 
         {/* 서비스별 설명 섹션 (메인 하단, 스크롤 시 fade-in) */}
         <div className="mt-32 space-y-32 pb-32">
@@ -156,7 +154,7 @@ export function MainPage() {
                   )}
                 </div>
                 <div className="flex-1 text-left md:pl-6">
-                  <h2 className="mb-3 text-3xl font-bold transition-colors duration-200 group-hover:text-blue-600">
+                  <h2 className="mb-3 text-3xl font-bold transition-colors duration-500 group-hover:text-blue-400">
                     {sec.title}
                   </h2>
                   <p className="text-lg leading-relaxed text-gray-600">
