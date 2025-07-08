@@ -101,7 +101,7 @@ export default function useDestinationManager() {
   const removePastDates = useCallback(() => {
     const today = new Date()
     const todayString = today.toISOString().split('T')[0]
-    
+
     setDestinationsByDate((prev) => {
       const filtered = {}
       Object.entries(prev).forEach(([date, destinations]) => {
@@ -118,8 +118,9 @@ export default function useDestinationManager() {
   const getPastDatesCount = useCallback(() => {
     const today = new Date()
     const todayString = today.toISOString().split('T')[0]
-    
-    return Object.keys(destinationsByDate).filter(date => date < todayString).length
+
+    return Object.keys(destinationsByDate).filter((date) => date < todayString)
+      .length
   }, [destinationsByDate])
 
   return {

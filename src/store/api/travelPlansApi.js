@@ -83,7 +83,10 @@ export const travelPlansApi = createApi({
       }),
       invalidatesTags: ['TravelPlan'],
       transformResponse: (response) => {
-        const validatedResponse = validateAndSanitizeResponse(response, TRAVEL_PLAN_DEFAULTS)
+        const validatedResponse = validateAndSanitizeResponse(
+          response,
+          TRAVEL_PLAN_DEFAULTS,
+        )
         return validatedResponse
       },
     }),
@@ -94,7 +97,10 @@ export const travelPlansApi = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ plan_id }) => ({ type: 'TravelPlan', id: plan_id })),
+              ...result.map(({ plan_id }) => ({
+                type: 'TravelPlan',
+                id: plan_id,
+              })),
               { type: 'TravelPlan', id: 'LIST' },
             ]
           : [{ type: 'TravelPlan', id: 'LIST' }],
@@ -132,12 +138,13 @@ export const travelPlansApi = createApi({
     // 특정 플랜 조회
     getTravelPlan: builder.query({
       query: (planId) => `travel-plans/${planId}`,
-      providesTags: (_, __, planId) => [
-        { type: 'TravelPlan', id: planId },
-      ],
+      providesTags: (_, __, planId) => [{ type: 'TravelPlan', id: planId }],
       keepUnusedDataFor: 600, // 10분간 캐싱
       transformResponse: (response) => {
-        const validatedResponse = validateAndSanitizeResponse(response, TRAVEL_PLAN_DEFAULTS)
+        const validatedResponse = validateAndSanitizeResponse(
+          response,
+          TRAVEL_PLAN_DEFAULTS,
+        )
         return validatedResponse
       },
       transformErrorResponse: (response) => {
@@ -164,7 +171,10 @@ export const travelPlansApi = createApi({
         { type: 'TravelPlan', id: 'LIST' },
       ],
       transformResponse: (response) => {
-        const validatedResponse = validateAndSanitizeResponse(response, TRAVEL_PLAN_DEFAULTS)
+        const validatedResponse = validateAndSanitizeResponse(
+          response,
+          TRAVEL_PLAN_DEFAULTS,
+        )
         return validatedResponse
       },
     }),
@@ -192,7 +202,10 @@ export const travelPlansApi = createApi({
         { type: 'TravelPlan', id: planId },
       ],
       transformResponse: (response) => {
-        const validatedResponse = validateAndSanitizeResponse(response, TRAVEL_PLAN_DEFAULTS)
+        const validatedResponse = validateAndSanitizeResponse(
+          response,
+          TRAVEL_PLAN_DEFAULTS,
+        )
         return validatedResponse
       },
     }),

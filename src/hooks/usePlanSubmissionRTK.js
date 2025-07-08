@@ -68,8 +68,8 @@ export default function usePlanSubmissionRTK() {
         const requestBody = {
           title: formData.title || `${formData.origin} 여행`,
           description: formData.description || '',
-          start_date: dateRange.from.toISOString().slice(0, 10),
-          end_date: dateRange.to.toISOString().slice(0, 10),
+          start_date: `${dateRange.from.getFullYear()}-${String(dateRange.from.getMonth() + 1).padStart(2, '0')}-${String(dateRange.from.getDate()).padStart(2, '0')}`,
+          end_date: `${dateRange.to.getFullYear()}-${String(dateRange.to.getMonth() + 1).padStart(2, '0')}-${String(dateRange.to.getDate()).padStart(2, '0')}`,
           budget: formData.budget || 0,
           itinerary: sanitizedItinerary, // 정제된 itinerary 전달
           participants: formData.participants || 1,

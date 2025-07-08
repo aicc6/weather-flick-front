@@ -6,7 +6,6 @@ import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,7 +29,13 @@ const formatDate = (dateString) => {
 }
 
 export function TravelPlansPage() {
-  const { data: plans, isLoading, isError, error, refetch } = useGetUserPlansQuery(undefined, {
+  const {
+    data: plans,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useGetUserPlansQuery(undefined, {
     refetchOnMountOrArgChange: true,
     refetchOnFocus: true,
     refetchOnReconnect: true,
@@ -85,11 +90,17 @@ export function TravelPlansPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-4 md:p-6">
-        <div className="flex flex-col items-center justify-center py-12">
-          <LoadingSpinner />
-          <p className="mt-4 text-gray-600">여행 계획 목록을 불러오는 중...</p>
-          <p className="mt-1 text-sm text-gray-400">잠시만 기다려 주세요</p>
+      <div className="min-h-screen bg-gray-50/50 px-4 py-6 dark:bg-gray-900">
+        <div className="mx-auto w-full max-w-6xl">
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-100 to-purple-100 shadow-lg">
+              <LoadingSpinner />
+            </div>
+            <p className="font-medium text-gray-600 dark:text-gray-300">
+              여행 계획 목록을 불러오는 중...
+            </p>
+            <p className="mt-1 text-sm text-gray-400">잠시만 기다려 주세요</p>
+          </div>
         </div>
       </div>
     )
@@ -97,43 +108,36 @@ export function TravelPlansPage() {
 
   if (isError) {
     return (
-      <div className="container mx-auto p-4 md:p-6">
-        <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
-          <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-red-100 p-3">
-            <svg
-              className="h-6 w-6 text-red-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-              />
-            </svg>
-          </div>
-          <h3 className="mb-2 text-lg font-semibold text-red-800">
-            여행 계획을 불러올 수 없습니다
-          </h3>
-          <p className="mb-4 text-red-700">
-            일시적인 문제가 발생했습니다. 네트워크 연결을 확인하고 다시 시도해
-            주세요.
-          </p>
-          <div className="space-x-4">
-            <button
-              onClick={() => refetch()}
-              className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-            >
-              다시 시도
-            </button>
-            <Link
-              to="/planner"
-              className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-            >
-              <PlusCircle className="mr-2 h-4 w-4" />새 플랜 만들기
-            </Link>
+      <div className="min-h-screen bg-gray-50/50 px-4 py-6 dark:bg-gray-900">
+        <div className="mx-auto w-full max-w-6xl">
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-r from-red-100 to-orange-100 shadow-lg">
+              <span className="text-3xl">⚠️</span>
+            </div>
+            <h3 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-gray-100">
+              여행 계획을 불러올 수 없습니다
+            </h3>
+            <p className="mb-6 max-w-md text-center text-gray-600 dark:text-gray-300">
+              일시적인 문제가 발생했습니다. 네트워크 연결을 확인하고 다시 시도해
+              주세요.
+            </p>
+            <div className="flex gap-4">
+              <Button
+                onClick={() => refetch()}
+                className="bg-gradient-to-r from-red-500 to-orange-600 shadow-lg hover:from-red-600 hover:to-orange-700"
+              >
+                다시 시도
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+              >
+                <Link to="/planner">
+                  <PlusCircle className="mr-2 h-4 w-4" />새 플랜 만들기
+                </Link>
+              </Button>
+            </div>
           </div>
           {/* eslint-disable-next-line no-undef */}
           {process.env.NODE_ENV === 'development' && (
@@ -152,114 +156,148 @@ export function TravelPlansPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">나의 여행 플랜</h1>
-        <Button asChild>
-          <Link to="/planner">
-            <PlusCircle className="mr-2 h-4 w-4" />새 플랜 만들기
-          </Link>
-        </Button>
-      </div>
-
-      <div className="mt-6">
-        {!isLoading && !isError && sortedPlans && sortedPlans.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {sortedPlans.map((plan) => (
-              <Card
-                key={plan.plan_id}
-                className="flex flex-col justify-between transition-all hover:scale-[1.02] hover:shadow-md"
-              >
-                <div>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <CardTitle className="pr-2">{plan.title}</CardTitle>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 flex-shrink-0"
-                        onClick={() => handleDeleteClick(plan)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <Badge
-                      variant={
-                        plan.status === 'CONFIRMED' ? 'default' : 'secondary'
-                      }
-                      className="w-fit"
-                    >
-                      {plan.status === 'CONFIRMED'
-                        ? '확정'
-                        : plan.status === 'PLANNING'
-                          ? '계획중'
-                          : plan.status === 'IN_PROGRESS'
-                            ? '여행중'
-                            : plan.status === 'COMPLETED'
-                              ? '완료'
-                              : '취소'}
-                    </Badge>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Calendar className="mr-2 h-4 w-4" />
-                      <span>
-                        {formatDate(plan.start_date)} ~{' '}
-                        {formatDate(plan.end_date)}
-                      </span>
-                    </div>
-                  </CardContent>
-                </div>
-                <div className="p-6 pt-0">
-                  <Button asChild variant="link" className="p-0">
-                    <Link to={`/travel-plans/${plan.plan_id}`}>
-                      자세히 보기
-                      <ChevronRight className="ml-1 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              </Card>
-            ))}
+    <div className="min-h-screen bg-gray-50/50 px-4 py-6 dark:bg-gray-900">
+      <div className="mx-auto w-full max-w-6xl">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
+              나의 여행 플랜
+            </h1>
+            <p className="mt-1 text-gray-600 dark:text-gray-300">
+              저장된 여행 계획들을 확인하고 관리하세요
+            </p>
           </div>
-        ) : (
-          <div className="py-20 text-center text-gray-500">
-            <div className="mx-auto mb-6 h-16 w-16 rounded-full bg-blue-100 p-4">
-              <svg
-                className="h-8 w-8 text-blue-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
-                />
-              </svg>
-            </div>
-            <h2 className="text-xl font-semibold text-gray-700">
-              아직 여행 계획이 없어요
-            </h2>
-            <p className="mt-2 text-gray-500">첫 번째 여행을 계획해보세요!</p>
-            <div className="mt-4 space-y-2">
-              <Button asChild>
-                <Link to="/planner">
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  지금 시작하기
-                </Link>
-              </Button>
-              <div>
-                <button
-                  onClick={() => refetch()}
-                  className="text-sm text-blue-600 hover:text-blue-800 underline"
+          <Button
+            asChild
+            className="bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg hover:from-indigo-600 hover:to-purple-700"
+          >
+            <Link to="/planner">
+              <PlusCircle className="mr-2 h-4 w-4" />새 플랜 만들기
+            </Link>
+          </Button>
+        </div>
+
+        <div className="mt-6">
+          {!isLoading && !isError && sortedPlans && sortedPlans.length > 0 ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {sortedPlans.map((plan) => (
+                <Card
+                  key={plan.plan_id}
+                  className="flex flex-col justify-between rounded-2xl border border-gray-200/50 bg-white shadow-sm transition-all hover:-translate-y-1 hover:border-gray-300 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800"
                 >
-                  새로고침
-                </button>
+                  <div>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <CardTitle className="pr-2 leading-tight text-gray-800 dark:text-gray-100">
+                          {plan.title}
+                        </CardTitle>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 flex-shrink-0 rounded-lg text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+                          onClick={() => handleDeleteClick(plan)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ${
+                            plan.status === 'CONFIRMED'
+                              ? 'border border-green-200 bg-green-100 text-green-700'
+                              : plan.status === 'PLANNING'
+                                ? 'border border-blue-200 bg-blue-100 text-blue-700'
+                                : plan.status === 'IN_PROGRESS'
+                                  ? 'border border-purple-200 bg-purple-100 text-purple-700'
+                                  : plan.status === 'COMPLETED'
+                                    ? 'border border-gray-200 bg-gray-100 text-gray-700'
+                                    : 'border border-red-200 bg-red-100 text-red-700'
+                          }`}
+                        >
+                          <div
+                            className={`h-2 w-2 rounded-full ${
+                              plan.status === 'CONFIRMED'
+                                ? 'bg-green-500'
+                                : plan.status === 'PLANNING'
+                                  ? 'bg-blue-500'
+                                  : plan.status === 'IN_PROGRESS'
+                                    ? 'bg-purple-500'
+                                    : plan.status === 'COMPLETED'
+                                      ? 'bg-gray-500'
+                                      : 'bg-red-500'
+                            }`}
+                          ></div>
+                          {plan.status === 'CONFIRMED'
+                            ? '확정'
+                            : plan.status === 'PLANNING'
+                              ? '계획중'
+                              : plan.status === 'IN_PROGRESS'
+                                ? '여행중'
+                                : plan.status === 'COMPLETED'
+                                  ? '완료'
+                                  : '취소'}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pb-4">
+                      <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
+                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                          <Calendar className="mr-2 h-4 w-4 text-indigo-500" />
+                          <span className="font-medium">
+                            {formatDate(plan.start_date)} ~{' '}
+                            {formatDate(plan.end_date)}
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </div>
+                  <div className="p-6 pt-0">
+                    <Button
+                      asChild
+                      className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-sm hover:from-indigo-600 hover:to-purple-700"
+                    >
+                      <Link to={`/travel-plans/${plan.plan_id}`}>
+                        자세히 보기
+                        <ChevronRight className="ml-1 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="py-20 text-center">
+              <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-100 to-purple-100 shadow-lg">
+                <span className="text-3xl">✈️</span>
+              </div>
+              <h2 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-gray-100">
+                아직 여행 계획이 없어요
+              </h2>
+              <p className="mt-2 text-gray-600 dark:text-gray-300">
+                첫 번째 여행을 계획해보세요!
+              </p>
+              <div className="mt-6 space-y-3">
+                <Button
+                  asChild
+                  className="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-3 shadow-lg hover:from-indigo-600 hover:to-purple-700"
+                >
+                  <Link to="/planner">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    지금 시작하기
+                  </Link>
+                </Button>
+                <div>
+                  <button
+                    onClick={() => refetch()}
+                    className="text-sm font-medium text-indigo-600 underline hover:text-indigo-800"
+                  >
+                    새로고침
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <AlertDialog

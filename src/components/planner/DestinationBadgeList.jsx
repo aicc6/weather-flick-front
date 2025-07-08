@@ -48,21 +48,26 @@ const DestinationListItem = ({
   )
 
   return (
-    <div className="mb-2 flex items-center gap-3 rounded-lg bg-blue-100 px-4 py-2 shadow-sm dark:bg-blue-900">
+    <div className="mb-4 flex items-start gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all duration-200 hover:border-gray-200 hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       {/* 드래그 핸들 */}
-      <span
+      <div
         {...dragHandleProps}
-        className="mr-1 cursor-grab text-blue-400 select-none"
+        className="mt-1 flex cursor-grab flex-col gap-1 text-gray-400 transition-colors hover:text-gray-600"
       >
-        ≡
-      </span>
+        <div className="h-1 w-1 rounded-full bg-current"></div>
+        <div className="h-1 w-1 rounded-full bg-current"></div>
+        <div className="h-1 w-1 rounded-full bg-current"></div>
+        <div className="h-1 w-1 rounded-full bg-current"></div>
+        <div className="h-1 w-1 rounded-full bg-current"></div>
+        <div className="h-1 w-1 rounded-full bg-current"></div>
+      </div>
       {/* 썸네일 */}
       {photoUrl && (
         <span className="relative inline-block flex-shrink-0">
           <img
             src={photoUrl}
             alt="장소 사진"
-            className="h-10 w-10 rounded border border-gray-200 bg-gray-100 object-cover dark:border-gray-700 dark:bg-gray-700"
+            className="h-14 w-14 rounded-xl border-2 border-gray-200 bg-gray-50 object-cover shadow-sm transition-shadow hover:shadow-md dark:border-gray-600 dark:bg-gray-700"
             style={{ position: 'relative', zIndex: 1 }}
             onMouseOver={onHover}
             onMouseOut={onUnhover}
@@ -92,47 +97,113 @@ const DestinationListItem = ({
       {/* 텍스트 영역: 주소 + 날씨정보 세로 배치 */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* 주소 (여러 줄, 전체 표시) */}
-        <span className="mb-1 text-base font-semibold break-words whitespace-normal text-blue-900 dark:text-blue-100">
+        <h3 className="mb-2 text-base leading-tight font-semibold break-words whitespace-normal text-gray-800 dark:text-gray-100">
           {desc.replace(/^대한민국\s*/, '')}
-        </span>
-        {/* 날씨 정보 (한 줄, compact) */}
+        </h3>
+        {/* 날씨 정보 (상세 정보) */}
         {placeId && date && (
-          <span className="flex min-w-[120px] items-center gap-2 text-xs whitespace-nowrap">
-            {loading && <span>⏳ 날씨 로딩중...</span>}
+          <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
+            {loading && (
+              <div className="flex items-center gap-2 text-indigo-600">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent"></div>
+                <span className="text-sm">날씨 정보 불러오는 중...</span>
+              </div>
+            )}
             {error && (
-              <span className="text-orange-500 text-xs">
-                🌤️ 날씨 서비스 준비중
-              </span>
+              <div className="flex items-center gap-2 text-amber-600">
+                <span className="text-lg">🌤️</span>
+                <span className="text-sm">날씨 서비스 준비중</span>
+              </div>
             )}
             {weather && !loading && !error && (
-              <>
-                <span className="text-lg">☀️</span>
-                <span className="font-semibold text-blue-700">
-                  {weather.temperature || weather.temp || '25'}°C
-                </span>
-                {weather.description && (
-                  <span className="text-gray-600">
-                    {weather.description}
-                  </span>
+              <div className="space-y-2">
+                {/* 첫 번째 줄: 아이콘, 온도, 날씨 상태 */}
+                <div className="flex items-center gap-3">
+                  {weather.icon ? (
+                    <img
+                      src={`https:${weather.icon}`}
+                      alt={weather.summary || '날씨'}
+                      className="h-7 w-7 flex-shrink-0"
+                    />
+                  ) : (
+                    <span className="flex-shrink-0 text-xl">
+                      {weather.summary?.includes('비')
+                        ? '🌧️'
+                        : weather.summary?.includes('눈')
+                          ? '❄️'
+                          : weather.summary?.includes('흐림')
+                            ? '☁️'
+                            : weather.summary?.includes('구름')
+                              ? '☁️'
+                              : '☀️'}
+                    </span>
+                  )}
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-gray-800 dark:text-gray-100">
+                      {weather.max_temp && weather.min_temp
+                        ? `${Math.round(weather.min_temp)}° ~ ${Math.round(weather.max_temp)}°C`
+                        : `${Math.round(weather.temp || weather.temperature || 25)}°C`}
+                    </span>
+                    {weather.summary && (
+                      <span className="text-sm text-gray-600 dark:text-gray-300">
+                        {weather.summary}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* 두 번째 줄: 추가 정보 */}
+                <div className="flex items-center gap-4 text-sm">
+                  {weather.chance_of_rain !== undefined && (
+                    <div className="flex items-center gap-1 text-blue-600">
+                      <span>💧</span>
+                      <span>{weather.chance_of_rain}%</span>
+                    </div>
+                  )}
+                  {weather.humidity && (
+                    <div className="flex items-center gap-1 text-cyan-600">
+                      <span>💨</span>
+                      <span>{weather.humidity}%</span>
+                    </div>
+                  )}
+                  {weather.wind_speed && (
+                    <div className="flex items-center gap-1 text-gray-600">
+                      <span>🌪️</span>
+                      <span>{weather.wind_speed}m/s</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 세 번째 줄: 체감온도, UV 지수 등 */}
+                {(weather.feels_like || weather.uv_index) && (
+                  <div className="flex items-center gap-4 border-t border-gray-200 pt-1 text-sm dark:border-gray-600">
+                    {weather.feels_like && (
+                      <div className="flex items-center gap-1 text-purple-600">
+                        <span>🌡️</span>
+                        <span>체감 {weather.feels_like}°C</span>
+                      </div>
+                    )}
+                    {weather.uv_index && (
+                      <div className="flex items-center gap-1 text-yellow-600">
+                        <span>☀️</span>
+                        <span>UV {weather.uv_index}</span>
+                      </div>
+                    )}
+                  </div>
                 )}
-                {weather.humidity && (
-                  <span className="text-blue-600">
-                    습도 {weather.humidity}%
-                  </span>
-                )}
-              </>
+              </div>
             )}
-          </span>
+          </div>
         )}
       </div>
       {/* 삭제 버튼 */}
       <button
         type="button"
         onClick={onRemove}
-        className="ml-2 text-blue-500 transition-colors hover:text-red-500"
+        className="flex-shrink-0 rounded-lg p-2 text-gray-400 transition-all duration-200 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
         aria-label={`${desc} 제거`}
       >
-        <X className="h-4 w-4" />
+        <X className="h-5 w-5" />
       </button>
     </div>
   )
