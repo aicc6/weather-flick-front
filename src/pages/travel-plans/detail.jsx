@@ -3,7 +3,6 @@ import { useGetTravelPlanQuery } from '@/store/api/travelPlansApi'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import {
   Calendar,
   Info,
@@ -321,310 +320,379 @@ export function TravelPlanDetailPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-4xl p-4 md:p-6">
-      <div className="mb-6">
-        <Button variant="outline" asChild>
-          <Link to="/travel-plans">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            목록으로 돌아가기
-          </Link>
-        </Button>
-      </div>
+    <div className="min-h-screen bg-gray-50/50 px-4 py-6 dark:bg-gray-900">
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-8">
+          <Button
+            variant="outline"
+            asChild
+            className="rounded-xl border-gray-200 hover:bg-gray-50"
+          >
+            <Link to="/travel-plans">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              목록으로 돌아가기
+            </Link>
+          </Button>
+        </div>
 
-      <Card className="mb-6">
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div>
-              <CardTitle className="mb-2 text-3xl font-bold">
-                {plan.title}
-              </CardTitle>
-              <Badge
-                variant={plan.status === 'CONFIRMED' ? 'default' : 'secondary'}
-              >
-                {plan.status}
-              </Badge>
-            </div>
-            <Button asChild onClick={handleEditClick}>
-              <Link to={`/planner?planId=${planId}`}>
-                <Edit className="mr-2 h-4 w-4" />
-                수정하기
-              </Link>
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center text-gray-700">
-            <Calendar className="mr-3 h-5 w-5 text-white" />
-            <span className="text-white">
-              {formatDate(plan.start_date)} ~ {formatDate(plan.end_date)}
-            </span>
-          </div>
-          {plan.description && (
-            <div className="flex items-start text-gray-700">
-              <Info className="mt-1 mr-3 h-5 w-5 flex-shrink-0 text-gray-500" />
-              <p>{plan.description}</p>
-            </div>
-          )}
-          {plan.start_location && (
-            <div className="flex items-center">
-              <MapPin className="mr-3 h-5 w-5" />
-              <span>출발지: {plan.start_location}</span>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* 날씨 정보 */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>날씨 정보</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {weatherData && weatherData.forecast ? (
-            <div className="space-y-3">
-              <div className="mb-4 rounded-md border border-blue-200 bg-blue-50 p-3">
-                <p className="text-sm text-blue-700">
-                  🌤️ 날씨 정보는 예측 데이터이며, 여행 전 최신 날씨를 확인해
-                  주세요
-                </p>
-              </div>
-              {weatherData.forecast.map((forecast, index) => {
-                const getWeatherIcon = (condition) => {
-                  const iconMap = {
-                    맑음: '☀️',
-                    구름조금: '🌤️',
-                    구름많음: '☁️',
-                    흐림: '☁️',
-                    비: '🌧️',
-                    눈: '🌨️',
-                    바람: '💨',
-                  }
-                  return iconMap[condition] || '☀️'
-                }
-
-                const formatDate = (dateString) => {
-                  const date = new Date(dateString)
-                  return date.toLocaleDateString('ko-KR', {
-                    month: 'short',
-                    day: 'numeric',
-                    weekday: 'short',
-                  })
-                }
-
-                return (
+        <Card className="mb-8 rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <CardHeader className="pb-6">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <CardTitle className="mb-4 text-3xl leading-tight font-bold text-gray-800 dark:text-gray-100">
+                  {plan.title}
+                </CardTitle>
+                <div
+                  className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium ${
+                    plan.status === 'CONFIRMED'
+                      ? 'border border-green-200 bg-green-100 text-green-700'
+                      : plan.status === 'PLANNING'
+                        ? 'border border-blue-200 bg-blue-100 text-blue-700'
+                        : plan.status === 'IN_PROGRESS'
+                          ? 'border border-purple-200 bg-purple-100 text-purple-700'
+                          : plan.status === 'COMPLETED'
+                            ? 'border border-gray-200 bg-gray-100 text-gray-700'
+                            : 'border border-red-200 bg-red-100 text-red-700'
+                  }`}
+                >
                   <div
-                    key={index}
-                    className="flex items-center justify-between rounded-lg border p-3"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <span className="text-lg">
-                        {getWeatherIcon(forecast.condition)}
-                      </span>
-                      <div>
-                        <div className="font-medium">
-                          {formatDate(forecast.date)}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {forecast.city && forecast.city !== '서울' && (
-                            <span className="mr-2 text-blue-600">
-                              📍{forecast.city}
-                            </span>
-                          )}
-                          {forecast.condition}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-medium">
-                        {forecast.temperature.min}°~{forecast.temperature.max}°
-                      </div>
-                      {forecast.precipitation > 0 && (
-                        <div className="text-sm text-blue-500">
-                          💧{forecast.precipitation}%
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-              {weatherData.recommendation && (
-                <div className="mt-4 rounded-md bg-gray-100 p-3">
-                  <p className="text-sm text-gray-600">
-                    💡 {weatherData.recommendation}
+                    className={`h-2 w-2 rounded-full ${
+                      plan.status === 'CONFIRMED'
+                        ? 'bg-green-500'
+                        : plan.status === 'PLANNING'
+                          ? 'bg-blue-500'
+                          : plan.status === 'IN_PROGRESS'
+                            ? 'bg-purple-500'
+                            : plan.status === 'COMPLETED'
+                              ? 'bg-gray-500'
+                              : 'bg-red-500'
+                    }`}
+                  ></div>
+                  {plan.status === 'CONFIRMED'
+                    ? '확정'
+                    : plan.status === 'PLANNING'
+                      ? '계획중'
+                      : plan.status === 'IN_PROGRESS'
+                        ? '여행중'
+                        : plan.status === 'COMPLETED'
+                          ? '완료'
+                          : '취소'}
+                </div>
+              </div>
+              <Button
+                asChild
+                onClick={handleEditClick}
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg hover:from-indigo-600 hover:to-purple-700"
+              >
+                <Link to={`/planner?planId=${planId}`}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  수정하기
+                </Link>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
+              <div className="flex items-center text-gray-700 dark:text-gray-300">
+                <Calendar className="mr-3 h-5 w-5 text-indigo-500" />
+                <span className="font-medium">
+                  {formatDate(plan.start_date)} ~ {formatDate(plan.end_date)}
+                </span>
+              </div>
+            </div>
+            {plan.description && (
+              <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+                <div className="flex items-start text-gray-700 dark:text-gray-300">
+                  <Info className="mt-1 mr-3 h-5 w-5 flex-shrink-0 text-blue-500" />
+                  <p className="leading-relaxed">{plan.description}</p>
+                </div>
+              </div>
+            )}
+            {plan.start_location && (
+              <div className="rounded-lg bg-green-50 p-4 dark:bg-green-900/20">
+                <div className="flex items-center text-gray-700 dark:text-gray-300">
+                  <MapPin className="mr-3 h-5 w-5 text-green-500" />
+                  <span className="font-medium">
+                    출발지: {plan.start_location}
+                  </span>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 날씨 정보 */}
+        <Card className="mb-8 rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-cyan-600">
+                <span className="text-sm font-bold text-white">☀️</span>
+              </div>
+              <CardTitle className="text-gray-800 dark:text-gray-100">
+                날씨 정보
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {weatherData && weatherData.forecast ? (
+              <div className="space-y-3">
+                <div className="mb-4 rounded-md border border-blue-200 bg-blue-50 p-3">
+                  <p className="text-sm text-blue-700">
+                    🌤️ 날씨 정보는 예측 데이터이며, 여행 전 최신 날씨를 확인해
+                    주세요
                   </p>
                 </div>
-              )}
-            </div>
-          ) : (
-            <div className="py-8 text-center">
-              <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-orange-100 p-3">
-                <svg
-                  className="h-6 w-6 text-orange-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
-                  />
-                </svg>
-              </div>
-              <h4 className="mb-2 font-medium text-gray-800">
-                날씨 정보 서비스 준비중
-              </h4>
-              <p className="mb-3 text-gray-600">
-                현재 날씨 서비스가 일시적으로 이용 불가합니다
-              </p>
-              <div className="rounded-md border border-yellow-200 bg-yellow-50 p-3">
-                <p className="text-sm text-yellow-700">
-                  🌤️ 여행 전 기상청이나 날씨 앱에서 각 지역의 날씨를 확인해
-                  주세요
-                </p>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                {weatherData.forecast.map((forecast, index) => {
+                  const getWeatherIcon = (condition) => {
+                    const iconMap = {
+                      맑음: '☀️',
+                      구름조금: '🌤️',
+                      구름많음: '☁️',
+                      흐림: '☁️',
+                      비: '🌧️',
+                      눈: '🌨️',
+                      바람: '💨',
+                    }
+                    return iconMap[condition] || '☀️'
+                  }
 
-      <Card>
-        <CardHeader>
-          <CardTitle>상세 일정</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {itineraryDays.length > 0 ? (
-            <div className="space-y-6">
-              {itineraryDays.map((day) => (
-                <div key={day} className="rounded-lg border p-4">
-                  <div className="mb-4 flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-blue-600">
-                      {day.replace('day', '') + '일차'}
-                    </h3>
-                  </div>
-                  <ul className="space-y-4">
-                    {plan.itinerary[day].map((item, index) => (
-                      <li key={index} className="flex items-start">
-                        <MapPin className="mt-1 mr-3 h-5 w-5 flex-shrink-0 text-blue-500" />
-                        <div className="flex-1">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <p className="font-medium">{item.description}</p>
-                              {item.address && (
-                                <p className="text-sm text-gray-600">
-                                  {item.address}
-                                </p>
-                              )}
-                              {item.category && (
-                                <div className="mt-1 flex items-center text-xs text-gray-500">
-                                  <Tag className="mr-1 h-3 w-3" />
-                                  {formatPlaceCategory(item.category)}
-                                </div>
-                              )}
-                              {item.memo && (
-                                <p className="mt-2 rounded-md bg-gray-100 p-2 text-sm text-gray-600">
-                                  {item.memo}
-                                </p>
-                              )}
-                            </div>
-                            {/* 개별 장소의 날씨 정보 */}
-                            {(() => {
-                              const city = extractCityFromLocation(
-                                item.description,
-                              )
-                              const getWeatherIcon = (condition) => {
-                                const iconMap = {
-                                  맑음: '☀️',
-                                  구름조금: '🌤️',
-                                  구름많음: '☁️',
-                                  흐림: '☁️',
-                                  비: '🌧️',
-                                  눈: '🌨️',
-                                  바람: '💨',
-                                }
-                                return iconMap[condition] || '☀️'
-                              }
+                  const formatDate = (dateString) => {
+                    const date = new Date(dateString)
+                    return date.toLocaleDateString('ko-KR', {
+                      month: 'short',
+                      day: 'numeric',
+                      weekday: 'short',
+                    })
+                  }
 
-                              // 해당 일차의 날씨 정보 가져오기
-                              const dayIndex =
-                                parseInt(day.replace('Day ', '')) - 1
-                              const dayWeather =
-                                weatherData?.forecast?.[dayIndex]
-
-                              if (dayWeather) {
-                                // 도시별 날씨 변화 적용
-                                const cityWeatherVariation = {
-                                  서울: { tempOffset: 0, conditionOffset: 0 },
-                                  부산: { tempOffset: 3, conditionOffset: 1 },
-                                  제주: { tempOffset: 5, conditionOffset: 2 },
-                                  대구: { tempOffset: 1, conditionOffset: 0 },
-                                  광주: { tempOffset: 2, conditionOffset: 1 },
-                                  강원: { tempOffset: -3, conditionOffset: 0 },
-                                }
-
-                                const variation =
-                                  cityWeatherVariation[city] ||
-                                  cityWeatherVariation['서울']
-                                const conditions = [
-                                  '맑음',
-                                  '구름조금',
-                                  '구름많음',
-                                  '흐림',
-                                  '비',
-                                ]
-                                const adjustedConditionIndex =
-                                  (conditions.indexOf(dayWeather.condition) +
-                                    variation.conditionOffset) %
-                                  conditions.length
-                                const adjustedCondition =
-                                  conditions[adjustedConditionIndex]
-
-                                const adjustedTemp = {
-                                  min: Math.max(
-                                    5,
-                                    dayWeather.temperature.min +
-                                      variation.tempOffset,
-                                  ),
-                                  max: Math.min(
-                                    35,
-                                    dayWeather.temperature.max +
-                                      variation.tempOffset,
-                                  ),
-                                }
-
-                                return (
-                                  <div className="ml-4 text-right">
-                                    <div className="flex items-center text-xs text-gray-500">
-                                      <span className="mr-1">
-                                        {getWeatherIcon(adjustedCondition)}
-                                      </span>
-                                      <span className="mr-1 text-blue-600">
-                                        📍{city}
-                                      </span>
-                                    </div>
-                                    <div className="mt-1 text-xs text-gray-600">
-                                      {adjustedCondition} {adjustedTemp.min}°~
-                                      {adjustedTemp.max}°
-                                    </div>
-                                  </div>
-                                )
-                              }
-                              return null
-                            })()}
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between rounded-lg border p-3"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <span className="text-lg">
+                          {getWeatherIcon(forecast.condition)}
+                        </span>
+                        <div>
+                          <div className="font-medium">
+                            {formatDate(forecast.date)}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {forecast.city && forecast.city !== '서울' && (
+                              <span className="mr-2 text-blue-600">
+                                📍{forecast.city}
+                              </span>
+                            )}
+                            {forecast.condition}
                           </div>
                         </div>
-                      </li>
-                    ))}
-                  </ul>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium">
+                          {forecast.temperature.min}°~{forecast.temperature.max}
+                          °
+                        </div>
+                        {forecast.precipitation > 0 && (
+                          <div className="text-sm text-blue-500">
+                            💧{forecast.precipitation}%
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+                {weatherData.recommendation && (
+                  <div className="mt-4 rounded-md bg-gray-100 p-3">
+                    <p className="text-sm text-gray-600">
+                      💡 {weatherData.recommendation}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="py-8 text-center">
+                <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-orange-100 p-3">
+                  <svg
+                    className="h-6 w-6 text-orange-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
+                    />
+                  </svg>
                 </div>
-              ))}
+                <h4 className="mb-2 font-medium text-gray-800">
+                  날씨 정보 서비스 준비중
+                </h4>
+                <p className="mb-3 text-gray-600">
+                  현재 날씨 서비스가 일시적으로 이용 불가합니다
+                </p>
+                <div className="rounded-md border border-yellow-200 bg-yellow-50 p-3">
+                  <p className="text-sm text-yellow-700">
+                    🌤️ 여행 전 기상청이나 날씨 앱에서 각 지역의 날씨를 확인해
+                    주세요
+                  </p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-emerald-600">
+                <span className="text-sm font-bold text-white">📋</span>
+              </div>
+              <CardTitle className="text-gray-800 dark:text-gray-100">
+                상세 일정
+              </CardTitle>
             </div>
-          ) : (
-            <p className="text-center text-gray-500">상세 일정이 없습니다.</p>
-          )}
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent>
+            {itineraryDays.length > 0 ? (
+              <div className="space-y-6">
+                {itineraryDays.map((day) => (
+                  <div key={day} className="rounded-lg border p-4">
+                    <div className="mb-4 flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-blue-600">
+                        {day.replace('day', '') + '일차'}
+                      </h3>
+                    </div>
+                    <ul className="space-y-4">
+                      {plan.itinerary[day].map((item, index) => (
+                        <li key={index} className="flex items-start">
+                          <MapPin className="mt-1 mr-3 h-5 w-5 flex-shrink-0 text-blue-500" />
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <p className="font-medium">
+                                  {item.description}
+                                </p>
+                                {item.address && (
+                                  <p className="text-sm text-gray-600">
+                                    {item.address}
+                                  </p>
+                                )}
+                                {item.category && (
+                                  <div className="mt-1 flex items-center text-xs text-gray-500">
+                                    <Tag className="mr-1 h-3 w-3" />
+                                    {formatPlaceCategory(item.category)}
+                                  </div>
+                                )}
+                                {item.memo && (
+                                  <p className="mt-2 rounded-md bg-gray-100 p-2 text-sm text-gray-600">
+                                    {item.memo}
+                                  </p>
+                                )}
+                              </div>
+                              {/* 개별 장소의 날씨 정보 */}
+                              {(() => {
+                                const city = extractCityFromLocation(
+                                  item.description,
+                                )
+                                const getWeatherIcon = (condition) => {
+                                  const iconMap = {
+                                    맑음: '☀️',
+                                    구름조금: '🌤️',
+                                    구름많음: '☁️',
+                                    흐림: '☁️',
+                                    비: '🌧️',
+                                    눈: '🌨️',
+                                    바람: '💨',
+                                  }
+                                  return iconMap[condition] || '☀️'
+                                }
+
+                                // 해당 일차의 날씨 정보 가져오기
+                                const dayIndex =
+                                  parseInt(day.replace('Day ', '')) - 1
+                                const dayWeather =
+                                  weatherData?.forecast?.[dayIndex]
+
+                                if (dayWeather) {
+                                  // 도시별 날씨 변화 적용
+                                  const cityWeatherVariation = {
+                                    서울: { tempOffset: 0, conditionOffset: 0 },
+                                    부산: { tempOffset: 3, conditionOffset: 1 },
+                                    제주: { tempOffset: 5, conditionOffset: 2 },
+                                    대구: { tempOffset: 1, conditionOffset: 0 },
+                                    광주: { tempOffset: 2, conditionOffset: 1 },
+                                    강원: {
+                                      tempOffset: -3,
+                                      conditionOffset: 0,
+                                    },
+                                  }
+
+                                  const variation =
+                                    cityWeatherVariation[city] ||
+                                    cityWeatherVariation['서울']
+                                  const conditions = [
+                                    '맑음',
+                                    '구름조금',
+                                    '구름많음',
+                                    '흐림',
+                                    '비',
+                                  ]
+                                  const adjustedConditionIndex =
+                                    (conditions.indexOf(dayWeather.condition) +
+                                      variation.conditionOffset) %
+                                    conditions.length
+                                  const adjustedCondition =
+                                    conditions[adjustedConditionIndex]
+
+                                  const adjustedTemp = {
+                                    min: Math.max(
+                                      5,
+                                      dayWeather.temperature.min +
+                                        variation.tempOffset,
+                                    ),
+                                    max: Math.min(
+                                      35,
+                                      dayWeather.temperature.max +
+                                        variation.tempOffset,
+                                    ),
+                                  }
+
+                                  return (
+                                    <div className="ml-4 text-right">
+                                      <div className="flex items-center text-xs text-gray-500">
+                                        <span className="mr-1">
+                                          {getWeatherIcon(adjustedCondition)}
+                                        </span>
+                                        <span className="mr-1 text-blue-600">
+                                          📍{city}
+                                        </span>
+                                      </div>
+                                      <div className="mt-1 text-xs text-gray-600">
+                                        {adjustedCondition} {adjustedTemp.min}°~
+                                        {adjustedTemp.max}°
+                                      </div>
+                                    </div>
+                                  )
+                                }
+                                return null
+                              })()}
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-gray-500">상세 일정이 없습니다.</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

@@ -12,13 +12,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import {
-  format,
-  addDays,
-  isBefore,
-  startOfToday,
-  differenceInCalendarDays,
-} from 'date-fns'
+import { format, isBefore, startOfToday } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
@@ -90,19 +84,47 @@ const PlannerForm = memo(() => {
   })
   const [calendarOpen, setCalendarOpen] = useState(false)
 
-
   // 편집 모드에서 기존 데이터 로드
   useEffect(() => {
     if (isEditMode && existingPlan && !isLoadingPlan) {
       try {
         // 기본 정보 설정
+        const today = new Date()
+        const originalStartDate = existingPlan.start_date
+          ? new Date(existingPlan.start_date)
+          : null
+        const originalEndDate = existingPlan.end_date
+          ? new Date(existingPlan.end_date)
+          : null
+
+        // 과거 날짜 처리: 시작 날짜가 과거인 경우 오늘로 조정
+        let adjustedStartDate = originalStartDate
+        let adjustedEndDate = originalEndDate
+
+        if (originalStartDate && originalStartDate < today) {
+          // 여행 기간 계산 (날짜 차이)
+          const originalDuration =
+            originalEndDate && originalStartDate
+              ? Math.ceil(
+                  (originalEndDate - originalStartDate) / (1000 * 60 * 60 * 24),
+                )
+              : 0
+
+          // 시작 날짜를 오늘로, 종료 날짜를 기간에 맞춰 조정
+          adjustedStartDate = new Date(today)
+          adjustedEndDate =
+            originalDuration > 0
+              ? new Date(
+                  today.getTime() + originalDuration * 24 * 60 * 60 * 1000,
+                )
+              : new Date(today)
+        }
+
         setForm({
           title: existingPlan.title || '',
           dateRange: {
-            from: existingPlan.start_date
-              ? new Date(existingPlan.start_date)
-              : null,
-            to: existingPlan.end_date ? new Date(existingPlan.end_date) : null,
+            from: adjustedStartDate,
+            to: adjustedEndDate,
           },
         })
 
@@ -114,17 +136,17 @@ const PlannerForm = memo(() => {
         // 일정 데이터 변환 및 설정
         if (
           existingPlan.itinerary &&
-          typeof existingPlan.itinerary === 'object'
+          typeof existingPlan.itinerary === 'object' &&
+          adjustedStartDate
         ) {
-          const startDate = new Date(existingPlan.start_date)
           const convertedDestinations = {}
 
           Object.entries(existingPlan.itinerary).forEach(
             ([dayKey, destinations]) => {
-              // "Day 1", "Day 2" 형태를 실제 날짜로 변환
+              // "Day 1", "Day 2" 형태를 실제 날짜로 변환 (조정된 시작 날짜 기준)
               const dayNumber = parseInt(dayKey.replace('Day ', '')) - 1
-              const currentDate = new Date(startDate)
-              currentDate.setDate(startDate.getDate() + dayNumber)
+              const currentDate = new Date(adjustedStartDate)
+              currentDate.setDate(adjustedStartDate.getDate() + dayNumber)
               const dateString = currentDate.toISOString().split('T')[0]
 
               // 목적지 데이터 변환
@@ -142,10 +164,18 @@ const PlannerForm = memo(() => {
           setInitialDestinations(convertedDestinations)
         }
 
-        toast.success('기존 여행 계획을 불러왔습니다', {
-          duration: 2000,
-          position: 'bottom-right',
-        })
+        // 사용자 알림
+        if (originalStartDate && originalStartDate < today) {
+          toast.info('과거 날짜가 오늘 날짜로 조정되었습니다', {
+            duration: 3000,
+            position: 'top-center',
+          })
+        } else {
+          toast.success('기존 여행 계획을 불러왔습니다', {
+            duration: 2000,
+            position: 'bottom-right',
+          })
+        }
       } catch (error) {
         console.error('플랜 데이터 로드 중 오류:', error)
         toast.error('플랜 데이터를 불러오는 중 문제가 발생했습니다', {
@@ -201,9 +231,9 @@ const PlannerForm = memo(() => {
   // 과거 날짜 필터링된 날짜 목록 (편집 모드에서만 적용)
   const dates = useMemo(() => {
     if (!isEditMode) return allDates
-    
+
     const today = new Date().toISOString().split('T')[0]
-    return allDates.filter(date => date >= today)
+    return allDates.filter((date) => date >= today)
   }, [allDates, isEditMode])
 
   // 폼 유효성 검사 - 메모이제이션 (안전장치 추가)
@@ -216,6 +246,12 @@ const PlannerForm = memo(() => {
     }
 
     try {
+      // 제목 검증
+      const hasTitle = form.title && form.title.trim().length > 0
+      if (!hasTitle) {
+        validation.missingFields.push('여행 제목')
+      }
+
       // 출발지 검증
       const hasOrigin = destInputs.origin && destInputs.origin.trim().length > 0
       if (!hasOrigin) {
@@ -245,7 +281,8 @@ const PlannerForm = memo(() => {
       }
 
       // 전체 유효성 (기존 로직 유지)
-      validation.isValid = hasOrigin && hasValidDates && hasDestinations
+      validation.isValid =
+        hasTitle && hasOrigin && hasValidDates && hasDestinations
 
       return validation
     } catch (error) {
@@ -258,6 +295,7 @@ const PlannerForm = memo(() => {
       }
     }
   }, [
+    form.title,
     destInputs.origin,
     form.dateRange?.from,
     form.dateRange?.to,
@@ -396,43 +434,45 @@ const PlannerForm = memo(() => {
   }
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 px-2 py-2 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="bg-gray-50/50 px-4 py-6 dark:bg-gray-900">
       <motion.div
-        className="mx-auto w-full max-w-2xl"
+        className="mx-auto w-full max-w-3xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
       >
         {/* 편집 모드 표시 */}
         {isEditMode && (
-          <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-center">
-            <p className="text-sm text-blue-700">
-              <span className="font-medium">편집 모드</span> - 기존 여행 계획을
-              수정하고 있습니다
-            </p>
+          <div className="mb-6 rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50 p-4 text-center shadow-sm">
+            <div className="flex items-center justify-center gap-2">
+              <div className="h-2 w-2 animate-pulse rounded-full bg-indigo-500"></div>
+              <p className="text-sm font-medium text-indigo-700">
+                편집 모드 - 기존 여행 계획을 수정하고 있습니다
+              </p>
+              <div className="h-2 w-2 animate-pulse rounded-full bg-purple-500"></div>
+            </div>
           </div>
         )}
-
 
         {/* 헤더 */}
         <PlannerHeader />
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-8">
           {/* 기본 정보 입력 */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
           >
-            <Card className="border-0 bg-white/80 shadow-xl backdrop-blur-sm dark:bg-gray-800/80">
-              <CardContent className="p-8">
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
-                    <span className="font-bold text-blue-600 dark:text-blue-400">
-                      1
-                    </span>
+            <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+              <CardContent className="p-6">
+                <div className="mb-6 flex items-center gap-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md">
+                    <span className="text-sm font-bold text-white">1</span>
                   </div>
-                  <h2 className="text-xl font-semibold">여행 기본 정보</h2>
+                  <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+                    여행 기본 정보
+                  </h2>
                 </div>
 
                 <div className="space-y-6">
@@ -534,67 +574,15 @@ const PlannerForm = memo(() => {
                             mode="range"
                             selected={form.dateRange}
                             onSelect={(range) => {
-                              if (range?.from && range?.to) {
-                                const maxEnd = addDays(range.from, 14)
-                                let to = range.to
-                                if (
-                                  differenceInCalendarDays(to, range.from) > 14
-                                ) {
-                                  to = maxEnd
-                                  const isDark =
-                                    document.documentElement.classList.contains(
-                                      'dark',
-                                    )
-                                  toast.error(
-                                    '여행 기간은 최대 15일까지 선택할 수 있습니다.',
-                                    {
-                                      duration: 3000,
-                                      position: 'top-center',
-                                      icon: '📅',
-                                      style: isDark
-                                        ? {
-                                            background:
-                                              'linear-gradient(90deg, #1e293b 0%, #334155 100%)',
-                                            color: '#f1f5f9',
-                                            fontWeight: 'bold',
-                                            borderRadius: '12px',
-                                            boxShadow:
-                                              '0 4px 24px 0 rgba(30,41,59,0.30)',
-                                            fontSize: '1.05rem',
-                                            padding: '1rem 1.5rem',
-                                            border: '1px solid #64748b',
-                                          }
-                                        : {
-                                            background:
-                                              'linear-gradient(90deg, #f9fafb 0%, #e0e7ff 100%)',
-                                            color: '#1e293b',
-                                            fontWeight: 'bold',
-                                            borderRadius: '12px',
-                                            boxShadow:
-                                              '0 4px 24px 0 rgba(30,41,59,0.10)',
-                                            fontSize: '1.05rem',
-                                            padding: '1rem 1.5rem',
-                                            border: '1px solid #a5b4fc',
-                                          },
-                                    },
-                                  )
-                                }
-                                setForm((prev) => ({
-                                  ...prev,
-                                  dateRange: { from: range.from, to },
-                                }))
-                              } else {
-                                setForm((prev) => ({
-                                  ...prev,
-                                  dateRange: range || { from: null, to: null },
-                                }))
-                              }
+                              setForm((prev) => ({
+                                ...prev,
+                                dateRange: range || { from: null, to: null },
+                              }))
                             }}
                             numberOfMonths={2}
                             locale={ko}
                             disabled={(date) => isBefore(date, startOfToday())}
                             fromDate={startOfToday()}
-                            toDate={addDays(startOfToday(), 14)}
                           />
                         </PopoverContent>
                       </Popover>
@@ -614,36 +602,35 @@ const PlannerForm = memo(() => {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.5 }}
               >
-                <Card className="border-0 bg-white/80 shadow-xl backdrop-blur-sm dark:bg-gray-800/80">
-                  <CardContent className="p-8">
-                    <div className="mb-6 flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900">
-                        <span className="font-bold text-purple-600 dark:text-purple-400">
-                          2
-                        </span>
+                <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                  <CardContent className="p-6">
+                    <div className="mb-6 flex items-center gap-4">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-pink-600 shadow-md">
+                        <span className="text-sm font-bold text-white">2</span>
                       </div>
-                      <h2 className="text-xl font-semibold">
+                      <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
                         날짜별 목적지 선택
                       </h2>
                     </div>
                     <p className="mt-1 mb-4 text-sm text-gray-400">
-                      14일 이후의 날씨 데이터는 알림으로 알려드립니다.
+                      14일 이후의 날씨 데이터는 제한적으로 제공될 수 있습니다.
                     </p>
-                    
+
                     {/* 과거 날짜 알림 및 삭제 버튼 */}
                     {getPastDatesCount() > 0 && (
-                      <div className="mb-4 rounded-lg border border-orange-200 bg-orange-50 p-4">
+                      <div className="mb-6 rounded-2xl border border-orange-200 bg-gradient-to-r from-orange-50 to-red-50 p-5 shadow-sm">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-100">
-                              <span className="text-sm">⚠️</span>
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 shadow-sm">
+                              <span className="text-lg">⚠️</span>
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-orange-800">
+                              <p className="mb-1 text-sm font-semibold text-orange-800">
                                 과거 날짜 감지됨
                               </p>
                               <p className="text-xs text-orange-600">
-                                {getPastDatesCount()}개의 과거 날짜가 있습니다. 날씨 정보를 가져올 수 없어요.
+                                {getPastDatesCount()}개의 과거 날짜가 있습니다.
+                                날씨 정보를 가져올 수 없어요.
                               </p>
                             </div>
                           </div>
@@ -658,7 +645,7 @@ const PlannerForm = memo(() => {
                                 position: 'bottom-right',
                               })
                             }}
-                            className="bg-orange-100 text-orange-700 hover:bg-orange-200"
+                            className="rounded-xl border-orange-300 bg-orange-100 font-medium text-orange-700 shadow-sm hover:bg-orange-200"
                           >
                             과거 날짜 삭제
                           </Button>
@@ -666,9 +653,10 @@ const PlannerForm = memo(() => {
                       </div>
                     )}
 
-                    <div className="space-y-6">
+                    <div className="space-y-8">
                       {dates.map((dateStr, index) => {
-                        const isPastDate = dateStr < new Date().toISOString().split('T')[0]
+                        const isPastDate =
+                          dateStr < new Date().toISOString().split('T')[0]
                         return (
                           <motion.div
                             key={dateStr}
@@ -676,22 +664,30 @@ const PlannerForm = memo(() => {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1, duration: 0.3 }}
                           >
-                            <Card className={`border ${isPastDate ? 'border-orange-200 bg-orange-50/50' : 'border-gray-200'} dark:border-gray-700`}>
-                              <CardContent className="p-6">
+                            <Card
+                              className={`border ${isPastDate ? 'border-orange-200 bg-orange-50/50' : 'border-gray-200/50 bg-white'} rounded-2xl shadow-sm dark:border-gray-700 dark:bg-gray-800`}
+                            >
+                              <CardContent className="p-5">
                                 <div className="mb-4 flex items-center justify-between">
                                   <div className="flex items-center gap-2">
-                                    <div className={`flex h-6 w-6 items-center justify-center rounded-full ${isPastDate ? 'bg-orange-100 dark:bg-orange-900' : 'bg-blue-100 dark:bg-blue-900'}`}>
-                                      <span className={`text-xs font-bold ${isPastDate ? 'text-orange-600 dark:text-orange-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                                    <div
+                                      className={`flex h-8 w-8 items-center justify-center rounded-full shadow-sm ${isPastDate ? 'bg-gradient-to-r from-orange-400 to-red-500 text-white' : 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white'}`}
+                                    >
+                                      <span className="text-xs font-bold">
                                         {index + 1}
                                       </span>
                                     </div>
-                                    <h3 className="font-medium">
-                                      {format(new Date(dateStr), 'M월 d일 (E)', {
-                                        locale: ko,
-                                      })}
+                                    <h3 className="font-semibold text-gray-800 dark:text-gray-100">
+                                      {format(
+                                        new Date(dateStr),
+                                        'M월 d일 (E)',
+                                        {
+                                          locale: ko,
+                                        },
+                                      )}
                                     </h3>
                                     {isPastDate && (
-                                      <span className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded">
+                                      <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700 shadow-sm">
                                         과거 날짜
                                       </span>
                                     )}
@@ -703,66 +699,88 @@ const PlannerForm = memo(() => {
                                       size="sm"
                                       onClick={() => {
                                         clearDestinations(dateStr)
-                                        toast.info(`${format(new Date(dateStr), 'M월 d일', { locale: ko })} 목적지가 삭제되었습니다`, {
-                                          duration: 2000,
-                                          position: 'bottom-right',
-                                        })
+                                        toast.info(
+                                          `${format(new Date(dateStr), 'M월 d일', { locale: ko })} 목적지가 삭제되었습니다`,
+                                          {
+                                            duration: 2000,
+                                            position: 'bottom-right',
+                                          },
+                                        )
                                       }}
-                                      className="text-orange-600 hover:text-orange-700 hover:bg-orange-100"
+                                      className="rounded-lg border-orange-300 font-medium text-orange-600 shadow-sm hover:bg-orange-100 hover:text-orange-700"
                                     >
                                       삭제
                                     </Button>
                                   )}
                                 </div>
 
-                              <div className="relative space-y-3">
-                                <label className="text-muted-foreground text-sm font-medium">
-                                  {dateStr} 목적지 추가
-                                </label>
-                                {isPastDate ? (
-                                  <div className="rounded-md border border-orange-200 bg-orange-50 p-3">
-                                    <p className="text-sm text-orange-700">
-                                      과거 날짜입니다. 목적지를 추가할 수 없습니다.
-                                    </p>
-                                  </div>
-                                ) : (
-                                  <>
-                                    <Input
-                                      value={destInputs[dateStr] || ''}
-                                      onChange={(e) =>
-                                        updateDestInput(dateStr, e.target.value)
-                                      }
-                                      onFocus={() => showDropdown(dateStr)}
-                                      onBlur={() =>
-                                        setTimeout(() => hideDropdown(dateStr), 150)
-                                      }
-                                      placeholder="도시, 장소 등을 검색하세요"
-                                      autoComplete="off"
-                                    />
-                                    <DestinationAutocomplete
-                                      isVisible={showDestDropdown[dateStr]}
-                                      suggestions={destSuggestions[dateStr]}
-                                      onSelect={(suggestion) =>
-                                        handleAddDestination(dateStr, suggestion)
-                                      }
-                                    />
-                                  </>
-                                )}
-                              </div>
+                                <div className="relative space-y-3">
+                                  <label className="mb-1 block text-sm font-semibold text-gray-600 dark:text-gray-300">
+                                    📍 목적지 추가
+                                  </label>
+                                  {isPastDate ? (
+                                    <div className="rounded-xl border border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 p-4 shadow-sm">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-lg">⏰</span>
+                                        <p className="text-sm font-medium text-orange-700">
+                                          과거 날짜입니다. 목적지를 추가할 수
+                                          없습니다.
+                                        </p>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <Input
+                                        value={destInputs[dateStr] || ''}
+                                        onChange={(e) =>
+                                          updateDestInput(
+                                            dateStr,
+                                            e.target.value,
+                                          )
+                                        }
+                                        onFocus={() => showDropdown(dateStr)}
+                                        onBlur={() =>
+                                          setTimeout(
+                                            () => hideDropdown(dateStr),
+                                            150,
+                                          )
+                                        }
+                                        placeholder="🔍 도시, 장소 등을 검색하세요"
+                                        autoComplete="off"
+                                        className="rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
+                                      />
+                                      <DestinationAutocomplete
+                                        isVisible={showDestDropdown[dateStr]}
+                                        suggestions={destSuggestions[dateStr]}
+                                        onSelect={(suggestion) =>
+                                          handleAddDestination(
+                                            dateStr,
+                                            suggestion,
+                                          )
+                                        }
+                                      />
+                                    </>
+                                  )}
+                                </div>
 
-                              <DestinationBadgeList
-                                destinations={destinationsByDate[dateStr] || []}
-                                onRemove={(destination) =>
-                                  handleRemoveDestination(dateStr, destination)
-                                }
-                                onReorder={(newOrder) =>
-                                  reorderDestinations(dateStr, newOrder)
-                                }
-                                date={dateStr}
-                              />
-                            </CardContent>
-                          </Card>
-                        </motion.div>
+                                <DestinationBadgeList
+                                  destinations={
+                                    destinationsByDate[dateStr] || []
+                                  }
+                                  onRemove={(destination) =>
+                                    handleRemoveDestination(
+                                      dateStr,
+                                      destination,
+                                    )
+                                  }
+                                  onReorder={(newOrder) =>
+                                    reorderDestinations(dateStr, newOrder)
+                                  }
+                                  date={dateStr}
+                                />
+                              </CardContent>
+                            </Card>
+                          </motion.div>
                         )
                       })}
                     </div>
@@ -778,16 +796,24 @@ const PlannerForm = memo(() => {
               {/* 폼 완성도 안내 (사용자 친화적 피드백) */}
               {!formValidation.isValid &&
                 formValidation.missingFields.length > 0 && (
-                  <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-center">
-                    <p className="text-sm text-blue-700">
-                      <span className="font-medium">
+                  <div className="mb-6 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4 text-center shadow-sm">
+                    <div className="mb-2 flex items-center justify-center gap-2">
+                      <span className="text-lg">📝</span>
+                      <p className="text-sm font-semibold text-amber-800">
                         아직 {formValidation.missingFields.length}개 항목이
                         남았어요!
-                      </span>
-                    </p>
-                    <p className="mt-1 text-xs text-blue-600">
-                      {formValidation.missingFields.join(', ')}을 입력해 주세요
-                    </p>
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {formValidation.missingFields.map((field, _index) => (
+                        <span
+                          key={field}
+                          className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700"
+                        >
+                          {field}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
 
@@ -809,8 +835,8 @@ const PlannerForm = memo(() => {
             transition={{ delay: 0.2, duration: 0.5 }}
             className="mt-12"
           >
-            <Card className="border-0 bg-white/80 shadow-xl backdrop-blur-sm dark:bg-gray-800/80">
-              <CardContent className="p-8">
+            <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+              <CardContent className="p-6">
                 <h3 className="mb-6 text-center text-2xl font-bold">
                   ✨ 맞춤 여행 플랜이 완성되었어요!
                 </h3>
