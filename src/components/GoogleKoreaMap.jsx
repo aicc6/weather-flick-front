@@ -12,7 +12,6 @@ const GoogleKoreaMap = ({ cities, selectedRegion, onRegionSelect }) => {
 
   const addCityMarkers = useCallback(
     (google, mapInstance) => {
-      console.log('마커 리셋', selectedRegion)
       // 기존 마커 제거 (수정된 로직)
       markersRef.current.forEach(({ marker }) => {
         if (marker) {

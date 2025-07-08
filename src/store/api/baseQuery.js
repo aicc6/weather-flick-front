@@ -47,16 +47,16 @@ export const baseQueryWithReauth = async (args, api, extraOptions) => {
 
   // 401 에러 처리
   if (result.error && result.error.status === 401) {
-    console.warn('Unauthorized access - redirecting to login')
     handle401Error()
   }
 
   // 응답 데이터 변환 (기존 handleResponse 로직 적용)
   if (result.data && typeof result.data === 'object') {
     // 성공 응답인 경우 data 필드 추출 (백엔드 응답 구조에 맞춤)
-    if (result.data.data !== undefined) {
+    if (result.data.success && result.data.data !== undefined) {
       result.data = result.data.data
     }
+    // success 필드가 없는 경우 직접 데이터 사용
   }
 
   return result

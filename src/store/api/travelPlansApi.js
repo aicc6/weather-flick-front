@@ -4,19 +4,39 @@ import { baseQueryWithReauth } from './baseQuery'
 // 데이터 검증 및 정제 유틸리티
 const validateAndSanitizeResponse = (response, expectedStructure = {}) => {
   try {
-    // 기본 응답 검증
+    // 기본 응답 검증 (null은 typeof가 'object'이므로 별도 처리)
     if (!response || typeof response !== 'object') {
-      console.warn('비정상적인 API 응답 타입:', typeof response)
-      return null
+      return expectedStructure
     }
 
     // 표준 응답 래퍼 처리
     if (Object.prototype.hasOwnProperty.call(response, 'success')) {
       if (!response.success) {
-        console.warn('API 응답 오류:', response.error || '알 수 없는 오류')
-        return response
+        // 에러는 실제 에러 처리를 위해 유지
+        console.error('API 응답 오류:', response.error || response)
+        return expectedStructure
       }
       response = response.data
+    }
+
+    // 응답이 null이거나 undefined인 경우 처리
+    if (!response) {
+      return expectedStructure
+    }
+
+    // 배열 응답인 경우 바로 반환
+    if (Array.isArray(response)) {
+      return response
+    }
+
+    // itinerary 필드가 문자열인 경우 JSON 파싱
+    if (response.itinerary && typeof response.itinerary === 'string') {
+      try {
+        response.itinerary = JSON.parse(response.itinerary)
+      } catch (parseError) {
+        console.warn('itinerary JSON 파싱 실패:', parseError)
+        response.itinerary = {}
+      }
     }
 
     // 데이터 구조 검증 및 기본값 설정
@@ -31,7 +51,7 @@ const validateAndSanitizeResponse = (response, expectedStructure = {}) => {
     return response
   } catch (error) {
     console.error('데이터 검증 중 오류:', error)
-    return null
+    return expectedStructure
   }
 }
 
@@ -63,15 +83,8 @@ export const travelPlansApi = createApi({
       }),
       invalidatesTags: ['TravelPlan'],
       transformResponse: (response) => {
-        // 표준 응답 래퍼 처리: { success: true, data: {...}, error: null }
-        if (
-          !response ||
-          typeof response !== 'object' ||
-          !Object.prototype.hasOwnProperty.call(response, 'success')
-        ) {
-          return response
-        }
-        return response.success ? response.data : response
+        const validatedResponse = validateAndSanitizeResponse(response, TRAVEL_PLAN_DEFAULTS)
+        return validatedResponse
       },
     }),
 
@@ -81,11 +94,11 @@ export const travelPlansApi = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: 'TravelPlan', id })),
+              ...result.map(({ plan_id }) => ({ type: 'TravelPlan', id: plan_id })),
               { type: 'TravelPlan', id: 'LIST' },
             ]
           : [{ type: 'TravelPlan', id: 'LIST' }],
-      keepUnusedDataFor: 300, // 5분간 캐싱
+      keepUnusedDataFor: 0, // 캐싱 비활성화하여 항상 최신 데이터 로드
       transformResponse: (response) => {
         const validatedResponse = validateAndSanitizeResponse(
           response,
@@ -93,7 +106,6 @@ export const travelPlansApi = createApi({
         )
         // 배열이 아니면 빈 배열 반환 (안전장치)
         if (!Array.isArray(validatedResponse)) {
-          console.warn('여행 계획 목록이 배열이 아님:', validatedResponse)
           return []
         }
         // 각 항목에 기본값 적용
@@ -106,6 +118,7 @@ export const travelPlansApi = createApi({
         }))
       },
       transformErrorResponse: (response) => {
+        console.error('getUserPlans API 오류:', response)
         return {
           status: response.status,
           data: response.data,
@@ -119,19 +132,23 @@ export const travelPlansApi = createApi({
     // 특정 플랜 조회
     getTravelPlan: builder.query({
       query: (planId) => `travel-plans/${planId}`,
-      providesTags: (result, error, planId) => [
+      providesTags: (_, __, planId) => [
         { type: 'TravelPlan', id: planId },
       ],
       keepUnusedDataFor: 600, // 10분간 캐싱
       transformResponse: (response) => {
-        if (
-          !response ||
-          typeof response !== 'object' ||
-          !Object.prototype.hasOwnProperty.call(response, 'success')
-        ) {
-          return response
+        const validatedResponse = validateAndSanitizeResponse(response, TRAVEL_PLAN_DEFAULTS)
+        return validatedResponse
+      },
+      transformErrorResponse: (response) => {
+        return {
+          status: response.status,
+          data: response.data,
+          message:
+            response.data?.message ||
+            response.data?.error?.message ||
+            '여행 계획을 불러오는 중 오류가 발생했습니다',
         }
-        return response.success ? response.data : response
       },
     }),
 
@@ -142,19 +159,13 @@ export const travelPlansApi = createApi({
         method: 'PUT',
         body: planData,
       }),
-      invalidatesTags: (result, error, { planId }) => [
+      invalidatesTags: (_, __, { planId }) => [
         { type: 'TravelPlan', id: planId },
         { type: 'TravelPlan', id: 'LIST' },
       ],
       transformResponse: (response) => {
-        if (
-          !response ||
-          typeof response !== 'object' ||
-          !Object.prototype.hasOwnProperty.call(response, 'success')
-        ) {
-          return response
-        }
-        return response.success ? response.data : response
+        const validatedResponse = validateAndSanitizeResponse(response, TRAVEL_PLAN_DEFAULTS)
+        return validatedResponse
       },
     }),
 
@@ -164,7 +175,7 @@ export const travelPlansApi = createApi({
         url: `travel-plans/${planId}`,
         method: 'DELETE',
       }),
-      invalidatesTags: (result, error, planId) => [
+      invalidatesTags: (_, __, planId) => [
         { type: 'TravelPlan', id: planId },
         { type: 'TravelPlan', id: 'LIST' },
       ],
@@ -177,18 +188,12 @@ export const travelPlansApi = createApi({
         method: 'POST',
         body: shareData,
       }),
-      invalidatesTags: (result, error, { planId }) => [
+      invalidatesTags: (_, __, { planId }) => [
         { type: 'TravelPlan', id: planId },
       ],
       transformResponse: (response) => {
-        if (
-          !response ||
-          typeof response !== 'object' ||
-          !Object.prototype.hasOwnProperty.call(response, 'success')
-        ) {
-          return response
-        }
-        return response.success ? response.data : response
+        const validatedResponse = validateAndSanitizeResponse(response, TRAVEL_PLAN_DEFAULTS)
+        return validatedResponse
       },
     }),
 
@@ -201,7 +206,7 @@ export const travelPlansApi = createApi({
           weather_conditions: weatherConditions.join(','),
         },
       }),
-      providesTags: (result, error, { theme }) => [
+      providesTags: (_, __, { theme }) => [
         { type: 'Destination', id: `recommend-${theme}` },
       ],
       keepUnusedDataFor: 600, // 10분간 캐싱 (추천 데이터는 상대적으로 안정적)

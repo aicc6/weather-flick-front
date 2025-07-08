@@ -318,12 +318,6 @@ export default function CustomizedScheduleRegionPage() {
                         {city.region_name}
                       </h3>
                       <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                        {console.log(
-                          'administrative_code:',
-                          city.administrative_code,
-                          'type:',
-                          typeof city.administrative_code,
-                        )}
                         {REGION_DESCRIPTIONS[city.administrative_code] ||
                           '아름다운 대한민국의 도시'}
                       </p>

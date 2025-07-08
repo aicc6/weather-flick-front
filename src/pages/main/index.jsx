@@ -50,7 +50,6 @@ export function MainPage() {
 
   const handleSearch = () => {
     // TODO: 검색 로직 구현
-    console.log('검색 데이터:', _searchData)
   }
 
   // 각 서비스별 설명 데이터

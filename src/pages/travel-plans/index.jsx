@@ -30,7 +30,11 @@ const formatDate = (dateString) => {
 }
 
 export function TravelPlansPage() {
-  const { data: plans, isLoading, isError, error } = useGetUserPlansQuery()
+  const { data: plans, isLoading, isError, error, refetch } = useGetUserPlansQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  })
   const [deleteTravelPlan, { isLoading: isDeleting }] =
     useDeleteTravelPlanMutation()
   const [planToDelete, setPlanToDelete] = useState(null)
@@ -119,10 +123,10 @@ export function TravelPlansPage() {
           </p>
           <div className="space-x-4">
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => refetch()}
               className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
             >
-              새로고침
+              다시 시도
             </button>
             <Link
               to="/planner"
@@ -159,7 +163,7 @@ export function TravelPlansPage() {
       </div>
 
       <div className="mt-6">
-        {sortedPlans && sortedPlans.length > 0 ? (
+        {!isLoading && !isError && sortedPlans && sortedPlans.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {sortedPlans.map((plan) => (
               <Card
@@ -238,12 +242,22 @@ export function TravelPlansPage() {
               아직 여행 계획이 없어요
             </h2>
             <p className="mt-2 text-gray-500">첫 번째 여행을 계획해보세요!</p>
-            <Button asChild className="mt-4">
-              <Link to="/planner">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                지금 시작하기
-              </Link>
-            </Button>
+            <div className="mt-4 space-y-2">
+              <Button asChild>
+                <Link to="/planner">
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  지금 시작하기
+                </Link>
+              </Button>
+              <div>
+                <button
+                  onClick={() => refetch()}
+                  className="text-sm text-blue-600 hover:text-blue-800 underline"
+                >
+                  새로고침
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

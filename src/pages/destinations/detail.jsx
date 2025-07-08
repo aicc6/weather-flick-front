@@ -782,7 +782,6 @@ export default function TravelCourseDetailPage() {
 
   useEffect(() => {
     // 페이지 방문 시 조회수 증가 (실제로는 API 호출)
-    console.log('조회수 증가:', course.title)
   }, [id, course.title])
 
   const handlePrevImage = () => {
