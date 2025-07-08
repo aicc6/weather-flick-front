@@ -3,7 +3,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { MessageSquare, Send, X, Bot, Sparkles } from '@/components/icons'
 import { cn } from '@/lib/utils'
-import { initialBotMessage, mockBotResponse, CHATBOT_CONFIG } from '@/data'
+import { initialBotMessage, CHATBOT_CONFIG } from '@/data'
+import {
+  useSendChatMessageMutation,
+  useGetInitialMessageQuery,
+} from '@/store/api/chatbotApi'
+import { toast } from 'sonner'
 
 // Typing indicator component
 const TypingIndicator = () => (
@@ -21,6 +26,12 @@ export function Chatbot() {
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef(null)
 
+  // RTK Query hooks
+  const [sendMessage, { isLoading: isSending }] = useSendChatMessageMutation()
+  const { data: initialMessage } = useGetInitialMessageQuery(undefined, {
+    skip: !isOpen, // API 호출을 열릴 때만 실행
+  })
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
@@ -30,45 +41,82 @@ export function Chatbot() {
     if (isOpen && messages.length === 0) {
       setIsTyping(true)
       setTimeout(() => {
+        const welcomeMessage = initialMessage || initialBotMessage
         setMessages([
           {
-            ...initialBotMessage,
             id: Date.now(),
+            text: welcomeMessage.message || welcomeMessage.text,
+            sender: 'bot',
+            suggestions: welcomeMessage.suggestions || [],
           },
         ])
         setIsTyping(false)
       }, CHATBOT_CONFIG.welcomeDelay / 2)
     }
-  }, [isOpen, messages.length])
+  }, [isOpen, messages.length, initialMessage])
 
   // Scroll to bottom when new messages are added
   useEffect(() => {
     scrollToBottom()
   }, [messages])
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault()
-    if (input.trim() === '' || isTyping) return
+    if (input.trim() === '' || isTyping || isSending) return
 
     const userMessage = {
-      id: Date.now(), // Use timestamp for unique key
+      id: Date.now(),
       text: input,
       sender: 'user',
     }
 
     setMessages((prev) => [...prev, userMessage])
     setInput('')
-    setIsTyping(true) // Bot starts "typing"
+    setIsTyping(true)
 
-    // Mock bot response
-    setTimeout(() => {
+    try {
+      // 실제 OpenAI API 호출
+      const response = await sendMessage({
+        text: input,
+        context: {
+          // 필요에 따라 컨텍스트 추가
+          timestamp: new Date().toISOString(),
+        },
+      }).unwrap()
+
+      setIsTyping(false)
+
       const botResponse = {
         id: Date.now() + 1,
-        ...mockBotResponse,
+        text: response.text,
+        sender: 'bot',
+        suggestions: response.suggestions || [],
       }
+
       setMessages((prev) => [...prev, botResponse])
-      setIsTyping(false) // Bot stops "typing"
-    }, CHATBOT_CONFIG.typingDelay)
+    } catch (error) {
+      setIsTyping(false)
+      console.error('챗봇 응답 오류:', error)
+
+      // 에러 시 fallback 메시지
+      const errorMessage = {
+        id: Date.now() + 1,
+        text: '죄송합니다. 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+        sender: 'bot',
+        suggestions: [
+          '날씨 정보를 알려주세요',
+          '여행지를 추천해주세요',
+          '도움말을 보여주세요',
+        ],
+      }
+
+      setMessages((prev) => [...prev, errorMessage])
+      toast.error('챗봇 응답 중 오류가 발생했습니다.')
+    }
+  }
+
+  const handleSuggestionClick = (suggestion) => {
+    setInput(suggestion)
   }
 
   return (
@@ -110,32 +158,55 @@ export function Chatbot() {
 
         <div className="bg-cloud-white dark:bg-card flex-1 space-y-4 overflow-y-auto p-4">
           {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={cn(
-                'animate-in fade-in slide-in-from-bottom-4 flex items-end gap-3 duration-500',
-                msg.sender === 'user' ? 'justify-end' : 'justify-start',
-              )}
-            >
-              {msg.sender === 'bot' && (
-                <div className="bg-sky-blue-dark flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
-                  <Bot className="h-5 w-5 text-white" />
-                </div>
-              )}
+            <div key={msg.id}>
               <div
                 className={cn(
-                  'max-w-[80%] rounded-2xl px-4 py-2.5 shadow-md transition-all hover:shadow-lg',
-                  msg.sender === 'user'
-                    ? 'weather-button rounded-br-none text-white'
-                    : 'glass-effect text-storm-gray-dark dark:text-foreground rounded-bl-none',
+                  'animate-in fade-in slide-in-from-bottom-4 flex items-end gap-3 duration-500',
+                  msg.sender === 'user' ? 'justify-end' : 'justify-start',
                 )}
               >
-                <p className="text-sm leading-relaxed">{msg.text}</p>
+                {msg.sender === 'bot' && (
+                  <div className="bg-sky-blue-dark flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
+                    <Bot className="h-5 w-5 text-white" />
+                  </div>
+                )}
+                <div
+                  className={cn(
+                    'max-w-[80%] rounded-2xl px-4 py-2.5 shadow-md transition-all hover:shadow-lg',
+                    msg.sender === 'user'
+                      ? 'weather-button rounded-br-none text-white'
+                      : 'glass-effect text-storm-gray-dark dark:text-foreground rounded-bl-none',
+                  )}
+                >
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                    {msg.text}
+                  </p>
+                </div>
               </div>
+
+              {/* 추천 질문 버튼들 */}
+              {msg.sender === 'bot' &&
+                msg.suggestions &&
+                msg.suggestions.length > 0 && (
+                  <div className="mt-2 ml-11 flex flex-wrap gap-2">
+                    {msg.suggestions.map((suggestion, index) => (
+                      <Button
+                        key={index}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className="text-sky-blue-dark border-sky-blue hover:bg-sky-blue h-7 rounded-full px-3 text-xs transition-colors hover:text-white"
+                        disabled={isTyping || isSending}
+                      >
+                        {suggestion}
+                      </Button>
+                    ))}
+                  </div>
+                )}
             </div>
           ))}
 
-          {isTyping && (
+          {(isTyping || isSending) && (
             <div className="flex items-end gap-3">
               <div className="bg-sky-blue-dark flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
                 <Bot className="h-5 w-5 text-white" />
@@ -160,11 +231,13 @@ export function Chatbot() {
               placeholder="메시지를 입력하세요..."
               className="weather-input h-10 flex-1 rounded-full px-4"
               autoComplete="off"
+              disabled={isTyping || isSending}
             />
             <Button
               type="submit"
               size="icon"
               className="sunny-button h-10 w-10 rounded-full"
+              disabled={isTyping || isSending || !input.trim()}
             >
               <Send className="h-5 w-5" />
             </Button>
