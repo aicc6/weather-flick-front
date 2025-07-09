@@ -1,5 +1,9 @@
 import { useParams, Link } from 'react-router-dom'
-import { useGetTravelPlanQuery } from '@/store/api/travelPlansApi'
+import { 
+  useGetTravelPlanQuery, 
+  useGetTravelPlanRoutesQuery, 
+  useAutoGenerateRoutesMutation 
+} from '@/store/api/travelPlansApi'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,6 +14,10 @@ import {
   ArrowLeft,
   MapPin,
   Tag,
+  Navigation,
+  Clock,
+  DollarSign,
+  Zap,
 } from '@/components/icons'
 import { toast } from 'sonner'
 
@@ -47,6 +55,18 @@ export function TravelPlanDetailPage() {
     isError,
     error,
   } = useGetTravelPlanQuery(planId)
+  
+  // 경로 정보 조회
+  const {
+    data: routes,
+    isLoading: routesLoading,
+    isError: routesError,
+  } = useGetTravelPlanRoutesQuery(planId, {
+    skip: !planId,
+  })
+  
+  // 자동 경로 생성
+  const [autoGenerateRoutes, { isLoading: isGeneratingRoutes }] = useAutoGenerateRoutesMutation()
 
   // 서울 날씨 정보 조회 (백엔드 API 500 에러로 인해 임시 비활성화)
   // const {
@@ -319,6 +339,105 @@ export function TravelPlanDetailPage() {
     })
   }
 
+  // 자동 경로 생성 핸들러
+  const handleAutoGenerateRoutes = async () => {
+    try {
+      const result = await autoGenerateRoutes(planId).unwrap()
+      toast.success(`${result.routes?.length || 0}개의 경로가 생성되었습니다!`, {
+        duration: 3000,
+        position: 'bottom-right',
+      })
+    } catch (error) {
+      toast.error('경로 생성에 실패했습니다', {
+        duration: 3000,
+        position: 'bottom-right',
+      })
+    }
+  }
+
+  // 교통수단 아이콘 반환
+  const getTransportIcon = (transportType) => {
+    switch (transportType) {
+      case 'walk':
+        return '🚶'
+      case 'car':
+        return '🚗'
+      case 'transit':
+        return '🚌'
+      case 'subway':
+        return '🚇'
+      case 'bus':
+        return '🚌'
+      default:
+        return '🚶'
+    }
+  }
+
+  // 교통수단 이름 반환
+  const getTransportName = (transportType) => {
+    switch (transportType) {
+      case 'walk':
+        return '도보'
+      case 'car':
+        return '자동차'
+      case 'transit':
+        return '대중교통'
+      case 'subway':
+        return '지하철'
+      case 'bus':
+        return '버스'
+      default:
+        return '도보'
+    }
+  }
+
+  // 시간을 시:분 형태로 변환
+  const formatDuration = (minutes) => {
+    if (!minutes) return '0분'
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    if (hours > 0) {
+      return `${hours}시간 ${mins}분`
+    }
+    return `${mins}분`
+  }
+
+  // 거리 형태로 변환
+  const formatDistance = (distance) => {
+    if (!distance) return '0km'
+    if (distance < 1) {
+      return `${Math.round(distance * 1000)}m`
+    }
+    return `${distance.toFixed(1)}km`
+  }
+
+  // 비용 형태로 변환
+  const formatCost = (cost) => {
+    if (!cost) return '무료'
+    return `${Math.round(cost).toLocaleString()}원`
+  }
+
+  // 일차별 경로 정보 그룹화
+  const groupRoutesByDay = (routes) => {
+    if (!routes || !Array.isArray(routes)) return {}
+    
+    const grouped = {}
+    routes.forEach(route => {
+      const dayKey = `day${route.day}`
+      if (!grouped[dayKey]) {
+        grouped[dayKey] = []
+      }
+      grouped[dayKey].push(route)
+    })
+    
+    // 각 일차별로 sequence 순서로 정렬
+    Object.keys(grouped).forEach(day => {
+      grouped[day].sort((a, b) => a.sequence - b.sequence)
+    })
+    
+    return grouped
+  }
+
   return (
     <div className="min-h-screen bg-gray-50/50 px-4 py-6 dark:bg-gray-900">
       <div className="mx-auto max-w-5xl">
@@ -539,6 +658,142 @@ export function TravelPlanDetailPage() {
                     주세요
                   </p>
                 </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 경로 정보 섹션 */}
+        <Card className="mb-8 rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-blue-600">
+                  <Navigation className="h-5 w-5 text-white" />
+                </div>
+                <CardTitle className="text-gray-800 dark:text-gray-100">
+                  교통 정보
+                </CardTitle>
+              </div>
+              {itineraryDays.length > 0 && (
+                <Button
+                  onClick={handleAutoGenerateRoutes}
+                  disabled={isGeneratingRoutes}
+                  className="bg-gradient-to-r from-green-500 to-blue-600 text-white hover:from-green-600 hover:to-blue-700"
+                >
+                  {isGeneratingRoutes ? (
+                    <>
+                      <Zap className="mr-2 h-4 w-4 animate-spin" />
+                      생성 중...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="mr-2 h-4 w-4" />
+                      {routes && routes.length > 0 ? '경로 재생성' : '자동 경로 생성'}
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {routesLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <LoadingSpinner />
+                <span className="ml-2 text-gray-600">경로 정보를 불러오는 중...</span>
+              </div>
+            ) : routes && routes.length > 0 ? (
+              <div className="space-y-4">
+                {(() => {
+                  const groupedRoutes = groupRoutesByDay(routes)
+                  return Object.keys(groupedRoutes).map((dayKey) => (
+                    <div key={dayKey} className="rounded-lg border p-4">
+                      <h3 className="mb-3 text-lg font-semibold text-blue-600">
+                        {dayKey.replace('day', '') + '일차 이동 정보'}
+                      </h3>
+                      <div className="space-y-3">
+                        {groupedRoutes[dayKey].map((route, index) => (
+                          <div key={route.route_id || index} className="flex items-center justify-between rounded-md bg-gray-50 p-3">
+                            <div className="flex items-center space-x-3">
+                              <span className="text-lg">
+                                {getTransportIcon(route.transport_type)}
+                              </span>
+                              <div>
+                                <div className="font-medium text-gray-900">
+                                  {route.departure_name} → {route.destination_name}
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  {getTransportName(route.transport_type)}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="flex items-center space-x-4 text-sm text-gray-600">
+                                {route.duration && (
+                                  <div className="flex items-center">
+                                    <Clock className="mr-1 h-3 w-3" />
+                                    {formatDuration(route.duration)}
+                                  </div>
+                                )}
+                                {route.distance && (
+                                  <div className="flex items-center">
+                                    <Navigation className="mr-1 h-3 w-3" />
+                                    {formatDistance(route.distance)}
+                                  </div>
+                                )}
+                                {route.cost !== undefined && (
+                                  <div className="flex items-center">
+                                    <DollarSign className="mr-1 h-3 w-3" />
+                                    {formatCost(route.cost)}
+                                  </div>
+                                )}
+                              </div>
+                              {route.route_data?.source && (
+                                <div className="mt-1 text-xs text-blue-500">
+                                  {route.route_data.source === 'ODsay' && '🚌 ODsay'}
+                                  {route.route_data.source === 'TMAP' && '🚗 TMAP'}
+                                  {route.route_data.source === 'Google' && '🗺️ Google'}
+                                  {route.route_data.source === 'calculation' && '📊 추정'}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))
+                })()}
+              </div>
+            ) : (
+              <div className="py-8 text-center">
+                <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-gray-100 p-3">
+                  <Navigation className="h-6 w-6 text-gray-600" />
+                </div>
+                <h4 className="mb-2 font-medium text-gray-800">
+                  경로 정보가 없습니다
+                </h4>
+                <p className="mb-4 text-gray-600">
+                  여행 일정이 있는 경우 자동으로 경로를 생성할 수 있습니다
+                </p>
+                {itineraryDays.length > 0 && (
+                  <Button
+                    onClick={handleAutoGenerateRoutes}
+                    disabled={isGeneratingRoutes}
+                    className="bg-gradient-to-r from-green-500 to-blue-600 text-white hover:from-green-600 hover:to-blue-700"
+                  >
+                    {isGeneratingRoutes ? (
+                      <>
+                        <Zap className="mr-2 h-4 w-4 animate-spin" />
+                        생성 중...
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="mr-2 h-4 w-4" />
+                        자동 경로 생성
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
             )}
           </CardContent>

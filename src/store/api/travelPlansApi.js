@@ -72,7 +72,7 @@ const TRAVEL_PLANS_LIST_DEFAULTS = []
 export const travelPlansApi = createApi({
   reducerPath: 'travelPlansApi',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['TravelPlan', 'Weather', 'Destination'],
+  tagTypes: ['TravelPlan', 'Weather', 'Destination', 'Route'],
   endpoints: (builder) => ({
     // 여행 플랜 생성
     createTravelPlan: builder.mutation({
@@ -233,6 +233,94 @@ export const travelPlansApi = createApi({
         body: { origin, destination, startDate, endDate },
       }),
     }),
+
+    // 경로 정보 관련 API
+    // 여행 계획의 경로 목록 조회
+    getTravelPlanRoutes: builder.query({
+      query: (planId) => `routes/plan/${planId}`,
+      providesTags: (result, error, planId) =>
+        result
+          ? [
+              ...result.map(({ route_id }) => ({ type: 'Route', id: route_id })),
+              { type: 'Route', id: `PLAN_${planId}` },
+            ]
+          : [{ type: 'Route', id: `PLAN_${planId}` }],
+      keepUnusedDataFor: 300, // 5분간 캐싱
+    }),
+
+    // 경로 계산 (단일)
+    calculateRoute: builder.mutation({
+      query: (routeRequest) => ({
+        url: 'routes/calculate',
+        method: 'POST',
+        body: routeRequest,
+      }),
+    }),
+
+    // 다중 경로 계산
+    calculateMultipleRoutes: builder.mutation({
+      query: (routeRequest) => ({
+        url: 'routes/calculate/multiple',
+        method: 'POST',
+        body: routeRequest,
+      }),
+    }),
+
+    // 추천 경로 계산
+    getRecommendedRoute: builder.mutation({
+      query: ({ routeRequest, preferences = {} }) => ({
+        url: 'routes/recommend',
+        method: 'POST',
+        body: { ...routeRequest, preferences },
+      }),
+    }),
+
+    // 자동 경로 생성
+    autoGenerateRoutes: builder.mutation({
+      query: (planId) => ({
+        url: `routes/plan/${planId}/auto-generate`,
+        method: 'POST',
+      }),
+      invalidatesTags: (result, error, planId) => [
+        { type: 'Route', id: `PLAN_${planId}` },
+        { type: 'TravelPlan', id: planId },
+      ],
+    }),
+
+    // 경로 생성
+    createRoute: builder.mutation({
+      query: (routeData) => ({
+        url: 'routes/',
+        method: 'POST',
+        body: routeData,
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: 'Route', id: `PLAN_${arg.plan_id}` },
+      ],
+    }),
+
+    // 경로 수정
+    updateRoute: builder.mutation({
+      query: ({ routeId, routeData }) => ({
+        url: `routes/${routeId}`,
+        method: 'PUT',
+        body: routeData,
+      }),
+      invalidatesTags: (result, error, { routeId }) => [
+        { type: 'Route', id: routeId },
+      ],
+    }),
+
+    // 경로 삭제
+    deleteRoute: builder.mutation({
+      query: (routeId) => ({
+        url: `routes/${routeId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (result, error, routeId) => [
+        { type: 'Route', id: routeId },
+      ],
+    }),
   }),
 })
 
@@ -246,4 +334,13 @@ export const {
   useShareTravelPlanMutation,
   useGetDestinationRecommendationsQuery,
   useGeneratePlanRecommendationMutation,
+  // 경로 관련 hooks
+  useGetTravelPlanRoutesQuery,
+  useCalculateRouteMutation,
+  useCalculateMultipleRoutesMutation,
+  useGetRecommendedRouteMutation,
+  useAutoGenerateRoutesMutation,
+  useCreateRouteMutation,
+  useUpdateRouteMutation,
+  useDeleteRouteMutation,
 } = travelPlansApi

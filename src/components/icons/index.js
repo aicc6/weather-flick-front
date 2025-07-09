@@ -65,6 +65,8 @@ export {
   Shield,
   Umbrella,
   Wallet,
+  DollarSign,
+  Zap,
 } from 'lucide-react'
 
 // Communication Icons
