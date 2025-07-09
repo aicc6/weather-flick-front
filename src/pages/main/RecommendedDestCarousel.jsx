@@ -113,7 +113,7 @@ export function RecommendedDestCarousel({ destinations = [] }) {
                 className="weather-card group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl"
                 onClick={() => {
                   // Navigate to destination detail page
-                  // window.location.href = `/destinations/${destination.id}`
+                  window.location.href = `/destinations/detail/${destination.id}`
                 }}
               >
                 {/* Image or Icon Display */}
