@@ -291,14 +291,9 @@ export default function TravelCoursePage() {
     <div className="bg-background min-h-screen">
       {/* Hero Section */}
       <section className="from-sky-blue-light/30 via-sunshine-yellow-light/20 to-sunset-orange-light/30 dark:from-sky-blue/10 dark:via-sunshine-yellow/5 dark:to-sunset-orange/10 relative bg-gradient-to-br py-16">
-        {/* Floating weather elements */}
-        <div className="bg-sunshine-yellow/20 weather-float absolute top-8 left-8 h-16 w-16 rounded-full"></div>
-        <div className="bg-sky-blue/30 weather-bounce absolute top-20 right-20 h-12 w-12 rounded-full"></div>
-        <div className="bg-sunset-orange/25 weather-float absolute bottom-10 left-1/4 h-8 w-8 rounded-full"></div>
-
         <div className="container mx-auto px-4 text-center">
           <div className="mb-8">
-            <h1 className="text-foreground weather-glow mb-4 text-4xl font-bold">
+            <h1 className="text-foreground mb-4 text-4xl font-bold">
               🌤️ 날씨 맞춤 여행지 추천
             </h1>
             <p className="text-muted-foreground text-lg">
@@ -404,7 +399,7 @@ export default function TravelCoursePage() {
           <div className="weather-card mx-auto max-w-md p-8 text-center">
             <div className="mb-6 flex justify-center">
               <div className="bg-sky-blue-light dark:bg-sky-blue/20 flex h-20 w-20 items-center justify-center rounded-full">
-                <Search className="text-sky-blue weather-float h-10 w-10" />
+                <Search className="text-sky-blue h-10 w-10" />
               </div>
             </div>
             <h3 className="text-foreground mb-2 text-xl font-semibold">
@@ -430,7 +425,7 @@ export default function TravelCoursePage() {
             {filteredCourses.map((course) => (
               <Card
                 key={course.id}
-                className="weather-card group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                className="weather-card group cursor-pointer"
               >
                 <Link to={`/recommend/${course.id}`} className="block">
                   {/* Image Section */}
@@ -438,7 +433,7 @@ export default function TravelCoursePage() {
                     <img
                       src={course.mainImage}
                       alt={course.title}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      className="h-full w-full object-cover"
                       loading="lazy"
                     />
                     {/* Weather overlay */}
@@ -450,7 +445,7 @@ export default function TravelCoursePage() {
                       {course.temperature}
                     </div>
                     {/* Like Button */}
-                    <button className="dark:bg-card/90 dark:hover:bg-card absolute top-3 left-3 rounded-full bg-white/90 p-2 transition-colors hover:bg-white">
+                    <button className="dark:bg-card/90 dark:hover:bg-card absolute top-3 left-3 rounded-full bg-white/90 p-2 hover:bg-white">
                       <Heart className="text-sunset-orange h-4 w-4" />
                     </button>
                   </div>
@@ -458,7 +453,7 @@ export default function TravelCoursePage() {
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <CardTitle className="text-foreground group-hover:text-sky-blue-dark line-clamp-1 text-lg font-bold transition-colors">
+                        <CardTitle className="text-foreground line-clamp-1 text-lg font-bold">
                           {course.title}
                         </CardTitle>
                         <p className="text-muted-foreground mt-1 line-clamp-1 text-sm">
@@ -530,7 +525,7 @@ export default function TravelCoursePage() {
       <section className="from-sky-blue-light/20 via-sunshine-yellow-light/15 to-sunset-orange-light/20 dark:from-sky-blue/5 dark:via-sunshine-yellow/3 dark:to-sunset-orange/5 bg-gradient-to-br py-16">
         <div className="container mx-auto px-4 text-center">
           <div className="weather-card glass-effect mx-auto max-w-2xl p-8">
-            <Sparkles className="text-sunshine-yellow sunshine-glow mx-auto mb-4 h-16 w-16" />
+            <Sparkles className="text-sunshine-yellow mx-auto mb-4 h-16 w-16" />
             <h2 className="text-foreground mb-4 text-3xl font-bold">
               나만의 여행 계획을 세워보세요!
             </h2>
@@ -540,13 +535,13 @@ export default function TravelCoursePage() {
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Link
                 to="/customized-schedule"
-                className="sunny-button rounded-full px-8 py-3 font-semibold transition-all duration-300 hover:scale-105"
+                className="sunny-button rounded-full px-8 py-3 font-semibold"
               >
                 🎯 맞춤 일정 만들기
               </Link>
               <Link
                 to="/planner"
-                className="weather-button rounded-full px-8 py-3 font-semibold text-white transition-all duration-300 hover:scale-105"
+                className="weather-button rounded-full px-8 py-3 font-semibold text-white"
               >
                 📋 직접 계획하기
               </Link>

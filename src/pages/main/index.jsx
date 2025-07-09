@@ -81,7 +81,7 @@ export function MainPage() {
 
   // 이미지 영역 스타일 업데이트 - 날씨 테마
   const imageBoxClass =
-    'flex-shrink-0 flex items-center justify-center w-44 h-44 md:w-52 md:h-52 weather-card shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-105'
+    'flex-shrink-0 flex items-center justify-center w-44 h-44 md:w-52 md:h-52 weather-card shadow-lg overflow-hidden'
 
   // 각 서비스별 링크 경로
   const serviceLinks = ['/recommend', '/customized-schedule', '/planner']
@@ -104,14 +104,9 @@ export function MainPage() {
         {/* Weather-themed overlay */}
         <div className="from-sky-blue/30 via-cloud-white/20 to-sunshine-yellow/30 dark:from-storm-gray-dark/60 dark:via-storm-gray/40 dark:to-sky-blue/20 absolute inset-0 bg-gradient-to-br"></div>
 
-        {/* Floating weather elements */}
-        <div className="bg-sunshine-yellow/30 weather-float absolute top-20 left-20 h-16 w-16 rounded-full"></div>
-        <div className="bg-sky-blue/40 weather-bounce absolute top-32 right-32 h-12 w-12 rounded-full"></div>
-        <div className="bg-sunset-orange/30 weather-float absolute bottom-32 left-1/4 h-8 w-8 rounded-full"></div>
-
         {/* Content */}
         <div className="relative z-10">
-          <h1 className="weather-glow mb-5 text-5xl font-bold text-white drop-shadow-lg">
+          <h1 className="mb-5 text-5xl font-bold text-white drop-shadow-lg">
             &quot;날씨 기반 스마트 여행 플래너&quot;
           </h1>
           <p className="mb-8 text-lg text-white/95 drop-shadow-md">
@@ -122,7 +117,7 @@ export function MainPage() {
           <div className="mt-8">
             <Link
               to="/recommend"
-              className="sunny-button text-storm-gray-dark inline-flex items-center rounded-full px-8 py-3 text-lg font-semibold shadow-lg transition-all duration-300 hover:shadow-xl"
+              className="sunny-button text-storm-gray-dark inline-flex items-center rounded-full px-8 py-3 text-lg font-semibold shadow-lg"
             >
               🌤️ 여행지 추천받기
             </Link>
@@ -131,7 +126,7 @@ export function MainPage() {
       </section>
 
       {/* Rest of the content with weather theme background */}
-      <div className="bg-background transition-colors duration-300">
+      <div className="bg-background">
         <section className="from-sky-blue-light/20 dark:from-sky-blue/10 bg-gradient-to-b to-transparent py-12">
           <div className="container mx-auto px-4">
             <h2 className="text-foreground mb-8 text-center text-3xl font-bold">
@@ -169,7 +164,7 @@ export function MainPage() {
                 key={sec.title}
                 ref={fadeProps.ref}
                 style={fadeProps.style}
-                className={`group weather-card focus:ring-sky-blue mx-auto flex max-w-6xl cursor-pointer flex-col items-center gap-10 rounded-2xl px-6 py-8 transition-all duration-300 hover:shadow-xl focus:ring-2 focus:outline-none ${
+                className={`group weather-card focus:ring-sky-blue mx-auto flex max-w-6xl cursor-pointer flex-col items-center gap-10 rounded-2xl px-6 py-8 hover:shadow-xl focus:ring-2 focus:outline-none ${
                   isEven ? 'md:flex-row' : 'md:flex-row-reverse'
                 }`}
                 tabIndex={0}
@@ -195,15 +190,15 @@ export function MainPage() {
                   >
                     서비스 {idx + 1}
                   </div>
-                  <h3 className="text-foreground group-hover:text-sky-blue-dark mb-4 text-3xl font-bold transition-colors duration-300">
+                  <h3 className="text-foreground mb-4 text-3xl font-bold">
                     {sec.title}
                   </h3>
-                  <p className="text-muted-foreground group-hover:text-foreground text-lg leading-relaxed transition-colors duration-300">
+                  <p className="text-muted-foreground text-lg leading-relaxed">
                     {sec.desc}
                   </p>
 
                   <div className="mt-6">
-                    <span className="weather-button inline-flex items-center rounded-full px-6 py-2 text-sm font-medium text-white transition-all duration-300 group-hover:scale-105">
+                    <span className="weather-button inline-flex items-center rounded-full px-6 py-2 text-sm font-medium text-white">
                       자세히 보기 →
                     </span>
                   </div>
@@ -226,13 +221,13 @@ export function MainPage() {
               <div className="flex flex-col justify-center gap-4 sm:flex-row">
                 <Link
                   to="/planner"
-                  className="sunny-button rounded-full px-8 py-3 font-semibold transition-all duration-300 hover:scale-105"
+                  className="sunny-button rounded-full px-8 py-3 font-semibold"
                 >
                   ✈️ 여행 계획 세우기
                 </Link>
                 <Link
                   to="/recommend"
-                  className="weather-button rounded-full px-8 py-3 font-semibold text-white transition-all duration-300 hover:scale-105"
+                  className="weather-button rounded-full px-8 py-3 font-semibold text-white"
                 >
                   🗺️ 여행지 둘러보기
                 </Link>
