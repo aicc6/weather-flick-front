@@ -17,14 +17,6 @@ const ForgotPasswordPage = lazy(() =>
     default: module.ForgotPasswordPage,
   })),
 )
-const ReviewsPage = lazy(() =>
-  import('./pages/reviews').then((module) => ({ default: module.ReviewsPage })),
-)
-const ReviewWritePage = lazy(() =>
-  import('./pages/reviews/write').then((module) => ({
-    default: module.ReviewWritePage,
-  })),
-)
 const CustomizedSchedulePage = lazy(
   () => import('./pages/customized-schedule/customized-schedule'),
 )
@@ -106,8 +98,6 @@ function App() {
               path="/destinations/detail/:id"
               element={<TravelCourseDetailPage />}
             />
-            <Route path="/reviews" element={<ReviewsPage />} />
-            <Route path="/reviews/write" element={<ReviewWritePage />} />
             <Route
               path="/customized-schedule"
               element={<CustomizedSchedulePage />}
