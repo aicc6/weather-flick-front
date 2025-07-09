@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -21,24 +21,26 @@ import {
   Navigation,
   Sparkles,
 } from '@/components/icons'
+import { getMultipleRegionImages } from '@/services/imageService'
 
 export default function TravelCoursePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('all')
   const [selectedMonth, setSelectedMonth] = useState('all')
   const [selectedTheme, setSelectedTheme] = useState('all')
+  const [images, setImages] = useState({})
+  const [imagesLoading, setImagesLoading] = useState(true)
 
-  // 여행 코스 더미 데이터
+  // 여행 코스 기본 데이터
   const travelCourses = [
     {
       id: 1,
       title: '제주도 자연 힐링 여행 코스',
       subtitle: '한라산부터 바다까지, 제주의 아름다운 자연을 만나보세요',
       region: 'jeju',
+      regionName: '제주도',
       duration: '2박 3일',
       theme: ['자연', '힐링', '관광'],
-      mainImage:
-        'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop',
       rating: 4.5,
       reviewCount: 100,
       likeCount: 200,
@@ -67,10 +69,9 @@ export default function TravelCoursePage() {
       title: '서울 전통과 현대의 만남',
       subtitle: '경복궁부터 강남까지, 서울의 과거와 현재를 체험하세요',
       region: 'seoul',
+      regionName: '서울',
       duration: '2박 3일',
       theme: ['문화', '역사', '도시탐방'],
-      mainImage:
-        'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&h=600&fit=crop',
       rating: 4.6,
       reviewCount: 120,
       likeCount: 250,
@@ -93,10 +94,9 @@ export default function TravelCoursePage() {
       title: '부산 바다와 문화 여행',
       subtitle: '해운대부터 감천문화마을까지, 부산의 바다와 문화를 즐기세요',
       region: 'busan',
+      regionName: '부산',
       duration: '2박 3일',
       theme: ['해양', '문화', '맛집'],
-      mainImage:
-        'https://images.unsplash.com/photo-1561022470-509098e4dd5e?w=800&h=600&fit=crop',
       rating: 4.6,
       reviewCount: 140,
       likeCount: 300,
@@ -125,10 +125,9 @@ export default function TravelCoursePage() {
       title: '경주 천년 고도 역사 탐방',
       subtitle: '불국사부터 첨성대까지, 신라의 찬란한 역사를 만나보세요',
       region: 'gyeongju',
+      regionName: '경주',
       duration: '2박 3일',
       theme: ['역사', '문화', '유적'],
-      mainImage:
-        'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop',
       rating: 4.4,
       reviewCount: 160,
       likeCount: 350,
@@ -151,10 +150,9 @@ export default function TravelCoursePage() {
       title: '강릉 바다와 커피 여행',
       subtitle: '경포대부터 안목해변까지, 강릉의 바다와 커피 문화를 즐기세요',
       region: 'gangneung',
+      regionName: '강릉',
       duration: '2박 3일',
       theme: ['해양', '커피', '자연'],
-      mainImage:
-        'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop',
       rating: 4.5,
       reviewCount: 180,
       likeCount: 400,
@@ -177,10 +175,9 @@ export default function TravelCoursePage() {
       title: '여수 밤바다와 섬 여행',
       subtitle: '오동도부터 향일암까지, 여수의 아름다운 바다를 만나보세요',
       region: 'yeosu',
+      regionName: '여수',
       duration: '2박 3일',
       theme: ['해양', '섬', '야경'],
-      mainImage:
-        'https://images.unsplash.com/photo-1551918120-9739cb430c6d?w=800&h=600&fit=crop',
       rating: 5.0,
       reviewCount: 200,
       likeCount: 450,
@@ -205,6 +202,32 @@ export default function TravelCoursePage() {
       tags: ['해양', '섬', '여수', '추천코스'],
     },
   ]
+
+  // 이미지 로드
+  useEffect(() => {
+    const loadImages = async () => {
+      try {
+        setImagesLoading(true)
+        const regionNames = travelCourses.map((course) => course.regionName)
+        const images = await getMultipleRegionImages(regionNames)
+        setImages(images)
+        console.log('로드된 이미지:', images)
+      } catch (error) {
+        console.error('이미지 로드 실패:', error)
+        // fallback으로 다른 이미지 사용
+        const fallbackImages = {}
+        travelCourses.forEach((course) => {
+          fallbackImages[course.regionName] =
+            `https://picsum.photos/800/600?random=${course.id}`
+        })
+        setImages(fallbackImages)
+      } finally {
+        setImagesLoading(false)
+      }
+    }
+
+    loadImages()
+  }, [])
 
   // 지역 이름 매핑
   const regionNames = {
@@ -284,6 +307,171 @@ export default function TravelCoursePage() {
 
     return matchesSearch && matchesRegion && matchesMonth && matchesTheme
   })
+
+  // 스켈레톤 카드 렌더링
+  const renderSkeletonCards = () => {
+    return Array.from({ length: 6 }).map((_, index) => (
+      <Card key={`skeleton-${index}`} className="weather-card">
+        <div className="relative h-48 animate-pulse overflow-hidden rounded-t-xl bg-gray-200"></div>
+        <CardHeader className="pb-3">
+          <div className="space-y-2">
+            <div className="h-5 animate-pulse rounded bg-gray-200"></div>
+            <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200"></div>
+          </div>
+          <div className="mt-3 flex gap-2">
+            <div className="h-6 w-16 animate-pulse rounded-full bg-gray-200"></div>
+            <div className="h-6 w-12 animate-pulse rounded-full bg-gray-200"></div>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="space-y-2">
+            <div className="h-4 animate-pulse rounded bg-gray-200"></div>
+            <div className="h-4 w-2/3 animate-pulse rounded bg-gray-200"></div>
+          </div>
+          <div className="mt-4 space-y-2">
+            <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200"></div>
+            <div className="h-4 w-1/3 animate-pulse rounded bg-gray-200"></div>
+          </div>
+        </CardContent>
+      </Card>
+    ))
+  }
+
+  // 실제 카드 렌더링
+  const renderCourseCards = () => {
+    return filteredCourses.map((course) => (
+      <Card
+        key={course.id}
+        className="weather-card group cursor-pointer overflow-hidden p-0"
+      >
+        <Link to={`/destinations/detail/${course.id}`} className="block">
+          {/* Image Section */}
+          <div className="relative h-48 overflow-hidden">
+            <img
+              src={
+                images[course.regionName] ||
+                `https://picsum.photos/800/600?random=${course.id}`
+              }
+              alt={course.title}
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+              loading="lazy"
+              onError={(e) => {
+                console.log(`이미지 로드 실패: ${course.regionName}`)
+                // 새로운 고품질 백업 이미지들 시도
+                const unsplashBackups = {
+                  제주도:
+                    'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&auto=format&q=60&ixlib=rb-4.0.3',
+                  서울: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&h=600&fit=crop&auto=format&q=60&ixlib=rb-4.0.3',
+                  부산: 'https://images.unsplash.com/photo-1536431311719-398b6704d4cc?w=800&h=600&fit=crop&auto=format&q=60&ixlib=rb-4.0.3',
+                  경주: 'https://images.unsplash.com/photo-1509909756405-be0199881695?w=800&h=600&fit=crop&auto=format&q=60&ixlib=rb-4.0.3',
+                  강릉: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&auto=format&q=60&ixlib=rb-4.0.3',
+                  여수: 'https://images.unsplash.com/photo-1551918120-9739cb430c6d?w=800&h=600&fit=crop&auto=format&q=60&ixlib=rb-4.0.3',
+                }
+
+                // 1차 fallback - 고품질 백업 이미지
+                if (!e.target.src.includes('q=60')) {
+                  e.target.src =
+                    unsplashBackups[course.regionName] ||
+                    `https://picsum.photos/800/600?random=${course.id}`
+                }
+                // 2차 fallback - Lorem Picsum
+                else if (!e.target.src.includes('picsum.photos')) {
+                  e.target.src = `https://picsum.photos/800/600?random=${course.id}`
+                }
+                // 3차 fallback - 다른 랜덤 이미지
+                else {
+                  e.target.src = `https://picsum.photos/800/600?random=${Date.now()}`
+                }
+              }}
+            />
+
+            {/* 좋아요 버튼 */}
+            <button className="absolute top-3 right-3 rounded-full bg-white/90 p-2 shadow-md transition-all duration-200 hover:scale-110 hover:bg-white">
+              <Heart className="h-4 w-4 text-gray-600 transition-colors hover:text-red-500" />
+            </button>
+          </div>
+
+          <CardHeader className="p-4 pb-3">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <CardTitle className="text-foreground line-clamp-1 text-lg font-bold">
+                  {course.title}
+                </CardTitle>
+                <p className="text-muted-foreground mt-1 line-clamp-1 text-sm">
+                  {course.subtitle}
+                </p>
+              </div>
+              <div className="flex items-center gap-1">
+                <Star
+                  className="h-4 w-4 fill-current"
+                  style={{ color: 'var(--accent-yellow)' }}
+                />
+                <span className="text-foreground text-sm font-medium">
+                  {course.rating}
+                </span>
+              </div>
+            </div>
+
+            {/* Tags */}
+            <div className="mt-3 flex flex-wrap gap-2">
+              {course.theme.slice(0, 3).map((tag, index) => (
+                <Badge key={index} className="status-soft text-xs">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </CardHeader>
+
+          <CardContent className="px-4 pt-0 pb-4">
+            <p className="text-muted-foreground mb-4 line-clamp-2 text-sm">
+              {course.summary}
+            </p>
+
+            {/* Course Info */}
+            <div className="mb-4 space-y-2">
+              <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                <Clock
+                  className="h-4 w-4"
+                  style={{ color: 'var(--primary-blue)' }}
+                />
+                <span>{course.duration}</span>
+              </div>
+              <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                <Navigation
+                  className="h-4 w-4"
+                  style={{ color: 'var(--primary-blue)' }}
+                />
+                <span>{regionNames[course.region] || course.region}</span>
+              </div>
+            </div>
+
+            {/* Bottom Info */}
+            <div
+              className="flex items-center justify-between border-t pt-3"
+              style={{ borderColor: 'var(--border)' }}
+            >
+              <div
+                className="text-lg font-bold"
+                style={{ color: 'var(--primary-blue-dark)' }}
+              >
+                {course.price}
+              </div>
+              <div className="text-muted-foreground flex items-center gap-4 text-xs">
+                <span className="flex items-center gap-1">
+                  <Heart className="h-3 w-3" />
+                  {course.likeCount}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Camera className="h-3 w-3" />
+                  {course.reviewCount}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Link>
+      </Card>
+    ))
+  }
 
   return (
     <div className="bg-background min-h-screen">
@@ -396,7 +584,7 @@ export default function TravelCoursePage() {
 
       {/* Courses Grid */}
       <section className="container mx-auto px-4 py-12">
-        {filteredCourses.length === 0 ? (
+        {filteredCourses.length === 0 && !imagesLoading ? (
           <div className="weather-card mx-auto max-w-md p-8 text-center">
             <div className="mb-6 flex justify-center">
               <div
@@ -429,125 +617,7 @@ export default function TravelCoursePage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {filteredCourses.map((course) => (
-              <Card
-                key={course.id}
-                className="weather-card group cursor-pointer"
-              >
-                <Link
-                  to={`/destinations/detail/${course.id}`}
-                  className="block"
-                >
-                  {/* Image Section */}
-                  <div className="relative h-48 overflow-hidden rounded-t-xl">
-                    <img
-                      src={course.mainImage}
-                      alt={course.title}
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                    {/* Weather overlay */}
-                    <div className="status-primary absolute top-3 right-3 rounded-full px-3 py-1 text-xs font-semibold">
-                      {course.weather}
-                    </div>
-                    {/* Temperature */}
-                    <div
-                      className="dark:bg-card/90 absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-sm font-bold"
-                      style={{ color: 'var(--primary-blue-dark)' }}
-                    >
-                      {course.temperature}
-                    </div>
-                    {/* Like Button */}
-                    <button className="dark:bg-card/90 dark:hover:bg-card absolute top-3 left-3 rounded-full bg-white/90 p-2 hover:bg-white">
-                      <Heart
-                        className="h-4 w-4"
-                        style={{ color: 'var(--primary-blue-dark)' }}
-                      />
-                    </button>
-                  </div>
-
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-foreground line-clamp-1 text-lg font-bold">
-                          {course.title}
-                        </CardTitle>
-                        <p className="text-muted-foreground mt-1 line-clamp-1 text-sm">
-                          {course.subtitle}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Star
-                          className="h-4 w-4 fill-current"
-                          style={{ color: 'var(--accent-yellow)' }}
-                        />
-                        <span className="text-foreground text-sm font-medium">
-                          {course.rating}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Tags */}
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {course.theme.slice(0, 3).map((tag, index) => (
-                        <Badge key={index} className="status-soft text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardHeader>
-
-                  <CardContent className="pt-0">
-                    <p className="text-muted-foreground mb-4 line-clamp-2 text-sm">
-                      {course.summary}
-                    </p>
-
-                    {/* Course Info */}
-                    <div className="mb-4 space-y-2">
-                      <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                        <Clock
-                          className="h-4 w-4"
-                          style={{ color: 'var(--primary-blue)' }}
-                        />
-                        <span>{course.duration}</span>
-                      </div>
-                      <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                        <Navigation
-                          className="h-4 w-4"
-                          style={{ color: 'var(--primary-blue)' }}
-                        />
-                        <span>
-                          {regionNames[course.region] || course.region}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Bottom Info */}
-                    <div
-                      className="flex items-center justify-between border-t pt-3"
-                      style={{ borderColor: 'var(--border)' }}
-                    >
-                      <div
-                        className="text-lg font-bold"
-                        style={{ color: 'var(--primary-blue-dark)' }}
-                      >
-                        {course.price}
-                      </div>
-                      <div className="text-muted-foreground flex items-center gap-4 text-xs">
-                        <span className="flex items-center gap-1">
-                          <Heart className="h-3 w-3" />
-                          {course.likeCount}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Camera className="h-3 w-3" />
-                          {course.reviewCount}
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Link>
-              </Card>
-            ))}
+            {imagesLoading ? renderSkeletonCards() : renderCourseCards()}
           </div>
         )}
       </section>
