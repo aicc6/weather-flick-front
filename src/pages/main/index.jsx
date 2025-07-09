@@ -23,7 +23,7 @@ export function MainPage() {
   const animationFrame = useRef(null)
 
   // 자연스러운 이동을 위한 상태
-  const targetPercent = useRef(50) // 0~100
+  const targetPercent = useRef(50)
   const currentPercent = useRef(50)
 
   // 마우스 이동 시 목표값만 갱신
@@ -32,7 +32,12 @@ export function MainPage() {
     const { left, width } = heroRef.current.getBoundingClientRect()
     const x = e.clientX - left
     const percent = Math.max(0, Math.min(1, x / width))
-    targetPercent.current = percent * 90 // 0~90%
+    targetPercent.current = percent * 90
+    // 마우스가 빠르게 움직이면 currentPercent를 target에 더 가깝게 당김 (0.12)
+    if (Math.abs(targetPercent.current - currentPercent.current) > 10) {
+      currentPercent.current +=
+        (targetPercent.current - currentPercent.current) * 0.015
+    }
   }, [])
 
   // 부드럽게 따라가는 애니메이션 루프
@@ -42,7 +47,7 @@ export function MainPage() {
       if (!running) return
       const prev = currentPercent.current
       currentPercent.current +=
-        (targetPercent.current - currentPercent.current) * 0.15 // 더 빠르고 부드럽게
+        (targetPercent.current - currentPercent.current) * 0.08
       // 변화량이 충분히 클 때만 setState
       if (Math.abs(currentPercent.current - prev) > 0.1) {
         setBgPos(`${currentPercent.current}% center`)
@@ -108,7 +113,7 @@ export function MainPage() {
           backgroundSize: 'cover',
           backgroundPosition: bgPos,
           backgroundRepeat: 'no-repeat',
-          transition: 'background-position 0.05s linear',
+          transition: 'background-position 0.18s cubic-bezier(0.4,0,0.2,1)',
         }}
       >
         {/* Weather-themed overlay */}
