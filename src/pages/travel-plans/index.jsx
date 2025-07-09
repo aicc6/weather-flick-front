@@ -156,11 +156,16 @@ export function TravelPlansPage() {
             {sortedPlans?.length || 0}개의 여행 계획이 있습니다
           </p>
         </div>
-        <Button asChild className="weather-button font-semibold text-white">
-          <Link to="/planner">
-            <PlusCircle className="mr-2 h-4 w-4" />새 플랜 만들기
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild className="weather-button font-semibold text-white">
+            <Link to="/planner">
+              <PlusCircle className="mr-2 h-4 w-4" />새 플랜 만들기
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="font-semibold">
+            <Link to="/profile">프로필로 돌아가기</Link>
+          </Button>
+        </div>
       </div>
 
       <div>
