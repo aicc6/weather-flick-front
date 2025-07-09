@@ -50,7 +50,7 @@ export function SettingsPage() {
               className="flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
-              프로필로 돌아가기
+              마이페이지로 돌아가기
             </Button>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               설정
