@@ -163,7 +163,7 @@ export function TravelPlansPage() {
             </Link>
           </Button>
           <Button asChild variant="outline" className="font-semibold">
-            <Link to="/profile">프로필로 돌아가기</Link>
+            <Link to="/profile">마이페이지로 돌아가기</Link>
           </Button>
         </div>
       </div>
