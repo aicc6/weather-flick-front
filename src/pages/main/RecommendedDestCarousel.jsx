@@ -156,18 +156,22 @@ export function RecommendedDestCarousel({ destinations = [] }) {
                   )}
 
                   {/* Weather overlay - only show when image is loaded or no image */}
+                  {/* 날씨 오버레이 제거
                   {(showImageOverlays || !hasImage) && (
                     <div className="weather-sunny absolute top-3 right-3 rounded-full px-3 py-1 text-xs font-semibold">
                       {destination.weather || '☀️ 맑음'}
                     </div>
                   )}
+                  */}
 
                   {/* Temperature with proper unit - only show when image is loaded or no image */}
+                  {/* 온도 표시 제거
                   {(showImageOverlays || !hasImage) && (
                     <div className="dark:bg-card/90 text-sky-blue-dark absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-sm font-bold">
                       🌡️ {destination.temperature || 22}°C
                     </div>
                   )}
+                  */}
                 </div>
 
                 {/* Content */}
@@ -237,6 +241,7 @@ export function RecommendedDestCarousel({ destinations = [] }) {
         )}
 
         {/* Auto-play indicator */}
+        {/* AUTO/PAUSE 인디케이터 제거
         <div className="absolute top-4 left-4 flex items-center gap-2">
           <div
             className={`h-2 w-2 rounded-full ${
@@ -249,6 +254,7 @@ export function RecommendedDestCarousel({ destinations = [] }) {
             {isAutoPlaying ? 'AUTO' : 'PAUSE'}
           </span>
         </div>
+        */}
       </div>
     </div>
   )
