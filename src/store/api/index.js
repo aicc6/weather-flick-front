@@ -8,6 +8,7 @@ export { destinationsApi } from './destinationsApi'
 export { weatherApi } from './weatherApi'
 export { regionsApi } from './regionsApi'
 export { localInfoApi } from './localInfoApi'
+export { travelCoursesApi } from './travelCoursesApi'
 
 // Export all hooks for convenience
 export {
@@ -76,3 +77,11 @@ export {
   useGetUnifiedRegionsLevel1Query,
   useGetRegionsPointQuery,
 } from './localInfoApi'
+
+export {
+  // Travel Courses API hooks
+  useGetTravelCoursesQuery,
+  useGetTravelCourseDetailQuery,
+  useGetCoursesByRegionQuery,
+  useSearchTravelCoursesQuery,
+} from './travelCoursesApi'

@@ -100,6 +100,12 @@ function App() {
             <Route path="/sign-up" element={<SignUpPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/recommend" element={<TravelCoursePage />} />
+            <Route path="/recommend/:id" element={<TravelCourseDetailPage />} />
+            <Route path="/destinations" element={<TravelCoursePage />} />
+            <Route
+              path="/destinations/detail/:id"
+              element={<TravelCourseDetailPage />}
+            />
             <Route path="/reviews" element={<ReviewsPage />} />
             <Route path="/reviews/write" element={<ReviewWritePage />} />
             <Route
@@ -130,7 +136,6 @@ function App() {
               path="/customized-schedule/result"
               element={<CustomizedScheduleResultPage />}
             />
-            <Route path="/recommend/:id" element={<TravelCourseDetailPage />} />
             <Route path="/planner" element={<PlannerPage />} />
             <Route path="/travel-plans" element={<TravelPlansPage />} />
             <Route

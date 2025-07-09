@@ -8,8 +8,8 @@ const getBaseUrl = () => {
     return '/api/'
   }
 
-  // 프로덕션 환경: 직접 URL 사용
-  return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+  // 프로덕션 환경: 환경변수 사용
+  return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/'
 }
 
 // 401 에러 처리 함수 (기존 로직 재사용)

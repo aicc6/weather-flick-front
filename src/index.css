@@ -159,10 +159,12 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    border-color: var(--border);
+    outline-color: color-mix(in srgb, var(--ring) 50%, transparent 50%);
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--background);
+    color: var(--foreground);
     font-family: 'Inter', 'Noto Sans KR', system-ui, sans-serif;
     /* 새로운 그라데이션 배경 */
     background-image: linear-gradient(
@@ -193,7 +195,13 @@
 @layer components {
   /* Main Card - 메인 카드 */
   .weather-card {
-    @apply bg-card border-border rounded-xl border shadow-sm;
+    background-color: var(--card);
+    border-color: var(--border);
+    border-radius: 0.75rem;
+    border-width: 1px;
+    box-shadow:
+      0 1px 3px 0 rgba(0, 0, 0, 0.1),
+      0 1px 2px 0 rgba(0, 0, 0, 0.06);
     background: linear-gradient(
       135deg,
       var(--card) 0%,
@@ -203,7 +211,9 @@
   }
 
   .weather-card:hover {
-    @apply shadow-md;
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
     border-color: var(--primary-blue-light);
     box-shadow:
       0 4px 6px -1px rgba(54, 116, 181, 0.1),
@@ -217,7 +227,10 @@
       var(--primary-blue-dark) 0%,
       var(--primary-blue) 100%
     );
-    @apply text-white transition-colors duration-200 hover:shadow-md;
+    color: white;
+    transition:
+      color 0.2s,
+      box-shadow 0.2s;
   }
 
   .primary-button:hover {
@@ -238,7 +251,10 @@
       var(--accent-cyan-bright) 0%,
       var(--accent-cyan) 100%
     );
-    @apply text-white transition-colors duration-200 hover:shadow-md;
+    color: white;
+    transition:
+      color 0.2s,
+      box-shadow 0.2s;
   }
 
   .accent-button:hover {
@@ -260,7 +276,10 @@
       color-mix(in srgb, var(--accent-yellow) 90%, var(--accent-cyan-light) 10%)
         100%
     );
-    @apply text-neutral-gray-800 transition-colors duration-200 hover:shadow-md;
+    color: var(--neutral-gray-800);
+    transition:
+      color 0.2s,
+      box-shadow 0.2s;
   }
 
   .bright-button:hover {
@@ -276,7 +295,8 @@
 
   /* Glass Effect - 유리 효과 */
   .glass-effect {
-    @apply border-border border;
+    border-color: var(--border);
+    border-width: 1px;
     background: linear-gradient(
       135deg,
       color-mix(in srgb, var(--card) 80%, var(--soft-mint) 20%) 0%,
@@ -421,37 +441,60 @@
 
   /* Alert Styles - 알림 스타일 */
   .alert-success {
-    @apply bg-soft-mint border-soft-mint text-neutral-gray-800;
+    background-color: var(--soft-mint);
+    border-color: var(--soft-mint);
+    color: var(--neutral-gray-800);
   }
 
   .alert-info {
-    @apply bg-accent-cyan-light border-accent-cyan text-primary-blue-dark;
+    background-color: var(--accent-cyan-light);
+    border-color: var(--accent-cyan);
+    color: var(--primary-blue-dark);
   }
 
   .alert-warning {
-    background: var(--accent-yellow);
-    @apply border-accent-yellow text-neutral-gray-800;
+    background-color: var(--accent-yellow);
+    border-color: var(--accent-yellow);
+    color: var(--neutral-gray-800);
   }
 
   .alert-error {
-    @apply border-red-200 bg-red-50 text-red-800;
+    background-color: #fef2f2;
+    border-color: #fecaca;
+    color: #991b1b;
   }
 
   /* Dark mode alerts */
   .dark .alert-success {
-    @apply bg-soft-mint/20 border-soft-mint/50 text-soft-mint;
+    background-color: color-mix(in srgb, var(--soft-mint) 20%, transparent 80%);
+    border-color: color-mix(in srgb, var(--soft-mint) 50%, transparent 50%);
+    color: var(--soft-mint);
   }
 
   .dark .alert-info {
-    @apply bg-accent-cyan/20 border-accent-cyan/50 text-accent-cyan;
+    background-color: color-mix(
+      in srgb,
+      var(--accent-cyan) 20%,
+      transparent 80%
+    );
+    border-color: color-mix(in srgb, var(--accent-cyan) 50%, transparent 50%);
+    color: var(--accent-cyan);
   }
 
   .dark .alert-warning {
-    @apply bg-accent-yellow/20 border-accent-yellow/50 text-accent-yellow;
+    background-color: color-mix(
+      in srgb,
+      var(--accent-yellow) 20%,
+      transparent 80%
+    );
+    border-color: color-mix(in srgb, var(--accent-yellow) 50%, transparent 50%);
+    color: var(--accent-yellow);
   }
 
   .dark .alert-error {
-    @apply border-red-500/50 bg-red-900/20 text-red-400;
+    background-color: color-mix(in srgb, #991b1b 20%, transparent 80%);
+    border-color: color-mix(in srgb, #991b1b 50%, transparent 50%);
+    color: #f87171;
   }
 
   /* Page Specific Styles - 페이지별 스타일 */

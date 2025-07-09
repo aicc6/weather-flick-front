@@ -5,6 +5,7 @@ import {
   destinationsApi,
   weatherApi,
   regionsApi,
+  travelCoursesApi,
 } from './api'
 import { localInfoApi } from './api/localInfoApi'
 import { chatbotApi } from './api/chatbotApi'
@@ -21,6 +22,7 @@ export const store = configureStore({
     [regionsApi.reducerPath]: regionsApi.reducer,
     [localInfoApi.reducerPath]: localInfoApi.reducer,
     [chatbotApi.reducerPath]: chatbotApi.reducer,
+    [travelCoursesApi.reducerPath]: travelCoursesApi.reducer,
     customizedSchedule: customizedScheduleReducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -36,6 +38,7 @@ export const store = configureStore({
       .concat(weatherApi.middleware)
       .concat(regionsApi.middleware)
       .concat(localInfoApi.middleware)
-      .concat(chatbotApi.middleware),
+      .concat(chatbotApi.middleware)
+      .concat(travelCoursesApi.middleware),
   devTools: import.meta.env.MODE !== 'production',
 })
