@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContextRTK'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { WithdrawModal } from '@/components/WithdrawModal'
@@ -105,8 +105,8 @@ export function SettingsPage() {
         <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <CardContent className="p-6">
             <div className="mb-6 flex items-center gap-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-pink-600 shadow-md">
-                <Shield className="h-5 w-5 text-white" />
+              <div className="timeline-circle-green flex h-10 w-10 items-center justify-center rounded-full shadow-md">
+                <span className="text-lg font-bold text-white">🔒</span>
               </div>
               <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
                 보안 설정

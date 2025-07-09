@@ -1303,11 +1303,14 @@ export default function TravelCourseDetailPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               {course.itinerary.map((day, dayIndex) => (
-                <div key={dayIndex} className="border-l-4 border-blue-500 pl-4">
+                <div
+                  key={dayIndex}
+                  className="timeline-line relative border-l-4 pl-6"
+                >
                   <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
                     Day {day.day}: {day.title}
                   </h3>
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     {day.activities.map((activity, actIndex) => {
                       // 활동 타입에 따른 아이콘과 색상 설정
                       const getActivityIcon = (type) => {
@@ -1332,7 +1335,7 @@ export default function TravelCourseDetailPage() {
                           case 'transport':
                             return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
                           case 'attraction':
-                            return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                            return 'status-soft'
                           case 'restaurant':
                             return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
                           case 'cafe':
@@ -1340,19 +1343,24 @@ export default function TravelCourseDetailPage() {
                           case 'accommodation':
                             return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
                           default:
-                            return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                            return 'status-primary'
                         }
                       }
 
                       return (
                         <div
                           key={actIndex}
-                          className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-600 dark:bg-gray-700"
+                          className="relative rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-600 dark:bg-gray-700"
                         >
+                          {/* 타임라인 동그라미 */}
+                          <div className="timeline-circle-green absolute top-4 -left-8 flex h-6 w-6 items-center justify-center rounded-full">
+                            <span className="text-xs font-bold text-white">
+                              {actIndex + 1}
+                            </span>
+                          </div>
+
                           <div className="flex gap-4">
-                            <div
-                              className={`flex-shrink-0 rounded px-3 py-1 text-sm font-medium ${getActivityColor(activity.type)}`}
-                            >
+                            <div className="flex w-16 flex-shrink-0 items-center justify-center text-base font-semibold text-gray-700 dark:text-gray-300">
                               {activity.time}
                             </div>
                             <div className="flex-1">

@@ -290,7 +290,7 @@ export default function TravelCoursePage() {
   return (
     <div className="bg-background min-h-screen">
       {/* Hero Section */}
-      <section className="from-sky-blue-light/30 via-sunshine-yellow-light/20 to-sunset-orange-light/30 dark:from-sky-blue/10 dark:via-sunshine-yellow/5 dark:to-sunset-orange/10 relative bg-gradient-to-br py-16">
+      <section className="page-destinations relative py-16">
         <div className="container mx-auto px-4 text-center">
           <div className="mb-8">
             <h1 className="text-foreground mb-4 text-4xl font-bold">
@@ -306,18 +306,21 @@ export default function TravelCoursePage() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
               {/* Search Input */}
               <div className="relative">
-                <Search className="text-sky-blue absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                <Search
+                  className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+                  style={{ color: 'var(--primary-blue)' }}
+                />
                 <Input
                   placeholder="여행지나 키워드 검색"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="weather-input pl-10"
+                  className="form-input pl-10"
                 />
               </div>
 
               {/* Region Filter */}
               <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-                <SelectTrigger className="weather-input">
+                <SelectTrigger className="form-input">
                   <SelectValue placeholder="지역 선택" />
                 </SelectTrigger>
                 <SelectContent className="weather-card">
@@ -334,7 +337,7 @@ export default function TravelCoursePage() {
 
               {/* Month Filter */}
               <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                <SelectTrigger className="weather-input">
+                <SelectTrigger className="form-input">
                   <SelectValue placeholder="여행 시기" />
                 </SelectTrigger>
                 <SelectContent className="weather-card">
@@ -351,7 +354,7 @@ export default function TravelCoursePage() {
 
               {/* Theme Filter */}
               <Select value={selectedTheme} onValueChange={setSelectedTheme}>
-                <SelectTrigger className="weather-input">
+                <SelectTrigger className="form-input">
                   <SelectValue placeholder="여행 테마" />
                 </SelectTrigger>
                 <SelectContent className="weather-card">
@@ -382,7 +385,7 @@ export default function TravelCoursePage() {
                     setSelectedMonth('all')
                     setSelectedTheme('all')
                   }}
-                  className="border-cloud-gray hover:bg-sky-blue-light"
+                  className="border-border hover:bg-muted"
                 >
                   <Filter className="mr-2 h-4 w-4" />
                   필터 초기화
@@ -398,8 +401,14 @@ export default function TravelCoursePage() {
         {filteredCourses.length === 0 ? (
           <div className="weather-card mx-auto max-w-md p-8 text-center">
             <div className="mb-6 flex justify-center">
-              <div className="bg-sky-blue-light dark:bg-sky-blue/20 flex h-20 w-20 items-center justify-center rounded-full">
-                <Search className="text-sky-blue h-10 w-10" />
+              <div
+                className="flex h-20 w-20 items-center justify-center rounded-full"
+                style={{ backgroundColor: 'var(--primary-blue-light)' }}
+              >
+                <Search
+                  className="h-10 w-10"
+                  style={{ color: 'var(--primary-blue)' }}
+                />
               </div>
             </div>
             <h3 className="text-foreground mb-2 text-xl font-semibold">
@@ -415,7 +424,7 @@ export default function TravelCoursePage() {
                 setSelectedMonth('all')
                 setSelectedTheme('all')
               }}
-              className="sunny-button font-semibold"
+              className="primary-button font-semibold"
             >
               전체 코스 보기
             </Button>
@@ -437,16 +446,22 @@ export default function TravelCoursePage() {
                       loading="lazy"
                     />
                     {/* Weather overlay */}
-                    <div className="weather-sunny absolute top-3 right-3 rounded-full px-3 py-1 text-xs font-semibold">
+                    <div className="status-primary absolute top-3 right-3 rounded-full px-3 py-1 text-xs font-semibold">
                       {course.weather}
                     </div>
                     {/* Temperature */}
-                    <div className="dark:bg-card/90 text-sky-blue-dark absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-sm font-bold">
+                    <div
+                      className="dark:bg-card/90 absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-sm font-bold"
+                      style={{ color: 'var(--primary-blue-dark)' }}
+                    >
                       {course.temperature}
                     </div>
                     {/* Like Button */}
                     <button className="dark:bg-card/90 dark:hover:bg-card absolute top-3 left-3 rounded-full bg-white/90 p-2 hover:bg-white">
-                      <Heart className="text-sunset-orange h-4 w-4" />
+                      <Heart
+                        className="h-4 w-4"
+                        style={{ color: 'var(--primary-blue-dark)' }}
+                      />
                     </button>
                   </div>
 
@@ -461,7 +476,10 @@ export default function TravelCoursePage() {
                         </p>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Star className="text-sunshine-yellow h-4 w-4 fill-current" />
+                        <Star
+                          className="h-4 w-4 fill-current"
+                          style={{ color: 'var(--accent-yellow)' }}
+                        />
                         <span className="text-foreground text-sm font-medium">
                           {course.rating}
                         </span>
@@ -471,7 +489,7 @@ export default function TravelCoursePage() {
                     {/* Tags */}
                     <div className="mt-3 flex flex-wrap gap-2">
                       {course.theme.slice(0, 3).map((tag, index) => (
-                        <Badge key={index} className="weather-cloudy text-xs">
+                        <Badge key={index} className="status-soft text-xs">
                           {tag}
                         </Badge>
                       ))}
@@ -486,11 +504,17 @@ export default function TravelCoursePage() {
                     {/* Course Info */}
                     <div className="mb-4 space-y-2">
                       <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                        <Clock className="text-sky-blue h-4 w-4" />
+                        <Clock
+                          className="h-4 w-4"
+                          style={{ color: 'var(--primary-blue)' }}
+                        />
                         <span>{course.duration}</span>
                       </div>
                       <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                        <Navigation className="text-sky-blue h-4 w-4" />
+                        <Navigation
+                          className="h-4 w-4"
+                          style={{ color: 'var(--primary-blue)' }}
+                        />
                         <span>
                           {regionNames[course.region] || course.region}
                         </span>
@@ -498,8 +522,14 @@ export default function TravelCoursePage() {
                     </div>
 
                     {/* Bottom Info */}
-                    <div className="border-cloud-gray flex items-center justify-between border-t pt-3">
-                      <div className="text-sunset-orange-dark text-lg font-bold">
+                    <div
+                      className="flex items-center justify-between border-t pt-3"
+                      style={{ borderColor: 'var(--border)' }}
+                    >
+                      <div
+                        className="text-lg font-bold"
+                        style={{ color: 'var(--primary-blue-dark)' }}
+                      >
                         {course.price}
                       </div>
                       <div className="text-muted-foreground flex items-center gap-4 text-xs">
@@ -522,10 +552,13 @@ export default function TravelCoursePage() {
       </section>
 
       {/* Bottom CTA Section */}
-      <section className="from-sky-blue-light/20 via-sunshine-yellow-light/15 to-sunset-orange-light/20 dark:from-sky-blue/5 dark:via-sunshine-yellow/3 dark:to-sunset-orange/5 bg-gradient-to-br py-16">
+      <section className="page-destinations py-16">
         <div className="container mx-auto px-4 text-center">
           <div className="weather-card glass-effect mx-auto max-w-2xl p-8">
-            <Sparkles className="text-sunshine-yellow mx-auto mb-4 h-16 w-16" />
+            <Sparkles
+              className="mx-auto mb-4 h-16 w-16"
+              style={{ color: 'var(--accent-cyan-bright)' }}
+            />
             <h2 className="text-foreground mb-4 text-3xl font-bold">
               나만의 여행 계획을 세워보세요!
             </h2>
@@ -535,13 +568,13 @@ export default function TravelCoursePage() {
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Link
                 to="/customized-schedule"
-                className="sunny-button rounded-full px-8 py-3 font-semibold"
+                className="primary-button rounded-full px-8 py-3 font-semibold"
               >
                 🎯 맞춤 일정 만들기
               </Link>
               <Link
                 to="/planner"
-                className="weather-button rounded-full px-8 py-3 font-semibold text-white"
+                className="accent-button rounded-full px-8 py-3 font-semibold"
               >
                 📋 직접 계획하기
               </Link>

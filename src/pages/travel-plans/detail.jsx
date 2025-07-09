@@ -547,7 +547,7 @@ export function TravelPlanDetailPage() {
         <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <CardHeader className="pb-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-emerald-600">
+              <div className="timeline-circle-green flex h-10 w-10 items-center justify-center rounded-full">
                 <span className="text-sm font-bold text-white">📋</span>
               </div>
               <CardTitle className="text-gray-800 dark:text-gray-100">

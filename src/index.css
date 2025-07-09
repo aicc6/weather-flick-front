@@ -58,98 +58,103 @@
 }
 
 /* ===================== */
-/* 🌤️ 날씨 테마 색상 시스템 */
+/* 🎨 새로운 색상 시스템 */
 /* ===================== */
 :root {
   --radius: 0.75rem;
 
-  /* 🌈 메인 5색 - 날씨 테마 */
-  --sky-blue-light: #dbeafe;
-  --sky-blue: #60a5fa;
-  --sky-blue-dark: #3b82f6;
+  /* 🌈 새로운 메인 색상 팔레트 */
+  /* Primary Blues - 주요 파란색 계열 */
+  --primary-blue-dark: #3674b5; /* rgb(54, 116, 181) */
+  --primary-blue: #578fca; /* rgb(87, 143, 202) */
+  --primary-blue-light: #a1e3f9; /* rgb(161, 227, 249) */
 
-  --sunshine-yellow-light: #fef3c7;
-  --sunshine-yellow: #fcd34d;
-  --sunshine-yellow-dark: #f59e0b;
+  /* Accent Cyans - 강조 청록색 계열 */
+  --accent-cyan-bright: #4ed7f1; /* rgb(78, 215, 241) */
+  --accent-cyan: #6fe6fc; /* rgb(111, 230, 252) */
+  --accent-cyan-light: #a8f1ff; /* rgb(168, 241, 255) */
 
-  --cloud-white: #f8fafc;
-  --cloud-gray-light: #e2e8f0;
-  --cloud-gray: #cbd5e1;
+  /* Supporting Colors - 보조 색상 */
+  --accent-yellow: #fffa8d; /* rgb(255, 250, 141) */
+  --soft-mint: #d1f8ef; /* rgb(209, 248, 239) */
 
-  --storm-gray: #64748b;
-  --storm-gray-dark: #374151;
+  /* Neutral Colors - 중성 색상 */
+  --neutral-white: #ffffff;
+  --neutral-gray-50: #f8fafc;
+  --neutral-gray-100: #f1f5f9;
+  --neutral-gray-200: #e2e8f0;
+  --neutral-gray-600: #475569;
+  --neutral-gray-700: #334155;
+  --neutral-gray-800: #1e293b;
+  --neutral-gray-900: #0f172a;
 
-  --sunset-orange-light: #fed7aa;
-  --sunset-orange: #fb923c;
-  --sunset-orange-dark: #ea580c;
-
-  /* 🌤️ 라이트 모드 - 화사한 날씨 테마 */
-  --background: var(--cloud-white);
-  --foreground: var(--storm-gray-dark);
-  --card: #ffffff;
-  --card-foreground: var(--storm-gray-dark);
-  --popover: #ffffff;
-  --popover-foreground: var(--storm-gray-dark);
-  --primary: var(--sky-blue-dark);
-  --primary-foreground: #ffffff;
-  --secondary: var(--sunshine-yellow);
-  --secondary-foreground: var(--storm-gray-dark);
-  --muted: var(--cloud-gray-light);
-  --muted-foreground: var(--storm-gray);
-  --accent: var(--sunshine-yellow-light);
-  --accent-foreground: var(--storm-gray-dark);
+  /* 🌤️ 라이트 모드 - 새로운 색상 시스템 */
+  --background: var(--neutral-white);
+  --foreground: var(--neutral-gray-800);
+  --card: var(--neutral-white);
+  --card-foreground: var(--neutral-gray-800);
+  --popover: var(--neutral-white);
+  --popover-foreground: var(--neutral-gray-800);
+  --primary: var(--primary-blue);
+  --primary-foreground: var(--neutral-white);
+  --secondary: var(--accent-cyan-light);
+  --secondary-foreground: var(--neutral-gray-800);
+  --muted: var(--neutral-gray-100);
+  --muted-foreground: var(--neutral-gray-600);
+  --accent: var(--soft-mint);
+  --accent-foreground: var(--neutral-gray-800);
   --destructive: #ef4444;
-  --border: var(--cloud-gray);
-  --input: #ffffff;
-  --ring: var(--sky-blue);
-  --chart-1: var(--sky-blue);
-  --chart-2: var(--sunshine-yellow);
-  --chart-3: var(--sunset-orange);
-  --chart-4: var(--storm-gray);
-  --chart-5: var(--cloud-gray);
-  --sidebar: var(--cloud-white);
-  --sidebar-foreground: var(--storm-gray-dark);
-  --sidebar-primary: var(--sky-blue-dark);
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: var(--sunshine-yellow-light);
-  --sidebar-accent-foreground: var(--storm-gray-dark);
-  --sidebar-border: var(--cloud-gray);
-  --sidebar-ring: var(--sky-blue);
+  --border: var(--neutral-gray-200);
+  --input: var(--neutral-white);
+  --ring: var(--primary-blue);
+  --chart-1: var(--primary-blue);
+  --chart-2: var(--accent-cyan);
+  --chart-3: var(--accent-yellow);
+  --chart-4: var(--primary-blue-light);
+  --chart-5: var(--soft-mint);
+  --sidebar: var(--neutral-white);
+  --sidebar-foreground: var(--neutral-gray-800);
+  --sidebar-primary: var(--primary-blue);
+  --sidebar-primary-foreground: var(--neutral-white);
+  --sidebar-accent: var(--soft-mint);
+  --sidebar-accent-foreground: var(--neutral-gray-800);
+  --sidebar-border: var(--neutral-gray-200);
+  --sidebar-ring: var(--primary-blue);
 }
 
 .dark {
-  /* 🌙 다크 모드 - 밤하늘 테마 */
-  --background: #0f172a;
-  --foreground: var(--cloud-white);
-  --card: #1e293b;
-  --card-foreground: var(--cloud-white);
-  --popover: #1e293b;
-  --popover-foreground: var(--cloud-white);
-  --primary: var(--sky-blue);
-  --primary-foreground: #0f172a;
-  --secondary: var(--sunset-orange);
-  --secondary-foreground: #0f172a;
-  --muted: #334155;
-  --muted-foreground: var(--cloud-gray);
-  --accent: #334155;
-  --accent-foreground: var(--sunshine-yellow);
+  /* 🌙 다크 모드 - 새로운 색상 시스템 */
+  --background: var(--neutral-gray-900);
+  --foreground: var(--neutral-white);
+  --card: var(--neutral-gray-800);
+  --card-foreground: var(--neutral-white);
+  --popover: var(--neutral-gray-800);
+  --popover-foreground: var(--neutral-white);
+  --primary: var(--accent-cyan);
+  --primary-foreground: var(--neutral-gray-900);
+  --secondary: var(--primary-blue-dark);
+  --secondary-foreground: var(--neutral-white);
+  --muted: var(--neutral-gray-700);
+  --muted-foreground: var(--neutral-gray-200);
+  --accent: var(--neutral-gray-700);
+  --accent-foreground: var(--accent-cyan);
   --destructive: #ef4444;
-  --border: #334155;
-  --input: #334155;
-  --ring: var(--sky-blue);
-  --chart-1: var(--sky-blue);
-  --chart-2: var(--sunshine-yellow);
-  --chart-3: var(--sunset-orange);
-  --chart-4: var(--cloud-gray);
-  --chart-5: var(--storm-gray);
-  --sidebar: #1e293b;
-  --sidebar-foreground: var(--cloud-white);
-  --sidebar-primary: var(--sky-blue);
-  --sidebar-primary-foreground: #0f172a;
-  --sidebar-accent: #334155;
-  --sidebar-accent-foreground: var(--sunshine-yellow);
-  --sidebar-border: #334155;
-  --sidebar-ring: var(--sky-blue);
+  --border: var(--neutral-gray-700);
+  --input: var(--neutral-gray-700);
+  --ring: var(--accent-cyan);
+  --chart-1: var(--accent-cyan);
+  --chart-2: var(--primary-blue);
+  --chart-3: var(--accent-yellow);
+  --chart-4: var(--primary-blue-light);
+  --chart-5: var(--soft-mint);
+  --sidebar: var(--neutral-gray-800);
+  --sidebar-foreground: var(--neutral-white);
+  --sidebar-primary: var(--accent-cyan);
+  --sidebar-primary-foreground: var(--neutral-gray-900);
+  --sidebar-accent: var(--neutral-gray-700);
+  --sidebar-accent-foreground: var(--accent-cyan);
+  --sidebar-border: var(--neutral-gray-700);
+  --sidebar-ring: var(--accent-cyan);
 }
 
 @layer base {
@@ -159,11 +164,12 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', 'Noto Sans KR', system-ui, sans-serif;
-    /* 미세한 그라데이션 배경 */
+    /* 새로운 그라데이션 배경 */
     background-image: linear-gradient(
       135deg,
       var(--background) 0%,
-      color-mix(in srgb, var(--background) 95%, var(--sky-blue-light) 5%) 100%
+      color-mix(in srgb, var(--background) 95%, var(--accent-cyan-light) 5%)
+        100%
     );
     min-height: 100vh;
   }
@@ -182,192 +188,343 @@
 }
 
 /* ===================== */
-/* 🎨 날씨 컴포넌트 스타일 */
+/* 🎨 새로운 컴포넌트 스타일 */
 /* ===================== */
 @layer components {
-  /* Weather Card - 날씨 카드 */
+  /* Main Card - 메인 카드 */
   .weather-card {
     @apply bg-card border-border rounded-xl border shadow-sm;
-    /* 복잡한 그라데이션 배경 제거 */
-    background: var(--card);
-    /* 애니메이션 효과 제거 */
+    background: linear-gradient(
+      135deg,
+      var(--card) 0%,
+      color-mix(in srgb, var(--card) 98%, var(--soft-mint) 2%) 100%
+    );
     transition: none;
   }
 
   .weather-card:hover {
     @apply shadow-md;
-    /* 호버 시 테두리 색상 변경 제거 */
-    border-color: var(--border);
-    /* 그림자 효과 최소화 */
+    border-color: var(--primary-blue-light);
     box-shadow:
-      0 4px 6px -1px rgba(0, 0, 0, 0.1),
-      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      0 4px 6px -1px rgba(54, 116, 181, 0.1),
+      0 2px 4px -1px rgba(54, 116, 181, 0.06);
   }
 
-  /* Weather Button - 날씨 테마 버튼 */
-  .weather-button {
+  /* Primary Button - 주요 버튼 */
+  .primary-button {
     background: linear-gradient(
       135deg,
-      var(--sky-blue-dark) 0%,
-      var(--sky-blue) 100%
+      var(--primary-blue-dark) 0%,
+      var(--primary-blue) 100%
     );
     @apply text-white transition-colors duration-200 hover:shadow-md;
   }
 
-  .weather-button:hover {
+  .primary-button:hover {
     background: linear-gradient(
       135deg,
-      var(--sky-blue) 0%,
-      var(--sky-blue-light) 100%
+      var(--primary-blue) 0%,
+      var(--primary-blue-light) 100%
     );
-    /* 위아래 움직임 제거 */
-    transform: none;
-    /* 그림자 효과 최소화 */
     box-shadow:
-      0 4px 6px -1px rgba(0, 0, 0, 0.1),
-      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      0 4px 6px -1px rgba(54, 116, 181, 0.15),
+      0 2px 4px -1px rgba(54, 116, 181, 0.1);
   }
 
-  /* Sunny Button - 햇빛 버튼 */
-  .sunny-button {
+  /* Accent Button - 강조 버튼 */
+  .accent-button {
     background: linear-gradient(
       135deg,
-      var(--sunshine-yellow-dark) 0%,
-      var(--sunshine-yellow) 100%
-    );
-    @apply text-storm-gray-dark transition-colors duration-200 hover:shadow-md;
-  }
-
-  .sunny-button:hover {
-    background: linear-gradient(
-      135deg,
-      var(--sunshine-yellow) 0%,
-      var(--sunshine-yellow-light) 100%
-    );
-    /* 위아래 움직임 제거 */
-    transform: none;
-    /* 그림자 효과 최소화 */
-    box-shadow:
-      0 4px 6px -1px rgba(0, 0, 0, 0.1),
-      0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  }
-
-  /* Sunset Button - 노을 버튼 */
-  .sunset-button {
-    background: linear-gradient(
-      135deg,
-      var(--sunset-orange-dark) 0%,
-      var(--sunset-orange) 100%
+      var(--accent-cyan-bright) 0%,
+      var(--accent-cyan) 100%
     );
     @apply text-white transition-colors duration-200 hover:shadow-md;
   }
 
-  .sunset-button:hover {
+  .accent-button:hover {
     background: linear-gradient(
       135deg,
-      var(--sunset-orange) 0%,
-      var(--sunset-orange-light) 100%
+      var(--accent-cyan) 0%,
+      var(--accent-cyan-light) 100%
     );
-    /* 위아래 움직임 제거 */
-    transform: none;
-    /* 그림자 효과 최소화 */
     box-shadow:
-      0 4px 6px -1px rgba(0, 0, 0, 0.1),
-      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      0 4px 6px -1px rgba(78, 215, 241, 0.15),
+      0 2px 4px -1px rgba(78, 215, 241, 0.1);
   }
 
-  /* Glass Effect - 구름 글래스 효과 */
+  /* Bright Button - 밝은 버튼 */
+  .bright-button {
+    background: linear-gradient(
+      135deg,
+      var(--accent-yellow) 0%,
+      color-mix(in srgb, var(--accent-yellow) 90%, var(--accent-cyan-light) 10%)
+        100%
+    );
+    @apply text-neutral-gray-800 transition-colors duration-200 hover:shadow-md;
+  }
+
+  .bright-button:hover {
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--accent-yellow) 80%, white 20%) 0%,
+      var(--accent-yellow) 100%
+    );
+    box-shadow:
+      0 4px 6px -1px rgba(255, 250, 141, 0.15),
+      0 2px 4px -1px rgba(255, 250, 141, 0.1);
+  }
+
+  /* Glass Effect - 유리 효과 */
   .glass-effect {
     @apply border-border border;
-    /* 반투명 테두리 제거하고 일반 테두리로 변경 */
-    background: var(--card);
-    /* 백드롭 블러 효과 제거 */
-    backdrop-filter: none;
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--card) 80%, var(--soft-mint) 20%) 0%,
+      color-mix(in srgb, var(--card) 90%, var(--accent-cyan-light) 10%) 100%
+    );
+    backdrop-filter: blur(8px);
   }
 
-  /* Weather Status - 날씨 상태 */
-  .weather-sunny {
-    @apply bg-sunshine-yellow-light text-storm-gray-dark border-sunshine-yellow border;
+  /* Status Badges - 상태 배지 */
+  .status-primary {
+    background-color: var(--primary-blue-light);
+    color: var(--primary-blue-dark);
+    border: 1px solid var(--primary-blue);
   }
 
-  .weather-cloudy {
-    @apply bg-cloud-gray-light text-storm-gray-dark border-cloud-gray border;
+  .status-accent {
+    background-color: var(--accent-cyan-light);
+    color: var(--primary-blue-dark);
+    border: 1px solid var(--accent-cyan);
   }
 
-  .weather-rainy {
-    @apply bg-sky-blue-light text-sky-blue-dark border-sky-blue border;
+  .status-bright {
+    background-color: var(--accent-yellow);
+    color: var(--neutral-gray-800);
+    border: 1px solid var(--accent-yellow);
   }
 
-  .weather-stormy {
-    @apply bg-storm-gray border-storm-gray-dark border text-white;
+  .status-soft {
+    background-color: var(--soft-mint);
+    color: var(--neutral-gray-700);
+    border: 1px solid var(--soft-mint);
   }
 
-  .weather-sunset {
-    @apply bg-sunset-orange-light text-sunset-orange-dark border-sunset-orange border;
+  /* Dark mode status */
+  .dark .status-primary {
+    background-color: color-mix(
+      in srgb,
+      var(--primary-blue) 20%,
+      transparent 80%
+    );
+    color: var(--primary-blue-light);
+    border: 1px solid
+      color-mix(in srgb, var(--primary-blue) 50%, transparent 50%);
   }
 
-  /* Dark mode weather status */
-  .dark .weather-sunny {
-    @apply bg-sunshine-yellow/20 text-sunshine-yellow border-sunshine-yellow/50;
+  .dark .status-accent {
+    background-color: color-mix(
+      in srgb,
+      var(--accent-cyan) 20%,
+      transparent 80%
+    );
+    color: var(--accent-cyan);
+    border: 1px solid
+      color-mix(in srgb, var(--accent-cyan) 50%, transparent 50%);
   }
 
-  .dark .weather-cloudy {
-    @apply bg-cloud-gray/20 text-cloud-gray border-cloud-gray/50;
+  .dark .status-bright {
+    background-color: color-mix(
+      in srgb,
+      var(--accent-yellow) 20%,
+      transparent 80%
+    );
+    color: var(--accent-yellow);
+    border: 1px solid
+      color-mix(in srgb, var(--accent-yellow) 50%, transparent 50%);
   }
 
-  .dark .weather-rainy {
-    @apply bg-sky-blue/20 text-sky-blue border-sky-blue/50;
-  }
-
-  .dark .weather-stormy {
-    @apply bg-storm-gray/40 text-cloud-white border-storm-gray;
-  }
-
-  .dark .weather-sunset {
-    @apply bg-sunset-orange/20 text-sunset-orange border-sunset-orange/50;
+  .dark .status-soft {
+    background-color: color-mix(in srgb, var(--soft-mint) 20%, transparent 80%);
+    color: var(--soft-mint);
+    border: 1px solid color-mix(in srgb, var(--soft-mint) 50%, transparent 50%);
   }
 
   /* Form Controls - 폼 요소 */
-  .weather-input {
-    @apply dark:bg-card border-cloud-gray dark:border-border bg-white;
-    @apply text-storm-gray-dark dark:text-foreground;
-    @apply placeholder:text-storm-gray dark:placeholder:text-muted-foreground;
-    @apply focus:border-sky-blue dark:focus:border-primary;
-    @apply focus:ring-sky-blue/20 dark:focus:ring-primary/20;
+  .form-input {
+    background-color: white;
+    border: 1px solid var(--neutral-gray-200);
+    color: var(--neutral-gray-800);
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--primary-blue) 20%, transparent 80%);
+  }
+
+  .form-input::placeholder {
+    color: var(--neutral-gray-600);
+  }
+
+  .dark .form-input {
+    background-color: var(--card);
+    border-color: var(--border);
+    color: var(--foreground);
+  }
+
+  .dark .form-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--primary) 20%, transparent 80%);
+  }
+
+  .dark .form-input::placeholder {
+    color: var(--muted-foreground);
+  }
+
+  /* Navigation - 네비게이션 */
+  .nav-primary {
+    background: linear-gradient(
+      90deg,
+      var(--primary-blue-dark) 0%,
+      var(--primary-blue) 50%,
+      var(--accent-cyan-bright) 100%
+    );
+  }
+
+  /* Hero Sections - 히어로 섹션 */
+  .hero-gradient {
+    background: linear-gradient(
+      135deg,
+      var(--primary-blue-dark) 0%,
+      var(--primary-blue) 25%,
+      var(--accent-cyan-bright) 50%,
+      var(--accent-cyan-light) 75%,
+      var(--soft-mint) 100%
+    );
+  }
+
+  .hero-overlay {
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--primary-blue-dark) 60%, transparent 40%) 0%,
+      color-mix(in srgb, var(--accent-cyan-bright) 40%, transparent 60%) 100%
+    );
   }
 
   /* Alert Styles - 알림 스타일 */
   .alert-success {
-    @apply bg-sunshine-yellow-light border-sunshine-yellow text-storm-gray-dark;
+    @apply bg-soft-mint border-soft-mint text-neutral-gray-800;
+  }
+
+  .alert-info {
+    @apply bg-accent-cyan-light border-accent-cyan text-primary-blue-dark;
   }
 
   .alert-warning {
-    @apply bg-sunset-orange-light border-sunset-orange text-sunset-orange-dark;
+    background: var(--accent-yellow);
+    @apply border-accent-yellow text-neutral-gray-800;
   }
 
   .alert-error {
     @apply border-red-200 bg-red-50 text-red-800;
   }
 
-  .alert-info {
-    @apply bg-sky-blue-light border-sky-blue text-sky-blue-dark;
-  }
-
   /* Dark mode alerts */
   .dark .alert-success {
-    @apply bg-sunshine-yellow/20 border-sunshine-yellow/50 text-sunshine-yellow;
+    @apply bg-soft-mint/20 border-soft-mint/50 text-soft-mint;
+  }
+
+  .dark .alert-info {
+    @apply bg-accent-cyan/20 border-accent-cyan/50 text-accent-cyan;
   }
 
   .dark .alert-warning {
-    @apply bg-sunset-orange/20 border-sunset-orange/50 text-sunset-orange;
+    @apply bg-accent-yellow/20 border-accent-yellow/50 text-accent-yellow;
   }
 
   .dark .alert-error {
     @apply border-red-500/50 bg-red-900/20 text-red-400;
   }
 
-  .dark .alert-info {
-    @apply bg-sky-blue/20 border-sky-blue/50 text-sky-blue;
+  /* Page Specific Styles - 페이지별 스타일 */
+  .page-destinations {
+    background: linear-gradient(
+      180deg,
+      var(--background) 0%,
+      color-mix(in srgb, var(--background) 95%, var(--accent-cyan-light) 5%) 50%,
+      color-mix(in srgb, var(--background) 98%, var(--soft-mint) 2%) 100%
+    );
+  }
+
+  .page-planner {
+    background: linear-gradient(
+      180deg,
+      var(--background) 0%,
+      color-mix(in srgb, var(--background) 95%, var(--primary-blue-light) 5%)
+        50%,
+      color-mix(in srgb, var(--background) 98%, var(--accent-yellow) 2%) 100%
+    );
+  }
+
+  .page-profile {
+    background: linear-gradient(
+      180deg,
+      var(--background) 0%,
+      color-mix(in srgb, var(--background) 95%, var(--soft-mint) 5%) 100%
+    );
+  }
+
+  /* Timeline Styles - 타임라인 스타일 */
+  .timeline-circle {
+    background: linear-gradient(
+      135deg,
+      var(--primary-blue) 0%,
+      var(--accent-cyan-bright) 100%
+    );
+  }
+
+  .timeline-circle-green {
+    background: linear-gradient(
+      135deg,
+      var(--primary-blue-dark) 0%,
+      var(--accent-cyan) 100%
+    );
+    box-shadow: 0 2px 8px
+      color-mix(in srgb, var(--primary-blue) 30%, transparent 70%);
+  }
+
+  .dark .timeline-circle-green {
+    background: linear-gradient(
+      135deg,
+      var(--accent-cyan-bright) 0%,
+      var(--accent-cyan) 100%
+    );
+    box-shadow: 0 2px 8px
+      color-mix(in srgb, var(--accent-cyan) 30%, transparent 70%);
+  }
+
+  .timeline-line {
+    background: linear-gradient(
+      to bottom,
+      var(--primary-blue-light) 0%,
+      var(--accent-cyan-light) 100%
+    );
+  }
+
+  .dark .timeline-line {
+    background: linear-gradient(
+      to bottom,
+      var(--accent-cyan) 0%,
+      var(--primary-blue) 100%
+    );
   }
 }
 
