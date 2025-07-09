@@ -114,14 +114,7 @@ export function MainPage() {
           </p>
 
           {/* Call to Action Button */}
-          <div className="mt-8">
-            <Link
-              to="/recommend"
-              className="sunny-button text-storm-gray-dark inline-flex items-center rounded-full px-8 py-3 text-lg font-semibold shadow-lg"
-            >
-              🌤️ 여행지 추천받기
-            </Link>
-          </div>
+          <div className="mt-8"></div>
         </div>
       </section>
 
