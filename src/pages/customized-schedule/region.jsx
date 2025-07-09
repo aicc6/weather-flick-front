@@ -134,6 +134,7 @@ export default function CustomizedScheduleRegionPage() {
 
   const handleNext = () => {
     if (regionCode) {
+      window.scrollTo({ top: 0, behavior: 'auto' })
       navigate(`/customized-schedule/period?region=${regionCode}`)
     }
   }

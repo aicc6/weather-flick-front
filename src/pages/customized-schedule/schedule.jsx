@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { Button } from '@/components/ui/button'
@@ -44,6 +44,16 @@ export default function CustomizedScheduleSchedulePage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [selectedSchedule, setSelectedSchedule] = useState(null)
+  const nextButtonRef = useRef(null)
+
+  useEffect(() => {
+    if (selectedSchedule && nextButtonRef.current) {
+      nextButtonRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+    }
+  }, [selectedSchedule])
 
   const region = searchParams.get('region') // This is regionCode
   const period = searchParams.get('period')
@@ -392,7 +402,7 @@ export default function CustomizedScheduleSchedulePage() {
       </div>
 
       {/* 완료 버튼 */}
-      <div className="flex justify-center">
+      <div className="flex justify-center" ref={nextButtonRef}>
         <Button
           onClick={handleNext}
           disabled={!selectedSchedule}

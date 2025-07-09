@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,16 @@ export default function CustomizedScheduleWhoPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [selectedCompanion, setSelectedCompanion] = useState(null)
+  const nextButtonRef = useRef(null)
+
+  useEffect(() => {
+    if (selectedCompanion && nextButtonRef.current) {
+      nextButtonRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+    }
+  }, [selectedCompanion])
 
   const region = searchParams.get('region') // This is regionCode
   const period = searchParams.get('period')
@@ -76,6 +86,7 @@ export default function CustomizedScheduleWhoPage() {
 
   const handleNext = () => {
     if (selectedCompanion) {
+      window.scrollTo({ top: 0, behavior: 'auto' })
       navigate(
         `/customized-schedule/style?region=${region}&period=${period}&days=${days}&who=${selectedCompanion.id}`,
       )
@@ -252,7 +263,7 @@ export default function CustomizedScheduleWhoPage() {
       </div>
 
       {/* 다음 버튼 */}
-      <div className="flex justify-center">
+      <div className="flex justify-center" ref={nextButtonRef}>
         <Button
           onClick={handleNext}
           disabled={!selectedCompanion}
