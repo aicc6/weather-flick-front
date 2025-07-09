@@ -69,8 +69,6 @@ export default function TravelCoursePage() {
         },
       ],
       tags: ['인스타감성', '자연치유', '드라이브'],
-      weather: '☀️ 맑음',
-      temperature: '22°C',
     },
     {
       id: 2,
@@ -105,8 +103,6 @@ export default function TravelCoursePage() {
         },
       ],
       tags: ['도시여행', '야경감상', '맛집투어'],
-      weather: '🌤️ 구름조금',
-      temperature: '19°C',
     },
     {
       id: 3,
@@ -141,8 +137,6 @@ export default function TravelCoursePage() {
         },
       ],
       tags: ['커피여행', '일출명소', '해변산책'],
-      weather: '🌊 바람',
-      temperature: '16°C',
     },
     {
       id: 4,
@@ -172,8 +166,6 @@ export default function TravelCoursePage() {
         },
       ],
       tags: ['문화재탐방', '역사교육', '전통체험'],
-      weather: '🌅 노을',
-      temperature: '18°C',
     },
     {
       id: 5,
@@ -204,8 +196,6 @@ export default function TravelCoursePage() {
         },
       ],
       tags: ['전통문화', '미식여행', '체험활동'],
-      weather: '☁️ 흐림',
-      temperature: '20°C',
     },
   ]
 
