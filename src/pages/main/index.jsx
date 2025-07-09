@@ -193,11 +193,6 @@ export function MainPage() {
                 <div
                   className={`flex-1 text-center ${isEven ? 'md:pl-8 md:text-left' : 'md:pr-8 md:text-right'}`}
                 >
-                  <div
-                    className={`mb-4 inline-block rounded-full px-4 py-2 text-sm font-semibold ${sec.bgClass}`}
-                  >
-                    서비스 {idx + 1}
-                  </div>
                   <h3 className="text-foreground mb-4 text-3xl font-bold">
                     {sec.title}
                   </h3>
@@ -235,7 +230,7 @@ export function MainPage() {
                 </Link>
                 <Link
                   to="/recommend"
-                  className="weather-button rounded-full px-8 py-3 font-semibold text-white"
+                  className="weather-button rounded-full px-8 py-3 font-semibold"
                 >
                   🗺️ 여행지 둘러보기
                 </Link>
