@@ -209,11 +209,21 @@ export default function TravelCoursePage() {
       try {
         setImagesLoading(true)
         const regionNames = travelCourses.map((course) => course.regionName)
+        console.log('🔍 요청할 지역명들:', regionNames)
+
         const images = await getMultipleRegionImages(regionNames)
+        console.log('📸 로드된 이미지 매핑:', images)
+
         setImages(images)
-        console.log('로드된 이미지:', images)
+
+        // 각 코스별로 어떤 이미지가 할당되었는지 확인
+        travelCourses.forEach((course) => {
+          console.log(
+            `${course.regionName} (ID: ${course.id}) → ${images[course.regionName]}`,
+          )
+        })
       } catch (error) {
-        console.error('이미지 로드 실패:', error)
+        console.error('❌ 이미지 로드 실패:', error)
         // fallback으로 다른 이미지 사용
         const fallbackImages = {}
         travelCourses.forEach((course) => {
