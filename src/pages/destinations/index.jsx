@@ -284,10 +284,10 @@ export default function TravelCoursePage() {
         <div className="container mx-auto px-4 text-center">
           <div className="mb-8">
             <h1 className="text-foreground mb-4 text-4xl font-bold">
-              🌤️ 날씨 맞춤 여행지 추천
+              여행지 추천
             </h1>
             <p className="text-muted-foreground text-lg">
-              실시간 날씨 정보를 기반으로 완벽한 여행지를 찾아보세요
+              한국의 인기있는 대표적인 여행지의 여행 코스를 추천해드립니다
             </p>
           </div>
 
