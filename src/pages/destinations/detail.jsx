@@ -15,6 +15,8 @@ import {
   Navigation,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   ArrowLeft,
   User,
   Eye,
@@ -34,6 +36,24 @@ export default function TravelCourseDetailPage() {
   const [comments, setComments] = useState([])
   const [isImageModalOpen, setIsImageModalOpen] = useState(false)
   const [modalImageIndex, setModalImageIndex] = useState(0)
+  // 각 일차별 열림/닫힘 상태 관리
+  const [expandedDays, setExpandedDays] = useState(() => {
+    // 기본적으로 모든 일차를 열린 상태로 초기화
+    const initialState = {}
+    for (let i = 1; i <= 6; i++) {
+      // 최대 6일까지 지원
+      initialState[i] = true
+    }
+    return initialState
+  })
+
+  // 일차별 토글 함수
+  const toggleDay = (dayNumber) => {
+    setExpandedDays((prev) => ({
+      ...prev,
+      [dayNumber]: !prev[dayNumber],
+    }))
+  }
 
   // 여행 코스 데이터 (실제로는 API에서 가져올 데이터)
   const courseData = {
@@ -1303,103 +1323,113 @@ export default function TravelCourseDetailPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               {course.itinerary.map((day, dayIndex) => (
-                <div
-                  key={dayIndex}
-                  className="timeline-line relative border-l-4 pl-6"
-                >
-                  <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-                    Day {day.day}: {day.title}
-                  </h3>
-                  <div className="space-y-6">
-                    {day.activities.map((activity, actIndex) => {
-                      // 활동 타입에 따른 아이콘과 색상 설정
-                      const getActivityIcon = (type) => {
-                        switch (type) {
-                          case 'transport':
-                            return '✈️'
-                          case 'attraction':
-                            return '🏛️'
-                          case 'restaurant':
-                            return '🍽️'
-                          case 'cafe':
-                            return '☕'
-                          case 'accommodation':
-                            return '🏨'
-                          default:
-                            return '📍'
-                        }
-                      }
+                <div key={dayIndex}>
+                  <div>
+                    {/* 클릭 가능한 Day 제목 */}
+                    <button
+                      onClick={() => toggleDay(day.day)}
+                      className="flex w-full items-center justify-between rounded-lg p-3 text-left transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                    >
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        Day {day.day}: {day.title}
+                      </h3>
+                      {expandedDays[day.day] ? (
+                        <ChevronUp className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                      )}
+                    </button>
 
-                      const getActivityColor = (type) => {
-                        switch (type) {
-                          case 'transport':
-                            return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-                          case 'attraction':
-                            return 'status-soft'
-                          case 'restaurant':
-                            return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
-                          case 'cafe':
-                            return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
-                          case 'accommodation':
-                            return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
-                          default:
-                            return 'status-primary'
-                        }
-                      }
+                    {/* 접었다 폈다 되는 상세 일정 */}
+                    {expandedDays[day.day] && (
+                      <div className="mt-4 space-y-4 pl-3">
+                        {day.activities.map((activity, actIndex) => {
+                          // 활동 타입에 따른 아이콘과 색상 설정
+                          const getActivityIcon = (type) => {
+                            switch (type) {
+                              case 'transport':
+                                return '✈️'
+                              case 'attraction':
+                                return '🏛️'
+                              case 'restaurant':
+                                return '🍽️'
+                              case 'cafe':
+                                return '☕'
+                              case 'accommodation':
+                                return '🏨'
+                              default:
+                                return '📍'
+                            }
+                          }
 
-                      return (
-                        <div
-                          key={actIndex}
-                          className="relative rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-600 dark:bg-gray-700"
-                        >
-                          {/* 타임라인 동그라미 */}
-                          <div className="timeline-circle-green absolute top-4 -left-8 flex h-6 w-6 items-center justify-center rounded-full">
-                            <span className="text-xs font-bold text-white">
-                              {actIndex + 1}
-                            </span>
-                          </div>
+                          const getActivityColor = (type) => {
+                            switch (type) {
+                              case 'transport':
+                                return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                              case 'attraction':
+                                return 'status-soft'
+                              case 'restaurant':
+                                return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+                              case 'cafe':
+                                return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
+                              case 'accommodation':
+                                return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+                              default:
+                                return 'status-primary'
+                            }
+                          }
 
-                          <div className="flex gap-4">
-                            <div className="flex w-16 flex-shrink-0 items-center justify-center text-base font-semibold text-gray-700 dark:text-gray-300">
-                              {activity.time}
-                            </div>
-                            <div className="flex-1">
-                              <div className="mb-2 flex items-center gap-2">
-                                <span className="text-lg">
-                                  {getActivityIcon(activity.type)}
-                                </span>
-                                <h4 className="font-semibold text-gray-900 dark:text-white">
-                                  {activity.place}
-                                </h4>
-                                {activity.duration && (
-                                  <Badge variant="outline" className="ml-auto">
-                                    <Clock className="mr-1 h-3 w-3" />
-                                    {activity.duration >= 60
-                                      ? `${Math.floor(activity.duration / 60)}시간`
-                                      : `${activity.duration}분`}
-                                  </Badge>
-                                )}
+                          return (
+                            <div
+                              key={actIndex}
+                              className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-600 dark:bg-gray-700"
+                            >
+                              <div className="flex gap-4">
+                                <div className="flex w-16 flex-shrink-0 items-center justify-center text-base font-semibold text-gray-700 dark:text-gray-300">
+                                  {activity.time}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="mb-2 flex items-center gap-2">
+                                    <span className="text-lg">
+                                      {getActivityIcon(activity.type)}
+                                    </span>
+                                    <h4 className="font-semibold text-gray-900 dark:text-white">
+                                      {activity.place}
+                                    </h4>
+                                    {activity.duration && (
+                                      <Badge
+                                        variant="outline"
+                                        className="ml-auto"
+                                      >
+                                        <Clock className="mr-1 h-3 w-3" />
+                                        {activity.duration >= 60
+                                          ? `${Math.floor(activity.duration / 60)}시간`
+                                          : `${activity.duration}분`}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">
+                                    {activity.description}
+                                  </p>
+                                  {activity.address && (
+                                    <div className="mb-1 flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                                      <MapPin className="h-3 w-3" />
+                                      <span>{activity.address}</span>
+                                    </div>
+                                  )}
+                                  {activity.phone && (
+                                    <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                                      <span>📞</span>
+                                      <span>{activity.phone}</span>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                              <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">
-                                {activity.description}
-                              </p>
-                              {activity.address && (
-                                <div className="mb-1 flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                                  <MapPin className="h-3 w-3" />
-                                  <span>{activity.address}</span>
-                                </div>
-                              )}
-                              {activity.phone && (
-                                <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                                  <span>📞</span>
-                                  <span>{activity.phone}</span>
-                                </div>
-                              )}
                             </div>
-                          </div>
-                        </div>
-                      )
-                    })}
+                          )
+                        })}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
