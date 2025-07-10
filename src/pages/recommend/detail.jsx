@@ -28,6 +28,11 @@ import {
   useGetReviewsByCourseQuery,
   useCreateReviewMutation,
 } from '@/store/api/recommendReviewsApi'
+import {
+  useGetCourseLikeQuery,
+  useLikeCourseMutation,
+  useUnlikeCourseMutation,
+} from '@/store/api'
 
 export default function TravelCourseDetailPage() {
   const { id } = useParams()
@@ -168,6 +173,21 @@ export default function TravelCourseDetailPage() {
     },
     [comment, _rating, id, user, createReview],
   )
+
+  // 좋아요 상태/카운트 RTK Query
+  const { data: likeData, isLoading: likeLoading } = useGetCourseLikeQuery(
+    Number(id),
+  )
+  const [likeCourse] = useLikeCourseMutation()
+  const [unlikeCourse] = useUnlikeCourseMutation()
+
+  const handleLikeClick = async () => {
+    if (likeData?.liked) {
+      await unlikeCourse(Number(id))
+    } else {
+      await likeCourse(Number(id))
+    }
+  }
 
   // 모든 useEffect들을 early return 이전으로 이동
   useEffect(() => {
@@ -314,8 +334,12 @@ export default function TravelCourseDetailPage() {
             <span className="text-gray-500">({reviewsCount}명 평가)</span>
           </div>
           <div className="flex items-center gap-2">
-            <Heart className="h-5 w-5 text-red-400" />
-            <span className="text-gray-600">좋아요 {course.likeCount}</span>
+            <Heart
+              className={`h-5 w-5 ${likeData?.liked ? 'text-red-500' : 'text-gray-400'}`}
+            />
+            <span className="text-gray-600">
+              좋아요 {likeLoading ? '-' : (likeData?.total ?? 0)}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <Eye className="h-5 w-5 text-gray-400" />
@@ -326,12 +350,13 @@ export default function TravelCourseDetailPage() {
         {/* 액션 버튼들 */}
         <div className="flex flex-wrap gap-3">
           <Button
-            variant={isLiked ? 'default' : 'outline'}
-            onClick={() => setIsLiked(!isLiked)}
-            className={isLiked ? 'bg-red-500 hover:bg-red-600' : ''}
+            variant={likeData?.liked ? 'default' : 'outline'}
+            onClick={handleLikeClick}
+            className={likeData?.liked ? 'bg-red-500 hover:bg-red-600' : ''}
+            disabled={likeLoading}
           >
             <Heart className="mr-2 h-4 w-4" />
-            좋아요
+            {likeData?.liked ? '좋아요 취소' : '좋아요'}
           </Button>
           <Button variant="outline" onClick={handleShare}>
             <Share2 className="mr-2 h-4 w-4" />
