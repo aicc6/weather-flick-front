@@ -8,6 +8,11 @@ import {
   ChevronDown,
   ChevronUp,
 } from '@/components/icons'
+import {
+  useGetReviewLikeQuery,
+  useLikeReviewMutation,
+  useUnlikeReviewMutation,
+} from '@/store/api/reviewLikesApi'
 
 // 닉네임 마스킹 함수
 function maskNickname(nickname) {
@@ -26,34 +31,6 @@ function formatDate(dateStr) {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
-// 좋아요/싫어요 mock (실제 연동 시 상태/함수로 대체)
-function useLikeDislike(initialLike = 0, initialDislike = 0) {
-  const [like, setLike] = useState(initialLike)
-  const [dislike, setDislike] = useState(initialDislike)
-  const [my, setMy] = useState(null) // 'like' | 'dislike' | null
-  const handleLike = () => {
-    if (my === 'like') {
-      setLike(like - 1)
-      setMy(null)
-    } else {
-      setLike(like + 1)
-      if (my === 'dislike') setDislike(dislike - 1)
-      setMy('like')
-    }
-  }
-  const handleDislike = () => {
-    if (my === 'dislike') {
-      setDislike(dislike - 1)
-      setMy(null)
-    } else {
-      setDislike(dislike + 1)
-      if (my === 'like') setLike(like - 1)
-      setMy('dislike')
-    }
-  }
-  return { like, dislike, my, handleLike, handleDislike }
-}
-
 /**
  * BEST 댓글 기준: 좋아요 10개 이상 또는 상위 3개 (mock)
  * 실제로는 review.likeCount, review.dislikeCount 필드 필요
@@ -67,8 +44,8 @@ function splitBestAndNormal(reviews) {
   }))
   const sorted = [...withLike].sort((a, b) => b.likeCount - a.likeCount)
   const best = sorted.slice(0, 3)
-  const bestIds = new Set(best.map((r) => r.id))
-  const normal = withLike.filter((r) => !bestIds.has(r.id))
+  // 전체 댓글(normal)은 best 포함(중복 허용)
+  const normal = sorted
   return { best, normal }
 }
 
@@ -80,11 +57,28 @@ const ReviewTree = memo(function ReviewTree({
 }) {
   // 최상위 댓글만 분리
   const topLevel = reviews.filter((r) => !r.parent_id)
+  // 평균 별점 및 인원수 계산 (삭제 예정)
+  // const totalRating = topLevel.reduce((sum, r) => sum + (r.rating || 0), 0)
+  // const avgRating = topLevel.length > 0 ? totalRating / topLevel.length : 0
+  // const peopleCount = topLevel.length
   const { best, normal } = splitBestAndNormal(topLevel)
   const [tab, setTab] = useState('best')
 
+  // 최상위 댓글 폼 별점 상태
+  const [rootRating, setRootRating] = useState(5)
+
+  // 최상위 댓글 등록 핸들러
+  const handleRootSubmit = useCallback(
+    async (content) => {
+      await onReply?.(undefined, content, rootRating)
+      // setRootRating(5) 제거: 등록 후에도 사용자가 선택한 별점 유지
+    },
+    [onReply, rootRating],
+  )
+
   return (
     <div className="">
+      {/* 상단: 좋아요 옆에 별점/인원 표시 삭제 */}
       {/* 탭 */}
       <div className="mb-2 flex gap-6 border-b">
         <button
@@ -146,11 +140,13 @@ const ReviewNode = memo(function ReviewNode({
   const [replyRating, setReplyRating] = useState(5)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showChildren, setShowChildren] = useState(true)
-  const { like, dislike, my, handleLike, handleDislike } = useLikeDislike(
-    review.likeCount,
-    review.dislikeCount,
+  const { data: likeData, isLoading: likeLoading } = useGetReviewLikeQuery(
+    review.id,
   )
+  const [likeReview] = useLikeReviewMutation()
+  const [unlikeReview] = useUnlikeReviewMutation()
 
+  // 답글(대댓글) 등록 핸들러에서 setReplyRating(5) 제거
   const handleReplySubmit = useCallback(
     async (e) => {
       e.preventDefault()
@@ -159,7 +155,7 @@ const ReviewNode = memo(function ReviewNode({
       try {
         await onReply?.(review.id, replyContent, replyRating)
         setReplyContent('')
-        setReplyRating(5)
+        // setReplyRating(5) 제거: 대댓글은 별점 초기화하지 않음
         setShowReply(false)
       } finally {
         setIsSubmitting(false)
@@ -168,6 +164,24 @@ const ReviewNode = memo(function ReviewNode({
     [onReply, review.id, replyContent, replyRating],
   )
 
+  const handleLike = useCallback(async () => {
+    if (!likeData) return
+    if (likeData.my_like) {
+      await unlikeReview({ reviewId: review.id, isLike: true })
+    } else {
+      await likeReview({ reviewId: review.id, isLike: true })
+    }
+  }, [likeData, likeReview, unlikeReview, review.id])
+
+  const handleDislike = useCallback(async () => {
+    if (!likeData) return
+    if (likeData.my_dislike) {
+      await unlikeReview({ reviewId: review.id, isLike: false })
+    } else {
+      await likeReview({ reviewId: review.id, isLike: false })
+    }
+  }, [likeData, likeReview, unlikeReview, review.id])
+
   // 답글 개수
   const replyCount = review.children?.length || 0
   // 답글(대댓글) 제한: depth === 0(최상위)만 답글 허용
@@ -175,7 +189,11 @@ const ReviewNode = memo(function ReviewNode({
 
   return (
     <div
-      className={`rounded-lg border bg-white p-4 ${isBest ? 'border-yellow-400' : 'border-gray-200'} shadow-sm dark:border-zinc-700 dark:bg-[#0f172a] dark:text-zinc-100`}
+      className={
+        depth === 1
+          ? 'px-4 py-3 text-sm'
+          : `rounded-lg border bg-white p-4 ${isBest ? 'border-yellow-400' : 'border-gray-200'} shadow-sm dark:border-zinc-700 dark:bg-[#0f172a] dark:text-zinc-100`
+      }
     >
       <div className="mb-1 flex items-center gap-2">
         <span className="font-semibold">{maskNickname(review.nickname)}</span>
@@ -191,20 +209,34 @@ const ReviewNode = memo(function ReviewNode({
       <div className="mb-2 text-gray-800 dark:text-zinc-100">
         {review.content}
       </div>
+      {depth === 0 && (
+        <div className="mb-1 flex items-center gap-1">
+          {[...Array(5)].map((_, i) => (
+            <Star
+              key={i}
+              className={`h-4 w-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-zinc-500'}`}
+              aria-label={`${i + 1}점`}
+            />
+          ))}
+          <span className="ml-1 text-xs text-gray-500 dark:text-zinc-400">
+            {review.rating}점
+          </span>
+        </div>
+      )}
       <div className="mb-2 flex items-center gap-2">
         <span className="flex items-center gap-1 text-gray-500 dark:text-zinc-400">
           <ThumbsUp
-            className={`h-4 w-4 cursor-pointer ${my === 'like' ? 'text-blue-600 dark:text-blue-400' : ''}`}
+            className={`h-4 w-4 cursor-pointer ${likeData?.my_like ? 'text-blue-600 dark:text-blue-400' : ''}`}
             onClick={handleLike}
           />
-          {like}
+          {likeLoading ? '-' : (likeData?.total_like ?? 0)}
         </span>
         <span className="flex items-center gap-1 text-gray-500 dark:text-zinc-400">
           <ThumbsDown
-            className={`h-4 w-4 cursor-pointer ${my === 'dislike' ? 'text-red-500 dark:text-red-400' : ''}`}
+            className={`h-4 w-4 cursor-pointer ${likeData?.my_dislike ? 'text-red-500 dark:text-red-400' : ''}`}
             onClick={handleDislike}
           />
-          {dislike}
+          {likeLoading ? '-' : (likeData?.total_dislike ?? 0)}
         </span>
         {replyCount > 0 && depth === 0 && (
           <Button
@@ -228,7 +260,7 @@ const ReviewNode = memo(function ReviewNode({
             onClick={() => setShowReply((v) => !v)}
             aria-label="답글 달기"
           >
-            답글
+            답글 달기
           </Button>
         )}
       </div>
@@ -242,6 +274,7 @@ const ReviewNode = memo(function ReviewNode({
             className="w-full dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
             rows={2}
           />
+          {/* 답글 폼에는 별점 UI를 렌더링하지 않음 (depth === 1) */}
           <div className="flex items-center gap-2">
             {[...Array(5)].map((_, i) => (
               <Star
@@ -273,14 +306,19 @@ const ReviewNode = memo(function ReviewNode({
         review.children.length > 0 &&
         showChildren &&
         depth === 0 && (
-          <div className="mt-2 ml-6 rounded bg-gray-50 p-2 dark:border dark:border-zinc-700 dark:bg-[#0f172a]">
-            {review.children.map((child) => (
-              <ReviewNode
-                key={child.id}
-                review={child}
-                onReply={onReply}
-                depth={1}
-              />
+          <div className="mt-2 ml-6">
+            {review.children.map((child, idx) => (
+              <div key={child.id} className="relative mb-2 pl-5">
+                {/* ㄴ자 선: 각 답글마다 앞에 개별적으로 */}
+                <div className="pointer-events-none absolute top-2 left-0 h-4 w-4">
+                  <div
+                    className="absolute top-0 left-1/2 h-3 w-0.5 bg-zinc-300 dark:bg-zinc-700"
+                    style={{ height: '12px' }}
+                  />
+                  <div className="absolute top-3 left-1/2 h-0.5 w-4 bg-zinc-300 dark:bg-zinc-700" />
+                </div>
+                <ReviewNode review={child} onReply={onReply} depth={1} />
+              </div>
             ))}
           </div>
         )}

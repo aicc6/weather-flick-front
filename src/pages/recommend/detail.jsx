@@ -174,6 +174,18 @@ export default function TravelCourseDetailPage() {
     }
   }
 
+  // 리뷰 별점 평균/인원 계산 함수
+  function getAvgRatingAndCount(reviews) {
+    const topLevel = reviews.filter((r) => !r.parent_id)
+    const totalRating = topLevel.reduce((sum, r) => sum + (r.rating || 0), 0)
+    const avgRating = topLevel.length > 0 ? totalRating / topLevel.length : 0
+    const peopleCount = topLevel.length
+    return { avgRating, peopleCount }
+  }
+
+  // 별점 평균/인원 계산 (reviewTree fetch 이후)
+  const { avgRating, peopleCount } = getAvgRatingAndCount(reviewTree)
+
   // 모든 useEffect들을 early return 이전으로 이동
   useEffect(() => {
     // 페이지 방문 시 조회수 증가 (실제로는 API 호출)
@@ -311,13 +323,18 @@ export default function TravelCourseDetailPage() {
 
         {/* 평점 및 통계 */}
         <div className="mb-6 flex flex-wrap items-center gap-6">
+          {/* 별점 평균/인원 표시 */}
           <div className="flex items-center gap-2">
-            <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                className={`h-5 w-5 ${i < Math.round(avgRating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-zinc-500'}`}
+              />
+            ))}
             <span className="text-lg font-semibold">
-              {/* reviewsAvgRating 변수가 삭제되었으므로 임시로 0.0 또는 빈 문자열 사용 */}
-              {0.0}
+              {avgRating.toFixed(1)}
             </span>
-            <span className="text-gray-500">({0}명 평가)</span>
+            <span className="text-gray-500">({peopleCount}명 평가)</span>
           </div>
           <div className="flex items-center gap-2">
             <Heart
@@ -329,7 +346,7 @@ export default function TravelCourseDetailPage() {
           </div>
           <div className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5 text-gray-400" />
-            <span className="text-gray-600">리뷰 {0}건</span>
+            <span className="text-gray-600">리뷰 {reviewTree.length}건</span>
           </div>
         </div>
 
