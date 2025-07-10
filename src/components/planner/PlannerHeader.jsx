@@ -14,9 +14,8 @@ const PlannerHeader = memo(() => {
         transition={{ delay: 0.2, duration: 0.3 }}
       >
         <h1 className="mb-4 text-4xl font-bold md:text-5xl">
-          🌤️
           <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            날씨 플래너
+            여행 플래너
           </span>
         </h1>
         <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
