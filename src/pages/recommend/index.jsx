@@ -22,6 +22,25 @@ import {
   Sparkles,
 } from '@/components/icons'
 import { getMultipleRegionImages } from '@/services/imageService'
+import { useGetReviewsByCourseQuery } from '@/store/api/recommendReviewsApi'
+
+// 별점 평균 캐시를 위한 커스텀 훅
+function useCourseRatings(courseIds) {
+  // courseIds: [1,2,3,...]
+  const ratings = {}
+  courseIds.forEach((id) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const { data: reviews = [] } = useGetReviewsByCourseQuery(id)
+    ratings[id] =
+      reviews.length > 0
+        ? (
+            reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
+            reviews.length
+          ).toFixed(1)
+        : null
+  })
+  return ratings
+}
 
 export default function TravelCoursePage() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -347,6 +366,10 @@ export default function TravelCoursePage() {
     ))
   }
 
+  // 별점 동기화: 모든 코스 id 추출
+  const courseIds = filteredCourses.map((c) => c.id)
+  const courseRatings = useCourseRatings(courseIds)
+
   // 실제 카드 렌더링
   const renderCourseCards = () => {
     return filteredCourses.map((course) => (
@@ -416,7 +439,7 @@ export default function TravelCoursePage() {
                   style={{ color: 'var(--accent-yellow)' }}
                 />
                 <span className="text-foreground text-sm font-medium">
-                  {course.rating}
+                  {courseRatings[course.id] ?? course.rating}
                 </span>
               </div>
             </div>
