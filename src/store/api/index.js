@@ -9,6 +9,7 @@ export { weatherApi } from './weatherApi'
 export { regionsApi } from './regionsApi'
 export { localInfoApi } from './localInfoApi'
 export { travelCoursesApi } from './travelCoursesApi'
+export { recommendLikesApi } from './recommendLikesApi'
 
 // Export all hooks for convenience
 export {
@@ -85,3 +86,9 @@ export {
   useGetCoursesByRegionQuery,
   useSearchTravelCoursesQuery,
 } from './travelCoursesApi'
+
+export {
+  useGetCourseLikeQuery,
+  useLikeCourseMutation,
+  useUnlikeCourseMutation,
+} from './recommendLikesApi'

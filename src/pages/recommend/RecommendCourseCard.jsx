@@ -1,0 +1,173 @@
+import React, { useCallback } from 'react'
+import { Link } from 'react-router-dom'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Heart, Camera, Star, Clock, Navigation } from '@/components/icons'
+import {
+  useGetCourseLikeQuery,
+  useLikeCourseMutation,
+  useUnlikeCourseMutation,
+} from '@/store/api'
+
+const regionNames = {
+  all: '전체',
+  seoul: '서울',
+  busan: '부산',
+  incheon: '인천',
+  daegu: '대구',
+  daejeon: '대전',
+  gwangju: '광주',
+  ulsan: '울산',
+  sejong: '세종',
+  gyeonggi: '경기',
+  gangwon: '강원',
+  chungbuk: '충북',
+  chungnam: '충남',
+  jeonbuk: '전북',
+  jeonnam: '전남',
+  gyeongbuk: '경북',
+  gyeongnam: '경남',
+  jeju: '제주',
+  gangneung: '강릉',
+  gyeongju: '경주',
+  jeonju: '전주',
+  yeosu: '여수',
+}
+
+const RecommendCourseCard = React.memo(function RecommendCourseCard({
+  course,
+  imageUrl,
+  rating,
+}) {
+  const { data: likeData, isLoading: likeLoading } = useGetCourseLikeQuery(
+    course.id,
+  )
+  const [likeCourse] = useLikeCourseMutation()
+  const [unlikeCourse] = useUnlikeCourseMutation()
+
+  const handleLikeClick = useCallback(
+    async (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (likeData?.liked) {
+        await unlikeCourse(course.id)
+      } else {
+        await likeCourse(course.id)
+      }
+    },
+    [likeData, course.id, likeCourse, unlikeCourse],
+  )
+
+  return (
+    <Card className="weather-card group cursor-pointer overflow-hidden p-0">
+      <Link to={`/recommend/detail/${course.id}`} className="block">
+        {/* Image Section */}
+        <div className="relative h-48 overflow-hidden">
+          <img
+            src={
+              imageUrl || `https://picsum.photos/800/600?random=${course.id}`
+            }
+            alt={course.title}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+            loading="lazy"
+            onError={(e) => {
+              // fallback 이미지 처리 (생략)
+            }}
+          />
+          {/* 좋아요 버튼 */}
+          <button
+            type="button"
+            className="absolute top-3 right-3 rounded-full bg-white/90 p-2 shadow-md transition-all duration-200 hover:scale-110 hover:bg-white"
+            onClick={handleLikeClick}
+            aria-label={likeData?.liked ? '좋아요 취소' : '좋아요'}
+            disabled={likeLoading}
+          >
+            <Heart
+              className="h-4 w-4 transition-colors"
+              style={{
+                color: likeData?.liked ? '#ef4444' : '#4b5563',
+                fill: likeData?.liked ? '#ef4444' : 'none',
+              }}
+            />
+          </button>
+        </div>
+        <CardHeader className="p-4 pb-3">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <CardTitle className="text-foreground line-clamp-1 text-lg font-bold">
+                {course.title}
+              </CardTitle>
+              <p className="text-muted-foreground mt-1 line-clamp-1 text-sm">
+                {course.subtitle}
+              </p>
+            </div>
+            <div className="flex items-center gap-1">
+              <Star
+                className="h-4 w-4 fill-current"
+                style={{ color: 'var(--accent-yellow)' }}
+              />
+              <span className="text-foreground text-sm font-medium">
+                {rating ?? course.rating}
+              </span>
+            </div>
+          </div>
+          {/* Tags */}
+          <div className="mt-3 flex flex-wrap gap-2">
+            {course.theme.slice(0, 3).map((tag, index) => (
+              <Badge key={index} className="status-soft text-xs">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        </CardHeader>
+        <CardContent className="px-4 pt-0 pb-4">
+          <p className="text-muted-foreground mb-4 line-clamp-2 text-sm">
+            {course.summary}
+          </p>
+          {/* Course Info */}
+          <div className="mb-4 space-y-2">
+            <div className="text-muted-foreground flex items-center gap-2 text-sm">
+              <Clock
+                className="h-4 w-4"
+                style={{ color: 'var(--primary-blue)' }}
+              />
+              <span>{course.duration}</span>
+            </div>
+            <div className="text-muted-foreground flex items-center gap-2 text-sm">
+              <Navigation
+                className="h-4 w-4"
+                style={{ color: 'var(--primary-blue)' }}
+              />
+              <span>{regionNames[course.region] || course.region}</span>
+            </div>
+          </div>
+          {/* Bottom Info */}
+          <div
+            className="flex items-center justify-between border-t pt-3"
+            style={{ borderColor: 'var(--border)' }}
+          >
+            <div
+              className="text-lg font-bold"
+              style={{ color: 'var(--primary-blue-dark)' }}
+            >
+              {course.price}
+            </div>
+            <div className="text-muted-foreground flex items-center gap-4 text-xs">
+              <span className="flex items-center gap-1">
+                <Heart className="h-3 w-3" />
+                {likeLoading ? '-' : (likeData?.total ?? 0)}
+              </span>
+              <span className="flex items-center gap-1">
+                <Camera className="h-3 w-3" />
+                {course.reviewCount}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Link>
+    </Card>
+  )
+})
+
+RecommendCourseCard.displayName = 'RecommendCourseCard'
+export default RecommendCourseCard
