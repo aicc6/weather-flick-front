@@ -92,10 +92,8 @@ function App() {
             <Route path="/sign-up" element={<SignUpPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/recommend" element={<TravelCoursePage />} />
-            <Route path="/recommend/:id" element={<TravelCourseDetailPage />} />
-            <Route path="/destinations" element={<TravelCoursePage />} />
             <Route
-              path="/destinations/detail/:id"
+              path="/recommend/detail/:id"
               element={<TravelCourseDetailPage />}
             />
             <Route
