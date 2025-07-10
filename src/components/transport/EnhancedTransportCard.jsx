@@ -33,16 +33,6 @@ const TimeSelector = ({ value, onChange, options }) => {
   const [showCustomTime, setShowCustomTime] = useState(false)
   const [customTime, setCustomTime] = useState('')
 
-  const now = new Date()
-  const timeOptions = {
-    now: '지금',
-    hour1: `1시간 후 (${new Date(now.getTime() + 60 * 60 * 1000).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })})`,
-    hour2: `2시간 후 (${new Date(now.getTime() + 2 * 60 * 60 * 1000).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })})`,
-    hour4: `4시간 후 (${new Date(now.getTime() + 4 * 60 * 60 * 1000).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })})`,
-    optimal: '최적 시간',
-    custom: '시간 직접 입력',
-  }
-
   const handleCustomTimeSubmit = () => {
     if (customTime) {
       onChange(`custom:${customTime}`)
@@ -57,62 +47,113 @@ const TimeSelector = ({ value, onChange, options }) => {
     return `${hours}:${minutes}`
   }
 
+  // 시간을 오전/오후 형식으로 변환하는 함수
+  const formatTimeToAmPm = (timeString) => {
+    const [hours, minutes] = timeString.split(':').map(Number)
+    const ampm = hours >= 12 ? '오후' : '오전'
+    const displayHours = hours > 12 ? hours - 12 : hours === 0 ? 12 : hours
+    return `${ampm} ${displayHours}:${minutes.toString().padStart(2, '0')}`
+  }
+
+  // 현재 선택된 시간을 표시하는 함수
+  const getSelectedTimeDisplay = () => {
+    if (value.startsWith('custom:')) {
+      const timeString = value.split(':')[1] + ':' + value.split(':')[2]
+      return formatTimeToAmPm(timeString)
+    }
+    
+    if (value === 'now') return '지금 출발'
+    if (value === 'optimal') return '최적 시간'
+    
+    // 1시간 후, 2시간 후 등의 경우 실제 시간 표시
+    const now = new Date()
+    if (value === 'hour1') {
+      const future = new Date(now.getTime() + 60 * 60 * 1000)
+      return formatTimeToAmPm(`${future.getHours()}:${future.getMinutes()}`)
+    }
+    if (value === 'hour2') {
+      const future = new Date(now.getTime() + 2 * 60 * 60 * 1000)
+      return formatTimeToAmPm(`${future.getHours()}:${future.getMinutes()}`)
+    }
+    if (value === 'hour4') {
+      const future = new Date(now.getTime() + 4 * 60 * 60 * 1000)
+      return formatTimeToAmPm(`${future.getHours()}:${future.getMinutes()}`)
+    }
+    
+    return '시간 선택'
+  }
+
   return (
-    <div className="space-y-2">
-      <div className="flex flex-wrap gap-2">
-        {options.map((option) => (
-          <Button
-            key={option}
-            variant={
-              value === option || value.startsWith(`${option}:`)
-                ? 'default'
-                : 'outline'
-            }
-            size="sm"
-            onClick={() => {
-              if (option === 'custom') {
+    <div className="flex items-center justify-between">
+      {/* 현재 선택된 시간 표시 */}
+      <div className="flex items-center space-x-3">
+        <span className="text-sm text-gray-600">출발시간:</span>
+        <span className="inline-block rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600">
+          🕒 {getSelectedTimeDisplay()}
+        </span>
+      </div>
+      
+      {/* 시간 선택 드롭다운 */}
+      <div className="flex items-center space-x-1">
+        {!showCustomTime ? (
+          <>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onChange('now')}
+              className={`text-xs ${value === 'now' ? 'bg-blue-100' : ''}`}
+            >
+              지금
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onChange('hour1')}
+              className={`text-xs ${value === 'hour1' ? 'bg-blue-100' : ''}`}
+            >
+              1시간후
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onChange('hour2')}
+              className={`text-xs ${value === 'hour2' ? 'bg-blue-100' : ''}`}
+            >
+              2시간후
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
                 setShowCustomTime(true)
                 setCustomTime(getCurrentTimeForInput())
-              } else {
-                onChange(option)
-                setShowCustomTime(false)
-              }
-            }}
-            className="text-xs"
-          >
-            {timeOptions[option] || option}
-          </Button>
-        ))}
-      </div>
-
-      {showCustomTime && (
-        <div className="mt-3 rounded-lg bg-gray-50 p-3">
+              }}
+              className={`text-xs ${value.startsWith('custom:') ? 'bg-blue-100' : ''}`}
+            >
+              직접입력
+            </Button>
+          </>
+        ) : (
           <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium">출발 시간:</label>
             <input
               type="time"
               value={customTime}
               onChange={(e) => setCustomTime(e.target.value)}
-              className="rounded border px-2 py-1 text-sm"
+              className="rounded border px-2 py-1 text-xs"
             />
             <Button size="sm" onClick={handleCustomTimeSubmit}>
-              적용
+              ✓
             </Button>
             <Button
               size="sm"
               variant="outline"
               onClick={() => setShowCustomTime(false)}
             >
-              취소
+              ✕
             </Button>
           </div>
-          <div className="mt-2 text-xs text-gray-600">
-            {value.startsWith('custom:') && (
-              <span>현재 설정: {value.split(':')[1]}</span>
-            )}
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
@@ -257,7 +298,7 @@ const formatCost = (cost) => {
 }
 
 // 메인 교통정보 카드 컴포넌트
-const EnhancedTransportCard = ({ route }) => {
+const EnhancedTransportCard = ({ route, travelDate }) => {
   const navigate = useNavigate()
   const [selectedTime, setSelectedTime] = useState('now')
   const [selectedMode, setSelectedMode] = useState('all')
@@ -265,6 +306,10 @@ const EnhancedTransportCard = ({ route }) => {
   const [transportData, setTransportData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+
+  // 여행 날짜가 과거인지 확인
+  const isPastTravel = travelDate && new Date(travelDate) < new Date().setHours(0, 0, 0, 0)
+  const isToday = travelDate && new Date(travelDate).toDateString() === new Date().toDateString()
 
   // API에서 실제 교통 정보 가져오기
   useEffect(() => {
@@ -280,6 +325,38 @@ const EnhancedTransportCard = ({ route }) => {
           departure_lng: route?.departure_lng,
           destination_lat: route?.destination_lat,
           destination_lng: route?.destination_lng,
+        })
+        setLoading(false)
+        return
+      }
+
+      // 과거 여행인 경우 API 호출하지 않고 기본 데이터만 표시
+      if (isPastTravel) {
+        setTransportData({
+          success: true,
+          routes: {
+            walk: {
+              success: true,
+              display_name: '도보',
+              duration: route.duration || 30,
+              distance: route.distance || 2.0,
+              cost: 0,
+            },
+            transit: {
+              success: true,
+              display_name: '대중교통',
+              duration: route.duration || 25,
+              distance: route.distance || 2.0,
+              cost: route.cost || 1500,
+            },
+            car: {
+              success: true,
+              display_name: '자동차',
+              duration: route.duration || 20,
+              distance: route.distance || 2.0,
+              cost: route.cost || 3000,
+            },
+          },
         })
         setLoading(false)
         return
@@ -448,7 +525,7 @@ const EnhancedTransportCard = ({ route }) => {
     }
 
     fetchTransportData()
-  }, [route, selectedTime])
+  }, [route, selectedTime, isPastTravel])
 
   // 실제 API 데이터를 기반으로 routes 배열 생성
   const createRoutesFromApiData = (apiData) => {
@@ -684,15 +761,34 @@ const EnhancedTransportCard = ({ route }) => {
             </h3>
             <p className="text-sm text-gray-600">교통정보 및 경로 안내</p>
           </div>
-          <TimeSelector
-            value={selectedTime}
-            onChange={setSelectedTime}
-            options={['now', 'hour1', 'hour2', 'hour4', 'optimal', 'custom']}
-          />
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
+        {/* 여행 날짜 상태 표시 */}
+        {isPastTravel && (
+          <div className="rounded-lg bg-gray-100 p-3 text-center">
+            <span className="text-sm text-gray-600">
+              📅 과거 여행 기록 - 실시간 교통정보는 현재/미래 여행에서만 제공됩니다
+            </span>
+          </div>
+        )}
+
+        {/* 시간 선택 UI - 과거 여행이 아닌 경우만 표시 */}
+        {!isPastTravel && (
+          <div className="border-b pb-4">
+            {isToday && (
+              <div className="mb-2 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded inline-block">
+                🔴 오늘 여행 - 실시간 교통정보 제공
+              </div>
+            )}
+            <TimeSelector
+              value={selectedTime}
+              onChange={setSelectedTime}
+              options={['now', 'hour1', 'hour2', 'custom']}
+            />
+          </div>
+        )}
         <TransportModeSelector
           modes={['transit', 'car', 'walk', 'bike']}
           selected={selectedMode}

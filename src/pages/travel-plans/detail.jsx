@@ -1345,6 +1345,7 @@ export function TravelPlanDetailPage() {
                                 route_data: route.route_data,
                                 isInterDay: route.sequence === 0,
                               }}
+                              travelDate={plan?.start_date}
                             />
                           </div>
                         )
