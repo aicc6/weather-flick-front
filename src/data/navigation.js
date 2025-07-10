@@ -16,4 +16,8 @@ export const navigationLinks = [
     path: '/planner',
     label: '여행 플래너',
   },
+  {
+    path: '/travel-plans',
+    label: '나의 플랜',
+  },
 ]
