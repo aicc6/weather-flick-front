@@ -518,10 +518,6 @@ export default function TravelCoursePage() {
       <RecommendCourseCard
         key={course.id}
         course={course}
-        imageUrl={
-          images[course.regionName] ||
-          `https://picsum.photos/800/600?random=${course.id}`
-        }
         rating={courseRatings[course.id] ?? course.rating}
         viewMode={viewMode}
       />

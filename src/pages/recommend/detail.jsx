@@ -14,7 +14,6 @@ import {
   Clock,
   MapPin,
   Camera,
-  Navigation,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -366,13 +365,6 @@ export default function TravelCourseDetailPage() {
             공유하기
           </Button>
           <Button
-            variant={isBookmarked ? 'default' : 'outline'}
-            onClick={() => setIsBookmarked(!isBookmarked)}
-          >
-            <Navigation className="mr-2 h-4 w-4" />
-            코스 담기
-          </Button>
-          <Button
             onClick={handleAddToMyTrip}
             className="bg-blue-600 hover:bg-blue-700"
           >
@@ -674,12 +666,16 @@ export default function TravelCourseDetailPage() {
                     <span className="ml-2 text-sm text-gray-600">
                       {_rating}점
                     </span>
-                    <Button
-                      type="submit"
-                      disabled={isPosting || !comment.trim()}
-                    >
-                      {isPosting ? '등록 중...' : '댓글 등록'}
-                    </Button>
+                    <div className="flex flex-1 justify-end">
+                      <Button
+                        type="submit"
+                        variant="outline"
+                        className="hover:bg-gray-100 dark:hover:bg-zinc-700"
+                        disabled={isPosting || !comment.trim()}
+                      >
+                        {isPosting ? '등록 중...' : '댓글 등록'}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </form>
@@ -761,7 +757,7 @@ export default function TravelCourseDetailPage() {
           {course.highlights && course.highlights.length > 0 && (
             <Card className="dark:border-gray-700 dark:bg-gray-800">
               <CardHeader>
-                <CardTitle className="dark:text-white">🎯 주요 명소</CardTitle>
+                <CardTitle className="dark:text-white">🏆 주요 명소</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
