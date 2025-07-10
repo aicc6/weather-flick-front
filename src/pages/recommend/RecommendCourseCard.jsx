@@ -2,12 +2,19 @@ import React, { useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Heart, Camera, Star, Clock, Navigation } from '@/components/icons'
+import {
+  Heart,
+  Star,
+  Clock,
+  Navigation,
+  MessageSquare,
+} from '@/components/icons'
 import {
   useGetCourseLikeQuery,
   useLikeCourseMutation,
   useUnlikeCourseMutation,
 } from '@/store/api'
+import { useGetReviewsByCourseQuery } from '@/store/api/recommendReviewsApi'
 
 const regionNames = {
   all: '전체',
@@ -44,6 +51,11 @@ const RecommendCourseCard = React.memo(function RecommendCourseCard({
   )
   const [likeCourse] = useLikeCourseMutation()
   const [unlikeCourse] = useUnlikeCourseMutation()
+  const {
+    data: reviews = [],
+    isLoading: reviewsLoading,
+    isError: reviewsError,
+  } = useGetReviewsByCourseQuery(course.id)
 
   const handleLikeClick = useCallback(
     async (e) => {
@@ -158,8 +170,8 @@ const RecommendCourseCard = React.memo(function RecommendCourseCard({
                 {likeLoading ? '-' : (likeData?.total ?? 0)}
               </span>
               <span className="flex items-center gap-1">
-                <Camera className="h-3 w-3" />
-                {course.reviewCount}
+                <MessageSquare className="h-3 w-3" />
+                {reviewsLoading ? '-' : reviewsError ? '!' : reviews.length}
               </span>
             </div>
           </div>
