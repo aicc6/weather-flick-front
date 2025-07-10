@@ -1,8 +1,8 @@
 import { useParams, Link } from 'react-router-dom'
-import { 
-  useGetTravelPlanQuery, 
-  useGetTravelPlanRoutesQuery, 
-  useAutoGenerateRoutesMutation 
+import {
+  useGetTravelPlanQuery,
+  useGetTravelPlanRoutesQuery,
+  useAutoGenerateRoutesMutation,
 } from '@/store/api/travelPlansApi'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { Button } from '@/components/ui/button'
@@ -55,7 +55,7 @@ export function TravelPlanDetailPage() {
     isError,
     error,
   } = useGetTravelPlanQuery(planId)
-  
+
   // 경로 정보 조회
   const {
     data: routes,
@@ -64,9 +64,10 @@ export function TravelPlanDetailPage() {
   } = useGetTravelPlanRoutesQuery(planId, {
     skip: !planId,
   })
-  
+
   // 자동 경로 생성
-  const [autoGenerateRoutes, { isLoading: isGeneratingRoutes }] = useAutoGenerateRoutesMutation()
+  const [autoGenerateRoutes, { isLoading: isGeneratingRoutes }] =
+    useAutoGenerateRoutesMutation()
 
   // 서울 날씨 정보 조회 (백엔드 API 500 에러로 인해 임시 비활성화)
   // const {
@@ -343,10 +344,13 @@ export function TravelPlanDetailPage() {
   const handleAutoGenerateRoutes = async () => {
     try {
       const result = await autoGenerateRoutes(planId).unwrap()
-      toast.success(`${result.routes?.length || 0}개의 경로가 생성되었습니다!`, {
-        duration: 3000,
-        position: 'bottom-right',
-      })
+      toast.success(
+        `${result.routes?.length || 0}개의 경로가 생성되었습니다!`,
+        {
+          duration: 3000,
+          position: 'bottom-right',
+        },
+      )
     } catch (error) {
       toast.error('경로 생성에 실패했습니다', {
         duration: 3000,
@@ -420,21 +424,21 @@ export function TravelPlanDetailPage() {
   // 일차별 경로 정보 그룹화
   const groupRoutesByDay = (routes) => {
     if (!routes || !Array.isArray(routes)) return {}
-    
+
     const grouped = {}
-    routes.forEach(route => {
+    routes.forEach((route) => {
       const dayKey = `day${route.day}`
       if (!grouped[dayKey]) {
         grouped[dayKey] = []
       }
       grouped[dayKey].push(route)
     })
-    
+
     // 각 일차별로 sequence 순서로 정렬
-    Object.keys(grouped).forEach(day => {
+    Object.keys(grouped).forEach((day) => {
       grouped[day].sort((a, b) => a.sequence - b.sequence)
     })
-    
+
     return grouped
   }
 
@@ -689,7 +693,9 @@ export function TravelPlanDetailPage() {
                   ) : (
                     <>
                       <Zap className="mr-2 h-4 w-4" />
-                      {routes && routes.length > 0 ? '경로 재생성' : '자동 경로 생성'}
+                      {routes && routes.length > 0
+                        ? '경로 재생성'
+                        : '자동 경로 생성'}
                     </>
                   )}
                 </Button>
@@ -700,7 +706,9 @@ export function TravelPlanDetailPage() {
             {routesLoading ? (
               <div className="flex items-center justify-center py-8">
                 <LoadingSpinner />
-                <span className="ml-2 text-gray-600">경로 정보를 불러오는 중...</span>
+                <span className="ml-2 text-gray-600">
+                  경로 정보를 불러오는 중...
+                </span>
               </div>
             ) : routes && routes.length > 0 ? (
               <div className="space-y-4">
@@ -713,14 +721,18 @@ export function TravelPlanDetailPage() {
                       </h3>
                       <div className="space-y-3">
                         {groupedRoutes[dayKey].map((route, index) => (
-                          <div key={route.route_id || index} className="flex items-center justify-between rounded-md bg-gray-50 p-3">
+                          <div
+                            key={route.route_id || index}
+                            className="flex items-center justify-between rounded-md bg-gray-50 p-3"
+                          >
                             <div className="flex items-center space-x-3">
                               <span className="text-lg">
                                 {getTransportIcon(route.transport_type)}
                               </span>
                               <div>
                                 <div className="font-medium text-gray-900">
-                                  {route.departure_name} → {route.destination_name}
+                                  {route.departure_name} →{' '}
+                                  {route.destination_name}
                                 </div>
                                 <div className="text-sm text-gray-600">
                                   {getTransportName(route.transport_type)}
@@ -750,10 +762,14 @@ export function TravelPlanDetailPage() {
                               </div>
                               {route.route_data?.source && (
                                 <div className="mt-1 text-xs text-blue-500">
-                                  {route.route_data.source === 'ODsay' && '🚌 ODsay'}
-                                  {route.route_data.source === 'TMAP' && '🚗 TMAP'}
-                                  {route.route_data.source === 'Google' && '🗺️ Google'}
-                                  {route.route_data.source === 'calculation' && '📊 추정'}
+                                  {route.route_data.source === 'ODsay' &&
+                                    '🚌 ODsay'}
+                                  {route.route_data.source === 'TMAP' &&
+                                    '🚗 TMAP'}
+                                  {route.route_data.source === 'Google' &&
+                                    '🗺️ Google'}
+                                  {route.route_data.source === 'calculation' &&
+                                    '📊 추정'}
                                 </div>
                               )}
                             </div>

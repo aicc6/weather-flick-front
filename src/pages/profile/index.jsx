@@ -22,7 +22,7 @@ export default function ProfilePage() {
   const { user: authUser, loading: authLoading, isAuthenticated } = useAuth()
   const [favoritePlaces, setFavoritePlaces] = useState([])
   const [loading, setLoading] = useState(true)
-  
+
   // 사용자 여행 플랜 데이터 가져오기
   const {
     data: userPlans = [],
@@ -33,10 +33,11 @@ export default function ProfilePage() {
   })
 
   // 최근 여행 플랜 데이터 가공 (최신순으로 정렬하고 최대 5개만)
-  const recentPlans = userPlans
-    ?.slice()
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-    .slice(0, 5) || []
+  const recentPlans =
+    userPlans
+      ?.slice()
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, 5) || []
 
   // Load additional user data (favorites, etc.)
   useEffect(() => {
@@ -291,7 +292,8 @@ export default function ProfilePage() {
                   <Calendar className="mx-auto mb-4 h-12 w-12 opacity-50" />
                   <p className="mb-2">여행 플랜을 불러올 수 없습니다.</p>
                   <p className="text-sm text-red-500">
-                    {plansError.data?.message || '네트워크 오류가 발생했습니다.'}
+                    {plansError.data?.message ||
+                      '네트워크 오류가 발생했습니다.'}
                   </p>
                 </div>
               ) : recentPlans.length > 0 ? (
@@ -316,12 +318,14 @@ export default function ProfilePage() {
                           <div className="flex items-center gap-3">
                             <Badge
                               variant={
-                                plan.status === 'CONFIRMED' || plan.status === 'COMPLETED'
+                                plan.status === 'CONFIRMED' ||
+                                plan.status === 'COMPLETED'
                                   ? 'default'
                                   : 'secondary'
                               }
                               className={
-                                plan.status === 'CONFIRMED' || plan.status === 'COMPLETED'
+                                plan.status === 'CONFIRMED' ||
+                                plan.status === 'COMPLETED'
                                   ? 'weather-sunny'
                                   : 'weather-cloudy'
                               }
