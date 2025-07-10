@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -41,11 +41,38 @@ const regionNames = {
   yeosu: '여수',
 }
 
+// 이미지 확장자별로 존재하는 첫 번째 이미지를 반환하는 커스텀 훅
+function useCourseImage(courseId) {
+  const [imageUrl, setImageUrl] = useState(null)
+  useEffect(() => {
+    let found = false
+    const exts = ['jpg', 'jpeg', 'png']
+    exts.forEach((ext) => {
+      const img = new window.Image()
+      img.src = `/course-images/${courseId}.${ext}`
+      img.onload = () => {
+        if (!found) {
+          setImageUrl(img.src)
+          found = true
+        }
+      }
+    })
+    // fallback: 1초 후에도 못 찾으면 랜덤 이미지
+    const timer = setTimeout(() => {
+      if (!found) {
+        setImageUrl(`https://picsum.photos/800/600?random=${courseId}`)
+      }
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [courseId])
+  return imageUrl
+}
+
 const RecommendCourseCard = React.memo(function RecommendCourseCard({
   course,
-  imageUrl,
   rating,
 }) {
+  const imageUrl = useCourseImage(course.id)
   const { data: likeData, isLoading: likeLoading } = useGetCourseLikeQuery(
     course.id,
   )
@@ -76,14 +103,12 @@ const RecommendCourseCard = React.memo(function RecommendCourseCard({
         {/* Image Section */}
         <div className="relative h-48 overflow-hidden">
           <img
-            src={
-              imageUrl || `https://picsum.photos/800/600?random=${course.id}`
-            }
+            src={imageUrl}
             alt={course.title}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
             loading="lazy"
             onError={(e) => {
-              // fallback 이미지 처리 (생략)
+              // fallback 이미지 처리 (이미 useCourseImage에서 처리됨)
             }}
           />
           {/* 좋아요 버튼 */}
