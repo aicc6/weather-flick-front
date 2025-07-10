@@ -140,6 +140,15 @@ export function Header() {
     }, 100)
   }
 
+  // 인증이 필요한 페이지 네비게이션 처리
+  const handleAuthRequiredNavigation = (path) => {
+    if (!user) {
+      navigate('/login')
+      return
+    }
+    handleNavigation(path)
+  }
+
   return (
     <>
       {/* 메인 헤더 */}

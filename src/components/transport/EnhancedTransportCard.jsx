@@ -61,10 +61,10 @@ const TimeSelector = ({ value, onChange, options }) => {
       const timeString = value.split(':')[1] + ':' + value.split(':')[2]
       return formatTimeToAmPm(timeString)
     }
-    
+
     if (value === 'now') return '지금 출발'
     if (value === 'optimal') return '최적 시간'
-    
+
     // 1시간 후, 2시간 후 등의 경우 실제 시간 표시
     const now = new Date()
     if (value === 'hour1') {
@@ -79,7 +79,7 @@ const TimeSelector = ({ value, onChange, options }) => {
       const future = new Date(now.getTime() + 4 * 60 * 60 * 1000)
       return formatTimeToAmPm(`${future.getHours()}:${future.getMinutes()}`)
     }
-    
+
     return '시간 선택'
   }
 
@@ -92,7 +92,7 @@ const TimeSelector = ({ value, onChange, options }) => {
           🕒 {getSelectedTimeDisplay()}
         </span>
       </div>
-      
+
       {/* 시간 선택 드롭다운 */}
       <div className="flex items-center space-x-1">
         {!showCustomTime ? (
@@ -308,8 +308,11 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
   const [error, setError] = useState(null)
 
   // 여행 날짜가 과거인지 확인
-  const isPastTravel = travelDate && new Date(travelDate) < new Date().setHours(0, 0, 0, 0)
-  const isToday = travelDate && new Date(travelDate).toDateString() === new Date().toDateString()
+  const isPastTravel =
+    travelDate && new Date(travelDate) < new Date().setHours(0, 0, 0, 0)
+  const isToday =
+    travelDate &&
+    new Date(travelDate).toDateString() === new Date().toDateString()
 
   // API에서 실제 교통 정보 가져오기
   useEffect(() => {
@@ -769,7 +772,8 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
         {isPastTravel && (
           <div className="rounded-lg bg-gray-100 p-3 text-center">
             <span className="text-sm text-gray-600">
-              📅 과거 여행 기록 - 실시간 교통정보는 현재/미래 여행에서만 제공됩니다
+              📅 과거 여행 기록 - 실시간 교통정보는 현재/미래 여행에서만
+              제공됩니다
             </span>
           </div>
         )}
@@ -778,8 +782,8 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
         {!isPastTravel && (
           <div className="border-b pb-4">
             {isToday && (
-              <div className="mb-2 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded inline-block">
-                🔴 오늘 여행 - 실시간 교통정보 제공
+              <div className="mb-2 inline-block rounded bg-blue-50 px-2 py-1 text-xs text-blue-600">
+                🔴 여행 계획 - 실시간 교통정보 제공
               </div>
             )}
             <TimeSelector
