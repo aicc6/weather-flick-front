@@ -14,7 +14,6 @@ import {
   Clock,
   MapPin,
   Camera,
-  Navigation,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -364,13 +363,6 @@ export default function TravelCourseDetailPage() {
           <Button variant="outline" onClick={handleShare}>
             <Share2 className="mr-2 h-4 w-4" />
             공유하기
-          </Button>
-          <Button
-            variant={isBookmarked ? 'default' : 'outline'}
-            onClick={() => setIsBookmarked(!isBookmarked)}
-          >
-            <Navigation className="mr-2 h-4 w-4" />
-            코스 담기
           </Button>
           <Button
             onClick={handleAddToMyTrip}
@@ -765,7 +757,7 @@ export default function TravelCourseDetailPage() {
           {course.highlights && course.highlights.length > 0 && (
             <Card className="dark:border-gray-700 dark:bg-gray-800">
               <CardHeader>
-                <CardTitle className="dark:text-white">�� 주요 명소</CardTitle>
+                <CardTitle className="dark:text-white">🏆 주요 명소</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
