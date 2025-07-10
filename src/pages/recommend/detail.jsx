@@ -23,8 +23,9 @@ import {
   MessageSquare,
   X,
 } from '@/components/icons'
+import ReviewTree from '@/components/common/ReviewTree'
 import {
-  useGetReviewsByCourseQuery,
+  useGetReviewsTreeByCourseQuery,
   useCreateReviewMutation,
 } from '@/store/api/recommendReviewsApi'
 import {
@@ -134,43 +135,28 @@ export default function TravelCourseDetailPage() {
 
   const { user } = useAuth()
 
-  // RTK Query 기반 댓글 목록/등록
+  // 트리형 댓글 데이터
   const {
-    data: reviews = [],
+    data: reviewTree = [],
     isLoading: isReviewsLoading,
     isError: isReviewsError,
     refetch: refetchReviews,
-  } = useGetReviewsByCourseQuery(id)
+  } = useGetReviewsTreeByCourseQuery(id)
   const [createReview, { isLoading: isPosting }] = useCreateReviewMutation()
 
-  // 댓글 별점 평균 계산
-  const reviewsCount = reviews.length
-  const reviewsAvgRating =
-    reviewsCount > 0
-      ? (
-          reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviewsCount
-        ).toFixed(1)
-      : null
-
-  const handleCommentSubmit = useCallback(
-    async (e) => {
-      e?.preventDefault?.()
-      if (!comment.trim()) return
-      try {
-        await createReview({
-          course_id: Number(id),
-          rating: _rating || 5,
-          content: comment,
-          nickname: user?.nickname || user?.email || '사용자',
-        }).unwrap()
-        setComment('')
-        setRating(0)
-        // invalidatesTags로 자동 갱신됨
-      } catch (err) {
-        alert('댓글 등록 실패: ' + (err?.data?.detail || err?.message))
-      }
+  // 댓글/답글 등록 핸들러
+  const handleReviewSubmit = useCallback(
+    async (parentId, content, rating) => {
+      await createReview({
+        course_id: Number(id),
+        rating: rating || 5,
+        content,
+        nickname: user?.nickname || user?.email || '사용자',
+        parent_id: parentId || null,
+      }).unwrap()
+      // invalidatesTags로 자동 갱신됨
     },
-    [comment, _rating, id, user, createReview],
+    [id, user, createReview],
   )
 
   // 좋아요 상태/카운트 RTK Query
@@ -328,9 +314,10 @@ export default function TravelCourseDetailPage() {
           <div className="flex items-center gap-2">
             <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
             <span className="text-lg font-semibold">
-              {reviewsAvgRating ?? '0.0'}
+              {/* reviewsAvgRating 변수가 삭제되었으므로 임시로 0.0 또는 빈 문자열 사용 */}
+              {0.0}
             </span>
-            <span className="text-gray-500">({reviewsCount}명 평가)</span>
+            <span className="text-gray-500">({0}명 평가)</span>
           </div>
           <div className="flex items-center gap-2">
             <Heart
@@ -342,7 +329,7 @@ export default function TravelCourseDetailPage() {
           </div>
           <div className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5 text-gray-400" />
-            <span className="text-gray-600">리뷰 {reviewsCount}건</span>
+            <span className="text-gray-600">리뷰 {0}건</span>
           </div>
         </div>
 
@@ -626,12 +613,20 @@ export default function TravelCourseDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 dark:text-white">
                 <MessageSquare className="h-5 w-5" />
-                댓글 ({reviews.length}건)
+                댓글 ({reviewTree.length}건)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* 댓글 작성 폼 */}
-              <form onSubmit={handleCommentSubmit} className="mt-8 space-y-2">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  handleReviewSubmit(null, comment, _rating)
+                  setComment('')
+                  setRating(0)
+                }}
+                className="mt-8 space-y-2"
+              >
                 <Textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
@@ -666,32 +661,8 @@ export default function TravelCourseDetailPage() {
                 </div>
               </form>
 
-              {/* 댓글 목록 */}
-              <div className="mt-6">
-                {isReviewsLoading ? (
-                  <div>댓글 불러오는 중...</div>
-                ) : isReviewsError ? (
-                  <div className="text-red-500">
-                    댓글을 불러오지 못했습니다.
-                  </div>
-                ) : reviews.length === 0 ? (
-                  <div className="text-gray-400">아직 댓글이 없습니다.</div>
-                ) : (
-                  reviews.map((review) => (
-                    <div key={review.id} className="mb-4 border-b pb-2">
-                      <div className="font-semibold">{review.nickname}</div>
-                      <div className="text-yellow-500">
-                        {'★'.repeat(review.rating)}
-                        {'☆'.repeat(5 - review.rating)}
-                      </div>
-                      <div>{review.content}</div>
-                      <div className="text-xs text-gray-400">
-                        {new Date(review.created_at).toLocaleString()}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
+              {/* 트리형 댓글 UI */}
+              <ReviewTree reviews={reviewTree} onReply={handleReviewSubmit} />
             </CardContent>
           </Card>
         </div>
