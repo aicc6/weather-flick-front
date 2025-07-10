@@ -139,6 +139,15 @@ export default function TravelCourseDetailPage() {
   } = useGetReviewsByCourseQuery(id)
   const [createReview, { isLoading: isPosting }] = useCreateReviewMutation()
 
+  // 댓글 별점 평균 계산
+  const reviewsCount = reviews.length
+  const reviewsAvgRating =
+    reviewsCount > 0
+      ? (
+          reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviewsCount
+        ).toFixed(1)
+      : null
+
   const handleCommentSubmit = useCallback(
     async (e) => {
       e?.preventDefault?.()
@@ -299,8 +308,10 @@ export default function TravelCourseDetailPage() {
         <div className="mb-6 flex flex-wrap items-center gap-6">
           <div className="flex items-center gap-2">
             <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-            <span className="text-lg font-semibold">{course.rating}</span>
-            <span className="text-gray-500">({course.reviewCount}명 평가)</span>
+            <span className="text-lg font-semibold">
+              {reviewsAvgRating ?? '0.0'}
+            </span>
+            <span className="text-gray-500">({reviewsCount}명 평가)</span>
           </div>
           <div className="flex items-center gap-2">
             <Heart className="h-5 w-5 text-red-400" />
