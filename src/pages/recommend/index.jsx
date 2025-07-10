@@ -138,9 +138,6 @@ export default function TravelCoursePage() {
           activities: ['남부시장', '전주비빔밥', '풍남문'],
         },
       ],
-<<<<<<< HEAD
-      tags: ['문화', '역사', '전주', '맛집', '추천코스'],
-=======
       tags: ['문화', '역사', '서울', '추천코스'],
       // 🟢 고도화 기능을 위한 새로운 속성들
       priceValue: 300000,
@@ -148,7 +145,6 @@ export default function TravelCoursePage() {
       weatherScore: 7.5,
       isNew: false,
       amenities: ['wifi', 'restaurant', 'accessible'],
->>>>>>> e6d3d2d81673862c9bb9196390e1bc30d71051a9
     },
     {
       id: 3,
