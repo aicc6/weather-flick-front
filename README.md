@@ -16,16 +16,16 @@ Weather Flick Frontend는 실시간 날씨 데이터를 기반으로 최적의 �
 
 ## 🚀 기술 스택
 
-| 카테고리 | 기술 | 버전 | 선택 이유 |
-|---|---|---|---|
-| **프레임워크** | React | 18.3.1 | 안정성과 생태계 지원 |
-| **언어** | JavaScript (JSX) | ES2022 | 개발 속도 및 팀 역량 |
-| **빌드 도구** | Vite | 6.3.5 | 빠른 개발 서버 |
-| **스타일링** | TailwindCSS + Shadcn/ui | 4.1.10 | 컴포넌트 중심 디자인 |
-| **상태 관리** | Context API + Redux | 하이브리드 | 용도별 선택적 사용 |
-| **라우팅** | React Router | 7.6.2 | 최신 라우팅 시스템 |
-| **폼 관리** | React Hook Form + Zod | - | 성능과 검증 |
-| **HTTP 클라이언트** | Custom Fetch | - | 가벼운 번들 크기 |
+| 카테고리            | 기술                    | 버전       | 선택 이유            |
+| ------------------- | ----------------------- | ---------- | -------------------- |
+| **프레임워크**      | React                   | 18.3.1     | 안정성과 생태계 지원 |
+| **언어**            | JavaScript (JSX)        | ES2022     | 개발 속도 및 팀 역량 |
+| **빌드 도구**       | Vite                    | 6.3.5      | 빠른 개발 서버       |
+| **스타일링**        | TailwindCSS + Shadcn/ui | 4.1.10     | 컴포넌트 중심 디자인 |
+| **상태 관리**       | Context API + Redux     | 하이브리드 | 용도별 선택적 사용   |
+| **라우팅**          | React Router            | 7.6.2      | 최신 라우팅 시스템   |
+| **폼 관리**         | React Hook Form + Zod   | -          | 성능과 검증          |
+| **HTTP 클라이언트** | Custom Fetch            | -          | 가벼운 번들 크기     |
 
 ## 📁 프로젝트 구조
 
@@ -113,11 +113,11 @@ VITE_APP_VERSION=1.0.0
 
 ```javascript
 // Context API 사용 예시 (인증)
-const { user, login, logout } = useAuth();
+const { user, login, logout } = useAuth()
 
 // Redux 사용 예시 (여행 계획) - 선택적
-const dispatch = useDispatch();
-dispatch(createTravelPlan(planData));
+const dispatch = useDispatch()
+dispatch(createTravelPlan(planData))
 ```
 
 ### HTTP 통신
@@ -125,10 +125,10 @@ dispatch(createTravelPlan(planData));
 커스텀 fetch 기반 HTTP 클라이언트 사용:
 
 ```javascript
-import { authHttp } from '@/lib/http';
+import { authHttp } from '@/lib/http'
 
 // 인증이 필요한 API 호출
-const response = await authHttp.GET('/travel-plans');
+const response = await authHttp.GET('/travel-plans')
 
 // 자동 Bearer 토큰 관리
 // 에러 처리 및 재시도 로직 포함
@@ -149,7 +149,7 @@ const response = await authHttp.GET('/travel-plans');
  */
 const WeatherCard = ({ weather, className }) => {
   // 컴포넌트 구현
-};
+}
 ```
 
 ## 🔗 백엔드 연동
@@ -174,18 +174,22 @@ python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ## 📱 주요 페이지
 
 ### 1. 메인 페이지 (`/`)
+
 - 서비스 소개 및 주요 기능 안내
 - 비로그인 사용자 대상 랜딩 페이지
 
 ### 2. 여행 계획 생성 (`/planner`)
+
 - 5단계 마법사 UI
 - 실시간 날씨 분석 및 추천
 
 ### 3. 추천 시스템 (`/recommend`)
+
 - 날씨 기반 여행지 추천
 - 지도 연동 시각화
 
 ### 4. 사용자 대시보드 (`/dashboard`)
+
 - 개인화된 여행 계획 관리
 - 날씨 알림 및 통계
 
@@ -216,7 +220,7 @@ npm run build
 server {
     listen 80;
     server_name your-domain.com;
-    
+
     location / {
         root /path/to/dist;
         try_files $uri $uri/ /index.html;

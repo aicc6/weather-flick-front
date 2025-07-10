@@ -29,6 +29,11 @@ export {
   PlusCircle,
   Info,
   TagIcon as Tag,
+  CheckCircle,
+  XCircle,
+  Vote,
+  UserPlus,
+  Brain,
 } from 'lucide-react'
 
 // Weather Icons

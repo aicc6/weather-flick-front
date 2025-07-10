@@ -1066,6 +1066,27 @@ export function TravelPlanDetailPage() {
               <div className="space-y-4">
                 {(() => {
                   const groupedRoutes = groupRoutesByDay(routes)
+<<<<<<< HEAD
+                  return Object.keys(groupedRoutes).map((dayKey) => (
+                    <div key={dayKey} className="rounded-lg border p-4">
+                      <h3 className="mb-3 text-lg font-semibold text-blue-600">
+                        {dayKey.replace('day', '') + '일차 이동 정보'}
+                      </h3>
+                      <div className="space-y-3">
+                        {groupedRoutes[dayKey].map((route, index) => (
+                          <div
+                            key={route.route_id || index}
+                            className="flex items-center justify-between rounded-md bg-gray-50 p-3"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <span className="text-lg">
+                                {getTransportIcon(route.transport_type)}
+                              </span>
+                              <div>
+                                <div className="font-medium text-gray-900">
+                                  {route.departure_name} →{' '}
+                                  {route.destination_name}
+=======
                   return Object.keys(groupedRoutes)
                     .sort(
                       (a, b) =>
@@ -1112,6 +1133,7 @@ export function TravelPlanDetailPage() {
                                     {route.transport_type === 'car' &&
                                       renderCarRouteDetails(route.route_data)}
                                   </div>
+>>>>>>> af5e56f7e672beea0393a2e77d007bab8dddaabf
                                 </div>
                                 <div className="text-right">
                                   <div className="flex items-center space-x-4 text-sm text-gray-600">
@@ -1147,9 +1169,49 @@ export function TravelPlanDetailPage() {
                                   )}
                                 </div>
                               </div>
+<<<<<<< HEAD
+                            </div>
+                            <div className="text-right">
+                              <div className="flex items-center space-x-4 text-sm text-gray-600">
+                                {route.duration && (
+                                  <div className="flex items-center">
+                                    <Clock className="mr-1 h-3 w-3" />
+                                    {formatDuration(route.duration)}
+                                  </div>
+                                )}
+                                {route.distance && (
+                                  <div className="flex items-center">
+                                    <Navigation className="mr-1 h-3 w-3" />
+                                    {formatDistance(route.distance)}
+                                  </div>
+                                )}
+                                {route.cost !== undefined && (
+                                  <div className="flex items-center">
+                                    <DollarSign className="mr-1 h-3 w-3" />
+                                    {formatCost(route.cost)}
+                                  </div>
+                                )}
+                              </div>
+                              {route.route_data?.source && (
+                                <div className="mt-1 text-xs text-blue-500">
+                                  {route.route_data.source === 'ODsay' &&
+                                    '🚌 ODsay'}
+                                  {route.route_data.source === 'TMAP' &&
+                                    '🚗 TMAP'}
+                                  {route.route_data.source === 'Google' &&
+                                    '🗺️ Google'}
+                                  {route.route_data.source === 'calculation' &&
+                                    '📊 추정'}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+=======
                             )
                           })}
                         </div>
+>>>>>>> af5e56f7e672beea0393a2e77d007bab8dddaabf
                       </div>
                     ))
                 })()}

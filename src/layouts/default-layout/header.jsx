@@ -6,7 +6,17 @@
  */
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Sun, Moon, User, LogOut, Settings, Menu, X } from '@/components/icons'
+import {
+  Sun,
+  Moon,
+  User,
+  LogOut,
+  Settings,
+  Menu,
+  X,
+  ChevronDown,
+  ChevronUp,
+} from '@/components/icons'
 import { navigationLinks } from '@/data'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContextRTK'
@@ -22,6 +32,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 export function Header() {
   const [isDark, setIsDark] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isMenuCollapsed, setIsMenuCollapsed] = useState(false)
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth > 950)
 
   const { user, logout, loading } = useAuth()
@@ -48,6 +59,12 @@ export function Header() {
     } else {
       document.documentElement.classList.remove('dark')
       setIsDark(false)
+    }
+
+    // 메뉴 접힘 상태 불러오기
+    const savedMenuState = localStorage.getItem('menuCollapsed')
+    if (savedMenuState) {
+      setIsMenuCollapsed(JSON.parse(savedMenuState))
     }
   }, [])
 
@@ -106,6 +123,12 @@ export function Header() {
     setIsSidebarOpen(!isSidebarOpen)
   }
 
+  const toggleMenuCollapse = () => {
+    const newState = !isMenuCollapsed
+    setIsMenuCollapsed(newState)
+    localStorage.setItem('menuCollapsed', JSON.stringify(newState))
+  }
+
   // 모바일 메뉴에서 안전한 네비게이션 처리
   const handleNavigation = (path) => {
     // 먼저 사이드바 닫기
@@ -119,9 +142,16 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-md dark:border-gray-800 dark:bg-gray-900/80">
+      {/* 메인 헤더 */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md dark:bg-gray-900/80">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
+          <div
+            className={`flex h-16 items-center justify-between ${
+              isLargeScreen && !isMenuCollapsed
+                ? ''
+                : 'border-b border-gray-200 dark:border-gray-800'
+            }`}
+          >
             <div className="flex items-center">
               {/* 햄버거 메뉴 버튼 (950px 이하) */}
               {!isLargeScreen && (
@@ -138,7 +168,7 @@ export function Header() {
 
               <Link to="/" className="flex items-center space-x-2">
                 <img
-                  src="/logo.jpg"
+                  src="/newicon.jpg"
                   alt="Weather Flick Logo"
                   className="h-8 w-8 rounded-lg object-cover"
                 />
@@ -148,32 +178,25 @@ export function Header() {
               </Link>
             </div>
 
-            {/* 상단 네비게이션 (950px 이상) */}
-            {isLargeScreen && (
-              <nav className="flex items-center space-x-8">
-                {navigationLinks.map((link) => {
-                  const isActive = isActiveRoute(link.path)
-                  return (
-                    <Link
-                      key={link.path}
-                      to={link.path}
-                      className={`relative font-medium transition-colors ${
-                        isActive
-                          ? 'text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
-                          : 'text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white'
-                      }`}
-                    >
-                      {link.label}
-                      {isActive && (
-                        <span className="absolute -bottom-1 left-0 h-0.5 w-full bg-blue-600 dark:bg-blue-400" />
-                      )}
-                    </Link>
-                  )
-                })}
-              </nav>
-            )}
-
+            {/* 우측 영역 */}
             <div className="flex items-center space-x-4">
+              {/* 메뉴 접기/펼치기 버튼 (950px 이상에서만 표시) */}
+              {isLargeScreen && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleMenuCollapse}
+                  aria-label={isMenuCollapsed ? '메뉴 펼치기' : '메뉴 접기'}
+                  className="mr-2"
+                >
+                  {isMenuCollapsed ? (
+                    <ChevronDown className="h-5 w-5" />
+                  ) : (
+                    <ChevronUp className="h-5 w-5" />
+                  )}
+                </Button>
+              )}
+
               {loading ? (
                 <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700" />
               ) : user ? (
@@ -242,6 +265,41 @@ export function Header() {
             </div>
           </div>
         </div>
+
+        {/* 네비게이션 메뉴 바 (950px 이상에서만 표시) */}
+        {isLargeScreen && (
+          <div
+            className={`overflow-hidden bg-white/90 backdrop-blur-sm transition-all duration-300 ease-in-out dark:bg-gray-900/90 ${
+              isMenuCollapsed ? 'max-h-0' : 'max-h-16'
+            }`}
+          >
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <nav className="flex h-16 items-center">
+                <div className="flex w-full items-center justify-between">
+                  {navigationLinks.map((link) => {
+                    const isActive = isActiveRoute(link.path)
+                    return (
+                      <Link
+                        key={link.path}
+                        to={link.path}
+                        className={`relative rounded-md px-3 py-2 font-medium transition-colors ${
+                          isActive
+                            ? 'bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30 dark:hover:text-blue-300'
+                            : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-white'
+                        }`}
+                      >
+                        {link.label}
+                        {isActive && (
+                          <span className="absolute -bottom-1 left-1/2 h-0.5 w-8 -translate-x-1/2 transform rounded-full bg-blue-600 dark:bg-blue-400" />
+                        )}
+                      </Link>
+                    )
+                  })}
+                </div>
+              </nav>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* 사이드바 오버레이 */}
@@ -265,7 +323,7 @@ export function Header() {
           <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
             <div className="flex items-center space-x-2">
               <img
-                src="/logo.jpg"
+                src="/newicon.jpg"
                 alt="Weather Flick Logo"
                 className="h-8 w-8 rounded-lg object-cover"
               />

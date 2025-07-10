@@ -466,10 +466,7 @@ const PlannerForm = memo(() => {
           >
             <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
               <CardContent className="p-6">
-                <div className="mb-6 flex items-center gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md">
-                    <span className="text-sm font-bold text-white">1</span>
-                  </div>
+                <div className="mb-6">
                   <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
                     여행 기본 정보
                   </h2>
@@ -604,10 +601,7 @@ const PlannerForm = memo(() => {
               >
                 <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                   <CardContent className="p-6">
-                    <div className="mb-6 flex items-center gap-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-pink-600 shadow-md">
-                        <span className="text-sm font-bold text-white">2</span>
-                      </div>
+                    <div className="mb-6">
                       <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
                         날짜별 목적지 선택
                       </h2>
@@ -716,7 +710,7 @@ const PlannerForm = memo(() => {
 
                                 <div className="relative space-y-3">
                                   <label className="mb-1 block text-sm font-semibold text-gray-600 dark:text-gray-300">
-                                    📍 목적지 추가
+                                    목적지 추가
                                   </label>
                                   {isPastDate ? (
                                     <div className="rounded-xl border border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 p-4 shadow-sm">

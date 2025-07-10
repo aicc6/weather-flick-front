@@ -241,7 +241,10 @@ export const travelPlansApi = createApi({
       providesTags: (result, error, planId) =>
         result
           ? [
-              ...result.map(({ route_id }) => ({ type: 'Route', id: route_id })),
+              ...result.map(({ route_id }) => ({
+                type: 'Route',
+                id: route_id,
+              })),
               { type: 'Route', id: `PLAN_${planId}` },
             ]
           : [{ type: 'Route', id: `PLAN_${planId}` }],
