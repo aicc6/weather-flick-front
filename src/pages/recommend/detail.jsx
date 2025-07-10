@@ -20,12 +20,14 @@ import {
   ChevronDown,
   ChevronUp,
   ArrowLeft,
-  User,
   Eye,
   MessageSquare,
-  Sparkles,
   X,
 } from '@/components/icons'
+import {
+  useGetReviewsByCourseQuery,
+  useCreateReviewMutation,
+} from '@/store/api/recommendReviewsApi'
 
 export default function TravelCourseDetailPage() {
   const { id } = useParams()
@@ -128,21 +130,35 @@ export default function TravelCourseDetailPage() {
 
   const { user } = useAuth()
 
-  const handleCommentSubmit = useCallback(() => {
-    if (comment.trim()) {
-      const displayName = user?.nickname || user?.email || '사용자'
-      const newComment = {
-        id: Date.now(),
-        user: displayName,
-        content: comment,
-        date: new Date().toLocaleDateString(),
-        rating: _rating, // 별점 상태 사용
-        helpful: 0,
+  // RTK Query 기반 댓글 목록/등록
+  const {
+    data: reviews = [],
+    isLoading: isReviewsLoading,
+    isError: isReviewsError,
+    refetch: refetchReviews,
+  } = useGetReviewsByCourseQuery(id)
+  const [createReview, { isLoading: isPosting }] = useCreateReviewMutation()
+
+  const handleCommentSubmit = useCallback(
+    async (e) => {
+      e?.preventDefault?.()
+      if (!comment.trim()) return
+      try {
+        await createReview({
+          course_id: Number(id),
+          rating: _rating || 5,
+          content: comment,
+          nickname: user?.nickname || user?.email || '사용자',
+        }).unwrap()
+        setComment('')
+        setRating(0)
+        // invalidatesTags로 자동 갱신됨
+      } catch (err) {
+        alert('댓글 등록 실패: ' + (err?.data?.detail || err?.message))
       }
-      setComments((prev) => [newComment, ...prev])
-      setComment('')
-    }
-  }, [comment, _rating, user])
+    },
+    [comment, _rating, id, user, createReview],
+  )
 
   // 모든 useEffect들을 early return 이전으로 이동
   useEffect(() => {
@@ -601,14 +617,21 @@ export default function TravelCourseDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 dark:text-white">
                 <MessageSquare className="h-5 w-5" />
-                댓글 ({comments.length}건)
+                댓글 ({reviews.length}건)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* 별점 + 댓글 입력란 + 버튼을 하나의 div로 감쌈 */}
-              <div className="space-y-3">
-                {/* 별점 선택 UI */}
-                <div className="mb-2 flex items-center gap-2">
+              {/* 댓글 작성 폼 */}
+              <form onSubmit={handleCommentSubmit} className="mt-8 space-y-2">
+                <Textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="댓글을 입력하세요"
+                  required
+                  className="w-full"
+                />
+                <div className="flex items-center gap-2">
+                  {/* 별점 선택 UI */}
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
@@ -628,74 +651,37 @@ export default function TravelCourseDetailPage() {
                   <span className="ml-2 text-sm text-gray-600">
                     {_rating}점
                   </span>
+                  <Button type="submit" disabled={isPosting || !comment.trim()}>
+                    {isPosting ? '등록 중...' : '댓글 등록'}
+                  </Button>
                 </div>
-                {/* 댓글 입력란 */}
-                <Textarea
-                  placeholder="이 여행 코스에 댓글을 남겨주세요..."
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  className="dark:border-gray-600 dark:bg-gray-700"
-                />
-                <Button onClick={handleCommentSubmit} size="sm">
-                  댓글 등록
-                </Button>
-              </div>
+              </form>
 
-              {comments.length > 0 && (
-                <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
-                  <h4 className="mb-2 flex items-center gap-2 font-semibold text-blue-800 dark:text-blue-200">
-                    <Sparkles className="h-4 w-4" />
-                    AI가 빠르게 요약해주는 사용자 후기!
-                  </h4>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">
-                    대부분의 사용자들이 자연 경관과 힐링 요소에 만족하고 있으며,
-                    특히 한라산 트레킹과 애월 카페거리를 추천하고 있습니다.
-                  </p>
-                </div>
-              )}
-
-              <div className="space-y-4">
-                {comments.map((comment) => (
-                  <div
-                    key={comment.id}
-                    className="border-b pb-4 dark:border-gray-700"
-                  >
-                    <div className="mb-2 flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-600">
-                        <User className="h-4 w-4" />
-                      </div>
-                      <span className="font-medium dark:text-white">
-                        {comment.user}
-                      </span>
-                      <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-3 w-3 ${
-                              i < comment.rating
-                                ? 'fill-yellow-400 text-yellow-400'
-                                : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-sm text-gray-500">
-                        {comment.date}
-                      </span>
-                    </div>
-                    <p className="text-gray-700 dark:text-gray-300">
-                      {comment.content}
-                    </p>
-                    <div className="mt-2 flex items-center gap-4">
-                      <Button variant="ghost" size="sm">
-                        👍 도움이 돼요 ({comment.helpful})
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        답글
-                      </Button>
-                    </div>
+              {/* 댓글 목록 */}
+              <div className="mt-6">
+                {isReviewsLoading ? (
+                  <div>댓글 불러오는 중...</div>
+                ) : isReviewsError ? (
+                  <div className="text-red-500">
+                    댓글을 불러오지 못했습니다.
                   </div>
-                ))}
+                ) : reviews.length === 0 ? (
+                  <div className="text-gray-400">아직 댓글이 없습니다.</div>
+                ) : (
+                  reviews.map((review) => (
+                    <div key={review.id} className="mb-4 border-b pb-2">
+                      <div className="font-semibold">{review.nickname}</div>
+                      <div className="text-yellow-500">
+                        {'★'.repeat(review.rating)}
+                        {'☆'.repeat(5 - review.rating)}
+                      </div>
+                      <div>{review.content}</div>
+                      <div className="text-xs text-gray-400">
+                        {new Date(review.created_at).toLocaleString()}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
