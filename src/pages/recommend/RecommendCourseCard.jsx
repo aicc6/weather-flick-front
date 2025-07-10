@@ -45,6 +45,7 @@ const RecommendCourseCard = React.memo(function RecommendCourseCard({
   course,
   imageUrl,
   rating,
+  viewMode = 'grid', // 기본값 추가
 }) {
   const { data: likeData, isLoading: likeLoading } = useGetCourseLikeQuery(
     course.id,
@@ -70,6 +71,111 @@ const RecommendCourseCard = React.memo(function RecommendCourseCard({
     [likeData, course.id, likeCourse, unlikeCourse],
   )
 
+  // 리스트 모드인 경우 다른 레이아웃 적용
+  if (viewMode === 'list') {
+    return (
+      <Card className="weather-card group cursor-pointer overflow-hidden p-0">
+        <Link to={`/recommend/detail/${course.id}`} className="block">
+          <div className="flex">
+            {/* 리스트 모드: 가로 이미지 */}
+            <div className="relative h-32 w-48 flex-shrink-0 overflow-hidden">
+              <img
+                src={
+                  imageUrl ||
+                  `https://picsum.photos/800/600?random=${course.id}`
+                }
+                alt={course.title}
+                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                loading="lazy"
+              />
+              {/* 좋아요 버튼 */}
+              <button
+                type="button"
+                className="absolute top-2 right-2 rounded-full bg-white/90 p-1.5 shadow-md transition-all duration-200 hover:scale-110 hover:bg-white"
+                onClick={handleLikeClick}
+                aria-label={likeData?.liked ? '좋아요 취소' : '좋아요'}
+                disabled={likeLoading}
+              >
+                <Heart
+                  className="h-3 w-3 transition-colors"
+                  style={{
+                    color: likeData?.liked ? '#ef4444' : '#4b5563',
+                    fill: likeData?.liked ? '#ef4444' : 'none',
+                  }}
+                />
+              </button>
+            </div>
+
+            {/* 리스트 모드: 컨텐츠 영역 */}
+            <div className="flex-1 p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="text-foreground line-clamp-1 text-lg font-bold">
+                    {course.title}
+                  </h3>
+                  <p className="text-muted-foreground mt-1 line-clamp-1 text-sm">
+                    {course.subtitle}
+                  </p>
+                </div>
+                <div className="ml-4 flex items-center gap-1">
+                  <Star
+                    className="h-4 w-4 fill-current"
+                    style={{ color: 'var(--accent-yellow)' }}
+                  />
+                  <span className="text-foreground text-sm font-medium">
+                    {rating ?? course.rating}
+                  </span>
+                </div>
+              </div>
+
+              {/* Tags */}
+              <div className="mt-2 flex flex-wrap gap-1">
+                {course.theme.slice(0, 3).map((tag, index) => (
+                  <Badge key={index} className="status-soft text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+
+              <p className="text-muted-foreground mt-2 line-clamp-2 text-sm">
+                {course.summary}
+              </p>
+
+              {/* Bottom Info */}
+              <div className="mt-3 flex items-center justify-between">
+                <div
+                  className="text-lg font-bold"
+                  style={{ color: 'var(--primary-blue-dark)' }}
+                >
+                  {course.price}
+                </div>
+                <div className="text-muted-foreground flex items-center gap-4 text-xs">
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {course.duration}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Navigation className="h-3 w-3" />
+                    {regionNames[course.region] || course.region}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Heart className="h-3 w-3" />
+                    {likeLoading ? '-' : (likeData?.total ?? 0)}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <MessageSquare className="h-3 w-3" />
+                    {reviewsLoading ? '-' : reviewsError ? '!' : reviews.length}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Link>
+      </Card>
+    )
+  }
+
+  // 기존 grid 모드 (기본값)
   return (
     <Card className="weather-card group cursor-pointer overflow-hidden p-0">
       <Link to={`/recommend/detail/${course.id}`} className="block">
