@@ -176,7 +176,7 @@ const RouteComparison = ({ routes }) => {
                     )}
                   </div>
                   <div className="text-sm text-gray-600">
-                    {route.duration}분 • {route.distance} • {route.cost}원
+                    {route.duration}분 • {route.distance} • {route.cost}
                   </div>
                 </div>
               </div>
@@ -239,6 +239,21 @@ const TimeMachineInsights = ({ time, predictions }) => {
       </div>
     </div>
   )
+}
+
+// 포맷팅 유틸리티 함수들
+const formatDistance = (distance) => {
+  if (!distance) return '0km'
+  const num = parseFloat(distance)
+  if (num < 1) {
+    return `${Math.round(num * 1000)}m`
+  }
+  return `${num.toFixed(1)}km`
+}
+
+const formatCost = (cost) => {
+  if (!cost || cost === 0) return '무료'
+  return `${Math.round(cost).toLocaleString()}원`
 }
 
 // 메인 교통정보 카드 컴포넌트
@@ -448,8 +463,8 @@ const EnhancedTransportCard = ({ route }) => {
         name: walk.display_name || '도보',
         mode: 'walk',
         duration: walk.duration,
-        distance: `${walk.distance}km`,
-        cost: walk.cost || 0,
+        distance: formatDistance(walk.distance),
+        cost: formatCost(walk.cost || 0),
         rating: 4,
         recommendation: walk.distance < 1 ? '최단거리' : '운동효과',
         details: [
@@ -467,8 +482,8 @@ const EnhancedTransportCard = ({ route }) => {
         name: transit.display_name || '대중교통',
         mode: 'bus',
         duration: transit.duration,
-        distance: `${transit.distance}km`,
-        cost: transit.cost,
+        distance: formatDistance(transit.distance),
+        cost: formatCost(transit.cost),
         rating: 5,
         recommendation: '경제적',
         details: [
@@ -486,12 +501,12 @@ const EnhancedTransportCard = ({ route }) => {
         name: car.display_name || '자동차',
         mode: 'car',
         duration: car.duration,
-        distance: `${car.distance}km`,
-        cost: car.cost + (car.toll_fee || 0),
+        distance: formatDistance(car.distance),
+        cost: formatCost(car.cost + (car.toll_fee || 0)),
         rating: 4,
         recommendation: car.predicted_traffic ? '실시간' : '편의성',
         details: [
-          car.toll_fee ? `통행료 ${car.toll_fee}원` : '통행료 없음',
+          car.toll_fee ? `통행료 ${formatCost(car.toll_fee)}` : '통행료 없음',
           car.fuel_efficiency?.estimated_fuel_usage
             ? `연료 ${car.fuel_efficiency.estimated_fuel_usage}`
             : '',
@@ -626,8 +641,8 @@ const EnhancedTransportCard = ({ route }) => {
                   </div>
                   <div className="text-sm text-gray-600">
                     {route.duration && `${route.duration}분`}
-                    {route.distance && ` • ${route.distance}km`}
-                    {route.cost && ` • ${route.cost}원`}
+                    {route.distance && ` • ${formatDistance(route.distance)}`}
+                    {route.cost && ` • ${formatCost(route.cost)}`}
                   </div>
                 </div>
               </div>
