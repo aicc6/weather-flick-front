@@ -621,32 +621,6 @@ export default function TravelCourseDetailPage() {
             </Card>
           )}
 
-          {/* 평가하기 */}
-          <Card className="mb-8 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
-            <CardHeader>
-              <CardTitle className="dark:text-white">
-                해당 코스가 마음에 드시나요?
-              </CardTitle>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                평가를 해주시면 개인화 추천 시 활용하여 최적의 여행지를 추천해
-                드리겠습니다.
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-4">
-                <Button
-                  onClick={() => handleRatingSubmit(5)}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  👍 좋아요!
-                </Button>
-                <Button variant="outline" onClick={() => handleRatingSubmit(2)}>
-                  👎 별로예요
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* 댓글 섹션 */}
           <Card className="dark:border-gray-700 dark:bg-gray-800">
             <CardHeader>
