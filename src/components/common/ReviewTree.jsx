@@ -268,23 +268,26 @@ const ReviewNode = memo(function ReviewNode({
       </div>
       {showReply && canReply && (
         <form onSubmit={handleReplySubmit} className="mb-2 space-y-1">
-          <Textarea
-            value={replyContent}
-            onChange={(e) => setReplyContent(e.target.value)}
-            placeholder="답글을 입력하세요"
-            required
-            className="w-full dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
-            rows={2}
-          />
-          {/* 답글 폼에는 별점 UI를 렌더링하지 않음 (별점 선택 삭제) */}
-          <div className="flex items-center gap-2">
-            <Button
-              type="submit"
-              size="xs"
-              disabled={isSubmitting || !replyContent.trim()}
-            >
-              {isSubmitting ? '등록 중...' : '답글 등록'}
-            </Button>
+          <div className="rounded-lg border border-gray-300 bg-white p-2 dark:border-zinc-600 dark:bg-zinc-800">
+            <Textarea
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+              placeholder="답글을 입력하세요"
+              required
+              className="w-full border-none bg-transparent shadow-none focus:border-none focus:ring-0 dark:text-zinc-100"
+              rows={2}
+            />
+            <div className="mt-2 flex items-center gap-2">
+              <Button
+                type="submit"
+                size="sm"
+                variant="outline"
+                className="border-2 border-gray-400 px-4 py-1 text-gray-900 dark:border-zinc-500 dark:text-zinc-100"
+                disabled={isSubmitting || !replyContent.trim()}
+              >
+                {isSubmitting ? '등록 중...' : '답글 등록'}
+              </Button>
+            </div>
           </div>
         </form>
       )}
