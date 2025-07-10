@@ -10,6 +10,7 @@ export {
   ArrowRight,
   Menu,
   Navigation,
+  Home,
 } from 'lucide-react'
 
 // UI Action Icons
@@ -34,6 +35,7 @@ export {
   Vote,
   UserPlus,
   Brain,
+  AlertCircle,
 } from 'lucide-react'
 
 // Weather Icons

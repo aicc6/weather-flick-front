@@ -229,12 +229,12 @@ const TmapRecommendations = memo(({ destination = '제주도' }) => {
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    <Card className="transition-shadow hover:shadow-md">
+                    <Card className="overflow-hidden transition-shadow hover:shadow-md">
                       <div className="relative">
                         <img
                           src={restaurant.image}
                           alt={restaurant.name}
-                          className="h-32 w-full rounded-t-lg object-cover"
+                          className="h-32 w-full object-cover"
                           loading="lazy"
                         />
                         <Button
@@ -327,13 +327,13 @@ const TmapRecommendations = memo(({ destination = '제주도' }) => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    <Card className="transition-shadow hover:shadow-md">
+                    <Card className="overflow-hidden transition-shadow hover:shadow-md">
                       <div className="md:flex">
                         <div className="md:w-1/3">
                           <img
                             src={course.image}
                             alt={course.name}
-                            className="h-32 w-full rounded-t-lg object-cover md:h-full md:rounded-t-none md:rounded-l-lg"
+                            className="h-32 w-full object-cover md:h-full"
                             loading="lazy"
                           />
                         </div>

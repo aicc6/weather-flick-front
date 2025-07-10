@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Mail, Phone, MapPin } from '@/components/icons'
+import { Badge } from '@/components/ui/badge'
 
 export function Footer() {
   return (
@@ -19,6 +20,15 @@ export function Footer() {
             <p className="text-sm text-gray-600 dark:text-gray-400">
               날씨 기반 맞춤형 여행 추천 서비스로 완벽한 여행을 계획해보세요.
             </p>
+            <div className="flex items-center space-x-2">
+              <Badge
+                variant="secondary"
+                className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+              >
+                🚧 개발 중
+              </Badge>
+              <span className="text-xs text-gray-500">v1.0.0</span>
+            </div>
           </div>
 
           {/* 서비스 */}
@@ -80,6 +90,14 @@ export function Footer() {
                   이용약관
                 </Link>
               </li>
+              <li>
+                <Link
+                  to="/privacy"
+                  className="transition-colors hover:text-gray-900 dark:hover:text-white"
+                >
+                  개인정보처리방침
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -103,10 +121,15 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 border-t border-gray-300 pt-8 text-center dark:border-gray-800">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            © 2024 Weather Flick. All rights reserved.
-          </p>
+        <div className="mt-8 border-t border-gray-300 pt-8 dark:border-gray-800">
+          <div className="flex flex-col items-center justify-between space-y-2 md:flex-row md:space-y-0">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              © 2024 Weather Flick. All rights reserved.
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-500">
+              현재 개발 중인 서비스입니다. 피드백을 환영합니다!
+            </p>
+          </div>
         </div>
       </div>
     </footer>

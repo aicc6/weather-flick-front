@@ -2,11 +2,16 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { Suspense, lazy } from 'react'
 import { DefaultLayout } from './layouts/default-layout'
 import LoadingSpinner from './components/LoadingSpinner'
+import ErrorBoundary from './components/common/ErrorBoundary'
 import '@/App.css'
 
 // 핵심 페이지는 즉시 로드
 import { MainPage } from './pages/main'
 import { LoginPage } from './pages/login'
+
+// 필수 페이지들
+const NotFoundPage = lazy(() => import('./pages/404'))
+const PrivacyPolicyPage = lazy(() => import('./pages/privacy'))
 
 // 나머지 페이지들은 지연 로딩
 const SignUpPage = lazy(() =>
@@ -83,69 +88,74 @@ const TermsPage = lazy(() => import('./pages/terms'))
 
 function App() {
   return (
-    <BrowserRouter>
-      <DefaultLayout>
-        <Suspense fallback={<LoadingSpinner />}>
-          <Routes>
-            <Route path="/" element={<MainPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/sign-up" element={<SignUpPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/recommend" element={<TravelCoursePage />} />
-            <Route
-              path="/recommend/detail/:id"
-              element={<TravelCourseDetailPage />}
-            />
-            <Route
-              path="/customized-schedule"
-              element={<CustomizedSchedulePage />}
-            />
-            <Route
-              path="/customized-schedule/region"
-              element={<CustomizedScheduleRegionPage />}
-            />
-            <Route
-              path="/customized-schedule/period"
-              element={<CustomizedSchedulePeriodPage />}
-            />
-            <Route
-              path="/customized-schedule/who"
-              element={<CustomizedScheduleWhoPage />}
-            />
-            <Route
-              path="/customized-schedule/style"
-              element={<CustomizedScheduleStylePage />}
-            />
-            <Route
-              path="/customized-schedule/schedule"
-              element={<CustomizedScheduleSchedulePage />}
-            />
-            <Route
-              path="/customized-schedule/result"
-              element={<CustomizedScheduleResultPage />}
-            />
-            <Route path="/planner" element={<PlannerPage />} />
-            <Route path="/travel-plans" element={<TravelPlansPage />} />
-            <Route
-              path="/travel-plans/:planId"
-              element={<TravelPlanDetailPage />}
-            />
-            <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
-            <Route
-              path="/auth/google/callback"
-              element={<GoogleCallbackPage />}
-            />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/profile/edit" element={<ProfileEditPage />} />
-            <Route path="/change-password" element={<ChangePasswordPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/help" element={<HelpPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/terms" element={<TermsPage />} />
-          </Routes>
-        </Suspense>
-      </DefaultLayout>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <DefaultLayout>
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              <Route path="/" element={<MainPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/sign-up" element={<SignUpPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/recommend" element={<TravelCoursePage />} />
+              <Route
+                path="/recommend/detail/:id"
+                element={<TravelCourseDetailPage />}
+              />
+              <Route
+                path="/customized-schedule"
+                element={<CustomizedSchedulePage />}
+              />
+              <Route
+                path="/customized-schedule/region"
+                element={<CustomizedScheduleRegionPage />}
+              />
+              <Route
+                path="/customized-schedule/period"
+                element={<CustomizedSchedulePeriodPage />}
+              />
+              <Route
+                path="/customized-schedule/who"
+                element={<CustomizedScheduleWhoPage />}
+              />
+              <Route
+                path="/customized-schedule/style"
+                element={<CustomizedScheduleStylePage />}
+              />
+              <Route
+                path="/customized-schedule/schedule"
+                element={<CustomizedScheduleSchedulePage />}
+              />
+              <Route
+                path="/customized-schedule/result"
+                element={<CustomizedScheduleResultPage />}
+              />
+              <Route path="/planner" element={<PlannerPage />} />
+              <Route path="/travel-plans" element={<TravelPlansPage />} />
+              <Route
+                path="/travel-plans/:planId"
+                element={<TravelPlanDetailPage />}
+              />
+              <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
+              <Route
+                path="/auth/google/callback"
+                element={<GoogleCallbackPage />}
+              />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/profile/edit" element={<ProfileEditPage />} />
+              <Route path="/change-password" element={<ChangePasswordPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/help" element={<HelpPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPolicyPage />} />
+              {/* 404 페이지 - 모든 라우트의 마지막에 위치 */}
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
+        </DefaultLayout>
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }
 
