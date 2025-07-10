@@ -11,6 +11,7 @@ export {
   Menu,
   Navigation,
   Home,
+  Route,
 } from 'lucide-react'
 
 // UI Action Icons

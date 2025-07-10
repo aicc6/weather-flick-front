@@ -77,11 +77,7 @@ const TravelPlansPage = lazy(() =>
     default: module.TravelPlansPage,
   })),
 )
-const TravelPlanDetailPage = lazy(() =>
-  import('./pages/travel-plans/detail').then((module) => ({
-    default: module.TravelPlanDetailPage,
-  })),
-)
+const TravelPlanDetailPage = lazy(() => import('./pages/travel-plans/detail'))
 const HelpPage = lazy(() => import('./pages/help/help'))
 const ContactPage = lazy(() => import('./pages/contact'))
 const TermsPage = lazy(() => import('./pages/terms'))

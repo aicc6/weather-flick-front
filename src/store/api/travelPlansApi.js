@@ -324,6 +324,69 @@ export const travelPlansApi = createApi({
         { type: 'Route', id: routeId },
       ],
     }),
+
+    // 경로 상세 정보 조회 (실시간 TMAP API 호출)
+    getDetailedRouteInfo: builder.query({
+      query: ({ routeId, includePois = true, includeAlternatives = false }) => ({
+        url: `routes/${routeId}/details`,
+        params: {
+          include_pois: includePois,
+          include_alternatives: includeAlternatives,
+        },
+      }),
+      // 실시간 데이터이므로 캐싱하지 않음
+      keepUnusedDataFor: 0,
+      transformResponse: (response) => {
+        return validateAndSanitizeResponse(response, {
+          success: false,
+          route_info: {},
+          detailed_info: {},
+          data_sources: {},
+        })
+      },
+      transformErrorResponse: (response) => {
+        return {
+          status: response.status,
+          data: response.data,
+          message:
+            response.data?.detail ||
+            response.data?.message ||
+            '상세 경로 정보를 불러오는 중 오류가 발생했습니다',
+        }
+      },
+    }),
+
+    // TMAP 타임머신 경로 정보 조회
+    getTimemachineRouteInfo: builder.query({
+      query: ({ routeId, departureTime = null, includeComparison = false }) => ({
+        url: `routes/${routeId}/timemachine`,
+        params: {
+          departure_time: departureTime,
+          include_comparison: includeComparison,
+        },
+      }),
+      // 타임머신 데이터는 시간에 따라 변하므로 캐싱하지 않음
+      keepUnusedDataFor: 0,
+      transformResponse: (response) => {
+        return validateAndSanitizeResponse(response, {
+          success: false,
+          route_info: {},
+          timemachine_info: {},
+          prediction_info: {},
+          data_sources: {},
+        })
+      },
+      transformErrorResponse: (response) => {
+        return {
+          status: response.status,
+          data: response.data,
+          message:
+            response.data?.detail ||
+            response.data?.message ||
+            '타임머신 경로 정보를 불러오는 중 오류가 발생했습니다',
+        }
+      },
+    }),
   }),
 })
 
@@ -346,4 +409,6 @@ export const {
   useCreateRouteMutation,
   useUpdateRouteMutation,
   useDeleteRouteMutation,
+  useGetDetailedRouteInfoQuery,
+  useGetTimemachineRouteInfoQuery,
 } = travelPlansApi
