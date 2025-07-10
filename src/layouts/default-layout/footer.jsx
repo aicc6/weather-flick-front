@@ -49,14 +49,6 @@ export function Footer() {
                   여행 플래너
                 </Link>
               </li>
-              <li>
-                <Link
-                  to="/reviews"
-                  className="transition-colors hover:text-gray-900 dark:hover:text-white"
-                >
-                  여행 리뷰
-                </Link>
-              </li>
             </ul>
           </div>
 

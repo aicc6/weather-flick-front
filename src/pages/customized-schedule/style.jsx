@@ -137,6 +137,7 @@ export default function CustomizedScheduleStylePage() {
 
   const handleNext = () => {
     if (selectedStyles.length > 0) {
+      window.scrollTo({ top: 0, behavior: 'auto' })
       const styleParams = selectedStyles.join(',')
       navigate(
         `/customized-schedule/schedule?region=${region}&period=${period}&days=${days}&who=${who}&styles=${styleParams}`,

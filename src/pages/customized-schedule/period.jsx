@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,16 @@ export default function CustomizedSchedulePeriodPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [selectedPeriod, setSelectedPeriod] = useState(null)
+  const nextButtonRef = useRef(null)
+
+  useEffect(() => {
+    if (selectedPeriod && nextButtonRef.current) {
+      nextButtonRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+    }
+  }, [selectedPeriod])
 
   const regionCode = searchParams.get('region')
   const { regionName: storedRegionName } = useSelector(
@@ -75,6 +85,7 @@ export default function CustomizedSchedulePeriodPage() {
 
   const handleNext = () => {
     if (selectedPeriod) {
+      window.scrollTo({ top: 0, behavior: 'auto' })
       navigate(
         `/customized-schedule/who?region=${regionCode}&period=${selectedPeriod.label}&days=${selectedPeriod.days}`,
       )
@@ -194,7 +205,7 @@ export default function CustomizedSchedulePeriodPage() {
       </div>
 
       {/* 다음 버튼 */}
-      <div className="flex justify-center">
+      <div className="flex justify-center" ref={nextButtonRef}>
         <Button
           onClick={handleNext}
           disabled={!selectedPeriod}

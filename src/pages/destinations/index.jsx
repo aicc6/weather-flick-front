@@ -369,13 +369,12 @@ export default function TravelCoursePage() {
                 console.log(`이미지 로드 실패: ${course.regionName}`)
                 // 새로운 고품질 백업 이미지들 시도
                 const unsplashBackups = {
-                  제주도:
-                    'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&auto=format&q=60&ixlib=rb-4.0.3',
-                  서울: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&h=600&fit=crop&auto=format&q=60&ixlib=rb-4.0.3',
-                  부산: 'https://images.unsplash.com/photo-1536431311719-398b6704d4cc?w=800&h=600&fit=crop&auto=format&q=60&ixlib=rb-4.0.3',
-                  경주: 'https://images.unsplash.com/photo-1509909756405-be0199881695?w=800&h=600&fit=crop&auto=format&q=60&ixlib=rb-4.0.3',
-                  강릉: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&auto=format&q=60&ixlib=rb-4.0.3',
-                  여수: 'https://images.unsplash.com/photo-1551918120-9739cb430c6d?w=800&h=600&fit=crop&auto=format&q=60&ixlib=rb-4.0.3',
+                  제주도: '../../../assets/images/jeju.jpg',
+                  서울: '../../../assets/images/seoul.jpg',
+                  부산: '../../../assets/images/busan.jpg',
+                  경주: '../../../assets/images/gyeongju.jpg',
+                  강릉: '../../../assets/images/gangneung.jpg',
+                  여수: '../../../assets/images/yeosu.jpg',
                 }
 
                 // 1차 fallback - 고품질 백업 이미지

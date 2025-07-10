@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { Button } from '@/components/ui/button'
@@ -134,6 +134,7 @@ export default function CustomizedScheduleRegionPage() {
 
   const handleNext = () => {
     if (regionCode) {
+      window.scrollTo({ top: 0, behavior: 'auto' })
       navigate(`/customized-schedule/period?region=${regionCode}`)
     }
   }
@@ -171,6 +172,18 @@ export default function CustomizedScheduleRegionPage() {
         return '목록 보기'
     }
   }
+
+  // '다음' 버튼을 참조할 ref
+  const nextButtonRef = useRef(null)
+  // regionCode가 바뀔 때마다 버튼으로 스크롤
+  useEffect(() => {
+    if (regionCode && nextButtonRef.current) {
+      nextButtonRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+    }
+  }, [regionCode])
 
   if (loading) return <div>로딩 중...</div>
   if (error) return <div className="text-red-500">{error}</div>
@@ -244,203 +257,130 @@ export default function CustomizedScheduleRegionPage() {
             </SelectContent>
           </Select>
         </div>
+
+        {/* regionCode가 있을 때만 상단 중앙에 '다음' 버튼 노출 */}
+        {regionCode && <div className="mt-6 flex justify-center"></div>}
       </div>
 
       {/* 뷰 모드별 컨텐츠 */}
       {viewMode === 'google-map' ? (
-        <GoogleKoreaMap
-          cities={cities
-            .map((city) => ({
-              id: city.region_code,
-              name: city.region_name,
-              name_full: city.region_name_full,
-              name_en: city.region_name_en,
-              latitude:
-                Number(city.center_latitude) ||
-                CITY_COORDINATES[city.region_code]?.latitude,
-              longitude:
-                Number(city.center_longitude) ||
-                CITY_COORDINATES[city.region_code]?.longitude,
-              administrative_code: city.administrative_code,
-              is_active: city.is_active,
-            }))
-            .filter((city) => city.latitude && city.longitude)}
-          selectedRegion={selectedRegion}
-          onRegionSelect={(id, name) => handleRegionSelect(id, name)}
-        />
-      ) : (
-        <div className="space-y-8">
-          <div>
-            <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-900 dark:text-white">
-              <MapPin className="h-5 w-5" />
-              대한민국
-            </h2>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {cities.map((city) => (
-                <Card
-                  key={city.region_code}
-                  className={`cursor-pointer overflow-hidden transition-all hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 ${
-                    regionCode === city.region_code
-                      ? 'bg-blue-50 ring-2 ring-blue-500 dark:bg-blue-900/20 dark:ring-blue-400'
-                      : 'hover:bg-gray-50 dark:hover:bg-gray-700'
-                  }`}
-                  onClick={() =>
-                    handleRegionSelect(city.region_code, city.region_name)
-                  }
-                >
-                  {/* 대표 이미지 */}
-                  <div className="relative h-32 overflow-hidden">
-                    {imagesLoading ? (
-                      <div className="flex h-full w-full items-center justify-center bg-gray-200 dark:bg-gray-700">
-                        <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
-                      </div>
-                    ) : (
-                      <img
-                        src={
-                          getCityImages(city.region_code)[0]?.url ||
-                          'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop'
-                        }
-                        alt={`${city.region_name} 대표사진`}
-                        className="h-full w-full object-cover transition-transform hover:scale-110"
-                        loading="lazy"
-                        onError={(e) => {
-                          e.target.src =
-                            'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop'
-                        }}
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                  </div>
-
-                  <CardContent className="p-4">
-                    <div className="mb-2">
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
-                        {city.region_name}
-                      </h3>
-                      <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                        {REGION_DESCRIPTIONS[city.administrative_code] ||
-                          '아름다운 대한민국의 도시'}
-                      </p>
-                    </div>
-                    {regionCode === city.region_code && (
-                      <Badge
-                        variant="secondary"
-                        className="mt-2 bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:ring-blue-400"
-                      >
-                        선택됨
-                      </Badge>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+        <>
+          <GoogleKoreaMap
+            cities={cities
+              .map((city) => ({
+                id: city.region_code,
+                name: city.region_name,
+                name_full: city.region_name_full,
+                name_en: city.region_name_en,
+                latitude:
+                  Number(city.center_latitude) ||
+                  CITY_COORDINATES[city.region_code]?.latitude,
+                longitude:
+                  Number(city.center_longitude) ||
+                  CITY_COORDINATES[city.region_code]?.longitude,
+                administrative_code: city.administrative_code,
+                is_active: city.is_active,
+              }))
+              .filter((city) => city.latitude && city.longitude)}
+            selectedRegion={selectedRegion}
+            onRegionSelect={(id, name) => handleRegionSelect(id, name)}
+          />
+          {/* '다음' 버튼을 항상 지도/목록 아래에 노출, regionCode 없으면 비활성화 */}
+          <div className="mt-6 flex justify-center" ref={nextButtonRef}>
+            <Button
+              onClick={handleNext}
+              className="rounded-lg bg-blue-600 px-8 py-3 text-white hover:bg-blue-700"
+              size="lg"
+              disabled={!regionCode}
+              aria-disabled={!regionCode}
+            >
+              다음
+            </Button>
           </div>
-        </div>
-      )}
-
-      {/* 선택된 지역 표시 및 이미지 갤러리 */}
-      {regionCode && (
-        <div className="mt-8 space-y-6">
-          {/* 선택된 지역 정보 */}
-          <div className="rounded-lg bg-blue-50 p-6 dark:bg-blue-900/20">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <p className="mb-2 text-sm text-blue-600 dark:text-blue-400">
-                  선택된 여행지
-                </p>
-                <div className="flex items-center gap-3">
-                  <Badge
-                    variant="secondary"
-                    className="bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200"
+        </>
+      ) : (
+        <>
+          <div className="space-y-8">
+            <div>
+              <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-900 dark:text-white">
+                <MapPin className="h-5 w-5" />
+                대한민국
+              </h2>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {cities.map((city) => (
+                  <Card
+                    key={city.region_code}
+                    className={`cursor-pointer overflow-hidden transition-all hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 ${
+                      regionCode === city.region_code
+                        ? 'bg-blue-50 ring-2 ring-blue-500 dark:bg-blue-900/20 dark:ring-blue-400'
+                        : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
+                    onClick={() =>
+                      handleRegionSelect(city.region_code, city.region_name)
+                    }
                   >
-                    {regionName}
-                  </Badge>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    {getSelectedCityData()?.region_name_full && (
-                      <span>({getSelectedCityData().region_name_full})</span>
-                    )}
-                    {getSelectedCityData()?.region_name_en && (
-                      <span> / {getSelectedCityData().region_name_en}</span>
-                    )}
-                  </p>
-                </div>
-              </div>
-              <MapPin className="h-6 w-6 text-blue-500" />
-            </div>
-
-            {/* 이미지 갤러리 */}
-            {getSelectedCityData()?.images && (
-              <div>
-                <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  🖼️ {regionName} 대표 사진
-                </h3>
-                {imagesLoading ? (
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {[1, 2, 3].map((_, index) => (
-                      <div
-                        key={index}
-                        className="flex h-48 w-full items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700"
-                      >
-                        <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {getSelectedCityData().images.map((image, index) => (
-                      <div
-                        key={image.id || index}
-                        className="group relative overflow-hidden rounded-lg shadow-md transition-transform hover:scale-105"
-                      >
+                    {/* 대표 이미지 */}
+                    <div className="relative h-32 overflow-hidden">
+                      {imagesLoading ? (
+                        <div className="flex h-full w-full items-center justify-center bg-gray-200 dark:bg-gray-700">
+                          <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
+                        </div>
+                      ) : (
                         <img
-                          src={image.url || image}
-                          alt={`${regionName} 대표사진 ${index + 1}`}
-                          className="h-48 w-full object-cover transition-transform group-hover:scale-110"
+                          src={
+                            getCityImages(city.region_code)[0]?.url ||
+                            'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop'
+                          }
+                          alt={`${city.region_name} 대표사진`}
+                          className="h-full w-full object-cover transition-transform hover:scale-110"
                           loading="lazy"
                           onError={(e) => {
                             e.target.src =
                               'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop'
                           }}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                        <div className="absolute bottom-2 left-2 opacity-0 transition-opacity group-hover:opacity-100">
-                          <span className="rounded-full bg-white/90 px-2 py-1 text-xs font-medium text-gray-800">
-                            {image.tags
-                              ? `#${image.tags.split(',')[0]}`
-                              : `사진 ${index + 1}`}
-                          </span>
-                        </div>
-                        {image.user && (
-                          <div className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
-                            <span className="rounded-full bg-black/70 px-2 py-1 text-xs text-white">
-                              📷 {image.user}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                  💡 이미지는 Pixabay API를 통해 실시간으로 제공됩니다
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    </div>
 
-      {/* 다음 버튼 */}
-      <div className="mt-12 flex justify-center">
-        <Button
-          onClick={handleNext}
-          disabled={!regionCode}
-          className="rounded-lg bg-blue-600 px-8 py-3 text-white hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-600"
-          size="lg"
-        >
-          다음
-        </Button>
-      </div>
+                    <CardContent className="p-4">
+                      <div className="mb-2">
+                        <h3 className="font-semibold text-gray-900 dark:text-white">
+                          {city.region_name}
+                        </h3>
+                        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                          {REGION_DESCRIPTIONS[city.administrative_code] ||
+                            '아름다운 대한민국의 도시'}
+                        </p>
+                      </div>
+                      {regionCode === city.region_code && (
+                        <Badge
+                          variant="secondary"
+                          className="mt-2 bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:ring-blue-400"
+                        >
+                          선택됨
+                        </Badge>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </div>
+          {/* '다음' 버튼을 항상 목록 아래에 노출, regionCode 없으면 비활성화 */}
+          <div className="mt-6 flex justify-center" ref={nextButtonRef}>
+            <Button
+              onClick={handleNext}
+              className="rounded-lg bg-blue-600 px-8 py-3 text-white hover:bg-blue-700"
+              size="lg"
+              disabled={!regionCode}
+              aria-disabled={!regionCode}
+            >
+              다음
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   )
 }
