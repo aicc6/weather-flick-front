@@ -168,7 +168,7 @@ export function Header() {
 
               <Link to="/" className="flex items-center space-x-2">
                 <img
-                  src="/logo.jpg"
+                  src="/newicon.jpg"
                   alt="Weather Flick Logo"
                   className="h-8 w-8 rounded-lg object-cover"
                 />
@@ -323,7 +323,7 @@ export function Header() {
           <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
             <div className="flex items-center space-x-2">
               <img
-                src="/logo.jpg"
+                src="/newicon.jpg"
                 alt="Weather Flick Logo"
                 className="h-8 w-8 rounded-lg object-cover"
               />

@@ -15,7 +15,7 @@ export const ANIMATION_CONFIG = {
 
 // 이미지 설정
 export const IMAGE_CONFIG = {
-  placeholder: '/logo.jpg',
+  placeholder: '/newicon.jpg',
   quality: 80,
   sizes: {
     thumbnail: 200,

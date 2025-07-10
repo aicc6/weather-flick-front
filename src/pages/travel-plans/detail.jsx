@@ -16,7 +16,6 @@ import {
   Tag,
   Navigation,
   Clock,
-  DollarSign,
   Zap,
 } from '@/components/icons'
 import { toast } from 'sonner'
@@ -421,6 +420,359 @@ export function TravelPlanDetailPage() {
     return `${Math.round(cost).toLocaleString()}원`
   }
 
+  // 대중교통 상세 정보 렌더링
+  const renderTransitDetails = (routeData) => {
+    if (!routeData) return null
+
+    // ODsay API 응답 (sub_paths)
+    if (routeData.sub_paths) {
+      const subPaths = routeData.sub_paths
+      const transitPaths = subPaths.filter(path => path.type === 'subway' || path.type === 'bus')
+      
+      if (transitPaths.length === 0) return null
+
+      return (
+        <div className="mt-2 space-y-1">
+          {transitPaths.map((path, index) => (
+            <div key={index} className="flex items-center space-x-2 text-xs text-gray-500">
+              {path.type === 'subway' && (
+                <>
+                  <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
+                    🚇 {path.lane?.name || path.lane?.busNo || '지하철'}
+                  </span>
+                  <span>
+                    {path.start_station} → {path.end_station}
+                  </span>
+                  {path.station_count > 0 && (
+                    <span className="text-gray-400">
+                      ({path.station_count}개 역)
+                    </span>
+                  )}
+                  {path.section_time > 0 && (
+                    <span className="text-gray-400">{path.section_time}분</span>
+                  )}
+                </>
+              )}
+              {path.type === 'bus' && (
+                <>
+                  <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
+                    🚌 {path.lane?.busNo || '버스'}
+                  </span>
+                  <span>
+                    {path.start_station} → {path.end_station}
+                  </span>
+                  {path.station_count > 0 && (
+                    <span className="text-gray-400">
+                      ({path.station_count}개 정류장)
+                    </span>
+                  )}
+                  {path.section_time > 0 && (
+                    <span className="text-gray-400">{path.section_time}분</span>
+                  )}
+                </>
+              )}
+            </div>
+          ))}
+          {routeData.summary && (
+            <div className="mt-2 text-xs text-gray-400">
+              {routeData.summary.bus_transit_count > 0 && (
+                <span className="mr-3">
+                  🚌 버스 환승 {routeData.summary.bus_transit_count}회
+                </span>
+              )}
+              {routeData.summary.subway_transit_count > 0 && (
+                <span>
+                  🚇 지하철 환승 {routeData.summary.subway_transit_count}회
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    // Google API 응답 (steps) - 대중교통 단계 분석
+    if (routeData.steps) {
+      const transitSteps = routeData.steps.filter(step => 
+        step.travel_mode === 'TRANSIT' || step.travel_mode === 'SUBWAY'
+      )
+      
+      if (transitSteps.length === 0) return null
+
+      return (
+        <div className="mt-2 space-y-1">
+          {transitSteps.map((step, index) => {
+            const transitDetails = step.transit_details || {}
+            const line = transitDetails.line || {}
+            const vehicle = line.vehicle || {}
+            
+            return (
+              <div key={index} className="flex items-center space-x-2 text-xs text-gray-500">
+                {vehicle.type === 'SUBWAY' && (
+                  <>
+                    <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
+                      🚇 {line.short_name || line.name || '지하철'}
+                    </span>
+                    <span>
+                      {transitDetails.departure_stop?.name} → {transitDetails.arrival_stop?.name}
+                    </span>
+                    {transitDetails.num_stops > 0 && (
+                      <span className="text-gray-400">
+                        ({transitDetails.num_stops}개 역)
+                      </span>
+                    )}
+                  </>
+                )}
+                {vehicle.type === 'BUS' && (
+                  <>
+                    <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
+                      🚌 {line.short_name || line.name || '버스'}
+                    </span>
+                    <span>
+                      {transitDetails.departure_stop?.name} → {transitDetails.arrival_stop?.name}
+                    </span>
+                    {transitDetails.num_stops > 0 && (
+                      <span className="text-gray-400">
+                        ({transitDetails.num_stops}개 정류장)
+                      </span>
+                    )}
+                  </>
+                )}
+              </div>
+            )
+          })}
+          <div className="mt-2 text-xs text-gray-400">
+            🗺️ Google Maps 기반 대중교통 경로
+          </div>
+        </div>
+      )
+    }
+
+    // 기타 API 응답 - 간단한 정보만 표시
+    if (routeData.method) {
+      return (
+        <div className="mt-2 text-xs text-gray-400">
+          📊 {routeData.method === 'estimated_calculation' ? '추정 계산' : '기본 계산'} 기반
+        </div>
+      )
+    }
+
+    return null
+  }
+
+  // 자동차 경로 상세 정보 렌더링
+  const renderCarRouteDetails = (routeData) => {
+    if (!routeData) return null
+
+    // TMAP API 응답 (detailed_guides 우선 사용)
+    if (routeData.detailed_guides && routeData.detailed_guides.length > 0) {
+      return (
+        <div className="mt-2 space-y-2">
+          <div className="text-xs font-medium text-gray-500">🗺️ 경로 안내</div>
+          {routeData.detailed_guides.map((guide, index) => (
+            <div key={index} className="flex items-start space-x-2 text-xs">
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-800 font-bold text-xs">
+                {guide.step}
+              </span>
+              <div className="flex-1">
+                <div className="text-gray-700 font-medium">{guide.description}</div>
+                <div className="flex items-center space-x-2 text-gray-400 mt-1">
+                  <span className="inline-flex items-center">
+                    📍 {guide.distance}
+                  </span>
+                  <span className="inline-flex items-center">
+                    ⏱️ {guide.time}
+                  </span>
+                  {guide.instruction && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-600 text-xs">
+                      {guide.instruction}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          {/* 경로 요약 정보 */}
+          {routeData.route_summary && (
+            <div className="mt-3 p-2 bg-gray-50 rounded-lg">
+              <div className="text-xs font-medium text-gray-600 mb-1">경로 요약</div>
+              <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
+                <div>총 {routeData.route_summary.total_steps}개 안내점</div>
+                <div>주요 구간 {routeData.route_summary.major_steps}개</div>
+                <div>예상 연료비 {routeData.route_summary.estimated_fuel_cost?.toLocaleString()}원</div>
+                <div>총 예상비용 {routeData.route_summary.total_cost_estimate?.toLocaleString()}원</div>
+              </div>
+            </div>
+          )}
+          
+          <div className="mt-2 flex items-center space-x-4 text-xs text-gray-400">
+            {routeData.toll_fee > 0 && (
+              <span className="inline-flex items-center">
+                🛣️ 통행료 {routeData.toll_fee.toLocaleString()}원
+              </span>
+            )}
+            {routeData.taxi_fee > 0 && (
+              <span className="inline-flex items-center">
+                🚖 택시요금 {routeData.taxi_fee.toLocaleString()}원
+              </span>
+            )}
+            <span className="inline-flex items-center">
+              🗺️ TMAP 기반 경로
+            </span>
+          </div>
+        </div>
+      )
+    }
+
+    // 기존 guide_points 사용 (fallback)
+    if (routeData.guide_points && routeData.guide_points.length > 0) {
+      const guidePoints = routeData.guide_points.slice(0, 5) // 최대 5개만 표시
+      
+      return (
+        <div className="mt-2 space-y-1">
+          <div className="text-xs font-medium text-gray-500">🗺️ 경로 안내</div>
+          {guidePoints.map((point, index) => (
+            <div key={index} className="flex items-start space-x-2 text-xs text-gray-500">
+              <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-100 text-blue-800 font-bold text-xs">
+                {index + 1}
+              </span>
+              <div className="flex-1">
+                <div className="text-gray-700">{point.description}</div>
+                <div className="flex items-center space-x-2 text-gray-400 mt-1">
+                  {point.distance > 0 && (
+                    <span>
+                      {point.distance >= 1000 
+                        ? `${(point.distance / 1000).toFixed(1)}km` 
+                        : `${point.distance}m`}
+                    </span>
+                  )}
+                  {point.turn_instruction && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-600 text-xs">
+                      {point.turn_instruction}
+                    </span>
+                  )}
+                  {point.road_name && (
+                    <span className="text-gray-500">• {point.road_name}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          <div className="mt-2 flex items-center space-x-4 text-xs text-gray-400">
+            {routeData.toll_fee > 0 && (
+              <span className="inline-flex items-center">
+                🛣️ 통행료 {routeData.toll_fee.toLocaleString()}원
+              </span>
+            )}
+            {routeData.taxi_fee > 0 && (
+              <span className="inline-flex items-center">
+                🚖 택시요금 {routeData.taxi_fee.toLocaleString()}원
+              </span>
+            )}
+            <span className="inline-flex items-center">
+              🗺️ TMAP 기반 경로
+            </span>
+          </div>
+        </div>
+      )
+    }
+
+    // Google API 응답 (steps)
+    if (routeData.steps && routeData.steps.length > 0) {
+      const drivingSteps = routeData.steps.filter(step => step.travel_mode === 'DRIVING')
+      const displaySteps = drivingSteps.slice(0, 5) // 최대 5개만 표시
+      
+      if (displaySteps.length === 0) return null
+
+      return (
+        <div className="mt-2 space-y-1">
+          <div className="text-xs font-medium text-gray-500">🗺️ 경로 안내</div>
+          {displaySteps.map((step, index) => (
+            <div key={index} className="flex items-start space-x-2 text-xs text-gray-500">
+              <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-100 text-blue-800 font-bold text-xs">
+                {index + 1}
+              </span>
+              <div className="flex-1">
+                <div className="text-gray-700" dangerouslySetInnerHTML={{ __html: step.html_instructions }} />
+                <div className="text-gray-400">
+                  {step.distance?.text} • {step.duration?.text}
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          <div className="mt-2 text-xs text-gray-400">
+            🗺️ Google Maps 기반 자동차 경로
+          </div>
+        </div>
+      )
+    }
+
+    // 기본 계산 방식 (enhanced)
+    if (routeData.method || routeData.source === 'calculation') {
+      return (
+        <div className="mt-2 space-y-1">
+          <div className="text-xs font-medium text-gray-500">
+            🚗 자동차 경로 정보
+          </div>
+          
+          {/* 안내점이 있는 경우 표시 */}
+          {routeData.guide_points && routeData.guide_points.length > 0 && (
+            <div className="space-y-1">
+              {routeData.guide_points.map((point, index) => (
+                <div key={index} className="flex items-start space-x-2 text-xs text-gray-500">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-100 text-blue-800 font-bold text-xs">
+                    {index + 1}
+                  </span>
+                  <div className="flex-1">
+                    <div className="text-gray-700">{point.description}</div>
+                    {point.distance > 0 && (
+                      <div className="text-gray-400">
+                        {point.distance >= 1000 
+                          ? `${(point.distance / 1000).toFixed(1)}km` 
+                          : `${point.distance}m`}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {/* 추가 요금 정보 */}
+          <div className="flex items-center space-x-4 text-xs text-gray-400">
+            {routeData.toll_fee > 0 && (
+              <span className="inline-flex items-center">
+                🛣️ 통행료 {routeData.toll_fee.toLocaleString()}원
+              </span>
+            )}
+            {routeData.taxi_fee > 0 && (
+              <span className="inline-flex items-center">
+                🚖 택시요금 {routeData.taxi_fee.toLocaleString()}원
+              </span>
+            )}
+          </div>
+          
+          <div className="text-xs text-gray-400">
+            📊{' '}
+            {routeData.method === 'estimated_calculation'
+              ? '추정 계산'
+              : '기본 계산'}{' '}
+            기반
+          </div>
+          <div className="text-xs text-gray-500">
+            • 실제 경로와 다를 수 있습니다 • 정확한 경로는 내비게이션 앱을
+            이용해주세요
+          </div>
+        </div>
+      )
+    }
+
+    return null
+  }
+
   // 일차별 경로 정보 그룹화
   const groupRoutesByDay = (routes) => {
     if (!routes || !Array.isArray(routes)) return {}
@@ -714,6 +1066,7 @@ export function TravelPlanDetailPage() {
               <div className="space-y-4">
                 {(() => {
                   const groupedRoutes = groupRoutesByDay(routes)
+<<<<<<< HEAD
                   return Object.keys(groupedRoutes).map((dayKey) => (
                     <div key={dayKey} className="rounded-lg border p-4">
                       <h3 className="mb-3 text-lg font-semibold text-blue-600">
@@ -733,11 +1086,90 @@ export function TravelPlanDetailPage() {
                                 <div className="font-medium text-gray-900">
                                   {route.departure_name} →{' '}
                                   {route.destination_name}
+=======
+                  return Object.keys(groupedRoutes)
+                    .sort(
+                      (a, b) =>
+                        parseInt(a.replace('day', '')) -
+                        parseInt(b.replace('day', '')),
+                    )
+                    .map((dayKey) => (
+                      <div key={dayKey} className="rounded-lg border p-4">
+                        <h3 className="mb-3 text-lg font-semibold text-blue-600">
+                          {dayKey.replace('day', '') + '일차 이동 정보'}
+                        </h3>
+                        <div className="space-y-3">
+                          {groupedRoutes[dayKey].map((route, index) => {
+                            const isInterDayRoute = route.sequence === 0
+                            return (
+                              <div
+                                key={route.route_id || index}
+                                className={`flex items-center justify-between rounded-md p-3 ${
+                                  isInterDayRoute
+                                    ? 'border border-amber-200 bg-amber-50'
+                                    : 'bg-gray-50'
+                                }`}
+                              >
+                                <div className="flex items-center space-x-3">
+                                  <span className="text-lg">
+                                    {getTransportIcon(route.transport_type)}
+                                  </span>
+                                  <div>
+                                    <div className="font-medium text-gray-900">
+                                      {route.departure_name} →{' '}
+                                      {route.destination_name}
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                      {isInterDayRoute ? (
+                                        <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800">
+                                          전일 마지막장소에서 이동
+                                        </span>
+                                      ) : (
+                                        getTransportName(route.transport_type)
+                                      )}
+                                    </div>
+                                    {route.transport_type === 'transit' &&
+                                      renderTransitDetails(route.route_data)}
+                                    {route.transport_type === 'car' &&
+                                      renderCarRouteDetails(route.route_data)}
+                                  </div>
+>>>>>>> af5e56f7e672beea0393a2e77d007bab8dddaabf
                                 </div>
-                                <div className="text-sm text-gray-600">
-                                  {getTransportName(route.transport_type)}
+                                <div className="text-right">
+                                  <div className="flex items-center space-x-4 text-sm text-gray-600">
+                                    {route.duration && (
+                                      <div className="flex items-center">
+                                        <Clock className="mr-1 h-3 w-3" />
+                                        {formatDuration(route.duration)}
+                                      </div>
+                                    )}
+                                    {route.distance && (
+                                      <div className="flex items-center">
+                                        <Navigation className="mr-1 h-3 w-3" />
+                                        {formatDistance(route.distance)}
+                                      </div>
+                                    )}
+                                    {route.cost !== undefined && (
+                                      <div className="flex items-center">
+                                        {formatCost(route.cost)}
+                                      </div>
+                                    )}
+                                  </div>
+                                  {route.route_data?.source && (
+                                    <div className="mt-1 text-xs text-blue-500">
+                                      {route.route_data.source === 'ODsay' &&
+                                        '🚌 ODsay'}
+                                      {route.route_data.source === 'TMAP' &&
+                                        '🚗 TMAP'}
+                                      {route.route_data.source === 'Google' &&
+                                        '🗺️ Google'}
+                                      {route.route_data.source ===
+                                        'calculation' && '📊 추정'}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
+<<<<<<< HEAD
                             </div>
                             <div className="text-right">
                               <div className="flex items-center space-x-4 text-sm text-gray-600">
@@ -775,9 +1207,13 @@ export function TravelPlanDetailPage() {
                             </div>
                           </div>
                         ))}
+=======
+                            )
+                          })}
+                        </div>
+>>>>>>> af5e56f7e672beea0393a2e77d007bab8dddaabf
                       </div>
-                    </div>
-                  ))
+                    ))
                 })()}
               </div>
             ) : (
