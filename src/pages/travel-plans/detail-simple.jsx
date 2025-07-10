@@ -28,9 +28,10 @@ const formatDate = (dateString) => {
 function TravelPlanDetailPage() {
   const { planId } = useParams()
   const { data: plan, isLoading, isError } = useGetTravelPlanQuery(planId)
-  const { data: routes, isLoading: routesLoading } = useGetTravelPlanRoutesQuery(planId, {
-    skip: !planId,
-  })
+  const { data: routes, isLoading: routesLoading } =
+    useGetTravelPlanRoutesQuery(planId, {
+      skip: !planId,
+    })
 
   const [selectedRoute, setSelectedRoute] = useState(null)
   const [isRouteDetailOpen, setIsRouteDetailOpen] = useState(false)
@@ -42,7 +43,7 @@ function TravelPlanDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <LoadingSpinner />
         <span className="ml-2 text-gray-600">로딩 중...</span>
       </div>
@@ -52,11 +53,11 @@ function TravelPlanDetailPage() {
   if (isError || !plan) {
     return (
       <div className="container mx-auto p-4">
-        <div className="text-center py-12">
-          <h2 className="text-xl font-semibold text-red-600 mb-2">
+        <div className="py-12 text-center">
+          <h2 className="mb-2 text-xl font-semibold text-red-600">
             여행 계획을 불러올 수 없습니다
           </h2>
-          <p className="text-gray-600 mb-4">
+          <p className="mb-4 text-gray-600">
             다시 시도하거나 목록으로 돌아가세요.
           </p>
           <Button asChild variant="outline">
@@ -92,7 +93,7 @@ function TravelPlanDetailPage() {
           </CardHeader>
           <CardContent>
             {plan.description && (
-              <p className="text-gray-700 mb-4">{plan.description}</p>
+              <p className="mb-4 text-gray-700">{plan.description}</p>
             )}
             {plan.start_location && (
               <div className="flex items-center text-gray-600">
@@ -115,14 +116,16 @@ function TravelPlanDetailPage() {
             {routesLoading ? (
               <div className="flex items-center justify-center py-8">
                 <LoadingSpinner />
-                <span className="ml-2 text-gray-600">경로 정보를 불러오는 중...</span>
+                <span className="ml-2 text-gray-600">
+                  경로 정보를 불러오는 중...
+                </span>
               </div>
             ) : routes && routes.length > 0 ? (
               <div className="space-y-4">
                 {routes.map((route, index) => (
                   <div
                     key={route.route_id || index}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-md cursor-pointer hover:bg-blue-50 transition-colors"
+                    className="flex cursor-pointer items-center justify-between rounded-md bg-gray-50 p-3 transition-colors hover:bg-blue-50"
                     onClick={() => handleRouteDetailClick(route)}
                   >
                     <div>
@@ -150,7 +153,7 @@ function TravelPlanDetailPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
+              <div className="py-8 text-center text-gray-500">
                 경로 정보가 없습니다.
               </div>
             )}
@@ -167,20 +170,24 @@ function TravelPlanDetailPage() {
               <div className="space-y-6">
                 {Object.entries(plan.itinerary).map(([day, items]) => (
                   <div key={day}>
-                    <h3 className="text-lg font-semibold text-blue-600 mb-3">
+                    <h3 className="mb-3 text-lg font-semibold text-blue-600">
                       {day.replace('day', '') + '일차'}
                     </h3>
                     <ul className="space-y-3">
                       {items.map((item, index) => (
                         <li key={index} className="flex items-start">
-                          <MapPin className="mr-3 h-5 w-5 text-blue-500 mt-0.5" />
+                          <MapPin className="mt-0.5 mr-3 h-5 w-5 text-blue-500" />
                           <div>
-                            <div className="font-medium">{item.description}</div>
+                            <div className="font-medium">
+                              {item.description}
+                            </div>
                             {item.address && (
-                              <div className="text-sm text-gray-600">{item.address}</div>
+                              <div className="text-sm text-gray-600">
+                                {item.address}
+                              </div>
                             )}
                             {item.memo && (
-                              <div className="text-sm text-gray-500 mt-1 p-2 bg-gray-100 rounded">
+                              <div className="mt-1 rounded bg-gray-100 p-2 text-sm text-gray-500">
                                 {item.memo}
                               </div>
                             )}
@@ -192,7 +199,7 @@ function TravelPlanDetailPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
+              <div className="py-8 text-center text-gray-500">
                 상세 일정이 없습니다.
               </div>
             )}
@@ -201,21 +208,22 @@ function TravelPlanDetailPage() {
 
         {/* 경로 상세 모달 */}
         <Dialog open={isRouteDetailOpen} onOpenChange={setIsRouteDetailOpen}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
             <DialogHeader>
               <DialogTitle>상세 이동 정보</DialogTitle>
               <DialogDescription>
                 {selectedRoute && (
                   <span>
-                    {selectedRoute.departure_name} → {selectedRoute.destination_name}
+                    {selectedRoute.departure_name} →{' '}
+                    {selectedRoute.destination_name}
                   </span>
                 )}
               </DialogDescription>
             </DialogHeader>
-            
+
             {selectedRoute && (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="grid grid-cols-2 gap-4 rounded-lg bg-gray-50 p-4">
                   <div className="text-center">
                     <div className="text-xl font-bold text-blue-600">
                       {Math.floor(selectedRoute.duration / 60)}분

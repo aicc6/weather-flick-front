@@ -17,7 +17,6 @@ import {
   MapPin,
   Tag,
   Navigation,
-  Clock,
   Zap,
   Route,
 } from '@/components/icons'
@@ -30,6 +29,7 @@ import {
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
+import EnhancedTransportCard from '@/components/transport/EnhancedTransportCard'
 
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
@@ -78,7 +78,7 @@ export function TravelPlanDetailPage() {
   // 자동 경로 생성
   const [autoGenerateRoutes, { isLoading: isGeneratingRoutes }] =
     useAutoGenerateRoutesMutation()
-  
+
   // 상세 경로 정보 모달 상태
   const [selectedRoute, setSelectedRoute] = useState(null)
   const [isRouteDetailOpen, setIsRouteDetailOpen] = useState(false)
@@ -97,7 +97,7 @@ export function TravelPlanDetailPage() {
     },
     {
       skip: !selectedRoute?.route_id || !isRouteDetailOpen,
-    }
+    },
   )
 
   // 상세 경로 정보 모달 열기
@@ -465,14 +465,19 @@ export function TravelPlanDetailPage() {
     // ODsay API 응답 (sub_paths)
     if (routeData.sub_paths) {
       const subPaths = routeData.sub_paths
-      const transitPaths = subPaths.filter(path => path.type === 'subway' || path.type === 'bus')
-      
+      const transitPaths = subPaths.filter(
+        (path) => path.type === 'subway' || path.type === 'bus',
+      )
+
       if (transitPaths.length === 0) return null
 
       return (
         <div className="mt-2 space-y-1">
           {transitPaths.map((path, index) => (
-            <div key={index} className="flex items-center space-x-2 text-xs text-gray-500">
+            <div
+              key={index}
+              className="flex items-center space-x-2 text-xs text-gray-500"
+            >
               {path.type === 'subway' && (
                 <>
                   <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
@@ -531,10 +536,11 @@ export function TravelPlanDetailPage() {
 
     // Google API 응답 (steps) - 대중교통 단계 분석
     if (routeData.steps) {
-      const transitSteps = routeData.steps.filter(step => 
-        step.travel_mode === 'TRANSIT' || step.travel_mode === 'SUBWAY'
+      const transitSteps = routeData.steps.filter(
+        (step) =>
+          step.travel_mode === 'TRANSIT' || step.travel_mode === 'SUBWAY',
       )
-      
+
       if (transitSteps.length === 0) return null
 
       return (
@@ -543,16 +549,20 @@ export function TravelPlanDetailPage() {
             const transitDetails = step.transit_details || {}
             const line = transitDetails.line || {}
             const vehicle = line.vehicle || {}
-            
+
             return (
-              <div key={index} className="flex items-center space-x-2 text-xs text-gray-500">
+              <div
+                key={index}
+                className="flex items-center space-x-2 text-xs text-gray-500"
+              >
                 {vehicle.type === 'SUBWAY' && (
                   <>
                     <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
                       🚇 {line.short_name || line.name || '지하철'}
                     </span>
                     <span>
-                      {transitDetails.departure_stop?.name} → {transitDetails.arrival_stop?.name}
+                      {transitDetails.departure_stop?.name} →{' '}
+                      {transitDetails.arrival_stop?.name}
                     </span>
                     {transitDetails.num_stops > 0 && (
                       <span className="text-gray-400">
@@ -567,7 +577,8 @@ export function TravelPlanDetailPage() {
                       🚌 {line.short_name || line.name || '버스'}
                     </span>
                     <span>
-                      {transitDetails.departure_stop?.name} → {transitDetails.arrival_stop?.name}
+                      {transitDetails.departure_stop?.name} →{' '}
+                      {transitDetails.arrival_stop?.name}
                     </span>
                     {transitDetails.num_stops > 0 && (
                       <span className="text-gray-400">
@@ -590,7 +601,11 @@ export function TravelPlanDetailPage() {
     if (routeData.method) {
       return (
         <div className="mt-2 text-xs text-gray-400">
-          📊 {routeData.method === 'estimated_calculation' ? '추정 계산' : '기본 계산'} 기반
+          📊{' '}
+          {routeData.method === 'estimated_calculation'
+            ? '추정 계산'
+            : '기본 계산'}{' '}
+          기반
         </div>
       )
     }
@@ -609,12 +624,14 @@ export function TravelPlanDetailPage() {
           <div className="text-xs font-medium text-gray-500">🗺️ 경로 안내</div>
           {routeData.detailed_guides.map((guide, index) => (
             <div key={index} className="flex items-start space-x-2 text-xs">
-              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-800 font-bold text-xs">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-800">
                 {guide.step}
               </span>
               <div className="flex-1">
-                <div className="text-gray-700 font-medium">{guide.description}</div>
-                <div className="flex items-center space-x-2 text-gray-400 mt-1">
+                <div className="font-medium text-gray-700">
+                  {guide.description}
+                </div>
+                <div className="mt-1 flex items-center space-x-2 text-gray-400">
                   <span className="inline-flex items-center">
                     📍 {guide.distance}
                   </span>
@@ -622,7 +639,7 @@ export function TravelPlanDetailPage() {
                     ⏱️ {guide.time}
                   </span>
                   {guide.instruction && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-600 text-xs">
+                    <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
                       {guide.instruction}
                     </span>
                   )}
@@ -630,20 +647,30 @@ export function TravelPlanDetailPage() {
               </div>
             </div>
           ))}
-          
+
           {/* 경로 요약 정보 */}
           {routeData.route_summary && (
-            <div className="mt-3 p-2 bg-gray-50 rounded-lg">
-              <div className="text-xs font-medium text-gray-600 mb-1">경로 요약</div>
+            <div className="mt-3 rounded-lg bg-gray-50 p-2">
+              <div className="mb-1 text-xs font-medium text-gray-600">
+                경로 요약
+              </div>
               <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
                 <div>총 {routeData.route_summary.total_steps}개 안내점</div>
                 <div>주요 구간 {routeData.route_summary.major_steps}개</div>
-                <div>예상 연료비 {routeData.route_summary.estimated_fuel_cost?.toLocaleString()}원</div>
-                <div>총 예상비용 {routeData.route_summary.total_cost_estimate?.toLocaleString()}원</div>
+                <div>
+                  예상 연료비{' '}
+                  {routeData.route_summary.estimated_fuel_cost?.toLocaleString()}
+                  원
+                </div>
+                <div>
+                  총 예상비용{' '}
+                  {routeData.route_summary.total_cost_estimate?.toLocaleString()}
+                  원
+                </div>
               </div>
             </div>
           )}
-          
+
           <div className="mt-2 flex items-center space-x-4 text-xs text-gray-400">
             {routeData.toll_fee > 0 && (
               <span className="inline-flex items-center">
@@ -655,9 +682,7 @@ export function TravelPlanDetailPage() {
                 🚖 택시요금 {routeData.taxi_fee.toLocaleString()}원
               </span>
             )}
-            <span className="inline-flex items-center">
-              🗺️ TMAP 기반 경로
-            </span>
+            <span className="inline-flex items-center">🗺️ TMAP 기반 경로</span>
           </div>
         </div>
       )
@@ -666,27 +691,30 @@ export function TravelPlanDetailPage() {
     // 기존 guide_points 사용 (fallback)
     if (routeData.guide_points && routeData.guide_points.length > 0) {
       const guidePoints = routeData.guide_points.slice(0, 5) // 최대 5개만 표시
-      
+
       return (
         <div className="mt-2 space-y-1">
           <div className="text-xs font-medium text-gray-500">🗺️ 경로 안내</div>
           {guidePoints.map((point, index) => (
-            <div key={index} className="flex items-start space-x-2 text-xs text-gray-500">
-              <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-100 text-blue-800 font-bold text-xs">
+            <div
+              key={index}
+              className="flex items-start space-x-2 text-xs text-gray-500"
+            >
+              <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-800">
                 {index + 1}
               </span>
               <div className="flex-1">
                 <div className="text-gray-700">{point.description}</div>
-                <div className="flex items-center space-x-2 text-gray-400 mt-1">
+                <div className="mt-1 flex items-center space-x-2 text-gray-400">
                   {point.distance > 0 && (
                     <span>
-                      {point.distance >= 1000 
-                        ? `${(point.distance / 1000).toFixed(1)}km` 
+                      {point.distance >= 1000
+                        ? `${(point.distance / 1000).toFixed(1)}km`
                         : `${point.distance}m`}
                     </span>
                   )}
                   {point.turn_instruction && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-600 text-xs">
+                    <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
                       {point.turn_instruction}
                     </span>
                   )}
@@ -697,7 +725,7 @@ export function TravelPlanDetailPage() {
               </div>
             </div>
           ))}
-          
+
           <div className="mt-2 flex items-center space-x-4 text-xs text-gray-400">
             {routeData.toll_fee > 0 && (
               <span className="inline-flex items-center">
@@ -709,9 +737,7 @@ export function TravelPlanDetailPage() {
                 🚖 택시요금 {routeData.taxi_fee.toLocaleString()}원
               </span>
             )}
-            <span className="inline-flex items-center">
-              🗺️ TMAP 기반 경로
-            </span>
+            <span className="inline-flex items-center">🗺️ TMAP 기반 경로</span>
           </div>
         </div>
       )
@@ -719,28 +745,36 @@ export function TravelPlanDetailPage() {
 
     // Google API 응답 (steps)
     if (routeData.steps && routeData.steps.length > 0) {
-      const drivingSteps = routeData.steps.filter(step => step.travel_mode === 'DRIVING')
+      const drivingSteps = routeData.steps.filter(
+        (step) => step.travel_mode === 'DRIVING',
+      )
       const displaySteps = drivingSteps.slice(0, 5) // 최대 5개만 표시
-      
+
       if (displaySteps.length === 0) return null
 
       return (
         <div className="mt-2 space-y-1">
           <div className="text-xs font-medium text-gray-500">🗺️ 경로 안내</div>
           {displaySteps.map((step, index) => (
-            <div key={index} className="flex items-start space-x-2 text-xs text-gray-500">
-              <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-100 text-blue-800 font-bold text-xs">
+            <div
+              key={index}
+              className="flex items-start space-x-2 text-xs text-gray-500"
+            >
+              <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-800">
                 {index + 1}
               </span>
               <div className="flex-1">
-                <div className="text-gray-700" dangerouslySetInnerHTML={{ __html: step.html_instructions }} />
+                <div
+                  className="text-gray-700"
+                  dangerouslySetInnerHTML={{ __html: step.html_instructions }}
+                />
                 <div className="text-gray-400">
                   {step.distance?.text} • {step.duration?.text}
                 </div>
               </div>
             </div>
           ))}
-          
+
           <div className="mt-2 text-xs text-gray-400">
             🗺️ Google Maps 기반 자동차 경로
           </div>
@@ -755,21 +789,24 @@ export function TravelPlanDetailPage() {
           <div className="text-xs font-medium text-gray-500">
             🚗 자동차 경로 정보
           </div>
-          
+
           {/* 안내점이 있는 경우 표시 */}
           {routeData.guide_points && routeData.guide_points.length > 0 && (
             <div className="space-y-1">
               {routeData.guide_points.map((point, index) => (
-                <div key={index} className="flex items-start space-x-2 text-xs text-gray-500">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-100 text-blue-800 font-bold text-xs">
+                <div
+                  key={index}
+                  className="flex items-start space-x-2 text-xs text-gray-500"
+                >
+                  <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-800">
                     {index + 1}
                   </span>
                   <div className="flex-1">
                     <div className="text-gray-700">{point.description}</div>
                     {point.distance > 0 && (
                       <div className="text-gray-400">
-                        {point.distance >= 1000 
-                          ? `${(point.distance / 1000).toFixed(1)}km` 
+                        {point.distance >= 1000
+                          ? `${(point.distance / 1000).toFixed(1)}km`
                           : `${point.distance}m`}
                       </div>
                     )}
@@ -778,7 +815,7 @@ export function TravelPlanDetailPage() {
               ))}
             </div>
           )}
-          
+
           {/* 추가 요금 정보 */}
           <div className="flex items-center space-x-4 text-xs text-gray-400">
             {routeData.toll_fee > 0 && (
@@ -792,7 +829,7 @@ export function TravelPlanDetailPage() {
               </span>
             )}
           </div>
-          
+
           <div className="text-xs text-gray-400">
             📊{' '}
             {routeData.method === 'estimated_calculation'
@@ -816,11 +853,11 @@ export function TravelPlanDetailPage() {
     if (!route?.route_data) return null
 
     const routeData = route.route_data
-    
+
     return (
       <div className="space-y-4">
         {/* 기본 정보 */}
-        <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+        <div className="grid grid-cols-2 gap-4 rounded-lg bg-gray-50 p-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-blue-600">
               {formatDuration(route.duration)}
@@ -834,7 +871,7 @@ export function TravelPlanDetailPage() {
             <div className="text-sm text-gray-600">이동거리</div>
           </div>
           {route.cost !== undefined && (
-            <div className="text-center col-span-2">
+            <div className="col-span-2 text-center">
               <div className="text-2xl font-bold text-purple-600">
                 {formatCost(route.cost)}
               </div>
@@ -846,19 +883,24 @@ export function TravelPlanDetailPage() {
         {/* 상세 안내 */}
         {routeData.detailed_guides && routeData.detailed_guides.length > 0 && (
           <div>
-            <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+            <h4 className="mb-3 flex items-center font-semibold text-gray-800">
               <Route className="mr-2 h-4 w-4" />
               상세 경로 안내
             </h4>
-            <div className="space-y-3 max-h-64 overflow-y-auto">
+            <div className="max-h-64 space-y-3 overflow-y-auto">
               {routeData.detailed_guides.map((guide, index) => (
-                <div key={index} className="flex items-start space-x-3 p-3 bg-white rounded border">
-                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-sm font-bold">
+                <div
+                  key={index}
+                  className="flex items-start space-x-3 rounded border bg-white p-3"
+                >
+                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-800">
                     {guide.step}
                   </div>
                   <div className="flex-1">
-                    <div className="font-medium text-gray-800">{guide.description}</div>
-                    <div className="flex items-center space-x-4 mt-1 text-sm text-gray-500">
+                    <div className="font-medium text-gray-800">
+                      {guide.description}
+                    </div>
+                    <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
                       <span>📍 {guide.distance}</span>
                       <span>⏱️ {guide.time}</span>
                       {guide.instruction && (
@@ -875,64 +917,81 @@ export function TravelPlanDetailPage() {
         )}
 
         {/* 기본 안내점 (detailed_guides가 없을 때) */}
-        {(!routeData.detailed_guides || routeData.detailed_guides.length === 0) && 
-         routeData.guide_points && routeData.guide_points.length > 0 && (
-          <div>
-            <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
-              <Navigation className="mr-2 h-4 w-4" />
-              경로 안내
-            </h4>
-            <div className="space-y-3 max-h-64 overflow-y-auto">
-              {routeData.guide_points.slice(0, 10).map((point, index) => (
-                <div key={index} className="flex items-start space-x-3 p-3 bg-white rounded border">
-                  <div className="flex-shrink-0 w-6 h-6 bg-green-100 text-green-800 rounded-full flex items-center justify-center text-xs font-bold">
-                    {index + 1}
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium text-gray-800">{point.description}</div>
-                    <div className="flex items-center space-x-4 mt-1 text-sm text-gray-500">
-                      {point.distance > 0 && (
-                        <span>
-                          {point.distance >= 1000 
-                            ? `${(point.distance / 1000).toFixed(1)}km` 
-                            : `${point.distance}m`}
-                        </span>
-                      )}
-                      {point.turn_instruction && (
-                        <Badge variant="outline" className="text-xs">
-                          {point.turn_instruction}
-                        </Badge>
-                      )}
-                      {point.road_name && (
-                        <span className="text-gray-400">• {point.road_name}</span>
-                      )}
+        {(!routeData.detailed_guides ||
+          routeData.detailed_guides.length === 0) &&
+          routeData.guide_points &&
+          routeData.guide_points.length > 0 && (
+            <div>
+              <h4 className="mb-3 flex items-center font-semibold text-gray-800">
+                <Navigation className="mr-2 h-4 w-4" />
+                경로 안내
+              </h4>
+              <div className="max-h-64 space-y-3 overflow-y-auto">
+                {routeData.guide_points.slice(0, 10).map((point, index) => (
+                  <div
+                    key={index}
+                    className="flex items-start space-x-3 rounded border bg-white p-3"
+                  >
+                    <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-xs font-bold text-green-800">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-800">
+                        {point.description}
+                      </div>
+                      <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
+                        {point.distance > 0 && (
+                          <span>
+                            {point.distance >= 1000
+                              ? `${(point.distance / 1000).toFixed(1)}km`
+                              : `${point.distance}m`}
+                          </span>
+                        )}
+                        {point.turn_instruction && (
+                          <Badge variant="outline" className="text-xs">
+                            {point.turn_instruction}
+                          </Badge>
+                        )}
+                        {point.road_name && (
+                          <span className="text-gray-400">
+                            • {point.road_name}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* 추가 정보 */}
         {routeData.route_summary && (
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <h4 className="font-semibold text-gray-800 mb-2">경로 요약</h4>
+          <div className="rounded-lg bg-blue-50 p-4">
+            <h4 className="mb-2 font-semibold text-gray-800">경로 요약</h4>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div>총 안내점: {routeData.route_summary.total_steps}개</div>
               <div>주요 구간: {routeData.route_summary.major_steps}개</div>
               {routeData.route_summary.estimated_fuel_cost && (
-                <div>예상 연료비: {routeData.route_summary.estimated_fuel_cost.toLocaleString()}원</div>
+                <div>
+                  예상 연료비:{' '}
+                  {routeData.route_summary.estimated_fuel_cost.toLocaleString()}
+                  원
+                </div>
               )}
               {routeData.route_summary.total_cost_estimate && (
-                <div>총 예상비용: {routeData.route_summary.total_cost_estimate.toLocaleString()}원</div>
+                <div>
+                  총 예상비용:{' '}
+                  {routeData.route_summary.total_cost_estimate.toLocaleString()}
+                  원
+                </div>
               )}
             </div>
           </div>
         )}
 
         {/* 데이터 소스 */}
-        <div className="flex items-center justify-between p-3 bg-gray-100 rounded">
+        <div className="flex items-center justify-between rounded bg-gray-100 p-3">
           <div className="text-sm text-gray-600">
             데이터 소스: {routeData.source || '기본'}
           </div>
@@ -1190,193 +1249,143 @@ export function TravelPlanDetailPage() {
           </CardContent>
         </Card>
 
-        {/* 경로 정보 섹션 */}
-        <Card className="mb-8 rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-blue-600">
-                  <Navigation className="h-5 w-5 text-white" />
-                </div>
-                <CardTitle className="text-gray-800 dark:text-gray-100">
-                  교통 정보
-                </CardTitle>
+        {/* 개선된 교통정보 섹션 */}
+        <div className="mb-8 space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-blue-600">
+                <Navigation className="h-5 w-5 text-white" />
               </div>
-              {itineraryDays.length > 0 && (
-                <Button
-                  onClick={handleAutoGenerateRoutes}
-                  disabled={isGeneratingRoutes}
-                  className="bg-gradient-to-r from-green-500 to-blue-600 text-white hover:from-green-600 hover:to-blue-700"
-                >
-                  {isGeneratingRoutes ? (
-                    <>
-                      <Zap className="mr-2 h-4 w-4 animate-spin" />
-                      생성 중...
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="mr-2 h-4 w-4" />
-                      {routes && routes.length > 0
-                        ? '경로 재생성'
-                        : '자동 경로 생성'}
-                    </>
-                  )}
-                </Button>
-              )}
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+                교통 정보
+              </h2>
             </div>
-          </CardHeader>
-          <CardContent>
-            {routesLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <LoadingSpinner />
-                <span className="ml-2 text-gray-600">
-                  경로 정보를 불러오는 중...
-                </span>
-              </div>
-            ) : routes && routes.length > 0 ? (
-              <div className="space-y-4">
-                {(() => {
-                  const groupedRoutes = groupRoutesByDay(routes)
-                  return Object.keys(groupedRoutes)
-                    .sort(
-                      (a, b) =>
-                        parseInt(a.replace('day', '')) -
-                        parseInt(b.replace('day', '')),
-                    )
-                    .map((dayKey) => (
-                      <div key={dayKey} className="rounded-lg border p-4">
-                        <h3 className="mb-3 text-lg font-semibold text-blue-600 flex items-center">
-                          {dayKey.replace('day', '') + '일차 이동 정보'}
-                          <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                            🕐 타임머신 예측 지원
-                          </span>
-                        </h3>
-                        <div className="space-y-3">
-                          {groupedRoutes[dayKey].map((route, index) => {
-                            const isInterDayRoute = route.sequence === 0
-                            return (
-                              <div
-                                key={route.route_id || index}
-                                className={`flex items-center justify-between rounded-md p-3 cursor-pointer transition-all hover:shadow-md ${
-                                  isInterDayRoute
-                                    ? 'border border-amber-200 bg-amber-50 hover:bg-amber-100'
-                                    : route.transport_type === 'car'
-                                      ? 'bg-blue-50 border border-blue-200 hover:bg-blue-100 hover:border-blue-300'
-                                      : 'bg-gray-50 hover:bg-blue-50'
-                                }`}
-                                onClick={() => handleRouteDetailClick(route)}
-                              >
-                                <div className="flex items-center space-x-3">
-                                  <span className="text-lg">
-                                    {getTransportIcon(route.transport_type)}
-                                  </span>
-                                  <div>
-                                    <div className="font-medium text-gray-900 flex items-center">
-                                      {route.departure_name} →{' '}
-                                      {route.destination_name}
-                                      {route.transport_type === 'car' && (
-                                        <span className="ml-2 text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
-                                          🕐 타임머신
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div className="text-sm text-gray-600">
-                                      {isInterDayRoute ? (
-                                        <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800">
-                                          전일 마지막장소에서 이동
-                                        </span>
-                                      ) : (
-                                        <span className="flex items-center">
-                                          {getTransportName(route.transport_type)}
-                                          {route.transport_type === 'car' && (
-                                            <span className="ml-2 text-xs text-blue-500">
-                                              클릭하여 실시간 교통예측 확인
-                                            </span>
-                                          )}
-                                        </span>
-                                      )}
-                                    </div>
-                                    {route.transport_type === 'transit' &&
-                                      renderTransitDetails(route.route_data)}
-                                    {route.transport_type === 'car' &&
-                                      renderCarRouteDetails(route.route_data)}
-                                  </div>
-                                </div>
-                                <div className="text-right">
-                                  <div className="flex items-center space-x-4 text-sm text-gray-600">
-                                    {route.duration && (
-                                      <div className="flex items-center">
-                                        <Clock className="mr-1 h-3 w-3" />
-                                        {formatDuration(route.duration)}
-                                      </div>
-                                    )}
-                                    {route.distance && (
-                                      <div className="flex items-center">
-                                        <Navigation className="mr-1 h-3 w-3" />
-                                        {formatDistance(route.distance)}
-                                      </div>
-                                    )}
-                                    {route.cost !== undefined && (
-                                      <div className="flex items-center">
-                                        {formatCost(route.cost)}
-                                      </div>
-                                    )}
-                                  </div>
-                                  {route.route_data?.source && (
-                                    <div className="mt-1 text-xs text-blue-500">
-                                      {route.route_data.source === 'ODsay' &&
-                                        '🚌 ODsay'}
-                                      {route.route_data.source === 'TMAP' &&
-                                        '🚗 TMAP'}
-                                      {route.route_data.source === 'Google' &&
-                                        '🗺️ Google'}
-                                      {route.route_data.source ===
-                                        'calculation' && '📊 추정'}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    ))
-                })()}
-              </div>
-            ) : (
-              <div className="py-8 text-center">
-                <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-gray-100 p-3">
-                  <Navigation className="h-6 w-6 text-gray-600" />
-                </div>
-                <h4 className="mb-2 font-medium text-gray-800">
-                  경로 정보가 없습니다
-                </h4>
-                <p className="mb-4 text-gray-600">
-                  여행 일정이 있는 경우 자동으로 경로를 생성할 수 있습니다
-                </p>
-                {itineraryDays.length > 0 && (
-                  <Button
-                    onClick={handleAutoGenerateRoutes}
-                    disabled={isGeneratingRoutes}
-                    className="bg-gradient-to-r from-green-500 to-blue-600 text-white hover:from-green-600 hover:to-blue-700"
-                  >
-                    {isGeneratingRoutes ? (
-                      <>
-                        <Zap className="mr-2 h-4 w-4 animate-spin" />
-                        생성 중...
-                      </>
-                    ) : (
-                      <>
-                        <Zap className="mr-2 h-4 w-4" />
-                        자동 경로 생성
-                      </>
-                    )}
-                  </Button>
+            {itineraryDays.length > 0 && (
+              <Button
+                onClick={handleAutoGenerateRoutes}
+                disabled={isGeneratingRoutes}
+                className="bg-gradient-to-r from-green-500 to-blue-600 text-white hover:from-green-600 hover:to-blue-700"
+              >
+                {isGeneratingRoutes ? (
+                  <>
+                    <Zap className="mr-2 h-4 w-4 animate-spin" />
+                    생성 중...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="mr-2 h-4 w-4" />
+                    {routes && routes.length > 0
+                      ? '경로 재생성'
+                      : '자동 경로 생성'}
+                  </>
                 )}
-              </div>
+              </Button>
             )}
-          </CardContent>
-        </Card>
+          </div>
+
+          <div className="space-y-6">
+            {routesLoading ? (
+              <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm">
+                <CardContent className="flex items-center justify-center py-8">
+                  <LoadingSpinner />
+                  <span className="ml-2 text-gray-600">
+                    경로 정보를 불러오는 중...
+                  </span>
+                </CardContent>
+              </Card>
+            ) : routes && routes.length > 0 ? (
+              (() => {
+                const groupedRoutes = groupRoutesByDay(routes)
+                return Object.keys(groupedRoutes)
+                  .sort(
+                    (a, b) =>
+                      parseInt(a.replace('day', '')) -
+                      parseInt(b.replace('day', '')),
+                  )
+                  .map((dayKey) => (
+                    <div key={dayKey} className="space-y-4">
+                      <h3 className="flex items-center text-xl font-semibold text-blue-600">
+                        {dayKey.replace('day', '') + '일차 이동 정보'}
+                        <span className="ml-2 rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-700">
+                          🕐 타임머신 예측 지원
+                        </span>
+                      </h3>
+
+                      {/* 각 경로에 대해 개선된 교통정보 카드 표시 */}
+                      {groupedRoutes[dayKey].map((route, index) => {
+                        const isStartRoute = route.sequence === 0 && dayKey === 'day1'
+                        const isInterDayRoute = route.sequence === 0 && dayKey !== 'day1'
+                        
+                        return (
+                          <div key={route.route_id || index}>
+                            {isStartRoute && (
+                              <div className="mb-2 inline-block rounded-full bg-green-50 px-3 py-1 text-sm font-medium text-green-600">
+                                🏠 출발지에서 첫 번째 목적지로
+                              </div>
+                            )}
+                            {isInterDayRoute && (
+                              <div className="mb-2 inline-block rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600">
+                                🏨 전일 마지막 장소에서 오늘 첫 번째 목적지로
+                              </div>
+                            )}
+                            <EnhancedTransportCard
+                              route={{
+                                from: route.departure_name,
+                                to: route.destination_name,
+                                departure_lat: route.departure_lat,
+                                departure_lng: route.departure_lng,
+                                destination_lat: route.destination_lat,
+                                destination_lng: route.destination_lng,
+                                duration: route.duration,
+                                distance: route.distance,
+                                cost: route.cost,
+                                transport_type: route.transport_type,
+                                route_data: route.route_data,
+                                isInterDay: route.sequence === 0,
+                              }}
+                            />
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ))
+              })()
+            ) : (
+              <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm">
+                <CardContent className="py-8 text-center">
+                  <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-gray-100 p-3">
+                    <Navigation className="h-6 w-6 text-gray-600" />
+                  </div>
+                  <h4 className="mb-2 font-medium text-gray-800">
+                    경로 정보가 없습니다
+                  </h4>
+                  <p className="mb-4 text-gray-600">
+                    여행 일정이 있는 경우 자동으로 경로를 생성할 수 있습니다
+                  </p>
+                  {itineraryDays.length > 0 && (
+                    <Button
+                      onClick={handleAutoGenerateRoutes}
+                      disabled={isGeneratingRoutes}
+                      className="bg-gradient-to-r from-green-500 to-blue-600 text-white hover:from-green-600 hover:to-blue-700"
+                    >
+                      {isGeneratingRoutes ? (
+                        <>
+                          <Zap className="mr-2 h-4 w-4 animate-spin" />
+                          생성 중...
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="mr-2 h-4 w-4" />
+                          자동 경로 생성
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
 
         <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <CardHeader className="pb-4">
@@ -1529,7 +1538,7 @@ export function TravelPlanDetailPage() {
 
         {/* 상세 경로 정보 모달 */}
         <Dialog open={isRouteDetailOpen} onOpenChange={setIsRouteDetailOpen}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Navigation className="h-5 w-5" />
@@ -1538,7 +1547,8 @@ export function TravelPlanDetailPage() {
               <DialogDescription>
                 {selectedRoute && (
                   <>
-                    {selectedRoute.departure_name} → {selectedRoute.destination_name}
+                    {selectedRoute.departure_name} →{' '}
+                    {selectedRoute.destination_name}
                     {selectedRoute?.transport_type === 'car' && (
                       <> • ⏰ 여행 계획 일정 기준으로 교통상황 예측</>
                     )}
@@ -1546,15 +1556,15 @@ export function TravelPlanDetailPage() {
                 )}
               </DialogDescription>
             </DialogHeader>
-            
+
             {selectedRoute && (
               <div className="px-6 pb-2">
-                <div className="text-sm text-blue-600 bg-blue-50 rounded-lg p-3">
+                <div className="rounded-lg bg-blue-50 p-3 text-sm text-blue-600">
                   ⏰ 여행 계획 일정 기준으로 교통상황 예측
                 </div>
               </div>
             )}
-            
+
             {/* 타임머신 API 응답 렌더링 */}
             {isTimemachineLoading ? (
               <div className="flex items-center justify-center py-12">
@@ -1584,13 +1594,15 @@ export function TravelPlanDetailPage() {
                   타임머신 예측을 불러올 수 없습니다
                 </h3>
                 <p className="mb-4 text-red-700">
-                  {timemachineError?.data?.message || 
-                   timemachineError?.message || 
-                   '일시적인 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.'}
+                  {timemachineError?.data?.message ||
+                    timemachineError?.message ||
+                    '일시적인 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.'}
                 </p>
                 <div className="space-y-4">
-                  <div className="p-4 bg-yellow-50 rounded border border-yellow-200">
-                    <h4 className="font-medium text-yellow-800 mb-2">기본 경로 정보</h4>
+                  <div className="rounded border border-yellow-200 bg-yellow-50 p-4">
+                    <h4 className="mb-2 font-medium text-yellow-800">
+                      기본 경로 정보
+                    </h4>
                     {selectedRoute && renderDetailedRouteInfo(selectedRoute)}
                   </div>
                 </div>
@@ -1598,162 +1610,231 @@ export function TravelPlanDetailPage() {
             ) : timemachineRouteInfo ? (
               <div className="space-y-6">
                 {/* 타임머신 상태 표시 */}
-                <div className="flex items-center justify-between p-3 bg-blue-50 rounded border border-blue-200">
+                <div className="flex items-center justify-between rounded border border-blue-200 bg-blue-50 p-3">
                   <div className="flex items-center space-x-2">
-                    <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-blue-500"></span>
                     <span className="text-sm font-medium text-blue-800">
                       🕐 TMAP 타임머신 예측
                     </span>
                   </div>
                   <div className="text-xs text-blue-600">
-                    {timemachineRouteInfo.prediction_info?.departure_time ? 
-                      new Date(timemachineRouteInfo.prediction_info.departure_time).toLocaleString('ko-KR') 
+                    {timemachineRouteInfo.prediction_info?.departure_time
+                      ? new Date(
+                          timemachineRouteInfo.prediction_info.departure_time,
+                        ).toLocaleString('ko-KR')
                       : '여행 일정 기준'}
                   </div>
                 </div>
 
                 {/* 자동차가 아닌 경우 */}
-                {selectedRoute?.transport_type !== 'car' && timemachineRouteInfo.timemachine_info?.message && (
-                  <div className="p-4 bg-yellow-50 rounded border border-yellow-200">
-                    <div className="text-sm text-yellow-800">
-                      ℹ️ {timemachineRouteInfo.timemachine_info.message}
+                {selectedRoute?.transport_type !== 'car' &&
+                  timemachineRouteInfo.timemachine_info?.message && (
+                    <div className="rounded border border-yellow-200 bg-yellow-50 p-4">
+                      <div className="text-sm text-yellow-800">
+                        ℹ️ {timemachineRouteInfo.timemachine_info.message}
+                      </div>
+                      <div className="mt-3 grid grid-cols-3 gap-4">
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-blue-600">
+                            {formatDuration(
+                              timemachineRouteInfo.timemachine_info.fallback
+                                ?.duration,
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-600">소요시간</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-green-600">
+                            {formatDistance(
+                              timemachineRouteInfo.timemachine_info.fallback
+                                ?.distance,
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-600">이동거리</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-purple-600">
+                            {formatCost(
+                              timemachineRouteInfo.timemachine_info.fallback
+                                ?.cost,
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-600">예상 비용</div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="mt-3 grid grid-cols-3 gap-4">
-                      <div className="text-center">
-                        <div className="text-lg font-bold text-blue-600">
-                          {formatDuration(timemachineRouteInfo.timemachine_info.fallback?.duration)}
-                        </div>
-                        <div className="text-xs text-gray-600">소요시간</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-lg font-bold text-green-600">
-                          {formatDistance(timemachineRouteInfo.timemachine_info.fallback?.distance)}
-                        </div>
-                        <div className="text-xs text-gray-600">이동거리</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-lg font-bold text-purple-600">
-                          {formatCost(timemachineRouteInfo.timemachine_info.fallback?.cost)}
-                        </div>
-                        <div className="text-xs text-gray-600">예상 비용</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                  )}
 
                 {/* 경로 비교 결과 (자동차인 경우) */}
                 {timemachineRouteInfo.timemachine_info?.comparison?.routes && (
                   <div>
-                    <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+                    <h4 className="mb-3 flex items-center font-semibold text-gray-800">
                       <Route className="mr-2 h-4 w-4" />
                       🕐 타임머신 경로 옵션 비교
                     </h4>
                     <div className="grid gap-3">
-                      {timemachineRouteInfo.timemachine_info.comparison.routes.map((route, index) => (
-                        <div key={index} className={`p-4 rounded-lg border ${
-                          route.is_recommended 
-                            ? 'border-green-200 bg-green-50' 
-                            : 'border-gray-200 bg-white'
-                        }`}>
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center space-x-3">
-                              <div className={`w-3 h-3 rounded-full ${
-                                route.is_recommended ? 'bg-green-500' : 'bg-gray-300'
-                              }`}></div>
-                              <div>
-                                <div className="font-medium text-gray-800">
-                                  {route.name}
-                                  {route.is_recommended && (
-                                    <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                                      🚗 추천
+                      {timemachineRouteInfo.timemachine_info.comparison.routes.map(
+                        (route, index) => (
+                          <div
+                            key={index}
+                            className={`rounded-lg border p-4 ${
+                              route.is_recommended
+                                ? 'border-green-200 bg-green-50'
+                                : 'border-gray-200 bg-white'
+                            }`}
+                          >
+                            <div className="mb-3 flex items-center justify-between">
+                              <div className="flex items-center space-x-3">
+                                <div
+                                  className={`h-3 w-3 rounded-full ${
+                                    route.is_recommended
+                                      ? 'bg-green-500'
+                                      : 'bg-gray-300'
+                                  }`}
+                                ></div>
+                                <div>
+                                  <div className="font-medium text-gray-800">
+                                    {route.name}
+                                    {route.is_recommended && (
+                                      <span className="ml-2 rounded-full bg-green-100 px-2 py-1 text-xs text-green-700">
+                                        🚗 추천
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-sm text-gray-500">
+                                    타임머신 예측 기준
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-semibold text-gray-800">
+                                  {formatDuration(route.duration)} •{' '}
+                                  {formatDistance(route.distance)}
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  {formatCost(route.cost + route.toll_fee)}
+                                  {route.toll_fee > 0 && (
+                                    <span className="ml-1 text-xs text-blue-600">
+                                      (통행료 {route.toll_fee.toLocaleString()}
+                                      원)
                                     </span>
                                   )}
                                 </div>
-                                <div className="text-sm text-gray-500">
-                                  타임머신 예측 기준
-                                </div>
                               </div>
                             </div>
-                            <div className="text-right">
-                              <div className="font-semibold text-gray-800">
-                                {formatDuration(route.duration)} • {formatDistance(route.distance)}
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                {formatCost(route.cost + route.toll_fee)}
-                                {route.toll_fee > 0 && (
-                                  <span className="ml-1 text-xs text-blue-600">
-                                    (통행료 {route.toll_fee.toLocaleString()}원)
-                                  </span>
+
+                            {/* 교통 예측 정보 */}
+                            {route.route_data?.route_summary && (
+                              <div className="mt-3 rounded border bg-blue-50 p-3">
+                                <div className="mb-2 text-sm font-medium text-blue-800">
+                                  🚦 실시간 교통 예측
+                                </div>
+                                {route.route_data.route_summary
+                                  .traffic_prediction && (
+                                  <div className="mb-2 text-sm text-blue-700">
+                                    전체 교통량:{' '}
+                                    <span className="font-medium">
+                                      {
+                                        route.route_data.route_summary
+                                          .traffic_prediction
+                                      }
+                                    </span>
+                                  </div>
+                                )}
+                                {route.route_data.route_summary
+                                  .expected_congestion && (
+                                  <div className="space-y-1">
+                                    {route.route_data.route_summary.expected_congestion.map(
+                                      (congestion, idx) => (
+                                        <div
+                                          key={idx}
+                                          className="flex justify-between text-xs text-blue-600"
+                                        >
+                                          <span>{congestion.location}</span>
+                                          <span
+                                            className={`font-medium ${
+                                              congestion.level === '원활'
+                                                ? 'text-green-600'
+                                                : congestion.level === '보통'
+                                                  ? 'text-yellow-600'
+                                                  : 'text-red-600'
+                                            }`}
+                                          >
+                                            {congestion.level}
+                                          </span>
+                                        </div>
+                                      ),
+                                    )}
+                                  </div>
                                 )}
                               </div>
-                            </div>
-                          </div>
-                          
-                          {/* 교통 예측 정보 */}
-                          {route.route_data?.route_summary && (
-                            <div className="mt-3 p-3 bg-blue-50 rounded border">
-                              <div className="text-sm font-medium text-blue-800 mb-2">
-                                🚦 실시간 교통 예측
-                              </div>
-                              {route.route_data.route_summary.traffic_prediction && (
-                                <div className="text-sm text-blue-700 mb-2">
-                                  전체 교통량: <span className="font-medium">{route.route_data.route_summary.traffic_prediction}</span>
-                                </div>
-                              )}
-                              {route.route_data.route_summary.expected_congestion && (
-                                <div className="space-y-1">
-                                  {route.route_data.route_summary.expected_congestion.map((congestion, idx) => (
-                                    <div key={idx} className="flex justify-between text-xs text-blue-600">
-                                      <span>{congestion.location}</span>
-                                      <span className={`font-medium ${
-                                        congestion.level === '원활' ? 'text-green-600' :
-                                        congestion.level === '보통' ? 'text-yellow-600' : 'text-red-600'
-                                      }`}>
-                                        {congestion.level}
-                                      </span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          
-                          {/* 상세 안내 (추천 경로의 경우) */}
-                          {route.is_recommended && route.route_data?.detailed_guides && (
-                            <div className="mt-3 p-3 bg-gray-50 rounded border">
-                              <div className="text-sm font-medium text-gray-700 mb-2">
-                                🗺️ 상세 경로 안내
-                              </div>
-                              <div className="space-y-2">
-                                {route.route_data.detailed_guides.slice(0, 3).map((guide, idx) => (
-                                  <div key={idx} className="flex items-start space-x-2 text-xs">
-                                    <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">
-                                      {guide.step}
-                                    </span>
-                                    <div className="flex-1">
-                                      <div className="text-gray-700">{guide.description}</div>
-                                      <div className="text-gray-500 mt-1">
-                                        {guide.distance} • {guide.time} • {guide.instruction}
-                                      </div>
-                                    </div>
+                            )}
+
+                            {/* 상세 안내 (추천 경로의 경우) */}
+                            {route.is_recommended &&
+                              route.route_data?.detailed_guides && (
+                                <div className="mt-3 rounded border bg-gray-50 p-3">
+                                  <div className="mb-2 text-sm font-medium text-gray-700">
+                                    🗺️ 상세 경로 안내
                                   </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                                  <div className="space-y-2">
+                                    {route.route_data.detailed_guides
+                                      .slice(0, 3)
+                                      .map((guide, idx) => (
+                                        <div
+                                          key={idx}
+                                          className="flex items-start space-x-2 text-xs"
+                                        >
+                                          <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-700">
+                                            {guide.step}
+                                          </span>
+                                          <div className="flex-1">
+                                            <div className="text-gray-700">
+                                              {guide.description}
+                                            </div>
+                                            <div className="mt-1 text-gray-500">
+                                              {guide.distance} • {guide.time} •{' '}
+                                              {guide.instruction}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ))}
+                                  </div>
+                                </div>
+                              )}
+                          </div>
+                        ),
+                      )}
                     </div>
-                    
+
                     {/* 비교 요약 */}
-                    {timemachineRouteInfo.timemachine_info.comparison.comparison_summary && (
-                      <div className="mt-4 p-3 bg-gray-50 rounded text-sm text-gray-600">
+                    {timemachineRouteInfo.timemachine_info.comparison
+                      .comparison_summary && (
+                      <div className="mt-4 rounded bg-gray-50 p-3 text-sm text-gray-600">
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            소요시간 범위: {formatDuration(timemachineRouteInfo.timemachine_info.comparison.comparison_summary.time_range.min)} ~ {formatDuration(timemachineRouteInfo.timemachine_info.comparison.comparison_summary.time_range.max)}
+                            소요시간 범위:{' '}
+                            {formatDuration(
+                              timemachineRouteInfo.timemachine_info.comparison
+                                .comparison_summary.time_range.min,
+                            )}{' '}
+                            ~{' '}
+                            {formatDuration(
+                              timemachineRouteInfo.timemachine_info.comparison
+                                .comparison_summary.time_range.max,
+                            )}
                           </div>
                           <div>
-                            거리 범위: {formatDistance(timemachineRouteInfo.timemachine_info.comparison.comparison_summary.distance_range.min)} ~ {formatDistance(timemachineRouteInfo.timemachine_info.comparison.comparison_summary.distance_range.max)}
+                            거리 범위:{' '}
+                            {formatDistance(
+                              timemachineRouteInfo.timemachine_info.comparison
+                                .comparison_summary.distance_range.min,
+                            )}{' '}
+                            ~{' '}
+                            {formatDistance(
+                              timemachineRouteInfo.timemachine_info.comparison
+                                .comparison_summary.distance_range.max,
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1762,137 +1843,196 @@ export function TravelPlanDetailPage() {
                 )}
 
                 {/* 단일 경로 예측 결과 */}
-                {timemachineRouteInfo.timemachine_info?.predicted_route && !timemachineRouteInfo.timemachine_info?.comparison && (
-                  <div>
-                    <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
-                      <Navigation className="mr-2 h-4 w-4" />
-                      🕐 타임머신 경로 예측
-                    </h4>
-                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                      <div className="grid grid-cols-3 gap-4 mb-4">
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-blue-600">
-                            {formatDuration(timemachineRouteInfo.timemachine_info.predicted_route.duration)}
-                          </div>
-                          <div className="text-xs text-gray-600">소요시간</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-green-600">
-                            {formatDistance(timemachineRouteInfo.timemachine_info.predicted_route.distance)}
-                          </div>
-                          <div className="text-xs text-gray-600">이동거리</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-purple-600">
-                            {formatCost(timemachineRouteInfo.timemachine_info.predicted_route.cost + timemachineRouteInfo.timemachine_info.predicted_route.toll_fee)}
-                          </div>
-                          <div className="text-xs text-gray-600">총 비용</div>
-                        </div>
-                      </div>
-                      
-                      {/* 교통 예측 정보 */}
-                      {timemachineRouteInfo.timemachine_info.predicted_route.route_data?.route_summary && (
-                        <div className="mb-4 p-3 bg-white rounded border">
-                          <div className="text-sm font-medium text-blue-800 mb-2">
-                            🚦 실시간 교통 예측
-                          </div>
-                          {timemachineRouteInfo.timemachine_info.predicted_route.route_data.route_summary.traffic_prediction && (
-                            <div className="text-sm text-blue-700 mb-2">
-                              전체 교통량: <span className="font-medium">{timemachineRouteInfo.timemachine_info.predicted_route.route_data.route_summary.traffic_prediction}</span>
+                {timemachineRouteInfo.timemachine_info?.predicted_route &&
+                  !timemachineRouteInfo.timemachine_info?.comparison && (
+                    <div>
+                      <h4 className="mb-3 flex items-center font-semibold text-gray-800">
+                        <Navigation className="mr-2 h-4 w-4" />
+                        🕐 타임머신 경로 예측
+                      </h4>
+                      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                        <div className="mb-4 grid grid-cols-3 gap-4">
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-blue-600">
+                              {formatDuration(
+                                timemachineRouteInfo.timemachine_info
+                                  .predicted_route.duration,
+                              )}
                             </div>
-                          )}
-                          {timemachineRouteInfo.timemachine_info.predicted_route.route_data.route_summary.expected_congestion && (
-                            <div className="grid grid-cols-1 gap-1">
-                              {timemachineRouteInfo.timemachine_info.predicted_route.route_data.route_summary.expected_congestion.map((congestion, idx) => (
-                                <div key={idx} className="flex justify-between text-xs text-blue-600">
-                                  <span>{congestion.location}</span>
-                                  <span className={`font-medium ${
-                                    congestion.level === '원활' ? 'text-green-600' :
-                                    congestion.level === '보통' ? 'text-yellow-600' : 'text-red-600'
-                                  }`}>
-                                    {congestion.level}
-                                  </span>
-                                </div>
-                              ))}
+                            <div className="text-xs text-gray-600">
+                              소요시간
                             </div>
-                          )}
-                        </div>
-                      )}
-                      
-                      {/* 상세 경로 안내 */}
-                      {timemachineRouteInfo.timemachine_info.predicted_route.route_data?.detailed_guides && (
-                        <div className="p-3 bg-white rounded border">
-                          <div className="text-sm font-medium text-gray-700 mb-2">
-                            🗺️ 상세 경로 안내
                           </div>
-                          <div className="space-y-2 max-h-48 overflow-y-auto">
-                            {timemachineRouteInfo.timemachine_info.predicted_route.route_data.detailed_guides.map((guide, idx) => (
-                              <div key={idx} className="flex items-start space-x-2 text-xs">
-                                <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">
-                                  {guide.step}
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-green-600">
+                              {formatDistance(
+                                timemachineRouteInfo.timemachine_info
+                                  .predicted_route.distance,
+                              )}
+                            </div>
+                            <div className="text-xs text-gray-600">
+                              이동거리
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-purple-600">
+                              {formatCost(
+                                timemachineRouteInfo.timemachine_info
+                                  .predicted_route.cost +
+                                  timemachineRouteInfo.timemachine_info
+                                    .predicted_route.toll_fee,
+                              )}
+                            </div>
+                            <div className="text-xs text-gray-600">총 비용</div>
+                          </div>
+                        </div>
+
+                        {/* 교통 예측 정보 */}
+                        {timemachineRouteInfo.timemachine_info.predicted_route
+                          .route_data?.route_summary && (
+                          <div className="mb-4 rounded border bg-white p-3">
+                            <div className="mb-2 text-sm font-medium text-blue-800">
+                              🚦 실시간 교통 예측
+                            </div>
+                            {timemachineRouteInfo.timemachine_info
+                              .predicted_route.route_data.route_summary
+                              .traffic_prediction && (
+                              <div className="mb-2 text-sm text-blue-700">
+                                전체 교통량:{' '}
+                                <span className="font-medium">
+                                  {
+                                    timemachineRouteInfo.timemachine_info
+                                      .predicted_route.route_data.route_summary
+                                      .traffic_prediction
+                                  }
                                 </span>
-                                <div className="flex-1">
-                                  <div className="text-gray-700">{guide.description}</div>
-                                  <div className="text-gray-500 mt-1">
-                                    {guide.distance} • {guide.time} • {guide.instruction}
-                                  </div>
-                                </div>
                               </div>
-                            ))}
+                            )}
+                            {timemachineRouteInfo.timemachine_info
+                              .predicted_route.route_data.route_summary
+                              .expected_congestion && (
+                              <div className="grid grid-cols-1 gap-1">
+                                {timemachineRouteInfo.timemachine_info.predicted_route.route_data.route_summary.expected_congestion.map(
+                                  (congestion, idx) => (
+                                    <div
+                                      key={idx}
+                                      className="flex justify-between text-xs text-blue-600"
+                                    >
+                                      <span>{congestion.location}</span>
+                                      <span
+                                        className={`font-medium ${
+                                          congestion.level === '원활'
+                                            ? 'text-green-600'
+                                            : congestion.level === '보통'
+                                              ? 'text-yellow-600'
+                                              : 'text-red-600'
+                                        }`}
+                                      >
+                                        {congestion.level}
+                                      </span>
+                                    </div>
+                                  ),
+                                )}
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      )}
+                        )}
+
+                        {/* 상세 경로 안내 */}
+                        {timemachineRouteInfo.timemachine_info.predicted_route
+                          .route_data?.detailed_guides && (
+                          <div className="rounded border bg-white p-3">
+                            <div className="mb-2 text-sm font-medium text-gray-700">
+                              🗺️ 상세 경로 안내
+                            </div>
+                            <div className="max-h-48 space-y-2 overflow-y-auto">
+                              {timemachineRouteInfo.timemachine_info.predicted_route.route_data.detailed_guides.map(
+                                (guide, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="flex items-start space-x-2 text-xs"
+                                  >
+                                    <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-700">
+                                      {guide.step}
+                                    </span>
+                                    <div className="flex-1">
+                                      <div className="text-gray-700">
+                                        {guide.description}
+                                      </div>
+                                      <div className="mt-1 text-gray-500">
+                                        {guide.distance} • {guide.time} •{' '}
+                                        {guide.instruction}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ),
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* 추천 경로 상세 안내 */}
-                {timemachineRouteInfo.timemachine_info?.comparison?.recommended?.route_data?.detailed_guides && (
+                {timemachineRouteInfo.timemachine_info?.comparison?.recommended
+                  ?.route_data?.detailed_guides && (
                   <div>
-                    <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+                    <h4 className="mb-3 flex items-center font-semibold text-gray-800">
                       <Navigation className="mr-2 h-4 w-4" />
                       🏆 추천 경로 상세 안내
                     </h4>
-                    <div className="space-y-3 max-h-64 overflow-y-auto">
-                      {timemachineRouteInfo.timemachine_info.comparison.recommended.route_data.detailed_guides.map((guide, index) => (
-                        <div key={index} className="flex items-start space-x-3 p-3 bg-white rounded border">
-                          <div className="flex-shrink-0 w-8 h-8 bg-green-100 text-green-800 rounded-full flex items-center justify-center text-sm font-bold">
-                            {guide.step}
-                          </div>
-                          <div className="flex-1">
-                            <div className="font-medium text-gray-800">{guide.description}</div>
-                            <div className="flex items-center space-x-4 mt-1 text-sm text-gray-500">
-                              {guide.distance && (
-                                <span>📍 {guide.distance}</span>
-                              )}
-                              {guide.time && (
-                                <span>⏱️ {guide.time}</span>
-                              )}
-                              {guide.instruction && (
-                                <Badge variant="secondary" className="text-xs">
-                                  {guide.instruction}
-                                </Badge>
-                              )}
+                    <div className="max-h-64 space-y-3 overflow-y-auto">
+                      {timemachineRouteInfo.timemachine_info.comparison.recommended.route_data.detailed_guides.map(
+                        (guide, index) => (
+                          <div
+                            key={index}
+                            className="flex items-start space-x-3 rounded border bg-white p-3"
+                          >
+                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-sm font-bold text-green-800">
+                              {guide.step}
+                            </div>
+                            <div className="flex-1">
+                              <div className="font-medium text-gray-800">
+                                {guide.description}
+                              </div>
+                              <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
+                                {guide.distance && (
+                                  <span>📍 {guide.distance}</span>
+                                )}
+                                {guide.time && <span>⏱️ {guide.time}</span>}
+                                {guide.instruction && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-xs"
+                                  >
+                                    {guide.instruction}
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        ),
+                      )}
                     </div>
                   </div>
                 )}
 
                 {/* 예측 정확도 정보 */}
-                <div className="p-3 bg-yellow-50 rounded border border-yellow-200">
+                <div className="rounded border border-yellow-200 bg-yellow-50 p-3">
                   <div className="text-sm text-yellow-800">
-                    ⚠️ {timemachineRouteInfo.prediction_info?.accuracy_note || 
-                         'TMAP 타임머신 API 기반 예측으로 실제 교통상황과 다를 수 있습니다.'}
+                    ⚠️{' '}
+                    {timemachineRouteInfo.prediction_info?.accuracy_note ||
+                      'TMAP 타임머신 API 기반 예측으로 실제 교통상황과 다를 수 있습니다.'}
                   </div>
                 </div>
 
                 {/* 데이터 소스 */}
-                <div className="flex items-center justify-between p-3 bg-blue-100 rounded">
+                <div className="flex items-center justify-between rounded bg-blue-100 p-3">
                   <div className="text-sm text-blue-800">
-                    📡 예측 데이터: {timemachineRouteInfo.data_sources?.timemachine_data || 'TMAP API'}
+                    📡 예측 데이터:{' '}
+                    {timemachineRouteInfo.data_sources?.timemachine_data ||
+                      'TMAP API'}
                   </div>
                   <Badge variant="outline" className="text-blue-600">
                     🕐 타임머신 예측
@@ -1901,9 +2041,13 @@ export function TravelPlanDetailPage() {
               </div>
             ) : selectedRoute ? (
               <div className="space-y-4">
-                <div className="p-4 bg-yellow-50 rounded border border-yellow-200">
-                  <h4 className="font-medium text-yellow-800 mb-2">기본 경로 정보</h4>
-                  <p className="text-sm text-yellow-700">타임머신 데이터를 불러올 수 없어 기본 정보를 표시합니다.</p>
+                <div className="rounded border border-yellow-200 bg-yellow-50 p-4">
+                  <h4 className="mb-2 font-medium text-yellow-800">
+                    기본 경로 정보
+                  </h4>
+                  <p className="text-sm text-yellow-700">
+                    타임머신 데이터를 불러올 수 없어 기본 정보를 표시합니다.
+                  </p>
                 </div>
                 {renderDetailedRouteInfo(selectedRoute)}
               </div>

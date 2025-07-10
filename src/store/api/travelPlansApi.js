@@ -327,7 +327,11 @@ export const travelPlansApi = createApi({
 
     // 경로 상세 정보 조회 (실시간 TMAP API 호출)
     getDetailedRouteInfo: builder.query({
-      query: ({ routeId, includePois = true, includeAlternatives = false }) => ({
+      query: ({
+        routeId,
+        includePois = true,
+        includeAlternatives = false,
+      }) => ({
         url: `routes/${routeId}/details`,
         params: {
           include_pois: includePois,
@@ -358,7 +362,11 @@ export const travelPlansApi = createApi({
 
     // TMAP 타임머신 경로 정보 조회
     getTimemachineRouteInfo: builder.query({
-      query: ({ routeId, departureTime = null, includeComparison = false }) => ({
+      query: ({
+        routeId,
+        departureTime = null,
+        includeComparison = false,
+      }) => ({
         url: `routes/${routeId}/timemachine`,
         params: {
           departure_time: departureTime,
