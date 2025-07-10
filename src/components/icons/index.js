@@ -26,6 +26,7 @@ export {
   Filter,
   Camera,
   List,
+  Grid3x3,
   AlertTriangle,
   PlusCircle,
   Info,
