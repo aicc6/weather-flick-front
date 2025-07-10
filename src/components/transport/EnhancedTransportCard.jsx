@@ -30,24 +30,89 @@ const transportIcons = {
 
 // 시간대별 선택 컴포넌트
 const TimeSelector = ({ value, onChange, options }) => {
+  const [showCustomTime, setShowCustomTime] = useState(false)
+  const [customTime, setCustomTime] = useState('')
+
+  const now = new Date()
   const timeOptions = {
     now: '지금',
-    optimal: '최적',
-    custom: '직접 설정',
+    hour1: `1시간 후 (${new Date(now.getTime() + 60 * 60 * 1000).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })})`,
+    hour2: `2시간 후 (${new Date(now.getTime() + 2 * 60 * 60 * 1000).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })})`,
+    hour4: `4시간 후 (${new Date(now.getTime() + 4 * 60 * 60 * 1000).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })})`,
+    optimal: '최적 시간',
+    custom: '시간 직접 입력',
+  }
+
+  const handleCustomTimeSubmit = () => {
+    if (customTime) {
+      onChange(`custom:${customTime}`)
+      setShowCustomTime(false)
+    }
+  }
+
+  const getCurrentTimeForInput = () => {
+    const now = new Date()
+    const hours = String(now.getHours()).padStart(2, '0')
+    const minutes = String(now.getMinutes()).padStart(2, '0')
+    return `${hours}:${minutes}`
   }
 
   return (
-    <div className="flex space-x-2">
-      {options.map((option) => (
-        <Button
-          key={option}
-          variant={value === option ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => onChange(option)}
-        >
-          {timeOptions[option]}
-        </Button>
-      ))}
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
+        {options.map((option) => (
+          <Button
+            key={option}
+            variant={
+              value === option || value.startsWith(`${option}:`)
+                ? 'default'
+                : 'outline'
+            }
+            size="sm"
+            onClick={() => {
+              if (option === 'custom') {
+                setShowCustomTime(true)
+                setCustomTime(getCurrentTimeForInput())
+              } else {
+                onChange(option)
+                setShowCustomTime(false)
+              }
+            }}
+            className="text-xs"
+          >
+            {timeOptions[option] || option}
+          </Button>
+        ))}
+      </div>
+
+      {showCustomTime && (
+        <div className="mt-3 rounded-lg bg-gray-50 p-3">
+          <div className="flex items-center space-x-2">
+            <label className="text-sm font-medium">출발 시간:</label>
+            <input
+              type="time"
+              value={customTime}
+              onChange={(e) => setCustomTime(e.target.value)}
+              className="rounded border px-2 py-1 text-sm"
+            />
+            <Button size="sm" onClick={handleCustomTimeSubmit}>
+              적용
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowCustomTime(false)}
+            >
+              취소
+            </Button>
+          </div>
+          <div className="mt-2 text-xs text-gray-600">
+            {value.startsWith('custom:') && (
+              <span>현재 설정: {value.split(':')[1]}</span>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -210,8 +275,49 @@ const EnhancedTransportCard = ({ route }) => {
         setError(null)
 
         // 현재 시간 또는 선택된 시간으로 출발 시간 설정
-        const departureTime =
-          selectedTime === 'now' ? new Date().toISOString() : selectedTime
+        const now = new Date()
+        let departureTime = now.toISOString()
+
+        if (selectedTime.startsWith('custom:')) {
+          // 사용자 정의 시간 처리 (HH:MM 형식)
+          const timeString =
+            selectedTime.split(':')[1] + ':' + selectedTime.split(':')[2]
+          const [hours, minutes] = timeString.split(':').map(Number)
+          const customDate = new Date()
+          customDate.setHours(hours, minutes, 0, 0)
+
+          // 설정한 시간이 현재 시간보다 이전이면 다음날로 설정
+          if (customDate < now) {
+            customDate.setDate(customDate.getDate() + 1)
+          }
+
+          departureTime = customDate.toISOString()
+        } else {
+          switch (selectedTime) {
+            case 'hour1':
+              departureTime = new Date(
+                now.getTime() + 60 * 60 * 1000,
+              ).toISOString()
+              break
+            case 'hour2':
+              departureTime = new Date(
+                now.getTime() + 2 * 60 * 60 * 1000,
+              ).toISOString()
+              break
+            case 'hour4':
+              departureTime = new Date(
+                now.getTime() + 4 * 60 * 60 * 1000,
+              ).toISOString()
+              break
+            case 'optimal':
+              // 최적 시간은 백엔드에서 계산하도록 null 전달
+              departureTime = null
+              break
+            case 'now':
+            default:
+              departureTime = now.toISOString()
+          }
+        }
 
         const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
         if (!token) {
@@ -243,7 +349,9 @@ const EnhancedTransportCard = ({ route }) => {
             localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
             throw new Error('로그인이 만료되었습니다. 다시 로그인해주세요.')
           }
-          throw new Error(`교통 정보를 가져오는데 실패했습니다 (${response.status})`)
+          throw new Error(
+            `교통 정보를 가져오는데 실패했습니다 (${response.status})`,
+          )
         }
 
         const data = await response.json()
@@ -448,7 +556,7 @@ const EnhancedTransportCard = ({ route }) => {
 
   if (error && !transportData) {
     const isAuthError = error.includes('로그인')
-    
+
     return (
       <Card className="transport-card w-full">
         <CardContent className="flex items-center justify-center py-8">
@@ -564,7 +672,7 @@ const EnhancedTransportCard = ({ route }) => {
           <TimeSelector
             value={selectedTime}
             onChange={setSelectedTime}
-            options={['now', 'optimal', 'custom']}
+            options={['now', 'hour1', 'hour2', 'hour4', 'optimal', 'custom']}
           />
         </div>
       </CardHeader>

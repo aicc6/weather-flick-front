@@ -1313,9 +1313,11 @@ export function TravelPlanDetailPage() {
 
                       {/* 각 경로에 대해 개선된 교통정보 카드 표시 */}
                       {groupedRoutes[dayKey].map((route, index) => {
-                        const isStartRoute = route.sequence === 0 && dayKey === 'day1'
-                        const isInterDayRoute = route.sequence === 0 && dayKey !== 'day1'
-                        
+                        const isStartRoute =
+                          route.sequence === 0 && dayKey === 'day1'
+                        const isInterDayRoute =
+                          route.sequence === 0 && dayKey !== 'day1'
+
                         return (
                           <div key={route.route_id || index}>
                             {isStartRoute && (
