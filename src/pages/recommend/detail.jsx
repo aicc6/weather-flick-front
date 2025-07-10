@@ -20,7 +20,6 @@ import {
   ChevronDown,
   ChevronUp,
   ArrowLeft,
-  Eye,
   MessageSquare,
   X,
 } from '@/components/icons'
@@ -342,8 +341,8 @@ export default function TravelCourseDetailPage() {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <Eye className="h-5 w-5 text-gray-400" />
-            <span className="text-gray-600">조회수 {course.viewCount}</span>
+            <MessageSquare className="h-5 w-5 text-gray-400" />
+            <span className="text-gray-600">리뷰 {reviewsCount}건</span>
           </div>
         </div>
 
