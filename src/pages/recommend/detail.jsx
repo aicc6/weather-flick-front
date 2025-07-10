@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { useGetTravelCourseDetailQuery } from '@/store/api'
+import { useAuth } from '@/contexts/AuthContextRTK'
 import {
   Star,
   Heart,
@@ -125,11 +126,14 @@ export default function TravelCourseDetailPage() {
     alert(`${value}점으로 평가해주셔서 감사합니다!`)
   }, [])
 
+  const { user } = useAuth()
+
   const handleCommentSubmit = useCallback(() => {
     if (comment.trim()) {
+      const displayName = user?.nickname || user?.email || '사용자'
       const newComment = {
         id: Date.now(),
-        user: '사용자',
+        user: displayName,
         content: comment,
         date: new Date().toLocaleDateString(),
         rating: _rating, // 별점 상태 사용
@@ -138,7 +142,7 @@ export default function TravelCourseDetailPage() {
       setComments((prev) => [newComment, ...prev])
       setComment('')
     }
-  }, [comment, _rating])
+  }, [comment, _rating, user])
 
   // 모든 useEffect들을 early return 이전으로 이동
   useEffect(() => {

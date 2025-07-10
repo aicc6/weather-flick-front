@@ -65,8 +65,8 @@ const SettingsPage = lazy(() =>
   })),
 )
 const PlannerPage = lazy(() => import('./pages/planner'))
-const TravelCoursePage = lazy(() => import('@/pages/destinations'))
-const TravelCourseDetailPage = lazy(() => import('@/pages/destinations/detail'))
+const TravelCoursePage = lazy(() => import('@/pages/recommend'))
+const TravelCourseDetailPage = lazy(() => import('@/pages/recommend/detail'))
 const TravelPlansPage = lazy(() =>
   import('./pages/travel-plans').then((module) => ({
     default: module.TravelPlansPage,
