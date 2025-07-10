@@ -23,8 +23,18 @@ export const recommendReviewsApi = createApi({
         { type: 'RecommendReview', id: course_id },
       ],
     }),
+    getReviewsTreeByCourse: builder.query({
+      query: (courseId) => `/recommend-reviews/course/${courseId}/tree`,
+      providesTags: (result, error, courseId) => [
+        { type: 'RecommendReview', id: courseId },
+      ],
+      keepUnusedDataFor: 300,
+    }),
   }),
 })
 
-export const { useGetReviewsByCourseQuery, useCreateReviewMutation } =
-  recommendReviewsApi
+export const {
+  useGetReviewsByCourseQuery,
+  useCreateReviewMutation,
+  useGetReviewsTreeByCourseQuery,
+} = recommendReviewsApi
