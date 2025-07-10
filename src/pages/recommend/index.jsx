@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -49,6 +49,16 @@ export default function TravelCoursePage() {
   const [selectedTheme, setSelectedTheme] = useState('all')
   const [images, setImages] = useState({})
   const [imagesLoading, setImagesLoading] = useState(true)
+
+  // 코스별 좋아요 상태 관리
+  const [likedCourses, setLikedCourses] = useState({})
+
+  const handleLikeToggle = useCallback((courseId) => {
+    setLikedCourses((prev) => ({
+      ...prev,
+      [courseId]: !prev[courseId],
+    }))
+  }, [])
 
   // 여행 코스 기본 데이터
   const travelCourses = [
@@ -418,8 +428,23 @@ export default function TravelCoursePage() {
             />
 
             {/* 좋아요 버튼 */}
-            <button className="absolute top-3 right-3 rounded-full bg-white/90 p-2 shadow-md transition-all duration-200 hover:scale-110 hover:bg-white">
-              <Heart className="h-4 w-4 text-gray-600 transition-colors hover:text-red-500" />
+            <button
+              type="button"
+              className="absolute top-3 right-3 rounded-full bg-white/90 p-2 shadow-md transition-all duration-200 hover:scale-110 hover:bg-white"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                handleLikeToggle(course.id)
+              }}
+              aria-label={likedCourses[course.id] ? '좋아요 취소' : '좋아요'}
+            >
+              <Heart
+                className="h-4 w-4 transition-colors"
+                style={{
+                  color: likedCourses[course.id] ? '#ef4444' : '#4b5563',
+                  fill: likedCourses[course.id] ? '#ef4444' : 'none',
+                }}
+              />
             </button>
           </div>
 
