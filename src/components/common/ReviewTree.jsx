@@ -32,18 +32,20 @@ function formatDate(dateStr) {
 }
 
 /**
- * BEST 댓글 기준: 좋아요 10개 이상 또는 상위 3개 (mock)
+ * BEST 댓글 기준: 추천수(좋아요) 내림차순 상위 5개
  * 실제로는 review.likeCount, review.dislikeCount 필드 필요
  */
 function splitBestAndNormal(reviews) {
-  // mock: likeCount 필드가 없으므로 랜덤/임의로 부여
+  // 실제 likeCount/dislikeCount만 사용, 없으면 0
   const withLike = reviews.map((r) => ({
     ...r,
-    likeCount: r.likeCount ?? Math.floor(Math.random() * 50),
-    dislikeCount: r.dislikeCount ?? Math.floor(Math.random() * 10),
+    likeCount: r.likeCount ?? 0,
+    dislikeCount: r.dislikeCount ?? 0,
   }))
+  // 추천수(좋아요) 내림차순 정렬
   const sorted = [...withLike].sort((a, b) => b.likeCount - a.likeCount)
-  const best = sorted.slice(0, 3)
+  // 상위 5개만 BEST로 선정
+  const best = sorted.slice(0, 5)
   // 전체 댓글(normal)은 best 포함(중복 허용)
   const normal = sorted
   return { best, normal }
@@ -274,23 +276,8 @@ const ReviewNode = memo(function ReviewNode({
             className="w-full dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
             rows={2}
           />
-          {/* 답글 폼에는 별점 UI를 렌더링하지 않음 (depth === 1) */}
+          {/* 답글 폼에는 별점 UI를 렌더링하지 않음 (별점 선택 삭제) */}
           <div className="flex items-center gap-2">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`h-5 w-5 cursor-pointer ${i < replyRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-zinc-500'}`}
-                onClick={() => setReplyRating(i + 1)}
-                aria-label={`${i + 1}점`}
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') setReplyRating(i + 1)
-                }}
-              />
-            ))}
-            <span className="ml-2 text-xs text-gray-600 dark:text-zinc-300">
-              {replyRating}점
-            </span>
             <Button
               type="submit"
               size="xs"
