@@ -674,12 +674,16 @@ export default function TravelCourseDetailPage() {
                     <span className="ml-2 text-sm text-gray-600">
                       {_rating}점
                     </span>
-                    <Button
-                      type="submit"
-                      disabled={isPosting || !comment.trim()}
-                    >
-                      {isPosting ? '등록 중...' : '댓글 등록'}
-                    </Button>
+                    <div className="flex flex-1 justify-end">
+                      <Button
+                        type="submit"
+                        variant="outline"
+                        className="hover:bg-gray-100 dark:hover:bg-zinc-700"
+                        disabled={isPosting || !comment.trim()}
+                      >
+                        {isPosting ? '등록 중...' : '댓글 등록'}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </form>
@@ -761,7 +765,7 @@ export default function TravelCourseDetailPage() {
           {course.highlights && course.highlights.length > 0 && (
             <Card className="dark:border-gray-700 dark:bg-gray-800">
               <CardHeader>
-                <CardTitle className="dark:text-white">🎯 주요 명소</CardTitle>
+                <CardTitle className="dark:text-white">�� 주요 명소</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">

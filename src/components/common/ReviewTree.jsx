@@ -42,13 +42,14 @@ function splitBestAndNormal(reviews) {
     likeCount: r.likeCount ?? 0,
     dislikeCount: r.dislikeCount ?? 0,
   }))
-  // 추천수(좋아요) 내림차순 정렬
-  const sorted = [...withLike].sort((a, b) => b.likeCount - a.likeCount)
-  // 상위 5개만 BEST로 선정
-  const best = sorted.slice(0, 5)
-  // 전체 댓글(normal)은 best 포함(중복 허용)
-  const normal = sorted
-  return { best, normal }
+  // 추천수(좋아요) 내림차순 정렬(BEST)
+  const sortedBest = [...withLike].sort((a, b) => b.likeCount - a.likeCount)
+  const best = sortedBest.slice(0, 5)
+  // 전체(normal)는 최신순(작성일 내림차순)
+  const sortedNormal = [...withLike].sort(
+    (a, b) => new Date(b.created_at) - new Date(a.created_at),
+  )
+  return { best, normal: sortedNormal }
 }
 
 const ReviewTree = memo(function ReviewTree({
@@ -278,15 +279,17 @@ const ReviewNode = memo(function ReviewNode({
               rows={2}
             />
             <div className="mt-2 flex items-center gap-2">
-              <Button
-                type="submit"
-                size="sm"
-                variant="outline"
-                className="border-2 border-gray-400 px-4 py-1 text-gray-900 dark:border-zinc-500 dark:text-zinc-100"
-                disabled={isSubmitting || !replyContent.trim()}
-              >
-                {isSubmitting ? '등록 중...' : '답글 등록'}
-              </Button>
+              <div className="flex flex-1 justify-end">
+                <Button
+                  type="submit"
+                  size="sm"
+                  variant="outline"
+                  className="px-4 py-1 text-gray-900 hover:bg-gray-100 dark:text-zinc-100 dark:hover:bg-zinc-700"
+                  disabled={isSubmitting || !replyContent.trim()}
+                >
+                  {isSubmitting ? '등록 중...' : '답글 등록'}
+                </Button>
+              </div>
             </div>
           </div>
         </form>
