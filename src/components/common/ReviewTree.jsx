@@ -82,22 +82,22 @@ const ReviewTree = memo(function ReviewTree({
     <div className="">
       {/* 상단: 좋아요 옆에 별점/인원 표시 삭제 */}
       {/* 탭 */}
-      <div className="mb-2 flex gap-6 border-b">
+      <div className="mb-2 flex gap-4">
         <button
-          className={`pb-2 font-bold ${tab === 'best' ? 'border-b-2 border-black' : 'text-gray-400'}`}
+          className={`pb-1 font-bold ${tab === 'best' ? 'border-b-2 border-black' : 'text-gray-400'}`}
           onClick={() => setTab('best')}
         >
           BEST 댓글
         </button>
         <button
-          className={`pb-2 font-bold ${tab === 'all' ? 'border-b-2 border-black' : 'text-gray-400'}`}
+          className={`pb-1 font-bold ${tab === 'all' ? 'border-b-2 border-black' : 'text-gray-400'}`}
           onClick={() => setTab('all')}
         >
           전체 댓글
         </button>
       </div>
       {tab === 'best' && (
-        <div className="space-y-6">
+        <div className="mt-4 space-y-6">
           {best.length === 0 && (
             <div className="text-gray-400">BEST 댓글이 없습니다.</div>
           )}
@@ -113,7 +113,7 @@ const ReviewTree = memo(function ReviewTree({
         </div>
       )}
       {tab === 'all' && (
-        <div className="space-y-6">
+        <div className="mt-4 space-y-6">
           {normal.length === 0 && (
             <div className="text-gray-400">아직 댓글이 없습니다.</div>
           )}

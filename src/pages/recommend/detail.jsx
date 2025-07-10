@@ -642,39 +642,45 @@ export default function TravelCourseDetailPage() {
                   setComment('')
                   setRating(0)
                 }}
-                className="mt-8 space-y-2"
+                className="mb-5"
               >
-                <Textarea
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  placeholder="댓글을 입력하세요"
-                  required
-                  className="w-full"
-                />
-                <div className="flex items-center gap-2">
-                  {/* 별점 선택 UI */}
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-6 w-6 cursor-pointer ${
-                        i < _rating
-                          ? 'fill-yellow-400 text-yellow-400'
-                          : 'text-gray-300'
-                      }`}
-                      onClick={() => setRating(i + 1)}
-                      aria-label={`${i + 1}점`}
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') setRating(i + 1)
-                      }}
-                    />
-                  ))}
-                  <span className="ml-2 text-sm text-gray-600">
-                    {_rating}점
-                  </span>
-                  <Button type="submit" disabled={isPosting || !comment.trim()}>
-                    {isPosting ? '등록 중...' : '댓글 등록'}
-                  </Button>
+                <div className="space-y-2 rounded-lg border border-gray-300 bg-white p-3 dark:border-zinc-600 dark:bg-zinc-800">
+                  <Textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="댓글을 입력하세요"
+                    required
+                    className="w-full border-none bg-transparent shadow-none focus:border-none focus:ring-0 dark:text-zinc-100"
+                  />
+                  <div className="flex items-center gap-2">
+                    {/* 별점 선택 UI */}
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-6 w-6 cursor-pointer ${
+                          i < _rating
+                            ? 'fill-yellow-400 text-yellow-400'
+                            : 'text-gray-300'
+                        }`}
+                        onClick={() => setRating(i + 1)}
+                        aria-label={`${i + 1}점`}
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ')
+                            setRating(i + 1)
+                        }}
+                      />
+                    ))}
+                    <span className="ml-2 text-sm text-gray-600">
+                      {_rating}점
+                    </span>
+                    <Button
+                      type="submit"
+                      disabled={isPosting || !comment.trim()}
+                    >
+                      {isPosting ? '등록 중...' : '댓글 등록'}
+                    </Button>
+                  </div>
                 </div>
               </form>
 
