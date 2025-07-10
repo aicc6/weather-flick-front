@@ -354,7 +354,7 @@ export default function TravelCoursePage() {
         key={course.id}
         className="weather-card group cursor-pointer overflow-hidden p-0"
       >
-        <Link to={`/destinations/detail/${course.id}`} className="block">
+        <Link to={`/recommend/detail/${course.id}`} className="block">
           {/* Image Section */}
           <div className="relative h-48 overflow-hidden">
             <img
