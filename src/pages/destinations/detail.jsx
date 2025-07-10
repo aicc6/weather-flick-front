@@ -132,13 +132,13 @@ export default function TravelCourseDetailPage() {
         user: '사용자',
         content: comment,
         date: new Date().toLocaleDateString(),
-        rating: 5,
+        rating: _rating, // 별점 상태 사용
         helpful: 0,
       }
       setComments((prev) => [newComment, ...prev])
       setComment('')
     }
-  }, [comment])
+  }, [comment, _rating])
 
   // 모든 useEffect들을 early return 이전으로 이동
   useEffect(() => {
@@ -601,7 +601,31 @@ export default function TravelCourseDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* 별점 + 댓글 입력란 + 버튼을 하나의 div로 감쌈 */}
               <div className="space-y-3">
+                {/* 별점 선택 UI */}
+                <div className="mb-2 flex items-center gap-2">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-6 w-6 cursor-pointer ${
+                        i < _rating
+                          ? 'fill-yellow-400 text-yellow-400'
+                          : 'text-gray-300'
+                      }`}
+                      onClick={() => setRating(i + 1)}
+                      aria-label={`${i + 1}점`}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') setRating(i + 1)
+                      }}
+                    />
+                  ))}
+                  <span className="ml-2 text-sm text-gray-600">
+                    {_rating}점
+                  </span>
+                </div>
+                {/* 댓글 입력란 */}
                 <Textarea
                   placeholder="이 여행 코스에 댓글을 남겨주세요..."
                   value={comment}
