@@ -14,6 +14,7 @@ import {
   Settings,
   Menu,
   X,
+  Calendar,
 } from '@/components/icons'
 import { navigationLinks } from '@/data'
 import { useEffect, useState } from 'react'
@@ -172,7 +173,17 @@ export function Header() {
               {loading ? (
                 <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700" />
               ) : user ? (
-                <DropdownMenu>
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate('/travel-plans')}
+                    className="hidden sm:flex items-center gap-2"
+                  >
+                    <Calendar className="h-4 w-4" />
+                    <span>나의 플랜</span>
+                  </Button>
+                  <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
@@ -212,6 +223,7 @@ export function Header() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+                </>
               ) : (
                 <>
                   <Button variant="outline" asChild>
@@ -356,6 +368,14 @@ export function Header() {
                   </div>
                 </div>
                 <div className="space-y-1">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => handleNavigation('/travel-plans')}
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    나의 플랜
+                  </Button>
                   <Button
                     variant="ghost"
                     className="w-full justify-start"
