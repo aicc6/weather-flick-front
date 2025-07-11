@@ -165,7 +165,7 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: 'Inter', 'Noto Sans KR', system-ui, sans-serif;
+    font-family: 'Monda', 'Noto Sans KR', system-ui, sans-serif;
     /* 새로운 그라데이션 배경 */
     background-image: linear-gradient(
       135deg,
@@ -183,7 +183,7 @@
   h4,
   h5,
   h6 {
-    font-family: 'Inter', 'Noto Sans KR', system-ui, sans-serif;
+    font-family: 'Monda', 'Noto Sans KR', system-ui, sans-serif;
     font-weight: 600;
     color: var(--foreground);
   }
@@ -594,5 +594,103 @@
     /* box-shadow: 0 0 20px
       color-mix(in srgb, var(--sunshine-yellow) 40%, transparent 60%);
     animation: sunshine-glow 2s ease-in-out infinite alternate; */
+  }
+}
+
+/* ===================== */
+/* 🎨 Noto Sans KR 폰트 유틸리티 클래스 */
+/* ===================== */
+@layer utilities {
+  /* Noto Sans KR 폰트 가중치 클래스들 */
+  .noto-sans-kr-thin {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 100;
+    font-style: normal;
+  }
+
+  .noto-sans-kr-extra-light {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 200;
+    font-style: normal;
+  }
+
+  .noto-sans-kr-light {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-style: normal;
+  }
+
+  .noto-sans-kr-regular {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  .noto-sans-kr-medium {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+  }
+
+  .noto-sans-kr-semi-bold {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+  }
+
+  .noto-sans-kr-bold {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal;
+  }
+
+  .noto-sans-kr-extra-bold {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 800;
+    font-style: normal;
+  }
+
+  .noto-sans-kr-black {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 900;
+    font-style: normal;
+  }
+
+  /* Monda 폰트 유틸리티 클래스들 */
+  .monda-regular {
+    font-family: 'Monda', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  .monda-medium {
+    font-family: 'Monda', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+  }
+
+  .monda-semi-bold {
+    font-family: 'Monda', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+  }
+
+  .monda-bold {
+    font-family: 'Monda', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal;
   }
 }
