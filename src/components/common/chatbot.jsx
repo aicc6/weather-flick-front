@@ -151,7 +151,7 @@ export function Chatbot() {
             : 'pointer-events-none scale-95 opacity-0',
         )}
       >
-        <header className="weather-button flex items-center space-x-3 rounded-t-2xl p-4 text-white shadow-lg">
+        <header className="weather-button flex items-center space-x-3 rounded-t-2xl p-4 shadow-lg dark:text-white">
           <Sparkles className="text-sunshine-yellow sunshine-glow h-6 w-6" />
           <h3 className="text-lg font-bold">Weather Flick AI 챗봇</h3>
         </header>
@@ -167,14 +167,14 @@ export function Chatbot() {
               >
                 {msg.sender === 'bot' && (
                   <div className="bg-sky-blue-dark flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
-                    <Bot className="h-5 w-5 text-white" />
+                    <Bot className="h-5 w-5 dark:text-white" />
                   </div>
                 )}
                 <div
                   className={cn(
                     'max-w-[80%] rounded-2xl px-4 py-2.5 shadow-md transition-all hover:shadow-lg',
                     msg.sender === 'user'
-                      ? 'weather-button rounded-br-none text-white'
+                      ? 'weather-button rounded-br-none dark:text-white'
                       : 'glass-effect text-storm-gray-dark dark:text-foreground rounded-bl-none',
                   )}
                 >
@@ -208,7 +208,7 @@ export function Chatbot() {
 
           {(isTyping || isSending) && (
             <div className="flex items-end gap-3">
-              <div className="bg-sky-blue-dark flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
+              <div className="bg-primary-blue-dark flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
                 <Bot className="h-5 w-5 text-white" />
               </div>
               <div className="glass-effect text-storm-gray-dark dark:text-foreground rounded-2xl rounded-bl-none px-4 py-2.5 shadow-md">
