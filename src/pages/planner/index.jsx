@@ -121,14 +121,14 @@ export default function PlannerPage() {
     <div className="mx-auto max-w-7xl p-4 sm:p-8">
       {/* 페이지 헤더 */}
       <div className="mb-8 text-center">
-        <h1 className="mb-2 text-4xl font-bold text-gray-900">
+        <h1 className="mb-2 text-4xl font-bold text-gray-900 dark:text-white">
           여행 플래너
           <Badge variant="secondary" className="ml-3">
             <Sparkles className="mr-1 h-3 w-3" />
             AI 고도화
           </Badge>
         </h1>
-        <p className="text-lg text-gray-600">
+        <p className="text-lg text-gray-600 dark:text-gray-300">
           AI와 함께하는 스마트한 여행 계획! 날씨, 협업, 개인화 추천까지
         </p>
       </div>
