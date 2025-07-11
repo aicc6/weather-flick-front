@@ -92,3 +92,5 @@ export {
   useLikeCourseMutation,
   useUnlikeCourseMutation,
 } from './recommendLikesApi'
+
+export * from './travelCourseLikesApi'

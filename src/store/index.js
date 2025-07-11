@@ -12,6 +12,7 @@ import { localInfoApi } from './api/localInfoApi'
 import { chatbotApi } from './api/chatbotApi'
 import { recommendLikesApi } from './api/recommendLikesApi'
 import { reviewLikesApi } from './api/reviewLikesApi'
+import { travelCourseLikesApi } from './api/travelCourseLikesApi'
 import customizedScheduleReducer from './slices/customizedScheduleSlice'
 
 // RTK Query 통합 스토어 설정
@@ -29,6 +30,7 @@ export const store = configureStore({
     [recommendReviewsApi.reducerPath]: recommendReviewsApi.reducer,
     [recommendLikesApi.reducerPath]: recommendLikesApi.reducer,
     [reviewLikesApi.reducerPath]: reviewLikesApi.reducer,
+    [travelCourseLikesApi.reducerPath]: travelCourseLikesApi.reducer,
     customizedSchedule: customizedScheduleReducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -48,6 +50,7 @@ export const store = configureStore({
       .concat(travelCoursesApi.middleware)
       .concat(recommendReviewsApi.middleware)
       .concat(recommendLikesApi.middleware)
-      .concat(reviewLikesApi.middleware),
+      .concat(reviewLikesApi.middleware)
+      .concat(travelCourseLikesApi.middleware),
   devTools: import.meta.env.MODE !== 'production',
 })

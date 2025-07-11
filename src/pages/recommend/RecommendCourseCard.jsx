@@ -13,6 +13,7 @@ import {
   useGetCourseLikeQuery,
   useLikeCourseMutation,
   useUnlikeCourseMutation,
+  useCreateTravelCourseLikeMutation,
 } from '@/store/api'
 import { useGetReviewsByCourseQuery } from '@/store/api/recommendReviewsApi'
 
@@ -79,6 +80,7 @@ const RecommendCourseCard = React.memo(function RecommendCourseCard({
   )
   const [likeCourse] = useLikeCourseMutation()
   const [unlikeCourse] = useUnlikeCourseMutation()
+  const [createTravelCourseLike] = useCreateTravelCourseLikeMutation()
   const {
     data: reviews = [],
     isLoading: reviewsLoading,
@@ -93,9 +95,62 @@ const RecommendCourseCard = React.memo(function RecommendCourseCard({
         await unlikeCourse(course.id)
       } else {
         await likeCourse(course.id)
+        // 제주도 코스라면 travel_course_likes 테이블에 코스 정보 저장
+        if (course.region === 'jeju') {
+          // activities가 문자열 배열이면 객체 배열로 변환
+          function normalizeItinerary(itinerary) {
+            return (itinerary || []).map((dayItem, dayIdx) => {
+              // activities가 문자열 배열이면 객체 배열로 변환
+              let activities = dayItem.activities
+              if (
+                Array.isArray(activities) &&
+                typeof activities[0] === 'string'
+              ) {
+                activities = activities.map((place, idx) => ({
+                  time: `${9 + idx}:00`,
+                  type:
+                    idx === 0
+                      ? 'transport'
+                      : idx === activities.length - 1
+                        ? 'cafe'
+                        : 'attraction',
+                  place,
+                  description: `${place} 방문`,
+                  address: '',
+                }))
+              }
+              return {
+                ...dayItem,
+                day:
+                  typeof dayItem.day === 'string'
+                    ? parseInt(dayItem.day, 10)
+                    : dayItem.day,
+                activities,
+              }
+            })
+          }
+          const rawItinerary = Array.isArray(course.itinerary)
+            ? course.itinerary
+            : JSON.parse(course.itinerary)
+          const normalizedItinerary = normalizeItinerary(rawItinerary)
+          const payload = {
+            title: course.title,
+            subtitle: course.subtitle,
+            summary: course.summary,
+            description: course.description ?? null,
+            region: course.region,
+            itinerary: normalizedItinerary,
+          }
+          console.log('travel_course_likes POST payload', payload)
+          try {
+            await createTravelCourseLike(payload).unwrap()
+          } catch (err) {
+            // 에러 무시(중복 저장 등)
+          }
+        }
       }
     },
-    [likeData, course.id, likeCourse, unlikeCourse],
+    [likeData, course, likeCourse, unlikeCourse, createTravelCourseLike],
   )
 
   // 리스트 모드인 경우 다른 레이아웃 적용
