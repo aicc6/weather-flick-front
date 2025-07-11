@@ -124,7 +124,7 @@ export function Footer() {
         <div className="mt-8 border-t border-gray-300 pt-8 dark:border-gray-800">
           <div className="flex flex-col items-center justify-between space-y-2 md:flex-row md:space-y-0">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              © 2024 Weather Flick. All rights reserved.
+              © 2025 Weather Flick. All rights reserved.
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-500">
               현재 개발 중인 서비스입니다. 피드백을 환영합니다!

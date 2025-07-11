@@ -14,8 +14,7 @@ import {
   Settings,
   Menu,
   X,
-  ChevronDown,
-  ChevronUp,
+  Calendar,
 } from '@/components/icons'
 import { navigationLinks } from '@/data'
 import { useEffect, useState } from 'react'
@@ -32,7 +31,6 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 export function Header() {
   const [isDark, setIsDark] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const [isMenuCollapsed, setIsMenuCollapsed] = useState(false)
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth > 950)
 
   const { user, logout, loading } = useAuth()
@@ -61,11 +59,6 @@ export function Header() {
       setIsDark(false)
     }
 
-    // 메뉴 접힘 상태 불러오기
-    const savedMenuState = localStorage.getItem('menuCollapsed')
-    if (savedMenuState) {
-      setIsMenuCollapsed(JSON.parse(savedMenuState))
-    }
   }, [])
 
   // 화면 크기 변화 감지
@@ -123,12 +116,6 @@ export function Header() {
     setIsSidebarOpen(!isSidebarOpen)
   }
 
-  const toggleMenuCollapse = () => {
-    const newState = !isMenuCollapsed
-    setIsMenuCollapsed(newState)
-    localStorage.setItem('menuCollapsed', JSON.stringify(newState))
-  }
-
   // 모바일 메뉴에서 안전한 네비게이션 처리
   const handleNavigation = (path) => {
     // 먼저 사이드바 닫기
@@ -154,13 +141,7 @@ export function Header() {
       {/* 메인 헤더 */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md dark:bg-gray-900/80">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div
-            className={`flex h-16 items-center justify-between ${
-              isLargeScreen && !isMenuCollapsed
-                ? ''
-                : 'border-b border-gray-200 dark:border-gray-800'
-            }`}
-          >
+          <div className="flex h-16 items-center justify-between border-b border-gray-200 dark:border-gray-800">
             <div className="flex items-center">
               {/* 햄버거 메뉴 버튼 (950px 이하) */}
               {!isLargeScreen && (
@@ -189,27 +170,20 @@ export function Header() {
 
             {/* 우측 영역 */}
             <div className="flex items-center space-x-4">
-              {/* 메뉴 접기/펼치기 버튼 (950px 이상에서만 표시) */}
-              {isLargeScreen && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleMenuCollapse}
-                  aria-label={isMenuCollapsed ? '메뉴 펼치기' : '메뉴 접기'}
-                  className="mr-2"
-                >
-                  {isMenuCollapsed ? (
-                    <ChevronDown className="h-5 w-5" />
-                  ) : (
-                    <ChevronUp className="h-5 w-5" />
-                  )}
-                </Button>
-              )}
-
               {loading ? (
                 <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700" />
               ) : user ? (
-                <DropdownMenu>
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate('/travel-plans')}
+                    className="hidden sm:flex items-center gap-2"
+                  >
+                    <Calendar className="h-4 w-4" />
+                    <span>나의 플랜</span>
+                  </Button>
+                  <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
@@ -249,6 +223,7 @@ export function Header() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+                </>
               ) : (
                 <>
                   <Button variant="outline" asChild>
@@ -277,11 +252,7 @@ export function Header() {
 
         {/* 네비게이션 메뉴 바 (950px 이상에서만 표시) */}
         {isLargeScreen && (
-          <div
-            className={`overflow-hidden bg-white/90 backdrop-blur-sm transition-all duration-300 ease-in-out dark:bg-gray-900/90 ${
-              isMenuCollapsed ? 'max-h-0' : 'max-h-16'
-            }`}
-          >
+          <div className="bg-white/90 backdrop-blur-sm dark:bg-gray-900/90">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
               <nav className="flex h-16 items-center">
                 <div className="flex w-full items-center justify-between">
@@ -397,6 +368,14 @@ export function Header() {
                   </div>
                 </div>
                 <div className="space-y-1">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => handleNavigation('/travel-plans')}
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    나의 플랜
+                  </Button>
                   <Button
                     variant="ghost"
                     className="w-full justify-start"

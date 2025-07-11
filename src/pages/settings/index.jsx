@@ -223,7 +223,7 @@ export function SettingsPage() {
             </div>
             <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <p>버전: 1.0.0</p>
-              <p>© 2024 Weather Flick. All rights reserved.</p>
+              <p>© 2025 Weather Flick. All rights reserved.</p>
             </div>
           </CardContent>
         </Card>
