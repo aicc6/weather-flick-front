@@ -43,6 +43,7 @@ export {
   AlertCircle,
   ThumbsUp,
   ThumbsDown,
+  Image,
 } from 'lucide-react'
 
 // Weather Icons
