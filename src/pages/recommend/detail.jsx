@@ -286,7 +286,179 @@ export default function TravelCourseDetailPage() {
   }
 
   // 안전한 배열 접근을 위한 헬퍼 함수
-  const safeItinerary = course.itinerary || []
+  let safeItinerary = course.itinerary || []
+
+  // [DEV ONLY] id=1(제주도)일 때 mock 일정 강제 세팅
+  if (id === '1') {
+    safeItinerary = [
+      {
+        day: 1,
+        title: '제주 입도 & 서부 탐방',
+        activities: [
+          {
+            time: '09:00',
+            type: 'transport',
+            place: '제주국제공항',
+            description: '제주 여행의 시작! 공항 도착 후 렌터카 픽업.',
+            address: '제주시 공항로 2',
+          },
+          {
+            time: '11:00',
+            type: 'restaurant',
+            place: '제주 흑돼지거리',
+            description: '제주 대표 흑돼지로 든든한 점심 식사.',
+            address: '제주시 일도일동',
+          },
+          {
+            time: '13:00',
+            type: 'attraction',
+            place: '협재해수욕장',
+            description: '에메랄드빛 바다와 하얀 모래가 아름다운 해변 산책.',
+            address: '제주시 한림읍 협재리',
+          },
+          {
+            time: '15:30',
+            type: 'attraction',
+            place: '한림공원',
+            description: '야자수와 다양한 식물, 동굴 체험이 가능한 테마파크.',
+            address: '제주시 한림읍 한림로 300',
+          },
+          {
+            time: '18:00',
+            type: 'restaurant',
+            place: '애월 해안도로 해산물 식당',
+            description: '바다 전망과 함께 신선한 해산물 저녁 식사.',
+            address: '제주시 애월읍',
+          },
+          {
+            time: '19:30',
+            type: 'cafe',
+            place: '애월 카페거리',
+            description: '감성 가득한 제주 바다뷰 카페에서 휴식.',
+            address: '제주시 애월읍',
+          },
+          {
+            time: '21:00',
+            type: 'accommodation',
+            place: '제주시/애월 숙소',
+            description: '숙소 체크인 및 휴식.',
+            address: '제주시 또는 애월읍',
+          },
+        ],
+      },
+      {
+        day: 2,
+        title: '동부/성산 & 우도 일주',
+        activities: [
+          {
+            time: '08:00',
+            type: 'restaurant',
+            place: '숙소 조식 또는 근처 식당',
+            description: '든든한 아침 식사로 하루 시작.',
+            address: '',
+          },
+          {
+            time: '09:30',
+            type: 'cafe',
+            place: '협재/한림 카페',
+            description: '제주 감성 카페에서 여유로운 커피 타임.',
+            address: '',
+          },
+          {
+            time: '10:30',
+            type: 'attraction',
+            place: '성산일출봉',
+            description: '제주 대표 명소, 분화구와 탁 트인 전망 감상.',
+            address: '서귀포시 성산읍',
+          },
+          {
+            time: '12:30',
+            type: 'restaurant',
+            place: '성산/우도 해산물 식당',
+            description: '싱싱한 해산물로 점심 식사.',
+            address: '서귀포시 성산읍 또는 우도',
+          },
+          {
+            time: '14:00',
+            type: 'attraction',
+            place: '우도',
+            description:
+              '자전거/스쿠터로 우도 한바퀴, 땅콩아이스크림 맛집 방문.',
+            address: '제주시 우도면',
+          },
+          {
+            time: '17:00',
+            type: 'attraction',
+            place: '섭지코지',
+            description: '드라마 촬영지로 유명한 해안 절경 산책.',
+            address: '서귀포시 성산읍',
+          },
+          {
+            time: '19:00',
+            type: 'restaurant',
+            place: '서귀포 맛집',
+            description: '현지인 추천 저녁 식사.',
+            address: '서귀포시',
+          },
+          {
+            time: '21:00',
+            type: 'accommodation',
+            place: '서귀포/성산 숙소',
+            description: '숙소 체크인 및 휴식.',
+            address: '서귀포시 또는 성산읍',
+          },
+        ],
+      },
+      {
+        day: 3,
+        title: '중문 & 출도',
+        activities: [
+          {
+            time: '08:00',
+            type: 'restaurant',
+            place: '숙소 조식 또는 근처 식당',
+            description: '여행 마지막 날 아침 식사.',
+            address: '',
+          },
+          {
+            time: '09:30',
+            type: 'cafe',
+            place: '중문 카페거리',
+            description: '바다 전망 카페에서 여유로운 시간.',
+            address: '서귀포시 중문동',
+          },
+          {
+            time: '10:30',
+            type: 'attraction',
+            place: '천지연폭포',
+            description: '웅장한 폭포와 산책로 감상.',
+            address: '서귀포시 천지동',
+          },
+          {
+            time: '12:00',
+            type: 'restaurant',
+            place: '서귀포 해물탕 식당',
+            description: '제주 해물탕으로 점심 식사.',
+            address: '서귀포시',
+          },
+          {
+            time: '13:30',
+            type: 'attraction',
+            place: '이중섭거리',
+            description: '예술가의 거리 산책 및 기념품 쇼핑.',
+            address: '서귀포시 이중섭로',
+          },
+          {
+            time: '15:00',
+            type: 'transport',
+            place: '제주국제공항',
+            description: '공항으로 이동, 제주 여행 마무리.',
+            address: '제주시 공항로 2',
+          },
+        ],
+      },
+    ]
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
