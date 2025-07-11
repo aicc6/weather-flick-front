@@ -157,7 +157,7 @@ export function TravelPlansPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button asChild className="weather-button font-semibold text-white">
+          <Button asChild className="weather-button font-semibold">
             <Link to="/planner">
               <PlusCircle className="mr-2 h-4 w-4" />새 플랜 만들기
             </Link>
