@@ -15,7 +15,6 @@ import {
   Edit,
   ArrowLeft,
   MapPin,
-  Tag,
   Navigation,
   Zap,
   Route,
@@ -30,6 +29,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import EnhancedTransportCard from '@/components/transport/EnhancedTransportCard'
+import { CompactDayItinerary } from '@/components/travel'
 
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
@@ -40,22 +40,6 @@ const formatDate = (dateString) => {
   })
 }
 
-// Google Place API 'types'를 한글 카테고리명으로 변환
-const formatPlaceCategory = (type) => {
-  const categoryMap = {
-    point_of_interest: '관심 장소',
-    establishment: '상업시설',
-    tourist_attraction: '관광명소',
-    park: '공원',
-    museum: '박물관',
-    restaurant: '음식점',
-    cafe: '카페',
-    lodging: '숙소',
-    store: '상점',
-    transit_station: '교통',
-  }
-  return categoryMap[type] || type
-}
 
 export function TravelPlanDetailPage() {
   const { planId } = useParams()
@@ -1390,154 +1374,89 @@ export function TravelPlanDetailPage() {
           </div>
         </div>
 
-        <Card className="rounded-2xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <CardHeader className="pb-4">
+        <Card className="rounded-xl border border-gray-200 bg-white shadow-sm">
+          <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
-              <div className="timeline-circle-green flex h-10 w-10 items-center justify-center rounded-full">
-                <span className="text-sm font-bold text-white">📋</span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
+                <span className="text-sm font-bold text-blue-600">📋</span>
               </div>
-              <CardTitle className="text-gray-800 dark:text-gray-100">
+              <CardTitle className="text-lg text-gray-800">
                 상세 일정
               </CardTitle>
             </div>
           </CardHeader>
           <CardContent>
             {itineraryDays.length > 0 ? (
-              <div className="space-y-6">
-                {itineraryDays.map((day) => (
-                  <div key={day} className="rounded-lg border p-4">
-                    <div className="mb-4 flex items-center justify-between">
-                      <h3 className="text-lg font-semibold text-blue-600">
-                        {day.replace('day', '') + '일차'}
-                      </h3>
-                    </div>
-                    <ul className="space-y-4">
-                      {plan.itinerary[day].map((item, index) => (
-                        <li key={index} className="flex items-start">
-                          <MapPin className="mt-1 mr-3 h-5 w-5 flex-shrink-0 text-blue-500" />
-                          <div className="flex-1">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <p className="font-medium">
-                                  {item.description}
-                                </p>
-                                {item.address && (
-                                  <p className="text-sm text-gray-600">
-                                    {item.address}
-                                  </p>
-                                )}
-                                {item.category && (
-                                  <div className="mt-1 flex items-center text-xs text-gray-500">
-                                    <Tag className="mr-1 h-3 w-3" />
-                                    {formatPlaceCategory(item.category)}
-                                  </div>
-                                )}
-                                {item.memo && (
-                                  <p className="mt-2 rounded-md bg-gray-100 p-2 text-sm text-gray-600">
-                                    {item.memo}
-                                  </p>
-                                )}
-                              </div>
-                              {/* 개별 장소의 날씨 정보 */}
-                              {(() => {
-                                const city = extractCityFromLocation(
-                                  item.description,
-                                )
-                                const getWeatherIcon = (condition) => {
-                                  const iconMap = {
-                                    맑음: '☀️',
-                                    구름조금: '🌤️',
-                                    구름많음: '☁️',
-                                    흐림: '☁️',
-                                    비: '🌧️',
-                                    눈: '🌨️',
-                                    바람: '💨',
-                                  }
-                                  return iconMap[condition] || '☀️'
-                                }
-
-                                // 해당 일차의 날씨 정보 가져오기
-                                const dayIndex =
-                                  parseInt(day.replace('Day ', '')) - 1
-                                const dayWeather =
-                                  weatherData?.forecast?.[dayIndex]
-
-                                if (dayWeather) {
-                                  // 도시별 날씨 변화 적용
-                                  const cityWeatherVariation = {
-                                    서울: { tempOffset: 0, conditionOffset: 0 },
-                                    부산: { tempOffset: 3, conditionOffset: 1 },
-                                    제주: { tempOffset: 5, conditionOffset: 2 },
-                                    대구: { tempOffset: 1, conditionOffset: 0 },
-                                    광주: { tempOffset: 2, conditionOffset: 1 },
-                                    강원: {
-                                      tempOffset: -3,
-                                      conditionOffset: 0,
-                                    },
-                                  }
-
-                                  const variation =
-                                    cityWeatherVariation[city] ||
-                                    cityWeatherVariation['서울']
-                                  const conditions = [
-                                    '맑음',
-                                    '구름조금',
-                                    '구름많음',
-                                    '흐림',
-                                    '비',
-                                  ]
-                                  const adjustedConditionIndex =
-                                    (conditions.indexOf(dayWeather.condition) +
-                                      variation.conditionOffset) %
-                                    conditions.length
-                                  const adjustedCondition =
-                                    conditions[adjustedConditionIndex]
-
-                                  const adjustedTemp = {
-                                    min: Math.max(
-                                      5,
-                                      dayWeather.temperature.min +
-                                        variation.tempOffset,
-                                    ),
-                                    max: Math.min(
-                                      35,
-                                      dayWeather.temperature.max +
-                                        variation.tempOffset,
-                                    ),
-                                  }
-
-                                  return (
-                                    <div className="ml-4 text-right">
-                                      <div className="flex items-center text-xs text-gray-500">
-                                        <span className="mr-1">
-                                          {getWeatherIcon(adjustedCondition)}
-                                        </span>
-                                        <span className="mr-1 text-blue-600">
-                                          📍{city}
-                                        </span>
-                                      </div>
-                                      <div className="mt-1 text-xs text-gray-600">
-                                        {adjustedCondition} {adjustedTemp.min}°~
-                                        {adjustedTemp.max}°
-                                      </div>
-                                    </div>
-                                  )
-                                }
-                                return null
-                              })()}
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
+              <div className="space-y-3">
+                {itineraryDays.map((day) => {
+                  const dayNumber = parseInt(day.replace(/\D/g, ''))
+                  const places = plan.itinerary[day] || []
+                  
+                  // 날씨 데이터 처리
+                  const dayIndex = dayNumber - 1
+                  const dayWeather = weatherData?.forecast?.[dayIndex]
+                  const weatherForPlaces = {}
+                  
+                  if (dayWeather) {
+                    places.forEach(place => {
+                      const city = extractCityFromLocation(place.description)
+                      const cityWeatherVariation = {
+                        서울: { tempOffset: 0, conditionOffset: 0 },
+                        부산: { tempOffset: 3, conditionOffset: 1 },
+                        제주: { tempOffset: 5, conditionOffset: 2 },
+                        대구: { tempOffset: 1, conditionOffset: 0 },
+                        광주: { tempOffset: 2, conditionOffset: 1 },
+                        강원: { tempOffset: -3, conditionOffset: 0 },
+                      }
+                      
+                      const variation = cityWeatherVariation[city] || cityWeatherVariation['서울']
+                      const conditions = ['맑음', '구름조금', '구름많음', '흐림', '비']
+                      const adjustedConditionIndex = Math.max(0, (conditions.indexOf(dayWeather.condition) + variation.conditionOffset) % conditions.length)
+                      const adjustedCondition = conditions[adjustedConditionIndex]
+                      
+                      weatherForPlaces[place.description] = {
+                        condition: adjustedCondition,
+                        temperature: Math.round((dayWeather.temperature.min + dayWeather.temperature.max) / 2 + variation.tempOffset),
+                        humidity: dayWeather.humidity,
+                        precipitation: dayWeather.precipitation
+                      }
+                    })
+                  } else {
+                    // 날씨 데이터가 없을 때 기본값 제공
+                    places.forEach(place => {
+                      weatherForPlaces[place.description] = {
+                        condition: '맑음',
+                        temperature: 20,
+                        humidity: 60,
+                        precipitation: 0
+                      }
+                    })
+                  }
+                  
+                  return (
+                    <CompactDayItinerary
+                      key={day}
+                      day={day}
+                      places={places}
+                      dayNumber={dayNumber}
+                      weatherData={weatherForPlaces}
+                      showWeather={true}
+                    />
+                  )
+                })}
               </div>
             ) : (
-              <p className="text-center text-gray-500">상세 일정이 없습니다.</p>
+              <div className="text-center py-8">
+                <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-gray-100 p-3">
+                  <MapPin className="h-6 w-6 text-gray-400" />
+                </div>
+                <p className="text-gray-500">상세 일정이 없습니다.</p>
+                <p className="text-sm text-gray-400 mt-1">여행 계획을 추가해보세요!</p>
+              </div>
             )}
           </CardContent>
         </Card>
+
 
         {/* 상세 경로 정보 모달 */}
         <Dialog open={isRouteDetailOpen} onOpenChange={setIsRouteDetailOpen}>
