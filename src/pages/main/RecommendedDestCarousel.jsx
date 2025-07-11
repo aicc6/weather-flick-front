@@ -83,7 +83,7 @@ export function RecommendedDestCarousel({ destinations = [] }) {
               className="dark:bg-card/90 dark:hover:bg-card weather-button absolute top-1/2 left-2 z-10 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-lg transition-all duration-300 hover:bg-white hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="이전 여행지"
             >
-              <ChevronLeft className="h-6 w-6 text-black" />
+              <ChevronLeft className="h-6 w-6 text-gray-700 dark:text-gray-200" />
             </button>
 
             <button
@@ -92,7 +92,7 @@ export function RecommendedDestCarousel({ destinations = [] }) {
               className="dark:bg-card/90 dark:hover:bg-card weather-button absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-lg transition-all duration-300 hover:bg-white hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="다음 여행지"
             >
-              <ChevronRight className="h-6 w-6 text-black" />
+              <ChevronRight className="h-6 w-6 text-gray-700 dark:text-gray-200" />
             </button>
           </>
         )}
