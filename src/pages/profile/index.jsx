@@ -14,7 +14,6 @@ import {
   MapPin,
   Settings,
   ChevronRight,
-  Star,
 } from '@/components/icons'
 
 export default function ProfilePage() {
@@ -162,9 +161,6 @@ export default function ProfilePage() {
                         'U'}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="bg-sunshine-yellow absolute -right-1 -bottom-1 flex h-8 w-8 items-center justify-center rounded-full">
-                    <Star className="text-storm-gray-dark h-4 w-4" />
-                  </div>
                 </div>
 
                 <div className="flex-1">
