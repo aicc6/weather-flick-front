@@ -15,7 +15,7 @@ export {
 } from 'lucide-react'
 
 // Transportation Icons
-export { Car, Bus, Train, Bike } from 'lucide-react'
+export { Car, Bus, Train, Bike, Footprints } from 'lucide-react'
 
 // UI Action Icons
 export {
