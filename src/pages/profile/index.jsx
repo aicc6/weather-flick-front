@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContextRTK'
 import { useGetUserPlansQuery } from '@/store/api/travelPlansApi'
+import { useGetTravelCourseLikesQuery } from '@/store/api/travelCourseLikesApi'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -20,7 +21,6 @@ import {
 export default function ProfilePage() {
   const navigate = useNavigate()
   const { user: authUser, loading: authLoading, isAuthenticated } = useAuth()
-  const [favoritePlaces, setFavoritePlaces] = useState([])
   const [loading, setLoading] = useState(true)
 
   // 사용자 여행 플랜 데이터 가져오기
@@ -30,6 +30,15 @@ export default function ProfilePage() {
     error: plansError,
   } = useGetUserPlansQuery(undefined, {
     skip: !isAuthenticated, // 인증된 사용자만 요청
+  })
+
+  // travel_course_likes 테이블에서 사용자별 저장 코스 불러오기
+  const {
+    data: likedCourses = [],
+    isLoading: likesLoading,
+    error: likesError,
+  } = useGetTravelCourseLikesQuery(authUser?.id, {
+    skip: !authUser?.id,
   })
 
   // 최근 여행 플랜 데이터 가공 (최신순으로 정렬하고 최대 5개만)
@@ -45,11 +54,11 @@ export default function ProfilePage() {
       try {
         // TODO: Replace with actual API calls for favorites
         // Mock favorite places
-        setFavoritePlaces([
-          { id: 1, name: '한라산' },
-          { id: 2, name: '성산일출봉' },
-          { id: 3, name: '해운대해수욕장' },
-        ])
+        // setFavoritePlaces([
+        //   { id: 1, name: '한라산' },
+        //   { id: 2, name: '성산일출봉' },
+        //   { id: 3, name: '해운대해수욕장' },
+        // ])
       } catch (error) {
         console.error('사용자 데이터 로드 실패:', error)
       } finally {
@@ -78,7 +87,13 @@ export default function ProfilePage() {
     }
   }
 
-  if (loading || authLoading || plansLoading) {
+  const favoritePlaces = likedCourses.map((course) => ({
+    id: course.id,
+    name: course.title,
+    // 필요시 추가 필드
+  }))
+
+  if (loading || authLoading || plansLoading || likesLoading) {
     return (
       <div className="bg-background min-h-screen">
         <div className="container mx-auto px-4 py-8">

@@ -12,7 +12,16 @@ export const travelCourseLikesApi = createApi({
         body: courseData,
       }),
     }),
+    getTravelCourseLikes: builder.query({
+      query: (userId) => ({
+        url: '/travel-course-likes/',
+        params: { user_id: userId },
+      }),
+    }),
   }),
 })
 
-export const { useCreateTravelCourseLikeMutation } = travelCourseLikesApi
+export const {
+  useCreateTravelCourseLikeMutation,
+  useGetTravelCourseLikesQuery,
+} = travelCourseLikesApi
