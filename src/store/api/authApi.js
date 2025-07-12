@@ -110,6 +110,15 @@ export const authApi = createApi({
       }),
       invalidatesTags: ['User'],
     }),
+
+    // 토큰 갱신
+    refreshToken: builder.mutation({
+      query: (refreshToken) => ({
+        url: 'auth/refresh',
+        method: 'POST',
+        body: { refresh_token: refreshToken },
+      }),
+    }),
   }),
 })
 
@@ -126,4 +135,5 @@ export const {
   useExchangeGoogleAuthCodeMutation,
   useForgotPasswordMutation,
   useWithdrawMutation,
+  useRefreshTokenMutation,
 } = authApi

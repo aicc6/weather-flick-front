@@ -15,6 +15,7 @@ const getBaseUrl = () => {
 // 401 에러 처리 함수 (기존 로직 재사용)
 const handle401Error = () => {
   localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
+  localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
   localStorage.removeItem(STORAGE_KEYS.USER_INFO)
 
   // 현재 페이지가 로그인 페이지가 아닌 경우에만 리다이렉트
@@ -41,13 +42,80 @@ export const baseQuery = fetchBaseQuery({
   },
 })
 
+// 토큰 갱신을 위한 mutex (동시에 여러 갱신 요청 방지)
+let isRefreshing = false
+let refreshPromise = null
+
+// refresh token으로 access token 갱신
+const refreshAccessToken = async () => {
+  const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
+  
+  if (!refreshToken) {
+    return null
+  }
+
+  try {
+    const response = await fetch(`${getBaseUrl()}auth/refresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    })
+
+    if (response.ok) {
+      const data = await response.json()
+      localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, data.access_token)
+      return data.access_token
+    }
+  } catch (error) {
+    console.error('Failed to refresh token:', error)
+  }
+
+  return null
+}
+
 // 에러 처리 및 재인증을 포함한 Base Query
 export const baseQueryWithReauth = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions)
 
   // 401 에러 처리
   if (result.error && result.error.status === 401) {
-    handle401Error()
+    // refresh 엔드포인트 자체에 대한 요청이면 바로 로그아웃
+    if (args.url === 'auth/refresh') {
+      handle401Error()
+      return result
+    }
+
+    // 이미 갱신 중이면 기다림
+    if (isRefreshing) {
+      try {
+        await refreshPromise
+        // 토큰 갱신 후 원래 요청 재시도
+        result = await baseQuery(args, api, extraOptions)
+      } catch {
+        handle401Error()
+      }
+      return result
+    }
+
+    // 토큰 갱신 시작
+    isRefreshing = true
+    refreshPromise = refreshAccessToken()
+
+    try {
+      const newToken = await refreshPromise
+      if (newToken) {
+        // 토큰 갱신 성공 - 원래 요청 재시도
+        result = await baseQuery(args, api, extraOptions)
+      } else {
+        // 토큰 갱신 실패 - 로그아웃
+        handle401Error()
+      }
+    } finally {
+      isRefreshing = false
+      refreshPromise = null
+    }
   }
 
   // 응답 데이터 변환 (기존 handleResponse 로직 적용)
