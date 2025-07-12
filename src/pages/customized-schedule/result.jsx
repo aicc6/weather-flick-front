@@ -15,6 +15,8 @@ import {
   RefreshCw,
 } from '@/components/icons'
 import { http } from '@/lib/http'
+import { useGetCustomTravelRecommendationsMutation } from '@/store/api/customTravelApi'
+import { toast } from 'sonner'
 
 // 여행 스타일 정의
 const travelStyles = [
@@ -110,6 +112,7 @@ export default function CustomizedScheduleResultPage() {
   const [recommendations, setRecommendations] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [attractionNames, setAttractionNames] = useState([])
+  const [getCustomRecommendations] = useGetCustomTravelRecommendationsMutation()
 
   const region = searchParams.get('region')
   const period = searchParams.get('period')
@@ -118,9 +121,13 @@ export default function CustomizedScheduleResultPage() {
   const styles = searchParams.get('styles')
   const schedule = searchParams.get('schedule')
 
-  const { regionName: displayedRegionName } = useSelector(
+  const { regionName: displayedRegionName, regionCode } = useSelector(
     (state) => state.customizedSchedule,
   )
+  
+  // URL에서 region 정보를 사용하여 임시로 설정
+  const finalRegionCode = regionCode || region
+  const finalRegionName = displayedRegionName || '서울'
 
   useEffect(() => {
     if (!region) return
@@ -181,42 +188,62 @@ export default function CustomizedScheduleResultPage() {
     return itinerary
   }, [days, region, attractionNames])
 
-  // 모의 추천 데이터 생성
+  // 추천 데이터 생성
   useEffect(() => {
     const generateRecommendations = async () => {
+      if (!finalRegionCode) return
+      
       setIsLoading(true)
 
       try {
-        // 백엔드 API 호출
-        const response = await http.POST('/travel-recommendations', {
-          body: JSON.stringify({
-            region: region,
+        // RTK Query API 호출
+        const result = await getCustomRecommendations({
+          region_code: finalRegionCode,
+          region_name: finalRegionName,
+          period: period,
+          days: parseInt(days),
+          who: who,
+          styles: styles?.split(',') || [],
+          schedule: schedule,
+        }).unwrap()
+
+        // API 응답 데이터 형식 변환
+        const formattedData = {
+          summary: {
+            region: finalRegionCode,
+            regionName: finalRegionName,
             period: period,
-            days: days,
+            days: parseInt(days),
             who: who,
-            styles: styles,
+            styles: styles?.split(','),
             schedule: schedule,
-          }),
-        })
-
-        if (!response.ok) {
-          throw new Error('추천 생성 실패')
+          },
+          itinerary: result.days,
+          weather_info: result.weather_summary || {
+            forecast: '맑음, 평균 기온 20°C',
+            recommendation: '야외 활동하기 좋은 날씨입니다!',
+          },
+          tips: [
+            '선택하신 스타일에 맞는 포토존이 많이 포함되어 있어요',
+            '맛집 위주로 구성된 일정으로 미식 여행을 즐기실 수 있어요',
+            schedule === 'relaxed' 
+              ? '널널한 일정으로 여유롭게 즐기실 수 있도록 구성했어요'
+              : '알찬 일정으로 다양한 경험을 하실 수 있도록 구성했어요',
+          ],
         }
-
-        const result = await response.json()
-
-        if (result.success) {
-          setRecommendations(result.data)
-        } else {
-          throw new Error(result.message || '추천 생성 실패')
-        }
+        
+        setRecommendations(formattedData)
+        toast.success('맞춤 여행 일정이 생성되었습니다!')
+        
       } catch (error) {
         console.error('API 호출 실패:', error)
+        toast.error('추천 생성에 실패했습니다. 모의 데이터를 표시합니다.')
 
         // API 실패 시 모의 데이터 사용
         const mockData = {
           summary: {
-            region: region,
+            region: finalRegionCode,
+            regionName: finalRegionName,
             period: period,
             days: parseInt(days),
             who: who,
@@ -241,7 +268,7 @@ export default function CustomizedScheduleResultPage() {
     }
 
     generateRecommendations()
-  }, [region, period, days, who, styles, schedule, generateMockItinerary])
+  }, [finalRegionCode, finalRegionName, period, days, who, styles, schedule, generateMockItinerary, getCustomRecommendations])
 
   const handleBack = () => {
     navigate(

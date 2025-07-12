@@ -10,6 +10,7 @@ export { regionsApi } from './regionsApi'
 export { localInfoApi } from './localInfoApi'
 export { travelCoursesApi } from './travelCoursesApi'
 export { recommendLikesApi } from './recommendLikesApi'
+export { customTravelApi } from './customTravelApi'
 
 // Export all hooks for convenience
 export {
@@ -94,3 +95,8 @@ export {
 } from './recommendLikesApi'
 
 export * from './travelCourseLikesApi'
+
+export {
+  // Custom Travel API hooks
+  useGetCustomTravelRecommendationsMutation,
+} from './customTravelApi'
