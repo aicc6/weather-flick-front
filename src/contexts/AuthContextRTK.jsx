@@ -59,14 +59,18 @@ export const AuthProvider = ({ children }) => {
   // 토큰 관리 헬퍼 함수들 (useMemo로 최적화)
   const tokenManager = useMemo(
     () => ({
-      setToken: (token, userInfo) => {
+      setToken: (token, userInfo, refreshToken) => {
         localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token)
         setHasToken(true) // React state 업데이트
+        if (refreshToken) {
+          localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken)
+        }
         if (userInfo) {
           localStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify(userInfo))
         }
       },
       getToken: () => localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN),
+      getRefreshToken: () => localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN),
       getUserInfo: () => {
         const userInfo = localStorage.getItem(STORAGE_KEYS.USER_INFO)
         return userInfo ? JSON.parse(userInfo) : null
@@ -80,6 +84,7 @@ export const AuthProvider = ({ children }) => {
       },
       clearTokens: () => {
         localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
+        localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
         localStorage.removeItem(STORAGE_KEYS.USER_INFO)
         setHasToken(false) // React state 업데이트
       },
@@ -92,10 +97,10 @@ export const AuthProvider = ({ children }) => {
   const login = useCallback(
     async (credentials) => {
       const response = await loginMutation(credentials).unwrap()
-      const { user_info, access_token } = response
+      const { user_info, access_token, refresh_token } = response
 
       // 토큰과 사용자 정보 저장
-      tokenManager.setToken(access_token, user_info)
+      tokenManager.setToken(access_token, user_info, refresh_token)
 
       return response
     },
@@ -146,9 +151,9 @@ export const AuthProvider = ({ children }) => {
 
   // Google OAuth 로그인 성공 후 처리 함수
   const handleGoogleAuthSuccess = useCallback(
-    (userInfo, accessToken) => {
+    (userInfo, accessToken, refreshToken) => {
       // 토큰과 사용자 정보 저장
-      tokenManager.setToken(accessToken, userInfo)
+      tokenManager.setToken(accessToken, userInfo, refreshToken)
     },
     [tokenManager],
   )
