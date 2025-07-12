@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -13,7 +12,6 @@ import {
 import {
   Search,
   Filter,
-  Sparkles,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -1114,38 +1112,6 @@ export default function TravelCoursePage() {
             )}
           </>
         )}
-      </section>
-
-      {/* Bottom CTA Section */}
-      <section className="page-destinations py-16">
-        <div className="container mx-auto px-4 text-center">
-          <div className="weather-card glass-effect mx-auto max-w-2xl p-8">
-            <Sparkles
-              className="mx-auto mb-4 h-16 w-16"
-              style={{ color: 'var(--accent-cyan-bright)' }}
-            />
-            <h2 className="text-foreground mb-4 text-3xl font-bold">
-              맞춤 여행 계획 워보세요
-            </h2>
-            <p className="text-muted-foreground mb-8 text-lg">
-              AI가 주는 맞춤 여행 정보로 여행 준비하세요
-            </p>
-            <div className="flex flex-col justify-center gap-4 sm:flex-row">
-              <Link
-                to="/customized-schedule"
-                className="primary-button rounded-full px-8 py-3 font-semibold"
-              >
-                맞춤 여행 정보 만들기
-              </Link>
-              <Link
-                to="/planner"
-                className="accent-button rounded-full px-8 py-3 font-semibold"
-              >
-                직접 계획하기
-              </Link>
-            </div>
-          </div>
-        </div>
       </section>
     </div>
   )
