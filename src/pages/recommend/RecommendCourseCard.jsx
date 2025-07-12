@@ -69,6 +69,21 @@ function useCourseImage(courseId) {
   return imageUrl
 }
 
+// 안전한 key 생성 함수 추가
+const generateSafeKey = (courseId, type, index, tag) => {
+  // 모든 값을 안전하게 문자열로 변환
+  const safeId = courseId || 'unknown'
+  const safeType = type || 'default'
+  const safeIndex = index ?? 0
+  const safeTag =
+    tag
+      ?.toString()
+      ?.replace(/\s+/g, '-')
+      ?.replace(/[^a-zA-Z0-9-_]/g, '') || 'empty'
+
+  return `${safeId}-${safeType}-${safeIndex}-${safeTag}`
+}
+
 const RecommendCourseCard = React.memo(function RecommendCourseCard({
   course,
   rating,
@@ -212,8 +227,11 @@ const RecommendCourseCard = React.memo(function RecommendCourseCard({
 
               {/* Tags */}
               <div className="mt-2 flex flex-wrap gap-1">
-                {course.theme.slice(0, 3).map((tag, index) => (
-                  <Badge key={index} className="status-soft text-xs">
+                {(course.theme || []).slice(0, 3).map((tag, index) => (
+                  <Badge
+                    key={generateSafeKey(course.id, 'list-tag', index, tag)}
+                    className="status-soft text-xs"
+                  >
                     {tag}
                   </Badge>
                 ))}
@@ -311,8 +329,11 @@ const RecommendCourseCard = React.memo(function RecommendCourseCard({
           </div>
           {/* Tags */}
           <div className="mt-3 flex flex-wrap gap-2">
-            {course.theme.slice(0, 3).map((tag, index) => (
-              <Badge key={index} className="status-soft text-xs">
+            {(course.theme || []).slice(0, 3).map((tag, index) => (
+              <Badge
+                key={generateSafeKey(course.id, 'grid-tag', index, tag)}
+                className="status-soft text-xs"
+              >
                 {tag}
               </Badge>
             ))}

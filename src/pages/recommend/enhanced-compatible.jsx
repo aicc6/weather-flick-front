@@ -20,6 +20,7 @@ import {
 } from '@/components/icons'
 import { getMultipleRegionImages } from '@/services/imageService'
 import { useGetReviewsByCourseQuery } from '@/store/api/recommendReviewsApi'
+import { useGetTravelCoursesQuery } from '@/store/api/travelCoursesApi'
 
 // 새로운 고도화 컴포넌트들 (선택적 사용)
 import QuickFilters from '@/components/recommend/QuickFilters'
@@ -65,78 +66,83 @@ const EnhancedCompatibleRecommendPage = () => {
   const [sortBy, setSortBy] = useState('recommended')
 
   // ===============================
-  // 🔵 기존 데이터 - 모두 보존
+  // 🚀 RTK Query로 데이터 가져오기
   // ===============================
-  const travelCourses = [
-    {
-      id: 1,
-      title: '제주도 자연 힐링 여행 코스',
-      subtitle: '한라산부터 바다까지, 제주의 아름다운 자연을 만나보세요',
-      region: 'jeju',
-      regionName: '제주도',
-      duration: '2박 3일',
-      theme: ['자연', '힐링', '관광'],
-      rating: 4.5,
-      reviewCount: 100,
-      likeCount: 200,
-      price: '250,000원',
-      bestMonths: [3, 4, 5, 9, 10, 11],
-      summary:
-        '제주도의 대표적인 자연 명소들을 둘러보며 힐링할 수 있는 여행 코스입니다.',
-      highlights: [
-        '한라산 국립공원',
-        '성산일출봉',
-        '우도',
-        '애월 카페거리',
-        '협재해수욕장',
-      ],
-      itinerary: [
-        {
-          day: 1,
-          title: '제주 도착 및 서부 지역 탐방',
-          activities: ['제주국제공항', '협재해수욕장', '애월 카페거리'],
-        },
-      ],
-      tags: ['자연', '힐링', '제주도', '추천코스'],
-      // 새로운 고도화 속성들 (호환성을 위해 추가)
-      priceValue: 250000,
-      popularityScore: 85,
-      weatherScore: 8.5,
-      isNew: false,
-      amenities: ['parking', 'restaurant', 'wifi'],
-    },
-    {
-      id: 2,
-      title: '서울 전통과 현대의 만남',
-      subtitle: '경복궁부터 강남까지, 서울의 과거와 현재를 체험하세요',
-      region: 'seoul',
-      regionName: '서울',
-      duration: '2박 3일',
-      theme: ['문화', '역사', '도시탐방'],
-      rating: 4.6,
-      reviewCount: 120,
-      likeCount: 250,
-      price: '300,000원',
-      bestMonths: [3, 4, 5, 9, 10, 11],
-      summary:
-        '전통 궁궐부터 현대적인 쇼핑가까지, 서울의 다양한 매력을 만끽하는 코스입니다.',
-      highlights: ['경복궁', '북촌한옥마을', '명동', '홍대', '동대문'],
-      itinerary: [
-        {
-          day: 1,
-          title: '전통 문화 체험',
-          activities: ['경복궁', '북촌한옥마을', '인사동'],
-        },
-      ],
-      tags: ['문화', '역사', '서울', '추천코스'],
-      priceValue: 300000,
-      popularityScore: 90,
-      weatherScore: 7.5,
-      isNew: false,
-      amenities: ['wifi', 'restaurant', 'accessible'],
-    },
-    // ... 더 많은 코스들
-  ]
+  const [currentPage, setCurrentPage] = useState(1)
+  const PAGE_SIZE = 20
+
+  // RTK Query 훅 사용
+  const {
+    data: travelCoursesResponse,
+    error: apiError,
+    isLoading: isApiLoading,
+    isError,
+    refetch,
+  } = useGetTravelCoursesQuery({
+    page: currentPage,
+    page_size: PAGE_SIZE,
+    region_code: selectedRegion !== 'all' ? selectedRegion : undefined,
+    course_theme: selectedTheme !== 'all' ? selectedTheme : undefined,
+  })
+
+  // API 응답에서 여행 코스 데이터 추출
+  const travelCourses = useMemo(() => {
+    if (!travelCoursesResponse) return []
+
+    // API 응답 구조에 따라 조정
+    if (Array.isArray(travelCoursesResponse)) {
+      return travelCoursesResponse
+    }
+
+    if (travelCoursesResponse.courses) {
+      return travelCoursesResponse.courses
+    }
+
+    return []
+  }, [travelCoursesResponse])
+
+  // 에러 처리
+  const error = useMemo(() => {
+    if (isError && apiError) {
+      return apiError.message || '여행 코스 데이터를 불러오는데 실패했습니다.'
+    }
+    return null
+  }, [isError, apiError])
+
+  // 로딩 상태
+  const isLoading = isApiLoading
+
+  // ===============================
+  // 🔵 하드 코딩 데이터 삭제 - API로 대체될 예정
+  // ===============================
+  // const [travelCourses, setTravelCourses] = useState([])
+  // const [isLoading, setIsLoading] = useState(true)
+  // const [error, setError] = useState(null)
+
+  // TODO: API 연결 - 여행 코스 데이터를 백엔드에서 가져오기
+  // useEffect(() => {
+  //   const fetchTravelCourses = async () => {
+  //     try {
+  //       setIsLoading(true)
+  //       setError(null)
+
+  //       // TODO: 실제 API 호출로 대체
+  //       // const response = await fetch('/api/travel-courses')
+  //       // const data = await response.json()
+  //       // setTravelCourses(data)
+
+  //       // 임시로 빈 배열 설정
+  //       setTravelCourses([])
+  //     } catch (err) {
+  //       console.error('여행 코스 데이터 로드 실패:', err)
+  //       setError('여행 코스 데이터를 불러오는데 실패했습니다.')
+  //     } finally {
+  //       setIsLoading(false)
+  //     }
+  //   }
+
+  //   fetchTravelCourses()
+  // }, [])
 
   // ===============================
   // 🔵 기존 데이터 정의 - 모두 보존
@@ -200,14 +206,26 @@ const EnhancedCompatibleRecommendPage = () => {
     const loadImages = async () => {
       try {
         setImagesLoading(true)
-        const regionNames = travelCourses.map((course) => course.regionName)
-        const images = await getMultipleRegionImages(regionNames)
+
+        // region 필드 사용 (regionName 대신)
+        const regionCodes = travelCourses
+          .map((course) => course.region)
+          .filter(Boolean)
+        const uniqueRegionCodes = [...new Set(regionCodes)]
+
+        // 지역 코드를 지역명으로 변환
+        const regionNamesForImages = uniqueRegionCodes.map(
+          (code) => regionNames[code] || code,
+        )
+
+        const images = await getMultipleRegionImages(regionNamesForImages)
         setImages(images)
       } catch (error) {
         console.error('❌ 이미지 로드 실패:', error)
         const fallbackImages = {}
         travelCourses.forEach((course) => {
-          fallbackImages[course.regionName] =
+          const regionDisplayName = regionNames[course.region] || course.region
+          fallbackImages[regionDisplayName] =
             `https://picsum.photos/800/600?random=${course.id}`
         })
         setImages(fallbackImages)
@@ -216,7 +234,7 @@ const EnhancedCompatibleRecommendPage = () => {
       }
     }
     loadImages()
-  }, [])
+  }, [travelCourses]) // travelCourses가 변경될 때마다 다시 실행
 
   // ===============================
   // 🔵 기존 필터링 로직 - 보존 및 확장
@@ -325,7 +343,7 @@ const EnhancedCompatibleRecommendPage = () => {
         key={course.id}
         course={course}
         imageUrl={
-          images[course.regionName] ||
+          images[regionNames[course.region] || course.region] ||
           `https://picsum.photos/800/600?random=${course.id}`
         }
         rating={courseRatings[course.id] ?? course.rating}
@@ -511,7 +529,59 @@ const EnhancedCompatibleRecommendPage = () => {
 
       {/* 🔵 기존 코스 그리드 - 보존하되 뷰모드 추가 */}
       <section className="container mx-auto px-4 py-12">
-        {sortedCourses.length === 0 && !imagesLoading ? (
+        {isLoading ? (
+          // 로딩 중
+          <div className="weather-card mx-auto max-w-md p-8 text-center">
+            <div className="mb-6 flex justify-center">
+              <div
+                className="flex h-20 w-20 animate-pulse items-center justify-center rounded-full"
+                style={{ backgroundColor: 'var(--primary-blue-light)' }}
+              >
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+              </div>
+            </div>
+            <h3 className="text-foreground mb-2 text-xl font-semibold">
+              여행 코스를 불러오는 중입니다...
+            </h3>
+            <p className="text-muted-foreground mb-6">잠시만 기다려주세요</p>
+          </div>
+        ) : error ? (
+          // 에러 발생
+          <div className="weather-card mx-auto max-w-md p-8 text-center">
+            <div className="mb-6 flex justify-center">
+              <div
+                className="flex h-20 w-20 items-center justify-center rounded-full"
+                style={{ backgroundColor: 'var(--accent-red-light)' }}
+              >
+                <span className="text-3xl">⚠️</span>
+              </div>
+            </div>
+            <h3 className="text-foreground mb-2 text-xl font-semibold">
+              데이터를 불러올 수 없습니다
+            </h3>
+            <p className="mb-6 text-sm text-red-500">{error}</p>
+            <div className="space-y-2">
+              <Button
+                onClick={() => refetch()}
+                className="primary-button w-full font-semibold"
+              >
+                🔄 다시 시도
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedRegion('all')
+                  setSelectedTheme('all')
+                  setSearchQuery('')
+                }}
+                className="w-full"
+              >
+                필터 초기화
+              </Button>
+            </div>
+          </div>
+        ) : filteredCourses.length === 0 ? (
+          // 검색 결과 없음
           <div className="weather-card mx-auto max-w-md p-8 text-center">
             <div className="mb-6 flex justify-center">
               <div
@@ -525,34 +595,71 @@ const EnhancedCompatibleRecommendPage = () => {
               </div>
             </div>
             <h3 className="text-foreground mb-2 text-xl font-semibold">
-              검색 결과가 없습니다
+              {travelCourses.length === 0
+                ? '등록된 여행 코스가 없습니다'
+                : '검색 결과가 없습니다'}
             </h3>
             <p className="text-muted-foreground mb-6">
-              다른 검색어나 필터를 시도해보세요
+              {travelCourses.length === 0
+                ? '관리자가 여행 코스를 등록하면 여기에 표시됩니다'
+                : '다른 검색어나 필터를 시도해보세요'}
             </p>
-            <Button
-              onClick={() => {
-                setSearchQuery('')
-                setSelectedRegion('all')
-                setSelectedMonth('all')
-                setSelectedTheme('all')
-                setQuickFilters([])
-              }}
-              className="primary-button font-semibold"
-            >
-              전체 코스 보기
-            </Button>
+            <div className="space-y-2">
+              <Button
+                onClick={() => {
+                  setSearchQuery('')
+                  setSelectedRegion('all')
+                  setSelectedMonth('all')
+                  setSelectedTheme('all')
+                  setQuickFilters([])
+                }}
+                className="primary-button w-full font-semibold"
+              >
+                {travelCourses.length === 0 ? '🔄 새로고침' : '전체 코스 보기'}
+              </Button>
+              {travelCourses.length === 0 && (
+                <Button
+                  onClick={() => refetch()}
+                  variant="outline"
+                  className="w-full"
+                >
+                  데이터 다시 불러오기
+                </Button>
+              )}
+            </div>
           </div>
         ) : (
-          <div
-            className={
-              viewMode === 'grid'
-                ? 'grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3'
-                : 'space-y-6'
-            }
-          >
-            {imagesLoading ? renderSkeletonCards() : renderCourseCards()}
-          </div>
+          // 정상 데이터 표시
+          <>
+            <div
+              className={
+                viewMode === 'grid'
+                  ? 'grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3'
+                  : 'space-y-6'
+              }
+            >
+              {imagesLoading ? renderSkeletonCards() : renderCourseCards()}
+            </div>
+
+            {/* 페이지네이션 또는 더보기 버튼 */}
+            {travelCoursesResponse &&
+              travelCoursesResponse.total > filteredCourses.length && (
+                <div className="mt-12 text-center">
+                  <Button
+                    onClick={() => setCurrentPage((prev) => prev + 1)}
+                    variant="outline"
+                    size="lg"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? '로딩 중...' : '더 많은 코스 보기'}
+                  </Button>
+                  <p className="text-muted-foreground mt-2 text-sm">
+                    {filteredCourses.length} / {travelCoursesResponse.total} 개
+                    표시 중
+                  </p>
+                </div>
+              )}
+          </>
         )}
       </section>
 

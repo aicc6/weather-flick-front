@@ -23,35 +23,158 @@ const validateAndSanitizeResponse = (response, expectedStructure = {}) => {
       return expectedStructure
     }
 
-    // 배열 응답인 경우 바로 반환
+    // 배열 응답인 경우 각 아이템 정제
     if (Array.isArray(response)) {
-      return response
+      return response.map((item) => normalizeItem(item))
     }
 
-    // itinerary 필드가 문자열인 경우 JSON 파싱
-    if (response.itinerary && typeof response.itinerary === 'string') {
-      try {
-        response.itinerary = JSON.parse(response.itinerary)
-      } catch (parseError) {
-        console.warn('itinerary JSON 파싱 실패:', parseError)
-        response.itinerary = []
+    // 단일 객체인 경우
+    if (response.courses && Array.isArray(response.courses)) {
+      return {
+        ...response,
+        courses: response.courses.map((item) => normalizeItem(item)),
       }
     }
 
-    // 기본값 적용
-    if (expectedStructure && typeof expectedStructure === 'object') {
-      Object.keys(expectedStructure).forEach((key) => {
-        if (response && typeof response === 'object' && !(key in response)) {
-          response[key] = expectedStructure[key]
-        }
-      })
-    }
-
-    return response
+    // 단일 course 객체인 경우
+    return normalizeItem(response)
   } catch (error) {
     console.error('데이터 검증 중 오류:', error)
     return expectedStructure
   }
+}
+
+// 개별 아이템 정규화 함수
+const normalizeItem = (item) => {
+  if (!item || typeof item !== 'object') {
+    return item
+  }
+
+  const normalized = { ...item }
+
+  // 필드명 정규화 (백엔드 필드명 → 프론트엔드 필드명)
+  const fieldMappings = {
+    // 지역 관련
+    region_code: 'region',
+    region_name: 'regionName',
+
+    // 기본 정보
+    course_id: 'id',
+    course_title: 'title',
+    course_subtitle: 'subtitle',
+    course_summary: 'summary',
+    course_description: 'description',
+
+    // 평점 관련
+    average_rating: 'rating',
+    review_count: 'reviewCount',
+    like_count: 'likeCount',
+    view_count: 'viewCount',
+
+    // 테마 관련
+    course_theme: 'theme',
+    course_themes: 'theme',
+
+    // 이미지 관련
+    main_image: 'mainImage',
+    course_images: 'images',
+
+    // 기타
+    best_months: 'bestMonths',
+    travel_duration: 'duration',
+    estimated_price: 'price',
+  }
+
+  // 필드명 매핑 적용
+  Object.entries(fieldMappings).forEach(([backendField, frontendField]) => {
+    if (normalized[backendField] !== undefined) {
+      normalized[frontendField] = normalized[backendField]
+      delete normalized[backendField]
+    }
+  })
+
+  // itinerary 필드가 문자열인 경우 JSON 파싱
+  if (normalized.itinerary && typeof normalized.itinerary === 'string') {
+    try {
+      normalized.itinerary = JSON.parse(normalized.itinerary)
+    } catch (parseError) {
+      console.warn('itinerary JSON 파싱 실패:', parseError)
+      normalized.itinerary = []
+    }
+  }
+
+  // theme 필드가 문자열인 경우 배열로 변환
+  if (normalized.theme && typeof normalized.theme === 'string') {
+    try {
+      // JSON 문자열인 경우
+      if (
+        normalized.theme.startsWith('[') ||
+        normalized.theme.startsWith('{')
+      ) {
+        normalized.theme = JSON.parse(normalized.theme)
+      } else {
+        // 콤마로 구분된 문자열인 경우
+        normalized.theme = normalized.theme
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      }
+    } catch (parseError) {
+      console.warn('theme 파싱 실패:', parseError)
+      normalized.theme = [normalized.theme] // 단일 문자열을 배열로 변환
+    }
+  }
+
+  // 배열 필드들이 undefined인 경우 빈 배열로 초기화
+  const arrayFields = [
+    'theme',
+    'images',
+    'highlights',
+    'tips',
+    'includes',
+    'excludes',
+    'tags',
+    'bestMonths',
+    'itinerary',
+  ]
+  arrayFields.forEach((field) => {
+    if (!Array.isArray(normalized[field])) {
+      normalized[field] = []
+    }
+  })
+
+  // 숫자 필드들 처리
+  const numberFields = ['rating', 'reviewCount', 'likeCount', 'viewCount']
+  numberFields.forEach((field) => {
+    if (normalized[field] !== undefined) {
+      const num = parseFloat(normalized[field])
+      normalized[field] = isNaN(num) ? 0 : num
+    }
+  })
+
+  // 기본값 적용
+  const defaultValues = {
+    rating: 4.5,
+    reviewCount: 0,
+    likeCount: 0,
+    viewCount: 0,
+    price: '문의',
+    duration: '2박 3일',
+    summary: '멋진 여행을 즐겨보세요',
+    description: '상세한 여행 정보를 확인하세요',
+  }
+
+  Object.entries(defaultValues).forEach(([field, defaultValue]) => {
+    if (
+      normalized[field] === undefined ||
+      normalized[field] === null ||
+      normalized[field] === ''
+    ) {
+      normalized[field] = defaultValue
+    }
+  })
+
+  return normalized
 }
 
 // 여행 코스 데이터 기본값

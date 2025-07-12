@@ -19,34 +19,39 @@ import {
   List,
 } from '@/components/icons'
 import { getMultipleRegionImages } from '@/services/imageService'
-import { useGetReviewsByCourseQuery } from '@/store/api/recommendReviewsApi'
+import {
+  useGetTravelCoursesQuery,
+  useSearchTravelCoursesQuery,
+} from '@/store/api/travelCoursesApi'
+import useDebounce from '@/hooks/useDebounce'
 
-// 🟢 새로운 고도화 컴포넌트들 (토글 시에만 사용)
+// 기존 고도 컴포넌트(고급 기능 사용 시 사용)
 import QuickFilters from '@/components/recommend/QuickFilters'
 import SmartSorting from '@/components/recommend/SmartSorting'
 
 import RecommendCourseCard from './RecommendCourseCard'
 
-// ⭐ 기존 RTK Query 훅 보존
-function useCourseRatings(courseIds) {
-  const ratings = {}
-  courseIds.forEach((id) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { data: reviews = [] } = useGetReviewsByCourseQuery(id)
-    ratings[id] =
-      reviews.length > 0
-        ? (
-            reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
-            reviews.length
-          ).toFixed(1)
-        : null
-  })
-  return ratings
+// 안전한 key 생성 유틸리티 함수
+const generateSafeKey = (item, prefix = '', index = 0) => {
+  const safeId = item?.id || item?.course_id || item?.plan_id || index
+  const safePrefix = prefix ? `${prefix}-` : ''
+  return `${safePrefix}${safeId}`
+}
+
+const generateSafeKeyWithValue = (prefix, index, value) => {
+  const safePrefix = prefix || 'item'
+  const safeIndex = index ?? 0
+  const safeValue =
+    value
+      ?.toString()
+      ?.replace(/\s+/g, '-')
+      ?.replace(/[^a-zA-Z0-9-_]/g, '') || 'empty'
+  return `${safePrefix}-${safeIndex}-${safeValue}`
 }
 
 export default function TravelCoursePage() {
   // ===============================
-  // 🔵 기존 상태들 - 모두 보존
+  // 기존 태클- 모두 보존
   // ===============================
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('all')
@@ -56,7 +61,7 @@ export default function TravelCoursePage() {
   const [imagesLoading, setImagesLoading] = useState(true)
 
   // ===============================
-  // 🟢 새로운 고도화 상태들 - 토글로 제어
+  // 고도 태클- 고급 기능
   // ===============================
   const [showAdvancedFeatures, setShowAdvancedFeatures] = useState(false)
   const [quickFilters, setQuickFilters] = useState([])
@@ -64,251 +69,168 @@ export default function TravelCoursePage() {
   const [sortBy, setSortBy] = useState('recommended')
 
   // ===============================
-  // 🔵 기존 데이터 - 모두 보존
+  // ?? ?상??RTK Query ?용 - 검???바?싱?조건부 쿼리
   // ===============================
-  const travelCourses = [
-    {
-      id: 1,
-      title: '제주도 자연 힐링 여행',
-      subtitle: '한라산부터 바다까지, 제주의 아름다운 자연을 만나보세요',
-      region: 'jeju',
-      regionName: '제주도',
-      duration: '2박 3일',
-      theme: ['자연', '힐링', '관광'],
-      rating: 4.5,
-      reviewCount: 100,
-      likeCount: 200,
-      price: '250,000원',
-      bestMonths: [3, 4, 5, 9, 10, 11],
-      summary:
-        '제주도의 대표적인 자연 명소들을 둘러보며 힐링할 수 있는 여행 코스입니다.',
-      highlights: [
-        '한라산 국립공원',
-        '성산일출봉',
-        '우도',
-        '애월 카페거리',
-        '협재해수욕장',
-      ],
-      itinerary: [
-        {
-          day: 1,
-          title: '제주 도착 및 서부 지역 탐방',
-          activities: ['제주국제공항', '협재해수욕장', '애월 카페거리'],
-        },
-      ],
-      tags: ['자연', '힐링', '제주도', '추천코스'],
-      // 🟢 고도화 기능을 위한 새로운 속성들
-      priceValue: 250000,
-      popularityScore: 85,
-      weatherScore: 8.5,
-      isNew: false,
-      amenities: ['parking', 'restaurant', 'wifi'],
-    },
-    {
-      id: 2,
-      title: '전주 한옥마을 감성 여행',
-      subtitle: '한옥마을부터 비빔밥까지, 전주의 멋과 맛을 느껴보세요',
-      region: 'jeonju',
-      regionName: '전주',
-      duration: '2박 3일',
-      theme: ['문화', '역사', '맛집'],
-      rating: 4.7,
-      reviewCount: 130,
-      likeCount: 270,
-      price: '280,000원',
-      bestMonths: [3, 4, 5, 9, 10, 11],
-      summary:
-        '전통 한옥의 정취와 전주만의 맛을 모두 즐길 수 있는 감성 여행 코스입니다.',
-      highlights: [
-        '전주한옥마을',
-        '경기전',
-        '전동성당',
-        '남부시장',
-        '전주비빔밥',
-      ],
-      itinerary: [
-        {
-          day: 1,
-          title: '전주 한옥마을과 전통 체험',
-          activities: ['전주한옥마을', '경기전', '전동성당'],
-        },
-        {
-          day: 2,
-          title: '전주 맛집 탐방',
-          activities: ['남부시장', '전주비빔밥', '풍남문'],
-        },
-      ],
-      tags: ['문화', '역사', '서울', '추천코스'],
-      // 🟢 고도화 기능을 위한 새로운 속성들
-      priceValue: 300000,
-      popularityScore: 90,
-      weatherScore: 7.5,
-      isNew: false,
-      amenities: ['wifi', 'restaurant', 'accessible'],
-    },
-    {
-      id: 3,
-      title: '부산 바다와 문화 여행',
-      subtitle: '해운대부터 감천문화마을까지, 부산의 바다와 문화를 즐기세요',
-      region: 'busan',
-      regionName: '부산',
-      duration: '2박 3일',
-      theme: ['해양', '문화', '맛집'],
-      rating: 4.6,
-      reviewCount: 140,
-      likeCount: 300,
-      price: '350,000원',
-      bestMonths: [3, 4, 5, 9, 10, 11],
-      summary:
-        '푸른 바다와 알록달록한 문화마을, 신선한 해산물까지 부산의 모든 매력을 담은 코스입니다.',
-      highlights: [
-        '해운대 해수욕장',
-        '감천문화마을',
-        '태종대',
-        '광안리',
-        '자갈치시장',
-      ],
-      itinerary: [
-        {
-          day: 1,
-          title: '부산 바다와 문화 체험',
-          activities: ['해운대 해수욕장', '감천문화마을', '자갈치시장'],
-        },
-      ],
-      tags: ['해양', '문화', '부산', '추천코스'],
-      // 🟢 고도화 기능을 위한 새로운 속성들
-      priceValue: 350000,
-      popularityScore: 95,
-      weatherScore: 8.0,
-      isNew: false,
-      amenities: ['parking', 'restaurant', 'wifi', 'photography'],
-    },
-    {
-      id: 4,
-      title: '경주 천년 고도 역사 탐방',
-      subtitle: '불국사부터 첨성대까지, 신라의 찬란한 역사를 만나보세요',
-      region: 'gyeongju',
-      regionName: '경주',
-      duration: '2박 3일',
-      theme: ['역사', '문화', '유적'],
-      rating: 4.4,
-      reviewCount: 160,
-      likeCount: 350,
-      price: '400,000원',
-      bestMonths: [3, 4, 5, 9, 10, 11],
-      summary:
-        '신라 천년의 역사가 살아 숨 쉬는 경주에서 우리나라의 찬란한 문화유산을 체험하는 코스입니다.',
-      highlights: ['불국사', '석굴암', '첨성대', '안압지', '대릉원'],
-      itinerary: [
-        {
-          day: 1,
-          title: '신라 역사 탐방',
-          activities: ['불국사', '석굴암', '첨성대'],
-        },
-      ],
-      tags: ['역사', '문화', '경주', '추천코스'],
-      // 🟢 고도화 기능을 위한 새로운 속성들
-      priceValue: 400000,
-      popularityScore: 80,
-      weatherScore: 7.8,
-      isNew: false,
-      amenities: ['parking', 'accessible', 'restaurant'],
-    },
-    {
-      id: 5,
-      title: '강릉 바다와 커피 여행',
-      subtitle: '경포대부터 안목해변까지, 강릉의 바다와 커피 문화를 즐기세요',
-      region: 'gangneung',
-      regionName: '강릉',
-      duration: '2박 3일',
-      theme: ['해양', '커피', '자연'],
-      rating: 4.5,
-      reviewCount: 180,
-      likeCount: 400,
-      price: '450,000원',
-      bestMonths: [3, 4, 5, 9, 10, 11],
-      summary:
-        '동해의 푸른 바다와 향긋한 커피 향이 어우러지는 강릉의 낭만적인 여행 코스입니다.',
-      highlights: ['경포대', '안목해변', '정동진', '오죽헌', '강릉커피거리'],
-      itinerary: [
-        {
-          day: 1,
-          title: '강릉 바다와 커피',
-          activities: ['경포대', '안목해변 커피거리', '정동진'],
-        },
-      ],
-      tags: ['해양', '커피', '강릉', '추천코스'],
-      // 🟢 고도화 기능을 위한 새로운 속성들
-      priceValue: 450000,
-      popularityScore: 88,
-      weatherScore: 8.2,
-      isNew: true,
-      amenities: ['wifi', 'restaurant', 'photography', 'parking'],
-    },
-    {
-      id: 6,
-      title: '여수 밤바다와 섬 여행',
-      subtitle: '오동도부터 향일암까지, 여수의 아름다운 바다를 만나보세요',
-      region: 'yeosu',
-      regionName: '여수',
-      duration: '2박 3일',
-      theme: ['해양', '섬', '야경'],
-      rating: 5.0,
-      reviewCount: 200,
-      likeCount: 450,
-      price: '500,000원',
-      bestMonths: [3, 4, 5, 9, 10, 11],
-      summary:
-        '아름다운 밤바다와 신비로운 섬들이 어우러진 여수에서 로맨틱한 바다 여행을 즐기는 코스입니다.',
-      highlights: [
-        '오동도',
-        '향일암',
-        '여수 밤바다',
-        '돌산대교',
-        '만성리해수욕장',
-      ],
-      itinerary: [
-        {
-          day: 1,
-          title: '여수 밤바다와 섬',
-          activities: ['오동도', '향일암', '여수 밤바다'],
-        },
-      ],
-      tags: ['해양', '섬', '여수', '추천코스'],
-      // 🟢 고도화 기능을 위한 새로운 속성들
-      priceValue: 500000,
-      popularityScore: 92,
-      weatherScore: 9.0,
-      isNew: true,
-      amenities: ['parking', 'restaurant', 'wifi', 'photography', 'accessible'],
-    },
-  ]
+  const [currentPage, setCurrentPage] = useState(1)
+  const PAGE_SIZE = 20
 
-  // 이미지 로드
+  // 검색 바 입력 시 검색 API 사용, 아니면 목록 API 사용
+  const debouncedSearchQuery = useDebounce(searchQuery.trim(), 300)
+
+  // 검색 바 입력 시 검색 API 사용, 아니면 목록 API 사용
+  const shouldUseSearch = debouncedSearchQuery.length >= 2
+
+  // ?반 ?행 코스 목록 조회
+  const {
+    data: travelCoursesResponse,
+    error: listError,
+    isLoading: isListLoading,
+    isError: isListError,
+    refetch: refetchList,
+  } = useGetTravelCoursesQuery(
+    {
+      page: currentPage,
+      page_size: PAGE_SIZE,
+      region_code: selectedRegion !== 'all' ? selectedRegion : undefined,
+      course_theme: selectedTheme !== 'all' ? selectedTheme : undefined,
+    },
+    {
+      skip: shouldUseSearch, // 검색 중일 때는 쿼리 건너뛰기
+    },
+  )
+
+  // 검색 API 사용
+  const {
+    data: searchResponse,
+    error: searchError,
+    isLoading: isSearchLoading,
+    isError: isSearchError,
+    refetch: refetchSearch,
+  } = useSearchTravelCoursesQuery(
+    {
+      searchQuery: debouncedSearchQuery,
+      region_code: selectedRegion !== 'all' ? selectedRegion : undefined,
+      theme: selectedTheme !== 'all' ? selectedTheme : undefined,
+      page: currentPage,
+      page_size: PAGE_SIZE,
+    },
+    {
+      skip: !shouldUseSearch, // 검색 중일 때는 쿼리 건너뛰기
+    },
+  )
+
+  // 재 사용 여부 태그 결정
+  const activeResponse = shouldUseSearch
+    ? searchResponse
+    : travelCoursesResponse
+  const activeError = shouldUseSearch ? searchError : listError
+  const isActiveLoading = shouldUseSearch ? isSearchLoading : isListLoading
+  const isActiveError = shouldUseSearch ? isSearchError : isListError
+  const activeRefetch = shouldUseSearch ? refetchSearch : refetchList
+
+  // API 응답 서버 코스 이추출
+  const travelCourses = useMemo(() => {
+    if (!activeResponse) return []
+
+    // 디버깅: API 응답 구조 로그
+    console.log('=== API 응답 디버깅 ===')
+    console.log('전체 응답:', activeResponse)
+    console.log('응답 타입:', typeof activeResponse)
+    console.log('배열인가?', Array.isArray(activeResponse))
+
+    // API 응답 구조 조정
+    if (Array.isArray(activeResponse)) {
+      console.log('배열 응답 처리, 길이:', activeResponse.length)
+      if (activeResponse.length > 0) {
+        console.log('배열 첫 번째 아이템:', activeResponse[0])
+        console.log('첫 번째 아이템 키들:', Object.keys(activeResponse[0]))
+      }
+      return activeResponse
+    }
+
+    if (activeResponse.courses) {
+      console.log(
+        'courses 필드에서 데이터 추출, 길이:',
+        activeResponse.courses.length,
+      )
+      if (activeResponse.courses.length > 0) {
+        console.log('courses 첫 번째 아이템:', activeResponse.courses[0])
+        console.log(
+          '첫 번째 course 키들:',
+          Object.keys(activeResponse.courses[0]),
+        )
+      }
+      return activeResponse.courses
+    }
+
+    console.log('알 수 없는 응답 구조, 빈 배열 반환')
+    return []
+  }, [activeResponse])
+
+  // 에러 처리
+  const error = useMemo(() => {
+    if (isActiveError && activeError) {
+      const errorMessage =
+        activeError.message || '여행 코스 데이터를 불러오는데 실패했습니다.'
+      return shouldUseSearch ? `검색 오류 발생: ${errorMessage}` : errorMessage
+    }
+    return null
+  }, [isActiveError, activeError, shouldUseSearch])
+
+  // 로딩 상태
+  const isLoading = isActiveLoading
+
+  // 이번에 불러오기 버튼 클릭 시 페이지 초기화
+  useEffect(() => {
+    if (currentPage > 1) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [currentPage])
+
+  // 필터 변경 시 페이지 초기화
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [selectedRegion, selectedTheme, debouncedSearchQuery])
+
+  // 지역 로드
   useEffect(() => {
     const loadImages = async () => {
       try {
         setImagesLoading(true)
-        const regionNames = travelCourses.map((course) => course.regionName)
-        console.log('🔍 요청할 지역명들:', regionNames)
 
-        const images = await getMultipleRegionImages(regionNames)
-        console.log('📸 로드된 이미지 매핑:', images)
+        // region 필드 사용 (regionName 대신)
+        const regionCodes = travelCourses
+          .map((course) => course.region)
+          .filter(Boolean)
+        const uniqueRegionCodes = [...new Set(regionCodes)]
+
+        console.log('요청 지역 코드:', uniqueRegionCodes)
+        console.log('첫 번째 코스 데이터 샘플:', travelCourses[0])
+
+        // 지역 코드를 지역명으로 변환
+        const regionNamesForImages = uniqueRegionCodes.map(
+          (code) => regionNames[code] || code,
+        )
+
+        const images = await getMultipleRegionImages(regionNamesForImages)
+        console.log('로드 지역 매핑:', images)
 
         setImages(images)
 
-        // 각 코스별로 어떤 이미지가 할당되었는지 확인
+        // 코스별로 어떤 지역이 있는지 확인 (디버깅용)
         travelCourses.forEach((course) => {
+          const regionDisplayName = regionNames[course.region] || course.region
           console.log(
-            `${course.regionName} (ID: ${course.id}) → ${images[course.regionName]}`,
+            `${course.title} - 지역: ${course.region} (${regionDisplayName}) - 이미지: ${images[regionDisplayName]}`,
           )
         })
       } catch (error) {
-        console.error('❌ 이미지 로드 실패:', error)
-        // fallback으로 다른 이미지 사용
+        console.error('지역 로드 실패:', error)
+        // fallback 로직
         const fallbackImages = {}
         travelCourses.forEach((course) => {
-          fallbackImages[course.regionName] =
+          const regionDisplayName = regionNames[course.region] || course.region
+          fallbackImages[regionDisplayName] =
             `https://picsum.photos/800/600?random=${course.id}`
         })
         setImages(fallbackImages)
@@ -317,10 +239,12 @@ export default function TravelCoursePage() {
       }
     }
 
-    loadImages()
-  }, [])
+    if (travelCourses.length > 0) {
+      loadImages()
+    }
+  }, [travelCourses]) // travelCourses가 변경될 때마다 실행
 
-  // 지역 이름 매핑
+  // 지역 매핑
   const regionNames = {
     all: '전체',
     seoul: '서울',
@@ -346,7 +270,7 @@ export default function TravelCoursePage() {
     yeosu: '여수',
   }
 
-  // 월 이름 배열
+  // 월 배열
   const monthNames = [
     '전체',
     '1월',
@@ -366,17 +290,17 @@ export default function TravelCoursePage() {
   // 테마 옵션
   const themeOptions = [
     { value: 'all', label: '전체 테마' },
-    { value: 'nature', label: '🌿 자연' },
-    { value: 'city', label: '🏙️ 도시' },
-    { value: 'beach', label: '🏖️ 바다' },
-    { value: 'history', label: '🏛️ 역사' },
-    { value: 'food', label: '🍜 맛집' },
-    { value: 'healing', label: '😌 힐링' },
-    { value: 'activity', label: '�� 액티비티' },
+    { value: 'nature', label: '자연' },
+    { value: 'city', label: '도시' },
+    { value: 'beach', label: '바다' },
+    { value: 'history', label: '역사' },
+    { value: 'food', label: '맛집' },
+    { value: 'healing', label: '힐링' },
+    { value: 'activity', label: '액티비티' },
   ]
 
   // ===============================
-  // 🔵 기존 + 🟢 확장된 필터링 로직
+  // 기존 + 고급 기능에 따른 빠른 필터 로직
   // ===============================
   const filteredCourses = useMemo(() => {
     return travelCourses.filter((course) => {
@@ -400,7 +324,7 @@ export default function TravelCoursePage() {
           theme.toLowerCase().includes(selectedTheme.toLowerCase()),
         )
 
-      // 🟢 새로운 빠른 필터 로직 (고급 기능 활성화 시에만)
+      // 고급 기능 성에 따른 빠른 필터 로직
       if (showAdvancedFeatures) {
         if (quickFilters.includes('high-rating') && course.rating < 4.0)
           return false
@@ -409,16 +333,16 @@ export default function TravelCoursePage() {
         if (quickFilters.includes('popular') && course.popularityScore < 80)
           return false
         if (quickFilters.includes('nearby')) {
-          // 실제로는 위치 기반 필터링, 여기서는 서울/경기 지역만
+          // 근처 지역 필터
           const nearbyRegions = ['seoul', 'gyeonggi', 'incheon']
           if (!nearbyRegions.includes(course.region)) return false
         }
         if (quickFilters.includes('weekend')) {
-          // 주말 추천은 duration이 "2박 3일" 이하인 것들
-          if (!course.duration.includes('2박')) return false
+          // 주말 추천
+          if (!course.duration.includes('23')) return false
         }
         if (quickFilters.includes('family')) {
-          // 가족 여행 친화적인 것들 (amenities에 accessible이 있거나 특정 테마)
+          // 가족 여행 친화적인 것들
           const familyThemes = ['자연', '문화', '역사']
           const hasFamilyTheme = course.theme.some((theme) =>
             familyThemes.includes(theme),
@@ -441,11 +365,11 @@ export default function TravelCoursePage() {
   ])
 
   // ===============================
-  // 🟢 새로운 정렬 로직
+  // 정렬 로직
   // ===============================
   const sortedCourses = useMemo(() => {
     if (!showAdvancedFeatures || sortBy === 'recommended') {
-      // 기본 모드: 기존 순서 유지
+      // 기본 모드: 기존 서버 데이터 사용
       return filteredCourses
     }
 
@@ -460,7 +384,7 @@ export default function TravelCoursePage() {
         case 'price-high':
           return b.priceValue - a.priceValue
         case 'smart': {
-          // AI 점수 계산
+          // AI 수 계산
           const scoreA =
             a.rating * 0.3 + a.weatherScore * 0.2 + a.popularityScore * 0.5
           const scoreB =
@@ -474,11 +398,11 @@ export default function TravelCoursePage() {
   }, [filteredCourses, showAdvancedFeatures, sortBy])
 
   // ===============================
-  // 🟢 새로운 핸들러 함수들
+  // 고급 기능 토글 핸들러
   // ===============================
   const handleAdvancedToggle = useCallback(() => {
     setShowAdvancedFeatures(!showAdvancedFeatures)
-    // 토글 끌 때 고급 설정들 초기화
+    // 고급 기능 초기화
     if (showAdvancedFeatures) {
       setQuickFilters([])
       setSortBy('recommended')
@@ -519,17 +443,13 @@ export default function TravelCoursePage() {
     ))
   }
 
-  // 기존 RTK Query 훅 사용 (변경된 필터링 결과 기준)
-  const courseIds = sortedCourses.map((c) => c.id)
-  const courseRatings = useCourseRatings(courseIds)
-
-  // 실제 카드 렌더링 (viewMode 지원)
+  // 기존 카드 렌더링 (viewMode 기반)
   const renderCourseCards = () => {
-    return sortedCourses.map((course) => (
+    return sortedCourses.map((course, index) => (
       <RecommendCourseCard
-        key={course.id}
+        key={generateSafeKey(course, 'course', index)}
         course={course}
-        rating={courseRatings[course.id] ?? course.rating}
+        rating={course.rating} // 서버에서 제공하는 기본 평점 사용
         viewMode={viewMode}
       />
     ))
@@ -544,17 +464,20 @@ export default function TravelCoursePage() {
             <h1 className="text-foreground mb-4 text-4xl font-bold">
               여행지 추천
               {showAdvancedFeatures && (
-                <span className="ml-2 text-2xl">✨</span>
+                <span className="ml-2 text-2xl">
+                  {' '}
+                  <Settings className="h-4 w-4" />
+                </span>
               )}
             </h1>
             <p className="text-muted-foreground text-lg">
               {showAdvancedFeatures
-                ? '고도화된 AI 추천 시스템으로 완벽한 여행을 계획하세요'
-                : '한국의 인기있는 대표적인 여행지의 여행 코스를 추천해드립니다'}
+                ? '고도 된 AI 추천 스타일로 여행 계획을 세우세요'
+                : '국내 기준으로 최적의 여행지를 추천드립니다'}
             </p>
           </div>
 
-          {/* 🟢 고도화 기능 토글 버튼 */}
+          {/* 고도 기능 버튼 */}
           <div className="mb-6 flex justify-center gap-4">
             <Button
               onClick={handleAdvancedToggle}
@@ -577,7 +500,7 @@ export default function TravelCoursePage() {
                 ) : (
                   <Grid3x3 className="h-4 w-4" />
                 )}
-                {viewMode === 'grid' ? '리스트' : '격자'}
+                {viewMode === 'grid' ? '리스트' : '그리드'}
               </Button>
             )}
           </div>
@@ -592,7 +515,7 @@ export default function TravelCoursePage() {
                   style={{ color: 'var(--primary-blue)' }}
                 />
                 <Input
-                  placeholder="여행지나 키워드 검색"
+                  placeholder="여행지 이름을 검색하세요"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="form-input pl-10"
@@ -609,7 +532,10 @@ export default function TravelCoursePage() {
                   {Object.entries(regionNames)
                     .slice(1)
                     .map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
+                      <SelectItem
+                        key={generateSafeKeyWithValue('region', value, label)}
+                        value={value}
+                      >
                         {label}
                       </SelectItem>
                     ))}
@@ -619,12 +545,12 @@ export default function TravelCoursePage() {
               {/* Month Filter */}
               <Select value={selectedMonth} onValueChange={setSelectedMonth}>
                 <SelectTrigger className="form-input">
-                  <SelectValue placeholder="여행 시기" />
+                  <SelectValue placeholder="여행 월" />
                 </SelectTrigger>
                 <SelectContent className="weather-card">
                   {monthNames.map((month, index) => (
                     <SelectItem
-                      key={index}
+                      key={generateSafeKeyWithValue('month', index, month)}
                       value={index === 0 ? 'all' : index.toString()}
                     >
                       {month}
@@ -639,8 +565,11 @@ export default function TravelCoursePage() {
                   <SelectValue placeholder="여행 테마" />
                 </SelectTrigger>
                 <SelectContent className="weather-card">
-                  {themeOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
+                  {themeOptions.map((option, index) => (
+                    <SelectItem
+                      key={generateSafeKey(option, 'theme', index)}
+                      value={option.value}
+                    >
                       {option.label}
                     </SelectItem>
                   ))}
@@ -650,36 +579,64 @@ export default function TravelCoursePage() {
 
             {/* Filter Summary */}
             <div className="mt-4 flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">
-                총 {sortedCourses.length}개의 여행 코스를 찾았습니다
-              </span>
-              {(selectedRegion !== 'all' ||
-                selectedMonth !== 'all' ||
-                selectedTheme !== 'all' ||
-                searchQuery ||
-                quickFilters.length > 0) && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSearchQuery('')
-                    setSelectedRegion('all')
-                    setSelectedMonth('all')
-                    setSelectedTheme('all')
-                    setQuickFilters([])
-                  }}
-                  className="border-border hover:bg-muted"
-                >
-                  <Filter className="mr-2 h-4 w-4" />
-                  필터 초기화
-                </Button>
-              )}
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">
+                  {shouldUseSearch ? (
+                    <>
+                      <span className="inline-flex items-center gap-1">
+                        <strong>&quot;{debouncedSearchQuery}&quot;</strong> 검색
+                        결과:
+                      </span>
+                      {` ${sortedCourses.length}개`}
+                    </>
+                  ) : (
+                    `${sortedCourses.length}개의 여행 코스를 찾았습니다`
+                  )}
+                </span>
+                {isLoading && (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {shouldUseSearch && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSearchQuery('')}
+                    className="text-xs"
+                  >
+                    검색 취소
+                  </Button>
+                )}
+                {(selectedRegion !== 'all' ||
+                  selectedMonth !== 'all' ||
+                  selectedTheme !== 'all' ||
+                  searchQuery ||
+                  quickFilters.length > 0) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSearchQuery('')
+                      setSelectedRegion('all')
+                      setSelectedMonth('all')
+                      setSelectedTheme('all')
+                      setQuickFilters([])
+                      setCurrentPage(1)
+                    }}
+                    className="border-border hover:bg-muted"
+                  >
+                    <Filter className="mr-2 h-4 w-4" />
+                    필터 초기화{' '}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 🟢 고도화 기능들 (조건부 렌더링) */}
+      {/* 고도 기능(조건부 더보기) */}
       {showAdvancedFeatures && (
         <section className="container mx-auto px-4 py-6">
           <div className="space-y-4">
@@ -689,7 +646,7 @@ export default function TravelCoursePage() {
               activeFilters={quickFilters}
             />
 
-            {/* 스마트 정렬 */}
+            {/* 정렬 */}
             <SmartSorting
               currentSort={sortBy}
               onSortChange={handleSortChange}
@@ -701,7 +658,59 @@ export default function TravelCoursePage() {
 
       {/* Courses Grid */}
       <section className="container mx-auto px-4 py-12">
-        {sortedCourses.length === 0 && !imagesLoading ? (
+        {isLoading ? (
+          // 로딩 중
+          <div className="weather-card mx-auto max-w-md p-8 text-center">
+            <div className="mb-6 flex justify-center">
+              <div
+                className="flex h-20 w-20 animate-pulse items-center justify-center rounded-full"
+                style={{ backgroundColor: 'var(--primary-blue-light)' }}
+              >
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+              </div>
+            </div>
+            <h3 className="text-foreground mb-2 text-xl font-semibold">
+              여행 코스를 불러오는 중입니다...
+            </h3>
+            <p className="text-muted-foreground mb-6">기다려주세요</p>
+          </div>
+        ) : error ? (
+          // 에러 발생
+          <div className="weather-card mx-auto max-w-md p-8 text-center">
+            <div className="mb-6 flex justify-center">
+              <div
+                className="flex h-20 w-20 items-center justify-center rounded-full"
+                style={{ backgroundColor: 'var(--accent-red-light)' }}
+              >
+                <span className="text-3xl">?�️</span>
+              </div>
+            </div>
+            <h3 className="text-foreground mb-2 text-xl font-semibold">
+              여행 코스를 불러오는데 실패했습니다
+            </h3>
+            <p className="mb-6 text-sm text-red-500">{error}</p>
+            <div className="space-y-2">
+              <Button
+                onClick={() => activeRefetch()}
+                className="primary-button w-full font-semibold"
+              >
+                이번에 불러오기
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedRegion('all')
+                  setSelectedTheme('all')
+                  setSearchQuery('')
+                }}
+                className="w-full"
+              >
+                필터 초기화{' '}
+              </Button>
+            </div>
+          </div>
+        ) : sortedCourses.length === 0 ? (
+          // 검색 결과 없음
           <div className="weather-card mx-auto max-w-md p-8 text-center">
             <div className="mb-6 flex justify-center">
               <div
@@ -715,34 +724,69 @@ export default function TravelCoursePage() {
               </div>
             </div>
             <h3 className="text-foreground mb-2 text-xl font-semibold">
-              검색 결과가 없습니다
+              {travelCourses.length === 0
+                ? '여행 코스가 없습니다'
+                : '검색 결과가 없습니다'}
             </h3>
             <p className="text-muted-foreground mb-6">
-              다른 검색어나 필터를 시도해보세요
+              {travelCourses.length === 0
+                ? '관리자가 여행 코스를 등록하면 기다려주세요'
+                : '다른 검색어를 입력해보세요'}
             </p>
-            <Button
-              onClick={() => {
-                setSearchQuery('')
-                setSelectedRegion('all')
-                setSelectedMonth('all')
-                setSelectedTheme('all')
-                setQuickFilters([])
-              }}
-              className="primary-button font-semibold"
-            >
-              전체 코스 보기
-            </Button>
+            <div className="space-y-2">
+              <Button
+                onClick={() => {
+                  setSearchQuery('')
+                  setSelectedRegion('all')
+                  setSelectedMonth('all')
+                  setSelectedTheme('all')
+                  setQuickFilters([])
+                }}
+                className="primary-button w-full font-semibold"
+              >
+                {travelCourses.length === 0 ? '기본 로딩' : '전체 코스 보기'}
+              </Button>
+              {travelCourses.length === 0 && (
+                <Button
+                  onClick={() => activeRefetch()}
+                  variant="outline"
+                  className="w-full"
+                >
+                  이번에 불러오기
+                </Button>
+              )}
+            </div>
           </div>
         ) : (
-          <div
-            className={
-              showAdvancedFeatures && viewMode === 'list'
-                ? 'space-y-6'
-                : 'grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3'
-            }
-          >
-            {imagesLoading ? renderSkeletonCards() : renderCourseCards()}
-          </div>
+          // 상태 이상 시
+          <>
+            <div
+              className={
+                showAdvancedFeatures && viewMode === 'list'
+                  ? 'space-y-6'
+                  : 'grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3'
+              }
+            >
+              {imagesLoading ? renderSkeletonCards() : renderCourseCards()}
+            </div>
+
+            {/* 이번에 불러오기 버튼 */}
+            {activeResponse && activeResponse.total > sortedCourses.length && (
+              <div className="mt-12 text-center">
+                <Button
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                  variant="outline"
+                  size="lg"
+                  disabled={isLoading}
+                >
+                  {isLoading ? '로딩 중...' : '더 많은 코스 보기'}
+                </Button>
+                <p className="text-muted-foreground mt-2 text-sm">
+                  {sortedCourses.length} / {activeResponse.total} 중에서{' '}
+                </p>
+              </div>
+            )}
+          </>
         )}
       </section>
 
@@ -755,23 +799,23 @@ export default function TravelCoursePage() {
               style={{ color: 'var(--accent-cyan-bright)' }}
             />
             <h2 className="text-foreground mb-4 text-3xl font-bold">
-              나만의 여행 계획을 세워보세요!
+              맞춤 여행 계획 워보세요
             </h2>
             <p className="text-muted-foreground mb-8 text-lg">
-              AI가 도와주는 맞춤형 여행 일정으로 완벽한 여행을 준비하세요
+              AI가 주는 맞춤 여행 정보로 여행 준비하세요
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Link
                 to="/customized-schedule"
                 className="primary-button rounded-full px-8 py-3 font-semibold"
               >
-                🎯 맞춤 일정 만들기
+                맞춤 여행 정보 만들기
               </Link>
               <Link
                 to="/planner"
                 className="accent-button rounded-full px-8 py-3 font-semibold"
               >
-                📋 직접 계획하기
+                직접 계획하기
               </Link>
             </div>
           </div>

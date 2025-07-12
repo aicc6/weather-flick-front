@@ -31,6 +31,13 @@ import { toast } from 'sonner'
 import EnhancedTransportCard from '@/components/transport/EnhancedTransportCard'
 import { CompactDayItinerary } from '@/components/travel'
 
+// 안전한 key 생성 유틸리티 함수
+const generateSafeKey = (item, prefix = '', index = 0) => {
+  const safeId = item?.id || item?.route_id || item?.guide_id || index
+  const safePrefix = prefix ? `${prefix}-` : ''
+  return `${safePrefix}${safeId}`
+}
+
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
   return new Date(dateString).toLocaleDateString('ko-KR', {
@@ -39,7 +46,6 @@ const formatDate = (dateString) => {
     day: 'numeric',
   })
 }
-
 
 export function TravelPlanDetailPage() {
   const { planId } = useParams()
@@ -459,7 +465,7 @@ export function TravelPlanDetailPage() {
         <div className="mt-2 space-y-1">
           {transitPaths.map((path, index) => (
             <div
-              key={index}
+              key={generateSafeKey(path, 'transit', index)}
               className="flex items-center space-x-2 text-xs text-gray-500"
             >
               {path.type === 'subway' && (
@@ -536,7 +542,7 @@ export function TravelPlanDetailPage() {
 
             return (
               <div
-                key={index}
+                key={generateSafeKey(step, 'step', index)}
                 className="flex items-center space-x-2 text-xs text-gray-500"
               >
                 {vehicle.type === 'SUBWAY' && (
@@ -607,7 +613,10 @@ export function TravelPlanDetailPage() {
         <div className="mt-2 space-y-2">
           <div className="text-xs font-medium text-gray-500">🗺️ 경로 안내</div>
           {routeData.detailed_guides.map((guide, index) => (
-            <div key={index} className="flex items-start space-x-2 text-xs">
+            <div
+              key={generateSafeKey(guide, 'guide', index)}
+              className="flex items-start space-x-2 text-xs"
+            >
               <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-800">
                 {guide.step}
               </span>
@@ -681,7 +690,7 @@ export function TravelPlanDetailPage() {
           <div className="text-xs font-medium text-gray-500">🗺️ 경로 안내</div>
           {guidePoints.map((point, index) => (
             <div
-              key={index}
+              key={generateSafeKey(point, 'point', index)}
               className="flex items-start space-x-2 text-xs text-gray-500"
             >
               <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-800">
@@ -741,7 +750,7 @@ export function TravelPlanDetailPage() {
           <div className="text-xs font-medium text-gray-500">🗺️ 경로 안내</div>
           {displaySteps.map((step, index) => (
             <div
-              key={index}
+              key={generateSafeKey(step, 'step', index)}
               className="flex items-start space-x-2 text-xs text-gray-500"
             >
               <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-800">
@@ -779,7 +788,7 @@ export function TravelPlanDetailPage() {
             <div className="space-y-1">
               {routeData.guide_points.map((point, index) => (
                 <div
-                  key={index}
+                  key={generateSafeKey(point, 'point', index)}
                   className="flex items-start space-x-2 text-xs text-gray-500"
                 >
                   <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-800">
@@ -874,7 +883,7 @@ export function TravelPlanDetailPage() {
             <div className="max-h-64 space-y-3 overflow-y-auto">
               {routeData.detailed_guides.map((guide, index) => (
                 <div
-                  key={index}
+                  key={generateSafeKey(guide, 'guide', index)}
                   className="flex items-start space-x-3 rounded border bg-white p-3"
                 >
                   <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-800">
@@ -913,7 +922,7 @@ export function TravelPlanDetailPage() {
               <div className="max-h-64 space-y-3 overflow-y-auto">
                 {routeData.guide_points.slice(0, 10).map((point, index) => (
                   <div
-                    key={index}
+                    key={generateSafeKey(point, 'point', index)}
                     className="flex items-start space-x-3 rounded border bg-white p-3"
                   >
                     <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-xs font-bold text-green-800">
@@ -1303,7 +1312,7 @@ export function TravelPlanDetailPage() {
                           route.sequence === 0 && dayKey !== 'day1'
 
                         return (
-                          <div key={route.route_id || index}>
+                          <div key={generateSafeKey(route, 'route', index)}>
                             {isStartRoute && (
                               <div className="mb-2 inline-block rounded-full bg-green-50 px-3 py-1 text-sm font-medium text-green-600">
                                 🏠 출발지에서 첫 번째 목적지로
@@ -1380,9 +1389,7 @@ export function TravelPlanDetailPage() {
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
                 <span className="text-sm font-bold text-blue-600">📋</span>
               </div>
-              <CardTitle className="text-lg text-gray-800">
-                상세 일정
-              </CardTitle>
+              <CardTitle className="text-lg text-gray-800">상세 일정</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
@@ -1391,14 +1398,14 @@ export function TravelPlanDetailPage() {
                 {itineraryDays.map((day) => {
                   const dayNumber = parseInt(day.replace(/\D/g, ''))
                   const places = plan.itinerary[day] || []
-                  
+
                   // 날씨 데이터 처리
                   const dayIndex = dayNumber - 1
                   const dayWeather = weatherData?.forecast?.[dayIndex]
                   const weatherForPlaces = {}
-                  
+
                   if (dayWeather) {
-                    places.forEach(place => {
+                    places.forEach((place) => {
                       const city = extractCityFromLocation(place.description)
                       const cityWeatherVariation = {
                         서울: { tempOffset: 0, conditionOffset: 0 },
@@ -1408,31 +1415,50 @@ export function TravelPlanDetailPage() {
                         광주: { tempOffset: 2, conditionOffset: 1 },
                         강원: { tempOffset: -3, conditionOffset: 0 },
                       }
-                      
-                      const variation = cityWeatherVariation[city] || cityWeatherVariation['서울']
-                      const conditions = ['맑음', '구름조금', '구름많음', '흐림', '비']
-                      const adjustedConditionIndex = Math.max(0, (conditions.indexOf(dayWeather.condition) + variation.conditionOffset) % conditions.length)
-                      const adjustedCondition = conditions[adjustedConditionIndex]
-                      
+
+                      const variation =
+                        cityWeatherVariation[city] ||
+                        cityWeatherVariation['서울']
+                      const conditions = [
+                        '맑음',
+                        '구름조금',
+                        '구름많음',
+                        '흐림',
+                        '비',
+                      ]
+                      const adjustedConditionIndex = Math.max(
+                        0,
+                        (conditions.indexOf(dayWeather.condition) +
+                          variation.conditionOffset) %
+                          conditions.length,
+                      )
+                      const adjustedCondition =
+                        conditions[adjustedConditionIndex]
+
                       weatherForPlaces[place.description] = {
                         condition: adjustedCondition,
-                        temperature: Math.round((dayWeather.temperature.min + dayWeather.temperature.max) / 2 + variation.tempOffset),
+                        temperature: Math.round(
+                          (dayWeather.temperature.min +
+                            dayWeather.temperature.max) /
+                            2 +
+                            variation.tempOffset,
+                        ),
                         humidity: dayWeather.humidity,
-                        precipitation: dayWeather.precipitation
+                        precipitation: dayWeather.precipitation,
                       }
                     })
                   } else {
                     // 날씨 데이터가 없을 때 기본값 제공
-                    places.forEach(place => {
+                    places.forEach((place) => {
                       weatherForPlaces[place.description] = {
                         condition: '맑음',
                         temperature: 20,
                         humidity: 60,
-                        precipitation: 0
+                        precipitation: 0,
                       }
                     })
                   }
-                  
+
                   return (
                     <CompactDayItinerary
                       key={day}
@@ -1446,17 +1472,18 @@ export function TravelPlanDetailPage() {
                 })}
               </div>
             ) : (
-              <div className="text-center py-8">
+              <div className="py-8 text-center">
                 <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-gray-100 p-3">
                   <MapPin className="h-6 w-6 text-gray-400" />
                 </div>
                 <p className="text-gray-500">상세 일정이 없습니다.</p>
-                <p className="text-sm text-gray-400 mt-1">여행 계획을 추가해보세요!</p>
+                <p className="mt-1 text-sm text-gray-400">
+                  여행 계획을 추가해보세요!
+                </p>
               </div>
             )}
           </CardContent>
         </Card>
-
 
         {/* 상세 경로 정보 모달 */}
         <Dialog open={isRouteDetailOpen} onOpenChange={setIsRouteDetailOpen}>
@@ -1598,7 +1625,7 @@ export function TravelPlanDetailPage() {
                       {timemachineRouteInfo.timemachine_info.comparison.routes.map(
                         (route, index) => (
                           <div
-                            key={index}
+                            key={generateSafeKey(route, 'comparison', index)}
                             className={`rounded-lg border p-4 ${
                               route.is_recommended
                                 ? 'border-green-200 bg-green-50'
@@ -1704,7 +1731,11 @@ export function TravelPlanDetailPage() {
                                       .slice(0, 3)
                                       .map((guide, idx) => (
                                         <div
-                                          key={idx}
+                                          key={generateSafeKey(
+                                            guide,
+                                            'guide',
+                                            idx,
+                                          )}
                                           className="flex items-start space-x-2 text-xs"
                                         >
                                           <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-700">
@@ -1871,7 +1902,7 @@ export function TravelPlanDetailPage() {
                               {timemachineRouteInfo.timemachine_info.predicted_route.route_data.detailed_guides.map(
                                 (guide, idx) => (
                                   <div
-                                    key={idx}
+                                    key={generateSafeKey(guide, 'guide', idx)}
                                     className="flex items-start space-x-2 text-xs"
                                   >
                                     <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-700">
@@ -1908,7 +1939,7 @@ export function TravelPlanDetailPage() {
                       {timemachineRouteInfo.timemachine_info.comparison.recommended.route_data.detailed_guides.map(
                         (guide, index) => (
                           <div
-                            key={index}
+                            key={generateSafeKey(guide, 'guide', index)}
                             className="flex items-start space-x-3 rounded border bg-white p-3"
                           >
                             <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-sm font-bold text-green-800">

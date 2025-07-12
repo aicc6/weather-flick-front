@@ -17,6 +17,13 @@ import {
   ChevronRight,
 } from '@/components/icons'
 
+// 안전한 key 생성 유틸리티 함수
+const generateSafeKey = (item, prefix = '', index = 0) => {
+  const safeId = item?.id || item?.course_id || item?.plan_id || index
+  const safePrefix = prefix ? `${prefix}-` : ''
+  return `${safePrefix}${safeId}`
+}
+
 export default function ProfilePage() {
   const navigate = useNavigate()
   const { user: authUser, loading: authLoading, isAuthenticated } = useAuth()
@@ -309,9 +316,9 @@ export default function ProfilePage() {
                 </div>
               ) : recentPlans.length > 0 ? (
                 <div className="space-y-4">
-                  {recentPlans.map((plan) => (
+                  {recentPlans.map((plan, index) => (
                     <div
-                      key={plan.plan_id}
+                      key={generateSafeKey(plan, 'plan', index)}
                       className="weather-card cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
                       onClick={() => navigate(`/travel-plans/${plan.plan_id}`)}
                     >
@@ -397,9 +404,9 @@ export default function ProfilePage() {
             <CardContent>
               {favoritePlaces.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
-                  {favoritePlaces.map((place) => (
+                  {favoritePlaces.map((place, index) => (
                     <Badge
-                      key={place.id}
+                      key={generateSafeKey(place, 'place', index)}
                       variant="outline"
                       className="weather-cloudy cursor-pointer transition-all duration-300 hover:scale-105"
                     >

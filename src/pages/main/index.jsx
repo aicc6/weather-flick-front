@@ -1,10 +1,10 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 
-import { recommendedDestinations } from '@/data'
 import { Chatbot } from '@/components/common/chatbot'
 import { RecommendedDestCarousel } from './RecommendedDestCarousel'
 import { useScrollFadeIn } from '@/hooks/useScrollFadeIn'
+import { useGetDestinationRecommendationsQuery } from '@/store/api/destinationsApi'
 
 /**
  * URL: '/'
@@ -16,6 +16,46 @@ export function MainPage() {
     date: null,
     theme: '',
   })
+
+  // RTK Query로 추천 여행지 데이터 가져오기
+  const {
+    data: recommendationsResponse,
+    error: apiError,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetDestinationRecommendationsQuery({
+    theme: 'popular', // 인기 여행지 추천
+    weatherConditions: [], // 전체 날씨 조건
+  })
+
+  // 추천 여행지 데이터 변환
+  const recommendedDestinations = useMemo(() => {
+    if (!recommendationsResponse) return []
+
+    // API 응답 구조에 따라 조정
+    if (Array.isArray(recommendationsResponse)) {
+      return recommendationsResponse
+    }
+
+    if (recommendationsResponse.destinations) {
+      return recommendationsResponse.destinations
+    }
+
+    if (recommendationsResponse.recommendations) {
+      return recommendationsResponse.recommendations
+    }
+
+    return []
+  }, [recommendationsResponse])
+
+  // 에러 메시지 처리
+  const error = useMemo(() => {
+    if (isError && apiError) {
+      return apiError.message || '추천 여행지 데이터를 불러오는데 실패했습니다.'
+    }
+    return null
+  }, [isError, apiError])
 
   // 배경 위치 상태
   const [bgPos, setBgPos] = useState('center')
@@ -142,9 +182,37 @@ export function MainPage() {
             </h2>
             <div className="flex justify-center">
               <div className="w-full max-w-5xl">
-                <RecommendedDestCarousel
-                  destinations={recommendedDestinations}
-                />
+                {isLoading ? (
+                  <div className="weather-card p-8 text-center">
+                    <div className="mb-4 text-2xl">🔄</div>
+                    <p className="text-muted-foreground">
+                      추천 여행지를 불러오는 중...
+                    </p>
+                  </div>
+                ) : error ? (
+                  <div className="weather-card p-8 text-center">
+                    <div className="mb-4 text-2xl">❌</div>
+                    <p className="mb-4 text-red-500">{error}</p>
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => refetch()}
+                        className="weather-button rounded-full px-6 py-2 text-sm font-medium text-white"
+                      >
+                        🔄 다시 시도
+                      </button>
+                      <button
+                        onClick={() => window.location.reload()}
+                        className="mx-auto block text-sm text-blue-600 underline hover:text-blue-800"
+                      >
+                        페이지 새로고침
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <RecommendedDestCarousel
+                    destinations={recommendedDestinations}
+                  />
+                )}
               </div>
             </div>
           </div>

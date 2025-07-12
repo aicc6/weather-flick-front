@@ -11,6 +11,9 @@ import {
   Users,
 } from 'lucide-react'
 
+// RTK Query import 추가
+import { useGetTravelCoursesQuery } from '@/store/api/travelCoursesApi'
+
 // 새로운 고도화 컴포넌트들 (위에서 생성한 컴포넌트들)
 import AdvancedFilters from '@/components/recommend/AdvancedFilters'
 import SmartSorting from '@/components/recommend/SmartSorting'
@@ -46,31 +49,50 @@ const EnhancedRecommendPage = () => {
   const [personalSettings, setPersonalSettings] = useState({})
   const [showPersonalization, setShowPersonalization] = useState(false)
 
-  // 모의 여행 코스 데이터 (실제로는 API에서 가져옴)
-  const travelCourses = [
-    {
-      id: 1,
-      title: '제주도 자연 힐링 여행 코스',
-      subtitle: '한라산부터 바다까지, 제주의 아름다운 자연을 만나보세요',
-      region: 'jeju',
-      regionName: '제주도',
-      duration: '2박 3일',
-      theme: ['자연', '힐링', '관광'],
-      rating: 4.5,
-      reviewCount: 100,
-      likeCount: 200,
-      price: 250000,
-      priceLabel: '250,000원',
-      bestMonths: [3, 4, 5, 9, 10, 11],
-      amenities: ['parking', 'restaurant', 'wifi'],
-      travelStyle: 'relaxed',
-      weatherScore: 8.5,
-      popularityScore: 85,
-      isNew: false,
-      createdAt: '2024-01-15',
-    },
-    // ... 더 많은 코스 데이터
-  ]
+  // ===============================
+  // 🚀 RTK Query로 데이터 가져오기
+  // ===============================
+  const [currentPage, setCurrentPage] = useState(1)
+  const PAGE_SIZE = 20
+
+  // RTK Query 훅 사용
+  const {
+    data: travelCoursesResponse,
+    error: apiError,
+    isLoading: isApiLoading,
+    isError,
+    refetch,
+  } = useGetTravelCoursesQuery({
+    page: currentPage,
+    page_size: PAGE_SIZE,
+  })
+
+  // API 응답에서 여행 코스 데이터 추출
+  const travelCourses = useMemo(() => {
+    if (!travelCoursesResponse) return []
+
+    // API 응답 구조에 따라 조정
+    if (Array.isArray(travelCoursesResponse)) {
+      return travelCoursesResponse
+    }
+
+    if (travelCoursesResponse.courses) {
+      return travelCoursesResponse.courses
+    }
+
+    return []
+  }, [travelCoursesResponse])
+
+  // 에러 처리
+  const error = useMemo(() => {
+    if (isError && apiError) {
+      return apiError.message || '여행 코스 데이터를 불러오는데 실패했습니다.'
+    }
+    return null
+  }, [isError, apiError])
+
+  // 로딩 상태
+  const isLoading = isApiLoading
 
   // 고급 필터링 로직
   const filteredCourses = useMemo(() => {
@@ -314,62 +336,137 @@ const EnhancedRecommendPage = () => {
               )}
             </div>
 
-            {/* 결과가 없는 경우 */}
-            {sortedCourses.length === 0 && (
+            {/* 로딩, 에러, 결과 없음 처리 */}
+            {isLoading ? (
+              // 로딩 중
+              <Alert>
+                <AlertDescription className="py-8 text-center">
+                  <div className="space-y-4">
+                    <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                    <p className="text-lg">여행 코스를 불러오는 중입니다...</p>
+                    <p className="text-muted-foreground text-sm">
+                      잠시만 기다려주세요
+                    </p>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            ) : error ? (
+              // 에러 발생
+              <Alert variant="destructive">
+                <AlertDescription className="py-8 text-center">
+                  <div className="space-y-4">
+                    <span className="text-3xl">⚠️</span>
+                    <p className="text-lg">데이터를 불러올 수 없습니다</p>
+                    <p className="text-sm">{error}</p>
+                    <div className="space-y-2">
+                      <Button onClick={() => refetch()} className="mt-4">
+                        🔄 다시 시도
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={handleFiltersReset}
+                        className="ml-2"
+                      >
+                        필터 초기화
+                      </Button>
+                    </div>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            ) : sortedCourses.length === 0 ? (
+              // 검색 결과 없음
               <Alert>
                 <AlertDescription className="py-8 text-center">
                   <div className="space-y-4">
                     <p className="text-lg">
-                      선택한 조건에 맞는 여행 코스가 없습니다 😥
+                      {travelCourses.length === 0
+                        ? '등록된 여행 코스가 없습니다 😔'
+                        : '선택한 조건에 맞는 여행 코스가 없습니다 😥'}
                     </p>
                     <div className="text-muted-foreground space-y-2 text-sm">
-                      <p>• 필터 조건을 완화해보세요</p>
-                      <p>• 다른 지역이나 테마를 선택해보세요</p>
-                      <p>• 개인화 설정을 조정해보세요</p>
+                      {travelCourses.length === 0 ? (
+                        <>
+                          <p>
+                            • 관리자가 여행 코스를 등록하면 여기에 표시됩니다
+                          </p>
+                          <p>• 잠시 후 다시 시도해보세요</p>
+                        </>
+                      ) : (
+                        <>
+                          <p>• 필터 조건을 완화해보세요</p>
+                          <p>• 다른 지역이나 테마를 선택해보세요</p>
+                          <p>• 개인화 설정을 조정해보세요</p>
+                        </>
+                      )}
                     </div>
-                    <Button onClick={handleFiltersReset} className="mt-4">
-                      필터 초기화
-                    </Button>
+                    <div className="space-y-2">
+                      <Button onClick={handleFiltersReset} className="mt-4">
+                        {travelCourses.length === 0
+                          ? '🔄 새로고침'
+                          : '필터 초기화'}
+                      </Button>
+                      {travelCourses.length === 0 && (
+                        <Button
+                          variant="outline"
+                          onClick={() => refetch()}
+                          className="ml-2"
+                        >
+                          데이터 다시 불러오기
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </AlertDescription>
               </Alert>
-            )}
+            ) : null}
 
             {/* 여행 코스 목록 */}
-            {sortedCourses.length > 0 && (
-              <div
-                className={
-                  viewMode === 'grid'
-                    ? 'grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'
-                    : 'space-y-4'
-                }
-              >
-                {sortedCourses.map((course) => (
-                  <RecommendCourseCard
-                    key={course.id}
-                    course={course}
-                    imageUrl={`https://picsum.photos/800/600?random=${course.id}`}
-                    rating={course.rating}
-                    viewMode={viewMode}
-                    personalizedScore={
-                      sortConfig.field === 'smart'
-                        ? course.rating * 0.3 +
-                          course.weatherScore * 0.2 +
-                          course.popularityScore * 0.5
-                        : null
-                    }
-                  />
-                ))}
-              </div>
-            )}
+            {!isLoading && !error && sortedCourses.length > 0 && (
+              <>
+                <div
+                  className={
+                    viewMode === 'grid'
+                      ? 'grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'
+                      : 'space-y-4'
+                  }
+                >
+                  {sortedCourses.map((course) => (
+                    <RecommendCourseCard
+                      key={course.id}
+                      course={course}
+                      imageUrl={`https://picsum.photos/800/600?random=${course.id}`}
+                      rating={course.rating}
+                      viewMode={viewMode}
+                      personalizedScore={
+                        sortConfig.field === 'smart'
+                          ? course.rating * 0.3 +
+                            course.weatherScore * 0.2 +
+                            course.popularityScore * 0.5
+                          : null
+                      }
+                    />
+                  ))}
+                </div>
 
-            {/* 더 보기 버튼 (무한 스크롤 대신) */}
-            {sortedCourses.length > 0 && (
-              <div className="py-8 text-center">
-                <Button variant="outline" size="lg">
-                  더 많은 여행 코스 보기
-                </Button>
-              </div>
+                {/* 페이지네이션 또는 더보기 버튼 */}
+                {travelCoursesResponse &&
+                  travelCoursesResponse.total > sortedCourses.length && (
+                    <div className="py-8 text-center">
+                      <Button
+                        onClick={() => setCurrentPage((prev) => prev + 1)}
+                        variant="outline"
+                        size="lg"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? '로딩 중...' : '더 많은 여행 코스 보기'}
+                      </Button>
+                      <p className="text-muted-foreground mt-2 text-sm">
+                        {sortedCourses.length} / {travelCoursesResponse.total}{' '}
+                        개 표시 중
+                      </p>
+                    </div>
+                  )}
+              </>
             )}
           </div>
         </div>
