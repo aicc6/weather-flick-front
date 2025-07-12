@@ -140,7 +140,9 @@ export default function TravelCourseDetailPage() {
     isLoading: isReviewsLoading,
     isError: isReviewsError,
     refetch: refetchReviews,
-  } = useGetReviewsTreeByCourseQuery(id)
+  } = useGetReviewsTreeByCourseQuery(id, {
+    skip: !id || isNaN(Number(id)), // id가 없거나 숫자가 아닐 때 스킵
+  })
   const [createReview, { isLoading: isPosting }] = useCreateReviewMutation()
 
   // 댓글/답글 등록 핸들러
@@ -161,6 +163,9 @@ export default function TravelCourseDetailPage() {
   // 좋아요 상태/카운트 RTK Query
   const { data: likeData, isLoading: likeLoading } = useGetCourseLikeQuery(
     Number(id),
+    {
+      skip: !id || isNaN(Number(id)), // id가 없거나 숫자가 아닐 때 스킵
+    },
   )
   const [likeCourse] = useLikeCourseMutation()
   const [unlikeCourse] = useUnlikeCourseMutation()

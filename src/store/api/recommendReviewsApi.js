@@ -7,7 +7,13 @@ export const recommendReviewsApi = createApi({
   tagTypes: ['RecommendReview'],
   endpoints: (builder) => ({
     getReviewsByCourse: builder.query({
-      query: (courseId) => `/recommend-reviews/course/${courseId}`,
+      query: (courseId) => {
+        // courseId 유효성 검증
+        if (!courseId || isNaN(Number(courseId))) {
+          throw new Error('Invalid course ID')
+        }
+        return `/recommend-reviews/course/${courseId}`
+      },
       providesTags: (result, error, courseId) => [
         { type: 'RecommendReview', id: courseId },
       ],
@@ -24,7 +30,13 @@ export const recommendReviewsApi = createApi({
       ],
     }),
     getReviewsTreeByCourse: builder.query({
-      query: (courseId) => `/recommend-reviews/course/${courseId}/tree`,
+      query: (courseId) => {
+        // courseId 유효성 검증
+        if (!courseId || isNaN(Number(courseId))) {
+          throw new Error('Invalid course ID')
+        }
+        return `/recommend-reviews/course/${courseId}/tree`
+      },
       providesTags: (result, error, courseId) => [
         { type: 'RecommendReview', id: courseId },
       ],

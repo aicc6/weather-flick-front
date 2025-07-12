@@ -7,26 +7,44 @@ export const recommendLikesApi = createApi({
   tagTypes: ['RecommendLike'],
   endpoints: (builder) => ({
     getCourseLike: builder.query({
-      query: (courseId) => `/likes-recommend/course/${courseId}`,
+      query: (courseId) => {
+        // courseId 유효성 검증
+        if (!courseId || isNaN(Number(courseId))) {
+          throw new Error('Invalid course ID')
+        }
+        return `/likes-recommend/course/${courseId}`
+      },
       providesTags: (result, error, courseId) => [
         { type: 'RecommendLike', id: courseId },
       ],
     }),
     likeCourse: builder.mutation({
-      query: (courseId) => ({
-        url: '/likes-recommend/',
-        method: 'POST',
-        body: { course_id: courseId },
-      }),
+      query: (courseId) => {
+        // courseId 유효성 검증
+        if (!courseId || isNaN(Number(courseId))) {
+          throw new Error('Invalid course ID')
+        }
+        return {
+          url: '/likes-recommend/',
+          method: 'POST',
+          body: { course_id: courseId },
+        }
+      },
       invalidatesTags: (result, error, courseId) => [
         { type: 'RecommendLike', id: courseId },
       ],
     }),
     unlikeCourse: builder.mutation({
-      query: (courseId) => ({
-        url: `/likes-recommend/${courseId}`,
-        method: 'DELETE',
-      }),
+      query: (courseId) => {
+        // courseId 유효성 검증
+        if (!courseId || isNaN(Number(courseId))) {
+          throw new Error('Invalid course ID')
+        }
+        return {
+          url: `/likes-recommend/${courseId}`,
+          method: 'DELETE',
+        }
+      },
       invalidatesTags: (result, error, courseId) => [
         { type: 'RecommendLike', id: courseId },
       ],

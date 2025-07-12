@@ -92,6 +92,9 @@ const RecommendCourseCard = React.memo(function RecommendCourseCard({
   const imageUrl = useCourseImage(course.id)
   const { data: likeData, isLoading: likeLoading } = useGetCourseLikeQuery(
     course.id,
+    {
+      skip: !course?.id || isNaN(Number(course.id)), // course.id가 없거나 숫자가 아닐 때 스킵
+    },
   )
   const [likeCourse] = useLikeCourseMutation()
   const [unlikeCourse] = useUnlikeCourseMutation()
@@ -100,7 +103,9 @@ const RecommendCourseCard = React.memo(function RecommendCourseCard({
     data: reviews = [],
     isLoading: reviewsLoading,
     isError: reviewsError,
-  } = useGetReviewsByCourseQuery(course.id)
+  } = useGetReviewsByCourseQuery(course.id, {
+    skip: !course?.id || isNaN(Number(course.id)), // course.id가 없거나 숫자가 아닐 때 스킵
+  })
 
   const handleLikeClick = useCallback(
     async (e) => {

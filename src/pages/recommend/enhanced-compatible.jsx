@@ -34,7 +34,9 @@ function useCourseRatings(courseIds) {
   const ratings = {}
   courseIds.forEach((id) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { data: reviews = [] } = useGetReviewsByCourseQuery(id)
+    const { data: reviews = [] } = useGetReviewsByCourseQuery(id, {
+      skip: !id || isNaN(Number(id)), // id가 없거나 숫자가 아닐 때 스킵
+    })
     ratings[id] =
       reviews.length > 0
         ? (

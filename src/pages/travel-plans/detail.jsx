@@ -60,8 +60,8 @@ export function TravelPlanDetailPage() {
   // 경로 정보 조회
   const { data: routes, isLoading: routesLoading } =
     useGetTravelPlanRoutesQuery(planId, {
-    skip: !planId,
-  })
+      skip: !planId,
+    })
 
   // 자동 경로 생성
   const [autoGenerateRoutes, { isLoading: isGeneratingRoutes }] =
@@ -404,7 +404,6 @@ export function TravelPlanDetailPage() {
     return `${Math.round(cost).toLocaleString()}원`
   }
 
-<<<<<<< HEAD
   // 대중교통 상세 정보 렌더링
   const renderTransitDetails = (routeData) => {
     if (!routeData) return null
@@ -654,143 +653,25 @@ export function TravelPlanDetailPage() {
                 {index + 1}
               </span>
               <div className="flex-1">
-                <div className="text-gray-700">{point.description}</div>
+                <div className="font-medium text-gray-700">
+                  {point.description}
+                </div>
                 <div className="mt-1 flex items-center space-x-2 text-gray-400">
-                  {point.distance > 0 && (
-                    <span>
-                      {point.distance >= 1000
-                        ? `${(point.distance / 1000).toFixed(1)}km`
-                        : `${point.distance}m`}
-                    </span>
-                  )}
-                  {point.turn_instruction && (
-                    <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
-                      {point.turn_instruction}
-                    </span>
-                  )}
-                  {point.road_name && (
-                    <span className="text-gray-500">• {point.road_name}</span>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-
-          <div className="mt-2 flex items-center space-x-4 text-xs text-gray-400">
-            {routeData.toll_fee > 0 && (
-              <span className="inline-flex items-center">
-                🛣️ 통행료 {routeData.toll_fee.toLocaleString()}원
-              </span>
-            )}
-            {routeData.taxi_fee > 0 && (
-              <span className="inline-flex items-center">
-                🚖 택시요금 {routeData.taxi_fee.toLocaleString()}원
-              </span>
-            )}
-            <span className="inline-flex items-center">🗺️ TMAP 기반 경로</span>
-          </div>
-        </div>
-      )
-    }
-
-    // Google API 응답 (steps)
-    if (routeData.steps && routeData.steps.length > 0) {
-      const drivingSteps = routeData.steps.filter(
-        (step) => step.travel_mode === 'DRIVING',
-      )
-      const displaySteps = drivingSteps.slice(0, 5) // 최대 5개만 표시
-
-      if (displaySteps.length === 0) return null
-
-      return (
-        <div className="mt-2 space-y-1">
-          <div className="text-xs font-medium text-gray-500">🗺️ 경로 안내</div>
-          {displaySteps.map((step, index) => (
-            <div
-              key={generateSafeKey(step, 'step', index)}
-              className="flex items-start space-x-2 text-xs text-gray-500"
-            >
-              <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-800">
-                {index + 1}
-              </span>
-              <div className="flex-1">
-                <div
-                  className="text-gray-700"
-                  dangerouslySetInnerHTML={{ __html: step.html_instructions }}
-                />
-                <div className="text-gray-400">
-                  {step.distance?.text} • {step.duration?.text}
-                </div>
-              </div>
-            </div>
-          ))}
-
-          <div className="mt-2 text-xs text-gray-400">
-            🗺️ Google Maps 기반 자동차 경로
-          </div>
-        </div>
-      )
-    }
-
-    // 기본 계산 방식 (enhanced)
-    if (routeData.method || routeData.source === 'calculation') {
-      return (
-        <div className="mt-2 space-y-1">
-          <div className="text-xs font-medium text-gray-500">
-            🚗 자동차 경로 정보
-          </div>
-
-          {/* 안내점이 있는 경우 표시 */}
-          {routeData.guide_points && routeData.guide_points.length > 0 && (
-            <div className="space-y-1">
-              {routeData.guide_points.map((point, index) => (
-                <div
-                  key={generateSafeKey(point, 'point', index)}
-                  className="flex items-start space-x-2 text-xs text-gray-500"
-                >
-                  <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-800">
-                    {index + 1}
+                  <span className="inline-flex items-center">
+                    📍 {point.distance}
                   </span>
-                  <div className="flex-1">
-                    <div className="text-gray-700">{point.description}</div>
-                    {point.distance > 0 && (
-                      <div className="text-gray-400">
-                        {point.distance >= 1000
-                          ? `${(point.distance / 1000).toFixed(1)}km`
-                          : `${point.distance}m`}
-                      </div>
-                    )}
-                  </div>
+                  <span className="inline-flex items-center">
+                    ⏱️ {point.time}
+                  </span>
+                  {point.instruction && (
+                    <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
+                      {point.instruction}
+                    </span>
+                  )}
                 </div>
-              ))}
+              </div>
             </div>
-          )}
-
-          {/* 추가 요금 정보 */}
-          <div className="flex items-center space-x-4 text-xs text-gray-400">
-            {routeData.toll_fee > 0 && (
-              <span className="inline-flex items-center">
-                🛣️ 통행료 {routeData.toll_fee.toLocaleString()}원
-              </span>
-            )}
-            {routeData.taxi_fee > 0 && (
-              <span className="inline-flex items-center">
-                🚖 택시요금 {routeData.taxi_fee.toLocaleString()}원
-              </span>
-            )}
-          </div>
-
-          <div className="text-xs text-gray-400">
-            📊{' '}
-            {routeData.method === 'estimated_calculation'
-              ? '추정 계산'
-              : '기본 계산'}{' '}
-            기반
-          </div>
-          <div className="text-xs text-gray-500">
-            • 실제 경로와 다를 수 있습니다 • 정확한 경로는 내비게이션 앱을
-            이용해주세요
-          </div>
+          ))}
         </div>
       )
     }
@@ -798,8 +679,6 @@ export function TravelPlanDetailPage() {
     return null
   }
 
-=======
->>>>>>> 471a89617d24ee1af699991bff0ac0788529caab
   // 상세 경로 정보 렌더링
   const renderDetailedRouteInfo = (route) => {
     if (!route?.route_data) return null
@@ -1002,8 +881,8 @@ export function TravelPlanDetailPage() {
               <Link to={`/planner?planId=${planId}`}>
                 <Edit className="mr-2 h-4 w-4" />
                 수정하기
-            </Link>
-          </Button>
+              </Link>
+            </Button>
           </div>
         </div>
 
@@ -1016,46 +895,46 @@ export function TravelPlanDetailPage() {
                   {plan.title}
                 </CardTitle>
                 <div className="flex items-center gap-4">
-                <div
-                  className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium ${
-                    plan.status === 'CONFIRMED'
-                      ? 'border border-green-200 bg-green-100 text-green-700'
-                      : plan.status === 'PLANNING'
-                        ? 'border border-blue-200 bg-blue-100 text-blue-700'
-                        : plan.status === 'IN_PROGRESS'
-                          ? 'border border-purple-200 bg-purple-100 text-purple-700'
-                          : plan.status === 'COMPLETED'
-                            ? 'border border-gray-200 bg-gray-100 text-gray-700'
-                            : 'border border-red-200 bg-red-100 text-red-700'
-                  }`}
-                >
                   <div
-                    className={`h-2 w-2 rounded-full ${
+                    className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium ${
                       plan.status === 'CONFIRMED'
-                        ? 'bg-green-500'
+                        ? 'border border-green-200 bg-green-100 text-green-700'
                         : plan.status === 'PLANNING'
-                          ? 'bg-blue-500'
+                          ? 'border border-blue-200 bg-blue-100 text-blue-700'
                           : plan.status === 'IN_PROGRESS'
-                            ? 'bg-purple-500'
+                            ? 'border border-purple-200 bg-purple-100 text-purple-700'
                             : plan.status === 'COMPLETED'
-                              ? 'bg-gray-500'
-                              : 'bg-red-500'
+                              ? 'border border-gray-200 bg-gray-100 text-gray-700'
+                              : 'border border-red-200 bg-red-100 text-red-700'
                     }`}
-                  ></div>
-                  {plan.status === 'CONFIRMED'
-                    ? '확정'
-                    : plan.status === 'PLANNING'
-                      ? '계획중'
-                      : plan.status === 'IN_PROGRESS'
-                        ? '여행중'
-                        : plan.status === 'COMPLETED'
-                          ? '완료'
-                          : '취소'}
-                </div>
+                  >
+                    <div
+                      className={`h-2 w-2 rounded-full ${
+                        plan.status === 'CONFIRMED'
+                          ? 'bg-green-500'
+                          : plan.status === 'PLANNING'
+                            ? 'bg-blue-500'
+                            : plan.status === 'IN_PROGRESS'
+                              ? 'bg-purple-500'
+                              : plan.status === 'COMPLETED'
+                                ? 'bg-gray-500'
+                                : 'bg-red-500'
+                      }`}
+                    ></div>
+                    {plan.status === 'CONFIRMED'
+                      ? '확정'
+                      : plan.status === 'PLANNING'
+                        ? '계획중'
+                        : plan.status === 'IN_PROGRESS'
+                          ? '여행중'
+                          : plan.status === 'COMPLETED'
+                            ? '완료'
+                            : '취소'}
+                  </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">
                     <Calendar className="mr-2 inline h-4 w-4" />
                     {formatDate(plan.start_date)} ~ {formatDate(plan.end_date)}
-              </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1112,7 +991,7 @@ export function TravelPlanDetailPage() {
                       <p className="text-sm text-gray-700 dark:text-gray-300">
                         {plan.description}
                       </p>
-            </div>
+                    </div>
                   )}
                   {plan.start_location && (
                     <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
@@ -1134,23 +1013,23 @@ export function TravelPlanDetailPage() {
                     <span>📊</span>
                     여행 통계
                   </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+                </CardHeader>
+                <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                         {itineraryDays.length}
-              </div>
+                      </div>
                       <div className="text-sm text-gray-600 dark:text-gray-300">
                         여행 일수
-            </div>
-                </div>
+                      </div>
+                    </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                         {plan.itinerary
                           ? Object.values(plan.itinerary).flat().length
                           : 0}
-              </div>
+                      </div>
                       <div className="text-sm text-gray-600 dark:text-gray-300">
                         방문 장소
                       </div>
@@ -1357,7 +1236,7 @@ export function TravelPlanDetailPage() {
                     <LoadingSpinner />
                     <span className="ml-2 text-gray-600 dark:text-gray-300">
                       경로 정보를 불러오는 중...
-                  </span>
+                    </span>
                   </CardContent>
                 </Card>
               ) : routes && routes.length > 0 ? (
@@ -1389,12 +1268,12 @@ export function TravelPlanDetailPage() {
                               {isStartRoute && (
                                 <div className="mb-2 inline-block rounded-full bg-green-50 px-3 py-1 text-sm font-medium text-green-600 dark:bg-green-900/30 dark:text-green-400">
                                   🏠 출발지에서 첫 번째 목적지로
-                </div>
+                                </div>
                               )}
                               {isInterDayRoute && (
                                 <div className="mb-2 inline-block rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
                                   🏨 전일 마지막 장소에서 오늘 첫 번째 목적지로
-              </div>
+                                </div>
                               )}
                               <EnhancedTransportCard
                                 route={{
@@ -1449,9 +1328,9 @@ export function TravelPlanDetailPage() {
                           </>
                         )}
                       </Button>
-            )}
-          </CardContent>
-        </Card>
+                    )}
+                  </CardContent>
+                </Card>
               )}
             </div>
           </TabsContent>
@@ -1459,88 +1338,88 @@ export function TravelPlanDetailPage() {
           {/* 날씨 탭 */}
           <TabsContent value="weather" className="space-y-6">
             <Card className="rounded-xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <CardHeader className="pb-4">
+              <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 text-lg text-gray-800 dark:text-gray-100">
                   <span className="text-xl">☀️</span>
-                날씨 정보
-              </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {weatherData && weatherData.forecast ? (
-              <div className="space-y-3">
+                  날씨 정보
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {weatherData && weatherData.forecast ? (
+                  <div className="space-y-3">
                     <div className="mb-4 rounded-md border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20">
                       <p className="text-sm text-blue-700 dark:text-blue-300">
                         🌤️ 날씨 정보는 예측 데이터이며, 여행 전 최신 날씨를
                         확인해 주세요
-                  </p>
-                </div>
+                      </p>
+                    </div>
                     <div className="grid gap-4 md:grid-cols-2">
-                {weatherData.forecast.map((forecast, index) => {
-                  const getWeatherIcon = (condition) => {
-                    const iconMap = {
-                      맑음: '☀️',
-                      구름조금: '🌤️',
-                      구름많음: '☁️',
-                      흐림: '☁️',
-                      비: '🌧️',
-                      눈: '🌨️',
-                      바람: '💨',
-                    }
-                    return iconMap[condition] || '☀️'
-                  }
+                      {weatherData.forecast.map((forecast, index) => {
+                        const getWeatherIcon = (condition) => {
+                          const iconMap = {
+                            맑음: '☀️',
+                            구름조금: '🌤️',
+                            구름많음: '☁️',
+                            흐림: '☁️',
+                            비: '🌧️',
+                            눈: '🌨️',
+                            바람: '💨',
+                          }
+                          return iconMap[condition] || '☀️'
+                        }
 
                         const formatWeatherDate = (dateString) => {
-                    const date = new Date(dateString)
-                    return date.toLocaleDateString('ko-KR', {
-                      month: 'short',
-                      day: 'numeric',
-                      weekday: 'short',
-                    })
-                  }
+                          const date = new Date(dateString)
+                          return date.toLocaleDateString('ko-KR', {
+                            month: 'short',
+                            day: 'numeric',
+                            weekday: 'short',
+                          })
+                        }
 
-                  return (
+                        return (
                           <Card
-                      key={index}
+                            key={index}
                             className="rounded-lg border border-gray-200 bg-gradient-to-br from-blue-50 to-cyan-50 p-4 dark:border-gray-600 dark:from-blue-900/20 dark:to-cyan-900/20"
-                    >
+                          >
                             <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
+                              <div className="flex items-center space-x-3">
                                 <span className="text-2xl">
-                          {getWeatherIcon(forecast.condition)}
-                        </span>
-                        <div>
+                                  {getWeatherIcon(forecast.condition)}
+                                </span>
+                                <div>
                                   <div className="font-semibold text-gray-800 dark:text-gray-100">
                                     {formatWeatherDate(forecast.date)}
-                          </div>
+                                  </div>
                                   <div className="text-sm text-gray-600 dark:text-gray-300">
                                     {forecast.city &&
                                       forecast.city !== '서울' && (
                                         <span className="mr-2 text-blue-600 dark:text-blue-400">
-                                📍{forecast.city}
-                              </span>
-                            )}
-                            {forecast.condition}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
+                                          📍{forecast.city}
+                                        </span>
+                                      )}
+                                    {forecast.condition}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-right">
                                 <div className="text-lg font-bold text-gray-800 dark:text-gray-100">
                                   {forecast.temperature.min}°~
                                   {forecast.temperature.max}°
-                        </div>
-                        {forecast.precipitation > 0 && (
+                                </div>
+                                {forecast.precipitation > 0 && (
                                   <div className="text-sm text-blue-500 dark:text-blue-400">
-                            💧{forecast.precipitation}%
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                                    💧{forecast.precipitation}%
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           </Card>
-                  )
-                })}
+                        )
+                      })}
                     </div>
 
-                {weatherData.recommendation && (
+                    {weatherData.recommendation && (
                       <Card className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
                         <div className="flex items-start gap-2">
                           <span className="text-lg">💡</span>
@@ -1550,45 +1429,45 @@ export function TravelPlanDetailPage() {
                             </h4>
                             <p className="text-sm text-green-700 dark:text-green-400">
                               {weatherData.recommendation}
-                    </p>
-                  </div>
+                            </p>
+                          </div>
                         </div>
                       </Card>
-                )}
-              </div>
-            ) : (
-              <div className="py-8 text-center">
+                    )}
+                  </div>
+                ) : (
+                  <div className="py-8 text-center">
                     <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-orange-100 p-3 dark:bg-orange-900/30">
-                  <svg
+                      <svg
                         className="h-6 w-6 text-orange-600 dark:text-orange-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
-                    />
-                  </svg>
-                </div>
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
+                        />
+                      </svg>
+                    </div>
                     <h4 className="mb-2 font-medium text-gray-800 dark:text-gray-100">
-                  날씨 정보 서비스 준비중
-                </h4>
+                      날씨 정보 서비스 준비중
+                    </h4>
                     <p className="mb-3 text-gray-600 dark:text-gray-300">
-                  현재 날씨 서비스가 일시적으로 이용 불가합니다
-                </p>
+                      현재 날씨 서비스가 일시적으로 이용 불가합니다
+                    </p>
                     <div className="rounded-md border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-800 dark:bg-yellow-900/20">
                       <p className="text-sm text-yellow-700 dark:text-yellow-300">
                         🌤️ 여행 전 기상청이나 날씨 앱에서 각 지역의 날씨를
                         확인해 주세요
-                  </p>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
 
