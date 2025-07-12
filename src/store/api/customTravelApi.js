@@ -1,5 +1,5 @@
-import { createApi } from '@reduxjs/toolkit/query/react';
-import { baseQuery } from './baseQuery';
+import { createApi } from '@reduxjs/toolkit/query/react'
+import { baseQuery } from './baseQuery'
 
 export const customTravelApi = createApi({
   reducerPath: 'customTravelApi',
@@ -17,10 +17,10 @@ export const customTravelApi = createApi({
         return {
           status: response.status,
           message: response.data?.detail || '추천 생성에 실패했습니다.',
-        };
+        }
       },
     }),
   }),
-});
+})
 
-export const { useGetCustomTravelRecommendationsMutation } = customTravelApi;
+export const { useGetCustomTravelRecommendationsMutation } = customTravelApi

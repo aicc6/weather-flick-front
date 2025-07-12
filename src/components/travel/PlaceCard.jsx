@@ -3,8 +3,6 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
-  MapPin,
-  Tag,
   Navigation,
   Cloud,
   Sun,
@@ -19,13 +17,13 @@ import { NavigationButton } from '@/components/navigation'
  * 여행 장소 통합 카드 컴포넌트
  * 장소 정보, 날씨, 내비게이션을 하나의 깔끔한 카드로 통합
  */
-export function PlaceCard({ 
-  place, 
-  dayNumber, 
-  placeIndex, 
+export function PlaceCard({
+  place,
+  dayNumber,
+  placeIndex,
   weather = null,
   showWeather = true,
-  className = '' 
+  className = '',
 }) {
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -33,9 +31,23 @@ export function PlaceCard({
 
   // 위치 정보 추출
   const getLocationInfo = (place) => {
-    const lat = place.lat || place.latitude || place.y || place.coords?.lat || place.location?.lat || place.geometry?.location?.lat
-    const lng = place.lng || place.longitude || place.x || place.coords?.lng || place.location?.lng || place.geometry?.location?.lng
-    return lat && lng && !isNaN(lat) && !isNaN(lng) ? { lat: Number(lat), lng: Number(lng) } : null
+    const lat =
+      place.lat ||
+      place.latitude ||
+      place.y ||
+      place.coords?.lat ||
+      place.location?.lat ||
+      place.geometry?.location?.lat
+    const lng =
+      place.lng ||
+      place.longitude ||
+      place.x ||
+      place.coords?.lng ||
+      place.location?.lng ||
+      place.geometry?.location?.lng
+    return lat && lng && !isNaN(lat) && !isNaN(lng)
+      ? { lat: Number(lat), lng: Number(lng) }
+      : null
   }
 
   // 카테고리 포맷팅
@@ -73,29 +85,29 @@ export function PlaceCard({
   const hasNavigation = locationInfo || place.place_id || place.description
 
   return (
-    <Card className={`hover:shadow-md transition-shadow ${className}`}>
+    <Card className={`transition-shadow hover:shadow-md ${className}`}>
       <CardContent className="p-4">
         {/* 메인 정보 영역 */}
         <div className="flex items-start justify-between">
           {/* 왼쪽: 장소 기본 정보 */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-800 rounded-full text-xs font-bold flex-shrink-0">
+          <div className="min-w-0 flex-1">
+            <div className="mb-2 flex items-center gap-2">
+              <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-800">
                 {placeIndex + 1}
               </div>
-              <h4 className="font-medium text-gray-900 truncate">
+              <h4 className="truncate font-medium text-gray-900">
                 {place.description || place.name || '이름 없음'}
               </h4>
             </div>
-            
+
             {place.address && (
-              <p className="text-sm text-gray-600 mb-2 truncate">
+              <p className="mb-2 truncate text-sm text-gray-600">
                 📍 {place.address}
               </p>
             )}
-            
+
             {place.category && (
-              <Badge variant="secondary" className="text-xs mb-2">
+              <Badge variant="secondary" className="mb-2 text-xs">
                 {formatPlaceCategory(place.category)}
               </Badge>
             )}
@@ -110,7 +122,7 @@ export function PlaceCard({
                 <span className="text-gray-600">{weather.temperature}°</span>
               </div>
             )}
-            
+
             {/* 내비게이션 버튼 (간소화) */}
             {hasNavigation ? (
               <NavigationButton
@@ -135,15 +147,15 @@ export function PlaceCard({
 
         {/* 메모 영역 */}
         {place.memo && (
-          <div className="mt-3 p-2 bg-gray-50 rounded text-sm text-gray-600">
+          <div className="mt-3 rounded bg-gray-50 p-2 text-sm text-gray-600">
             💭 {place.memo}
           </div>
         )}
 
         {/* 확장 가능한 상세 정보 */}
-        {(showWeather && weather || hasNavigation) && (
+        {((showWeather && weather) || hasNavigation) && (
           <>
-            <div className="mt-3 pt-3 border-t border-gray-100">
+            <div className="mt-3 border-t border-gray-100 pt-3">
               <Button
                 variant="ghost"
                 size="sm"
@@ -164,13 +176,15 @@ export function PlaceCard({
 
             {/* 확장된 상세 정보 */}
             {isExpanded && (
-              <div className="mt-3 pt-3 border-t border-gray-100 space-y-3">
+              <div className="mt-3 space-y-3 border-t border-gray-100 pt-3">
                 {/* 상세 날씨 정보 */}
                 {showWeather && weather && (
-                  <div className="bg-blue-50 rounded-lg p-3">
-                    <div className="flex items-center gap-2 mb-2">
+                  <div className="rounded-lg bg-blue-50 p-3">
+                    <div className="mb-2 flex items-center gap-2">
                       <Thermometer className="h-4 w-4 text-blue-600" />
-                      <span className="text-sm font-medium text-blue-800">날씨 정보</span>
+                      <span className="text-sm font-medium text-blue-800">
+                        날씨 정보
+                      </span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div className="flex items-center gap-1">
@@ -178,12 +192,16 @@ export function PlaceCard({
                         <span>{weather.condition}</span>
                       </div>
                       <div className="text-right">
-                        <span className="font-medium">{weather.temperature}°C</span>
+                        <span className="font-medium">
+                          {weather.temperature}°C
+                        </span>
                       </div>
                       {weather.humidity && (
                         <>
                           <div>습도: {weather.humidity}%</div>
-                          <div className="text-right">강수: {weather.precipitation || 0}%</div>
+                          <div className="text-right">
+                            강수: {weather.precipitation || 0}%
+                          </div>
                         </>
                       )}
                     </div>
@@ -192,10 +210,12 @@ export function PlaceCard({
 
                 {/* 상세 내비게이션 옵션 */}
                 {hasNavigation && (
-                  <div className="bg-green-50 rounded-lg p-3">
-                    <div className="flex items-center gap-2 mb-2">
+                  <div className="rounded-lg bg-green-50 p-3">
+                    <div className="mb-2 flex items-center gap-2">
                       <Navigation className="h-4 w-4 text-green-600" />
-                      <span className="text-sm font-medium text-green-800">길찾기 옵션</span>
+                      <span className="text-sm font-medium text-green-800">
+                        길찾기 옵션
+                      </span>
                     </div>
                     <NavigationButton
                       destination={{

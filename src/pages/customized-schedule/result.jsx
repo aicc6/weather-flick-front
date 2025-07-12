@@ -124,7 +124,7 @@ export default function CustomizedScheduleResultPage() {
   const { regionName: displayedRegionName, regionCode } = useSelector(
     (state) => state.customizedSchedule,
   )
-  
+
   // URL에서 region 정보를 사용하여 임시로 설정
   const finalRegionCode = regionCode || region
   const finalRegionName = displayedRegionName || '서울'
@@ -192,7 +192,7 @@ export default function CustomizedScheduleResultPage() {
   useEffect(() => {
     const generateRecommendations = async () => {
       if (!finalRegionCode) return
-      
+
       setIsLoading(true)
 
       try {
@@ -226,15 +226,14 @@ export default function CustomizedScheduleResultPage() {
           tips: [
             '선택하신 스타일에 맞는 포토존이 많이 포함되어 있어요',
             '맛집 위주로 구성된 일정으로 미식 여행을 즐기실 수 있어요',
-            schedule === 'relaxed' 
+            schedule === 'relaxed'
               ? '널널한 일정으로 여유롭게 즐기실 수 있도록 구성했어요'
               : '알찬 일정으로 다양한 경험을 하실 수 있도록 구성했어요',
           ],
         }
-        
+
         setRecommendations(formattedData)
         toast.success('맞춤 여행 일정이 생성되었습니다!')
-        
       } catch (error) {
         console.error('API 호출 실패:', error)
         toast.error('추천 생성에 실패했습니다. 모의 데이터를 표시합니다.')
@@ -268,7 +267,17 @@ export default function CustomizedScheduleResultPage() {
     }
 
     generateRecommendations()
-  }, [finalRegionCode, finalRegionName, period, days, who, styles, schedule, generateMockItinerary, getCustomRecommendations])
+  }, [
+    finalRegionCode,
+    finalRegionName,
+    period,
+    days,
+    who,
+    styles,
+    schedule,
+    generateMockItinerary,
+    getCustomRecommendations,
+  ])
 
   const handleBack = () => {
     navigate(
