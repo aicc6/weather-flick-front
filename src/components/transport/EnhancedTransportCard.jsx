@@ -248,75 +248,96 @@ const RouteComparison = ({ routes }) => {
                 </div>
               </div>
             )}
-            
+
             {/* 대중교통 전용 상세 정보 */}
             {route.mode === 'bus' && route.transitInfo && (
               <div className="mt-3 rounded-lg bg-blue-50 p-3">
                 <div className="mb-2 flex items-center space-x-1">
                   <Bus className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm font-medium text-blue-800">상세 경로 정보</span>
+                  <span className="text-sm font-medium text-blue-800">
+                    상세 경로 정보
+                  </span>
                 </div>
-                
+
                 <div className="space-y-2 text-xs text-blue-700">
                   {/* 환승 요약 */}
                   <div className="flex items-center justify-between">
                     <span>총 환승 횟수</span>
-                    <span className="font-medium">{route.transitInfo.transferCount}회</span>
+                    <span className="font-medium">
+                      {route.transitInfo.transferCount}회
+                    </span>
                   </div>
-                  
+
                   {route.transitInfo.busTransferCount > 0 && (
                     <div className="flex items-center justify-between">
                       <span>🚌 버스 환승</span>
                       <span>{route.transitInfo.busTransferCount}회</span>
                     </div>
                   )}
-                  
+
                   {route.transitInfo.subwayTransferCount > 0 && (
                     <div className="flex items-center justify-between">
                       <span>🚇 지하철 환승</span>
                       <span>{route.transitInfo.subwayTransferCount}회</span>
                     </div>
                   )}
-                  
+
                   {route.transitInfo.walkingDistance > 0 && (
                     <div className="flex items-center justify-between">
                       <span>🚶 도보 거리</span>
                       <span>{route.transitInfo.walkingDistance}m</span>
                     </div>
                   )}
-                  
+
                   {route.transitInfo.totalStops > 0 && (
                     <div className="flex items-center justify-between">
                       <span>총 정거장 수</span>
                       <span>{route.transitInfo.totalStops}개</span>
                     </div>
                   )}
-                  
+
                   {/* 노선 정보 상세 */}
                   {route.transitInfo.routeInfo.length > 0 && (
-                    <div className="mt-3 pt-2 border-t border-blue-200">
-                      <div className="text-xs font-medium text-blue-800 mb-2">이용 노선</div>
+                    <div className="mt-3 border-t border-blue-200 pt-2">
+                      <div className="mb-2 text-xs font-medium text-blue-800">
+                        이용 노선
+                      </div>
                       <div className="space-y-1">
                         {route.transitInfo.routeInfo.map((routeItem, idx) => (
-                          <div key={idx} className="flex items-center justify-between">
+                          <div
+                            key={idx}
+                            className="flex items-center justify-between"
+                          >
                             <span>
-                              {routeItem.type === 'bus' ? '🚌' : routeItem.type === 'subway' ? '🚇' : '🚊'} 
+                              {routeItem.type === 'bus'
+                                ? '🚌'
+                                : routeItem.type === 'subway'
+                                  ? '🚇'
+                                  : '🚊'}
                               {routeItem.name || routeItem.line_name}
                             </span>
                             {routeItem.duration && (
-                              <span className="text-blue-600">{routeItem.duration}분</span>
+                              <span className="text-blue-600">
+                                {routeItem.duration}분
+                              </span>
                             )}
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
-                  
+
                   {/* 추가 팁 */}
-                  <div className="mt-3 pt-2 border-t border-blue-200">
-                    <div className="text-xs text-blue-600 space-y-1">
+                  <div className="mt-3 border-t border-blue-200 pt-2">
+                    <div className="space-y-1 text-xs text-blue-600">
                       {route.transitInfo.peakTimeMultiplier > 1 && (
-                        <div>⚠️ 출퇴근 시간대 예상 지연: +{Math.round((route.transitInfo.peakTimeMultiplier - 1) * 100)}%</div>
+                        <div>
+                          ⚠️ 출퇴근 시간대 예상 지연: +
+                          {Math.round(
+                            (route.transitInfo.peakTimeMultiplier - 1) * 100,
+                          )}
+                          %
+                        </div>
                       )}
                       <div>💡 모바일 앱에서 실시간 도착정보 확인 가능</div>
                       <div>💳 교통카드 미리 충전하여 빠른 승차</div>
@@ -376,7 +397,7 @@ const formatTransportType = (type) => {
   const typeMap = {
     car: '자동차',
     transit: '대중교통',
-    walk: '도보'
+    walk: '도보',
   }
   return typeMap[type] || type
 }
@@ -439,20 +460,30 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
               bus_transfer_count: 1,
               subway_transfer_count: 0,
               route_info: [
-                { type: 'bus', name: '472번', line_name: '472번 버스', duration: 15 },
-                { type: 'subway', name: '2호선', line_name: '지하철 2호선', duration: 10 }
+                {
+                  type: 'bus',
+                  name: '472번',
+                  line_name: '472번 버스',
+                  duration: 15,
+                },
+                {
+                  type: 'subway',
+                  name: '2호선',
+                  line_name: '지하철 2호선',
+                  duration: 10,
+                },
               ],
               walking_distance: 300,
               total_stops: 8,
               environmental_impact: 'CO2 절약',
               first_last_time: {
                 first_time: '05:30',
-                last_time: '23:50'
+                last_time: '23:50',
               },
               service_interval: 8,
               real_time_info: true,
               accessibility: true,
-              peak_time_multiplier: 1.2
+              peak_time_multiplier: 1.2,
             },
             car: {
               success: true,
@@ -583,15 +614,25 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
               bus_transfer_count: 0,
               subway_transfer_count: 1,
               route_info: [
-                { type: 'bus', name: '742번', line_name: '742번 버스', duration: 12 },
-                { type: 'subway', name: '1호선', line_name: '지하철 1호선', duration: 6 }
+                {
+                  type: 'bus',
+                  name: '742번',
+                  line_name: '742번 버스',
+                  duration: 12,
+                },
+                {
+                  type: 'subway',
+                  name: '1호선',
+                  line_name: '지하철 1호선',
+                  duration: 6,
+                },
               ],
               walking_distance: 250,
               total_stops: 6,
               environmental_impact: '저탄소',
               first_last_time: {
                 first_time: '05:20',
-                last_time: '24:00'
+                last_time: '24:00',
               },
               service_interval: 5,
               real_time_info: true,
@@ -675,10 +716,10 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
     // 대중교통 경로
     if (apiData.routes.transit?.success) {
       const transit = apiData.routes.transit
-      
+
       // 상세 경로 정보 생성
       const routeDetails = []
-      
+
       // 환승 정보
       if (transit.transfer_count > 0) {
         routeDetails.push(`🔄 환승 ${transit.transfer_count}회`)
@@ -691,43 +732,51 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
       } else {
         routeDetails.push('🚌 직통 운행')
       }
-      
+
       // 노선 정보
       if (transit.route_info && transit.route_info.length > 0) {
-        const routeNames = transit.route_info.slice(0, 3).map(route => {
-          const routeType = route.type === 'bus' ? '🚌' : route.type === 'subway' ? '🚇' : '🚊'
-          return `${routeType} ${route.name || route.line_name}`
-        }).join(' → ')
+        const routeNames = transit.route_info
+          .slice(0, 3)
+          .map((route) => {
+            const routeType =
+              route.type === 'bus'
+                ? '🚌'
+                : route.type === 'subway'
+                  ? '🚇'
+                  : '🚊'
+            return `${routeType} ${route.name || route.line_name}`
+          })
+          .join(' → ')
         routeDetails.push(routeNames)
       }
-      
+
       // 첫차/막차 정보
       if (transit.first_last_time) {
         routeDetails.push(`🕐 첫차 ${transit.first_last_time.first_time}`)
         routeDetails.push(`🕘 막차 ${transit.first_last_time.last_time}`)
       }
-      
+
       // 배차간격
       if (transit.service_interval) {
         routeDetails.push(`⏱️ 배차간격 ${transit.service_interval}분`)
       }
-      
+
       // 실시간 정보
       if (transit.real_time_info) {
         routeDetails.push('📍 실시간 도착정보')
       }
-      
+
       // 접근성 정보
       if (transit.accessibility) {
         routeDetails.push('♿ 휠체어 이용 가능')
       }
-      
+
       // 기본 정보 추가
       routeDetails.push('💳 교통카드 결제')
       if (transit.environmental_impact) {
         routeDetails.push(`🌱 ${transit.environmental_impact}`)
       }
-      
+
       routes.push({
         name: transit.display_name || '대중교통',
         mode: 'bus',
@@ -746,7 +795,7 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
           walkingDistance: transit.walking_distance || 0,
           totalStops: transit.total_stops || 0,
           peakTimeMultiplier: transit.peak_time_multiplier || 1,
-        }
+        },
       })
     }
 
@@ -781,7 +830,9 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
         now: {
           carDuration: `${apiData?.routes?.car?.duration || 30}분`,
           transitDuration: `${apiData?.routes?.transit?.duration || 25}분`,
-          recommendation: formatTransportType(apiData?.recommendations?.primary?.type || 'transit'),
+          recommendation: formatTransportType(
+            apiData?.recommendations?.primary?.type || 'transit',
+          ),
           reasons: [apiData?.recommendations?.primary?.reason || '경제적'],
         },
       }
@@ -892,65 +943,79 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
             onChange={setSelectedMode}
           />
 
-          <RouteComparison routes={[
-            {
-              name: '대중교통',
-              mode: 'bus',
-              duration: route.duration || 25,
-              distance: formatDistance(route.distance || 2.0),
-              cost: formatCost(route.cost || 1500),
-              rating: 5,
-              recommendation: '경제적',
-              details: [
-                '🔄 환승 1회',
-                '🚌 472번 버스',
-                '🚇 지하철 2호선',
-                '💳 교통카드 결제',
-                '🌱 친환경',
-                '🕐 첫차 05:30',
-                '🕘 막차 23:50',
-                '⏱️ 배차간격 8분',
-                '📍 실시간 도착정보',
-                '♿ 휠체어 이용 가능'
-              ],
-              transitInfo: {
-                transferCount: 1,
-                busTransferCount: 1,
-                subwayTransferCount: 0,
-                routeInfo: [
-                  { type: 'bus', name: '472번', line_name: '472번 버스', duration: 15 },
-                  { type: 'subway', name: '2호선', line_name: '지하철 2호선', duration: 10 }
+          <RouteComparison
+            routes={[
+              {
+                name: '대중교통',
+                mode: 'bus',
+                duration: route.duration || 25,
+                distance: formatDistance(route.distance || 2.0),
+                cost: formatCost(route.cost || 1500),
+                rating: 5,
+                recommendation: '경제적',
+                details: [
+                  '🔄 환승 1회',
+                  '🚌 472번 버스',
+                  '🚇 지하철 2호선',
+                  '💳 교통카드 결제',
+                  '🌱 친환경',
+                  '🕐 첫차 05:30',
+                  '🕘 막차 23:50',
+                  '⏱️ 배차간격 8분',
+                  '📍 실시간 도착정보',
+                  '♿ 휠체어 이용 가능',
                 ],
-                walkingDistance: 300,
-                totalStops: 8,
-                peakTimeMultiplier: 1.2
-              }
-            },
-            {
-              name: '자동차',
-              mode: 'car',
-              duration: route.duration ? Math.round(route.duration * 0.8) : 20,
-              distance: formatDistance(route.distance || 2.0),
-              cost: formatCost(3000),
-              rating: 4,
-              recommendation: '빠름',
-              details: ['🚗 개인차량', '⛽ 연료비', '🅿️ 주차요금']
-            },
-            {
-              name: '도보',
-              mode: 'walk',
-              duration: route.duration ? Math.round(route.duration * 2) : 50,
-              distance: formatDistance(route.distance || 2.0),
-              cost: formatCost(0),
-              rating: 3,
-              recommendation: '건강',
-              details: ['👟 편한 신발', '🌱 친환경', '💪 운동효과']
-            }
-          ].filter(r => selectedMode === 'all' || r.mode === selectedMode)} />
+                transitInfo: {
+                  transferCount: 1,
+                  busTransferCount: 1,
+                  subwayTransferCount: 0,
+                  routeInfo: [
+                    {
+                      type: 'bus',
+                      name: '472번',
+                      line_name: '472번 버스',
+                      duration: 15,
+                    },
+                    {
+                      type: 'subway',
+                      name: '2호선',
+                      line_name: '지하철 2호선',
+                      duration: 10,
+                    },
+                  ],
+                  walkingDistance: 300,
+                  totalStops: 8,
+                  peakTimeMultiplier: 1.2,
+                },
+              },
+              {
+                name: '자동차',
+                mode: 'car',
+                duration: route.duration
+                  ? Math.round(route.duration * 0.8)
+                  : 20,
+                distance: formatDistance(route.distance || 2.0),
+                cost: formatCost(3000),
+                rating: 4,
+                recommendation: '빠름',
+                details: ['🚗 개인차량', '⛽ 연료비', '🅿️ 주차요금'],
+              },
+              {
+                name: '도보',
+                mode: 'walk',
+                duration: route.duration ? Math.round(route.duration * 2) : 50,
+                distance: formatDistance(route.distance || 2.0),
+                cost: formatCost(0),
+                rating: 3,
+                recommendation: '건강',
+                details: ['👟 편한 신발', '🌱 친환경', '💪 운동효과'],
+              },
+            ].filter((r) => selectedMode === 'all' || r.mode === selectedMode)}
+          />
 
           <div className="rounded-lg bg-blue-50 p-3 text-sm text-blue-700">
-            💡 <strong>참고:</strong> 정확한 교통정보를 위해서는 출발지와 목적지 좌표가 필요합니다. 
-            현재는 예상 정보를 제공하고 있습니다.
+            💡 <strong>참고:</strong> 정확한 교통정보를 위해서는 출발지와 목적지
+            좌표가 필요합니다. 현재는 예상 정보를 제공하고 있습니다.
           </div>
         </CardContent>
       </Card>

@@ -58,7 +58,6 @@ export function Header() {
       document.documentElement.classList.remove('dark')
       setIsDark(false)
     }
-
   }, [])
 
   // 화면 크기 변화 감지
@@ -178,51 +177,55 @@ export function Header() {
                     variant="outline"
                     size="sm"
                     onClick={() => navigate('/travel-plans')}
-                    className="hidden sm:flex items-center gap-2"
+                    className="hidden items-center gap-2 sm:flex"
                   >
                     <Calendar className="h-4 w-4" />
                     <span>나의 플랜</span>
                   </Button>
                   <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="relative h-8 w-8 rounded-full"
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="relative h-8 w-8 rounded-full"
+                      >
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>
+                            <User className="h-4 w-4" />
+                          </AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      className="w-56"
+                      align="end"
+                      forceMount
                     >
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback>
-                          <User className="h-4 w-4" />
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
-                    <div className="px-2 py-1.5">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm leading-none font-medium">
-                          {user.nickname || user.email || '사용자'}
-                        </p>
-                        <p className="text-muted-foreground text-xs leading-none">
-                          {user.email || ''}
-                        </p>
+                      <div className="px-2 py-1.5">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm leading-none font-medium">
+                            {user.nickname || user.email || '사용자'}
+                          </p>
+                          <p className="text-muted-foreground text-xs leading-none">
+                            {user.email || ''}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate('/profile')}>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>마이페이지</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/settings')}>
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>설정</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>로그아웃</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => navigate('/profile')}>
+                        <User className="mr-2 h-4 w-4" />
+                        <span>마이페이지</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/settings')}>
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>설정</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleLogout}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>로그아웃</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </>
               ) : (
                 <>

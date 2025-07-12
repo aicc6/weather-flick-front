@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
-  Calendar,
   MapPin,
   Route,
   ChevronDown,
@@ -15,13 +14,13 @@ import CompactPlaceCard from './CompactPlaceCard'
 /**
  * 컴팩트한 일차별 여행 일정 컴포넌트
  */
-export function CompactDayItinerary({ 
-  day, 
-  places = [], 
-  dayNumber, 
+export function CompactDayItinerary({
+  day,
+  places = [],
+  dayNumber,
   weatherData = {},
   showWeather = true,
-  className = '' 
+  className = '',
 }) {
   const [isExpanded, setIsExpanded] = useState(true)
 
@@ -31,15 +30,31 @@ export function CompactDayItinerary({
 
   // 유효한 위치 정보가 있는 장소 필터링
   const getLocationFromPlace = (place) => {
-    const lat = place.lat || place.latitude || place.y || place.coords?.lat || place.location?.lat || place.geometry?.location?.lat
-    const lng = place.lng || place.longitude || place.x || place.coords?.lng || place.location?.lng || place.geometry?.location?.lng
-    return lat && lng && !isNaN(lat) && !isNaN(lng) ? { lat: Number(lat), lng: Number(lng) } : null
+    const lat =
+      place.lat ||
+      place.latitude ||
+      place.y ||
+      place.coords?.lat ||
+      place.location?.lat ||
+      place.geometry?.location?.lat
+    const lng =
+      place.lng ||
+      place.longitude ||
+      place.x ||
+      place.coords?.lng ||
+      place.location?.lng ||
+      place.geometry?.location?.lng
+    return lat && lng && !isNaN(lat) && !isNaN(lng)
+      ? { lat: Number(lat), lng: Number(lng) }
+      : null
   }
 
-  const validPlaces = places.map(place => {
-    const location = getLocationFromPlace(place)
-    return location ? { ...place, ...location } : null
-  }).filter(Boolean)
+  const validPlaces = places
+    .map((place) => {
+      const location = getLocationFromPlace(place)
+      return location ? { ...place, ...location } : null
+    })
+    .filter(Boolean)
 
   const hasMultiplePlaces = validPlaces.length > 1
 
@@ -48,8 +63,10 @@ export function CompactDayItinerary({
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
-              <span className="text-sm font-bold text-blue-600">{dayNumber}</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
+              <span className="text-sm font-bold text-blue-600">
+                {dayNumber}
+              </span>
             </div>
             <div>
               <CardTitle className="text-base text-gray-800">
@@ -74,23 +91,29 @@ export function CompactDayItinerary({
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  const routeUrl = `https://www.google.com/maps/dir/?api=1&origin=current+location&destination=${validPlaces[validPlaces.length - 1].lat},${validPlaces[validPlaces.length - 1].lng}`
-                    + (validPlaces.length > 2 ? `&waypoints=${validPlaces.slice(0, -1).map(p => `${p.lat},${p.lng}`).join('|')}` : '')
+                  const routeUrl =
+                    `https://www.google.com/maps/dir/?api=1&origin=current+location&destination=${validPlaces[validPlaces.length - 1].lat},${validPlaces[validPlaces.length - 1].lng}` +
+                    (validPlaces.length > 2
+                      ? `&waypoints=${validPlaces
+                          .slice(0, -1)
+                          .map((p) => `${p.lat},${p.lng}`)
+                          .join('|')}`
+                      : '')
                   window.open(routeUrl, '_blank', 'noopener,noreferrer')
                 }}
-                className="text-xs px-2 py-1 h-7"
+                className="h-7 px-2 py-1 text-xs"
               >
                 <Route className="mr-1 h-3 w-3" />
                 경로
               </Button>
             )}
-            
+
             {/* 접기/펼치기 버튼 */}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
-              className="text-gray-500 hover:text-gray-700 px-1 h-7"
+              className="h-7 px-1 text-gray-500 hover:text-gray-700"
             >
               {isExpanded ? (
                 <ChevronUp className="h-3 w-3" />
@@ -115,15 +138,15 @@ export function CompactDayItinerary({
             )}
             <div className="flex -space-x-1">
               {places.slice(0, 4).map((place, index) => (
-                <div 
+                <div
                   key={index}
-                  className="w-5 h-5 bg-blue-100 border border-white rounded-full flex items-center justify-center text-xs font-medium"
+                  className="flex h-5 w-5 items-center justify-center rounded-full border border-white bg-blue-100 text-xs font-medium"
                 >
                   {index + 1}
                 </div>
               ))}
               {places.length > 4 && (
-                <div className="w-5 h-5 bg-gray-400 border border-white rounded-full flex items-center justify-center text-xs text-white font-medium">
+                <div className="flex h-5 w-5 items-center justify-center rounded-full border border-white bg-gray-400 text-xs font-medium text-white">
                   +{places.length - 4}
                 </div>
               )}
@@ -143,21 +166,27 @@ export function CompactDayItinerary({
                 placeIndex={index}
                 weather={weatherData[place.description] || null}
                 showWeather={showWeather}
-                className="hover:shadow-sm transition-shadow"
+                className="transition-shadow hover:shadow-sm"
               />
             ))}
           </div>
 
           {/* 일차별 요약 정보 */}
           {hasMultiplePlaces && (
-            <div className="mt-3 pt-2 border-t border-gray-100">
+            <div className="mt-3 border-t border-gray-100 pt-2">
               <div className="flex items-center justify-center">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    const routeUrl = `https://www.google.com/maps/dir/?api=1&origin=current+location&destination=${validPlaces[validPlaces.length - 1].lat},${validPlaces[validPlaces.length - 1].lng}`
-                      + (validPlaces.length > 2 ? `&waypoints=${validPlaces.slice(0, -1).map(p => `${p.lat},${p.lng}`).join('|')}` : '')
+                    const routeUrl =
+                      `https://www.google.com/maps/dir/?api=1&origin=current+location&destination=${validPlaces[validPlaces.length - 1].lat},${validPlaces[validPlaces.length - 1].lng}` +
+                      (validPlaces.length > 2
+                        ? `&waypoints=${validPlaces
+                            .slice(0, -1)
+                            .map((p) => `${p.lat},${p.lng}`)
+                            .join('|')}`
+                        : '')
                     window.open(routeUrl, '_blank', 'noopener,noreferrer')
                   }}
                   className="text-xs text-blue-600 hover:text-blue-800"

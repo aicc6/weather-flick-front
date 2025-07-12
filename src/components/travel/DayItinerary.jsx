@@ -9,7 +9,6 @@ import {
   Route,
   ChevronDown,
   ChevronUp,
-  Navigation,
 } from '@/components/icons'
 import PlaceCard from './PlaceCard'
 
@@ -17,13 +16,13 @@ import PlaceCard from './PlaceCard'
  * 일차별 여행 일정 컴포넌트
  * 깔끔하고 간결한 디자인으로 일차별 장소들을 표시
  */
-export function DayItinerary({ 
-  day, 
-  places = [], 
-  dayNumber, 
+export function DayItinerary({
+  day,
+  places = [],
+  dayNumber,
   weatherData = {},
   showWeather = true,
-  className = '' 
+  className = '',
 }) {
   const [isExpanded, setIsExpanded] = useState(true)
 
@@ -33,15 +32,31 @@ export function DayItinerary({
 
   // 유효한 위치 정보가 있는 장소 필터링
   const getLocationFromPlace = (place) => {
-    const lat = place.lat || place.latitude || place.y || place.coords?.lat || place.location?.lat || place.geometry?.location?.lat
-    const lng = place.lng || place.longitude || place.x || place.coords?.lng || place.location?.lng || place.geometry?.location?.lng
-    return lat && lng && !isNaN(lat) && !isNaN(lng) ? { lat: Number(lat), lng: Number(lng) } : null
+    const lat =
+      place.lat ||
+      place.latitude ||
+      place.y ||
+      place.coords?.lat ||
+      place.location?.lat ||
+      place.geometry?.location?.lat
+    const lng =
+      place.lng ||
+      place.longitude ||
+      place.x ||
+      place.coords?.lng ||
+      place.location?.lng ||
+      place.geometry?.location?.lng
+    return lat && lng && !isNaN(lat) && !isNaN(lng)
+      ? { lat: Number(lat), lng: Number(lng) }
+      : null
   }
 
-  const validPlaces = places.map(place => {
-    const location = getLocationFromPlace(place)
-    return location ? { ...place, ...location } : null
-  }).filter(Boolean)
+  const validPlaces = places
+    .map((place) => {
+      const location = getLocationFromPlace(place)
+      return location ? { ...place, ...location } : null
+    })
+    .filter(Boolean)
 
   const hasMultiplePlaces = validPlaces.length > 1
 
@@ -50,7 +65,7 @@ export function DayItinerary({
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
               <Calendar className="h-5 w-5 text-blue-600" />
             </div>
             <div>
@@ -76,17 +91,23 @@ export function DayItinerary({
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  const routeUrl = `https://www.google.com/maps/dir/?api=1&origin=current+location&destination=${validPlaces[validPlaces.length - 1].lat},${validPlaces[validPlaces.length - 1].lng}`
-                    + (validPlaces.length > 2 ? `&waypoints=${validPlaces.slice(0, -1).map(p => `${p.lat},${p.lng}`).join('|')}` : '')
+                  const routeUrl =
+                    `https://www.google.com/maps/dir/?api=1&origin=current+location&destination=${validPlaces[validPlaces.length - 1].lat},${validPlaces[validPlaces.length - 1].lng}` +
+                    (validPlaces.length > 2
+                      ? `&waypoints=${validPlaces
+                          .slice(0, -1)
+                          .map((p) => `${p.lat},${p.lng}`)
+                          .join('|')}`
+                      : '')
                   window.open(routeUrl, '_blank', 'noopener,noreferrer')
                 }}
-                className="text-xs bg-blue-500 text-white hover:bg-blue-600 border-0"
+                className="border-0 bg-blue-500 text-xs text-white hover:bg-blue-600"
               >
                 <Route className="mr-1 h-3 w-3" />
                 일차 경로
               </Button>
             )}
-            
+
             {/* 접기/펼치기 버튼 */}
             <Button
               variant="ghost"
@@ -118,15 +139,15 @@ export function DayItinerary({
             )}
             <div className="flex -space-x-1">
               {places.slice(0, 3).map((place, index) => (
-                <div 
+                <div
                   key={index}
-                  className="w-6 h-6 bg-gray-200 border-2 border-white rounded-full flex items-center justify-center text-xs font-medium"
+                  className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-gray-200 text-xs font-medium"
                 >
                   {index + 1}
                 </div>
               ))}
               {places.length > 3 && (
-                <div className="w-6 h-6 bg-gray-400 border-2 border-white rounded-full flex items-center justify-center text-xs text-white font-medium">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-gray-400 text-xs font-medium text-white">
                   +{places.length - 3}
                 </div>
               )}
@@ -153,7 +174,7 @@ export function DayItinerary({
           </div>
 
           {/* 일차별 요약 액션 */}
-          <div className="mt-4 pt-4 border-t border-gray-100">
+          <div className="mt-4 border-t border-gray-100 pt-4">
             <div className="flex items-center justify-between text-sm text-gray-600">
               <div className="flex items-center gap-4">
                 <span>📍 총 {places.length}개 장소</span>
@@ -161,7 +182,7 @@ export function DayItinerary({
                   <span className="text-blue-600">🗺️ 연결 경로 이용 가능</span>
                 )}
               </div>
-              
+
               {hasMultiplePlaces && (
                 <Button
                   variant="outline"
@@ -169,8 +190,14 @@ export function DayItinerary({
                   className="text-xs"
                   onClick={() => {
                     // 일차별 전체 경로 생성 로직 (RouteNavigation 컴포넌트의 기능 활용)
-                    const routeUrl = `https://www.google.com/maps/dir/?api=1&origin=current+location&destination=${validPlaces[validPlaces.length - 1].lat},${validPlaces[validPlaces.length - 1].lng}`
-                    + (validPlaces.length > 2 ? `&waypoints=${validPlaces.slice(0, -1).map(p => `${p.lat},${p.lng}`).join('|')}` : '')
+                    const routeUrl =
+                      `https://www.google.com/maps/dir/?api=1&origin=current+location&destination=${validPlaces[validPlaces.length - 1].lat},${validPlaces[validPlaces.length - 1].lng}` +
+                      (validPlaces.length > 2
+                        ? `&waypoints=${validPlaces
+                            .slice(0, -1)
+                            .map((p) => `${p.lat},${p.lng}`)
+                            .join('|')}`
+                        : '')
                     window.open(routeUrl, '_blank', 'noopener,noreferrer')
                   }}
                 >

@@ -7,14 +7,23 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { Badge } from '@/components/ui/badge'
-import { ChevronDown, Navigation, Car, Bus, Footprints } from '@/components/icons'
+import {
+  ChevronDown,
+  Navigation,
+  Car,
+  Bus,
+  Footprints,
+} from '@/components/icons'
 
 /**
  * 내비게이션 버튼 컴포넌트
  * 2단계: 다중 지도 서비스 선택 + 교통수단별 옵션 제공
  */
-export function NavigationButton({ destination, showTransportOptions = true, className = '' }) {
+export function NavigationButton({
+  destination,
+  showTransportOptions = true,
+  className = '',
+}) {
   const [isOpen, setIsOpen] = useState(false)
 
   // 기본값 설정
@@ -33,7 +42,7 @@ export function NavigationButton({ destination, showTransportOptions = true, cla
       </Button>
     )
   }
-  
+
   // 좌표 또는 place_id 중 하나는 있어야 함
   if (!lat && !lng && !destination.place_id) {
     return (
@@ -46,10 +55,12 @@ export function NavigationButton({ destination, showTransportOptions = true, cla
 
   // 모바일 환경 감지
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-  
+
   // 지도 서비스별 URL 생성 함수들
   const getKakaoMapUrl = (transportType = 'car') => {
-    const encodedName = encodeURIComponent(name || destination.description || 'Unknown')
+    const encodedName = encodeURIComponent(
+      name || destination.description || 'Unknown',
+    )
     if (lat && lng) {
       // 카카오맵에서는 자동으로 현재 위치에서 출발하는 길찾기 제공
       return `https://map.kakao.com/link/to/${encodedName},${lat},${lng}`
@@ -61,11 +72,13 @@ export function NavigationButton({ destination, showTransportOptions = true, cla
   }
 
   const getNaverMapUrl = (transportType = 'car') => {
-    const encodedName = encodeURIComponent(name || destination.description || 'Unknown')
+    const encodedName = encodeURIComponent(
+      name || destination.description || 'Unknown',
+    )
     const transportMap = {
       car: 'car',
-      transit: 'transit', 
-      walk: 'walk'
+      transit: 'transit',
+      walk: 'walk',
     }
     const naverTransport = transportMap[transportType] || 'car'
     if (lat && lng) {
@@ -82,10 +95,10 @@ export function NavigationButton({ destination, showTransportOptions = true, cla
     const transportMap = {
       car: 'driving',
       transit: 'transit',
-      walk: 'walking'
+      walk: 'walking',
     }
     const googleTransport = transportMap[transportType] || 'driving'
-    
+
     if (lat && lng) {
       return `https://www.google.com/maps/dir/?api=1&origin=current+location&destination=${lat},${lng}&travelmode=${googleTransport}`
     } else if (destination.place_id) {
@@ -117,22 +130,22 @@ export function NavigationButton({ destination, showTransportOptions = true, cla
       icon: '🗺️',
       color: 'bg-yellow-500 hover:bg-yellow-600',
       getUrl: getKakaoMapUrl,
-      description: '국내 최적화'
+      description: '국내 최적화',
     },
     {
-      name: '네이버지도', 
+      name: '네이버지도',
       icon: '🧭',
       color: 'bg-green-500 hover:bg-green-600',
       getUrl: getNaverMapUrl,
-      description: '실시간 교통정보'
+      description: '실시간 교통정보',
     },
     {
       name: 'Google Maps',
-      icon: '📍', 
+      icon: '📍',
       color: 'bg-blue-500 hover:bg-blue-600',
       getUrl: getGoogleMapsUrl,
-      description: '글로벌 서비스'
-    }
+      description: '글로벌 서비스',
+    },
   ]
 
   // 교통수단 옵션
@@ -141,20 +154,20 @@ export function NavigationButton({ destination, showTransportOptions = true, cla
       type: 'car',
       name: '자동차',
       icon: <Car className="h-4 w-4" />,
-      color: 'text-blue-600'
+      color: 'text-blue-600',
     },
     {
-      type: 'transit', 
+      type: 'transit',
       name: '대중교통',
       icon: <Bus className="h-4 w-4" />,
-      color: 'text-green-600'
+      color: 'text-green-600',
     },
     {
       type: 'walk',
       name: '도보',
       icon: <Footprints className="h-4 w-4" />,
-      color: 'text-gray-600'
-    }
+      color: 'text-gray-600',
+    },
   ]
 
   // 간단한 길찾기 버튼 (교통수단 옵션 없음)
@@ -162,7 +175,11 @@ export function NavigationButton({ destination, showTransportOptions = true, cla
     return (
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className={`${className} hover:bg-blue-50`}>
+          <Button
+            variant="outline"
+            size="sm"
+            className={`${className} hover:bg-blue-50`}
+          >
             <Navigation className="mr-1 h-3 w-3" />
             길찾기
             <ChevronDown className="ml-1 h-3 w-3" />
@@ -170,9 +187,13 @@ export function NavigationButton({ destination, showTransportOptions = true, cla
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
           <div className="p-2">
-            <div className="text-xs text-gray-500 mb-2 font-medium">목적지: {name}</div>
+            <div className="mb-2 text-xs font-medium text-gray-500">
+              목적지: {name}
+            </div>
             {address && (
-              <div className="text-xs text-gray-400 mb-3 line-clamp-2">{address}</div>
+              <div className="mb-3 line-clamp-2 text-xs text-gray-400">
+                {address}
+              </div>
             )}
           </div>
           <DropdownMenuSeparator />
@@ -183,12 +204,14 @@ export function NavigationButton({ destination, showTransportOptions = true, cla
                 openNavigation(service.getUrl(), service.name)
                 setIsOpen(false)
               }}
-              className="flex items-center gap-3 cursor-pointer"
+              className="flex cursor-pointer items-center gap-3"
             >
               <span className="text-lg">{service.icon}</span>
               <div className="flex-1">
                 <div className="font-medium">{service.name}</div>
-                <div className="text-xs text-gray-500">{service.description}</div>
+                <div className="text-xs text-gray-500">
+                  {service.description}
+                </div>
               </div>
             </DropdownMenuItem>
           ))}
@@ -201,7 +224,11 @@ export function NavigationButton({ destination, showTransportOptions = true, cla
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className={`${className} hover:bg-blue-50`}>
+        <Button
+          variant="outline"
+          size="sm"
+          className={`${className} hover:bg-blue-50`}
+        >
           <Navigation className="mr-1 h-3 w-3" />
           길찾기
           <ChevronDown className="ml-1 h-3 w-3" />
@@ -209,32 +236,39 @@ export function NavigationButton({ destination, showTransportOptions = true, cla
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
         <div className="p-3">
-          <div className="text-sm font-medium text-gray-900 mb-1">{name}</div>
+          <div className="mb-1 text-sm font-medium text-gray-900">{name}</div>
           {address && (
-            <div className="text-xs text-gray-500 mb-3 line-clamp-2">{address}</div>
+            <div className="mb-3 line-clamp-2 text-xs text-gray-500">
+              {address}
+            </div>
           )}
-          
+
           {/* 교통수단 선택 */}
           <div className="space-y-2">
-            <div className="text-xs font-medium text-gray-700 mb-2">교통수단 선택</div>
+            <div className="mb-2 text-xs font-medium text-gray-700">
+              교통수단 선택
+            </div>
             {transportOptions.map((transport) => (
               <div key={transport.type} className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
                   <span className={transport.color}>{transport.icon}</span>
                   {transport.name}
                 </div>
-                <div className="grid grid-cols-3 gap-1 ml-6">
+                <div className="ml-6 grid grid-cols-3 gap-1">
                   {mapServices.map((service) => (
                     <button
                       key={`${transport.type}-${service.name}`}
                       onClick={() => {
-                        openNavigation(service.getUrl(transport.type), service.name)
+                        openNavigation(
+                          service.getUrl(transport.type),
+                          service.name,
+                        )
                         setIsOpen(false)
                       }}
-                      className="flex flex-col items-center gap-1 p-2 rounded hover:bg-gray-50 transition-colors text-xs"
+                      className="flex flex-col items-center gap-1 rounded p-2 text-xs transition-colors hover:bg-gray-50"
                     >
                       <span className="text-sm">{service.icon}</span>
-                      <span className="text-xs text-gray-600 leading-tight">
+                      <span className="text-xs leading-tight text-gray-600">
                         {service.name.replace('Maps', '')}
                       </span>
                     </button>
@@ -244,9 +278,9 @@ export function NavigationButton({ destination, showTransportOptions = true, cla
             ))}
           </div>
         </div>
-        
+
         <DropdownMenuSeparator />
-        
+
         {/* 빠른 실행 (기본: 자동차 + 카카오맵) */}
         <div className="p-2">
           <button
@@ -254,16 +288,16 @@ export function NavigationButton({ destination, showTransportOptions = true, cla
               openNavigation(getKakaoMapUrl('car'), '카카오맵')
               setIsOpen(false)
             }}
-            className="w-full flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-3 rounded text-sm font-medium transition-colors"
+            className="flex w-full items-center justify-center gap-2 rounded bg-yellow-500 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-yellow-600"
           >
             <span>🗺️</span>
             카카오맵으로 빠른 길찾기
           </button>
         </div>
-        
+
         {/* 추가 정보 */}
-        <div className="p-2 border-t">
-          <div className="text-xs text-gray-500 space-y-1">
+        <div className="border-t p-2">
+          <div className="space-y-1 text-xs text-gray-500">
             <div>💡 교통수단에 따라 최적 경로가 제공됩니다</div>
             {isMobile && (
               <div>📱 모바일에서는 해당 앱이 자동으로 실행됩니다</div>
