@@ -40,7 +40,6 @@ const formatDate = (dateString) => {
   })
 }
 
-
 export function TravelPlanDetailPage() {
   const { planId } = useParams()
   const {
@@ -1380,9 +1379,7 @@ export function TravelPlanDetailPage() {
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
                 <span className="text-sm font-bold text-blue-600">📋</span>
               </div>
-              <CardTitle className="text-lg text-gray-800">
-                상세 일정
-              </CardTitle>
+              <CardTitle className="text-lg text-gray-800">상세 일정</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
@@ -1391,14 +1388,14 @@ export function TravelPlanDetailPage() {
                 {itineraryDays.map((day) => {
                   const dayNumber = parseInt(day.replace(/\D/g, ''))
                   const places = plan.itinerary[day] || []
-                  
+
                   // 날씨 데이터 처리
                   const dayIndex = dayNumber - 1
                   const dayWeather = weatherData?.forecast?.[dayIndex]
                   const weatherForPlaces = {}
-                  
+
                   if (dayWeather) {
-                    places.forEach(place => {
+                    places.forEach((place) => {
                       const city = extractCityFromLocation(place.description)
                       const cityWeatherVariation = {
                         서울: { tempOffset: 0, conditionOffset: 0 },
@@ -1408,31 +1405,50 @@ export function TravelPlanDetailPage() {
                         광주: { tempOffset: 2, conditionOffset: 1 },
                         강원: { tempOffset: -3, conditionOffset: 0 },
                       }
-                      
-                      const variation = cityWeatherVariation[city] || cityWeatherVariation['서울']
-                      const conditions = ['맑음', '구름조금', '구름많음', '흐림', '비']
-                      const adjustedConditionIndex = Math.max(0, (conditions.indexOf(dayWeather.condition) + variation.conditionOffset) % conditions.length)
-                      const adjustedCondition = conditions[adjustedConditionIndex]
-                      
+
+                      const variation =
+                        cityWeatherVariation[city] ||
+                        cityWeatherVariation['서울']
+                      const conditions = [
+                        '맑음',
+                        '구름조금',
+                        '구름많음',
+                        '흐림',
+                        '비',
+                      ]
+                      const adjustedConditionIndex = Math.max(
+                        0,
+                        (conditions.indexOf(dayWeather.condition) +
+                          variation.conditionOffset) %
+                          conditions.length,
+                      )
+                      const adjustedCondition =
+                        conditions[adjustedConditionIndex]
+
                       weatherForPlaces[place.description] = {
                         condition: adjustedCondition,
-                        temperature: Math.round((dayWeather.temperature.min + dayWeather.temperature.max) / 2 + variation.tempOffset),
+                        temperature: Math.round(
+                          (dayWeather.temperature.min +
+                            dayWeather.temperature.max) /
+                            2 +
+                            variation.tempOffset,
+                        ),
                         humidity: dayWeather.humidity,
-                        precipitation: dayWeather.precipitation
+                        precipitation: dayWeather.precipitation,
                       }
                     })
                   } else {
                     // 날씨 데이터가 없을 때 기본값 제공
-                    places.forEach(place => {
+                    places.forEach((place) => {
                       weatherForPlaces[place.description] = {
                         condition: '맑음',
                         temperature: 20,
                         humidity: 60,
-                        precipitation: 0
+                        precipitation: 0,
                       }
                     })
                   }
-                  
+
                   return (
                     <CompactDayItinerary
                       key={day}
@@ -1446,17 +1462,18 @@ export function TravelPlanDetailPage() {
                 })}
               </div>
             ) : (
-              <div className="text-center py-8">
+              <div className="py-8 text-center">
                 <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-gray-100 p-3">
                   <MapPin className="h-6 w-6 text-gray-400" />
                 </div>
                 <p className="text-gray-500">상세 일정이 없습니다.</p>
-                <p className="text-sm text-gray-400 mt-1">여행 계획을 추가해보세요!</p>
+                <p className="mt-1 text-sm text-gray-400">
+                  여행 계획을 추가해보세요!
+                </p>
               </div>
             )}
           </CardContent>
         </Card>
-
 
         {/* 상세 경로 정보 모달 */}
         <Dialog open={isRouteDetailOpen} onOpenChange={setIsRouteDetailOpen}>
