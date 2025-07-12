@@ -16,6 +16,7 @@ import {
   useCreateTravelCourseLikeMutation,
 } from '@/store/api'
 import { useGetReviewsByCourseQuery } from '@/store/api/recommendReviewsApi'
+import { useAuth } from '@/contexts/AuthContextRTK'
 
 const regionNames = {
   all: '전체',
@@ -90,10 +91,13 @@ const RecommendCourseCard = React.memo(function RecommendCourseCard({
   viewMode = 'grid', // 기본값 추가
 }) {
   const imageUrl = useCourseImage(course.id)
+  const { user } = useAuth() // 사용자 인증 상태 확인
+
+  // 로그인된 사용자만 좋아요 API 호출
   const { data: likeData, isLoading: likeLoading } = useGetCourseLikeQuery(
     course.id,
     {
-      skip: !course?.id || isNaN(Number(course.id)), // course.id가 없거나 숫자가 아닐 때 스킵
+      skip: !course?.id || isNaN(Number(course.id)) || !user, // 로그인하지 않으면 스킵
     },
   )
   const [likeCourse] = useLikeCourseMutation()
@@ -111,6 +115,13 @@ const RecommendCourseCard = React.memo(function RecommendCourseCard({
     async (e) => {
       e.preventDefault()
       e.stopPropagation()
+
+      // 로그인하지 않은 사용자 처리
+      if (!user) {
+        alert('로그인이 필요한 기능입니다.')
+        return
+      }
+
       if (likeData?.liked) {
         await unlikeCourse(course.id)
       } else {
@@ -170,7 +181,7 @@ const RecommendCourseCard = React.memo(function RecommendCourseCard({
         }
       }
     },
-    [likeData, course, likeCourse, unlikeCourse, createTravelCourseLike],
+    [likeData, course, likeCourse, unlikeCourse, createTravelCourseLike, user],
   )
 
   // 리스트 모드인 경우 다른 레이아웃 적용
