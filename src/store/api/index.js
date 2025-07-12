@@ -76,7 +76,6 @@ export {
   useGetCategoriesQuery,
   useGetSupportedCitiesQuery,
   useGetCityInfoQuery,
-  useGetUnifiedRegionsLevel1Query,
   useGetRegionsPointQuery,
 } from './localInfoApi'
 

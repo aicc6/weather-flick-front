@@ -169,19 +169,9 @@ export const localInfoApi = createApi({
       keepUnusedDataFor: 1800, // 30분간 캐싱
     }),
 
-    // 통합 지역정보 레벨1 조회
-    getUnifiedRegionsLevel1: builder.query({
-      query: () => 'local/resions',
-      providesTags: [{ type: 'LocalInfo', id: 'regions-level1' }],
-      keepUnusedDataFor: 1800, // 30분간 캐싱
-      transformResponse: (response) => {
-        return response.regions || []
-      },
-    }),
-
     // 통합 지역정보 포인트 조회
     getRegionsPoint: builder.query({
-      query: () => 'local/resions_point',
+      query: () => 'local/regions_point',
       providesTags: [{ type: 'LocalInfo', id: 'regions-point' }],
       keepUnusedDataFor: 1800, // 30분간 캐싱
       transformResponse: (response) => {
@@ -201,6 +191,5 @@ export const {
   useGetCategoriesQuery,
   useGetSupportedCitiesQuery,
   useGetCityInfoQuery,
-  useGetUnifiedRegionsLevel1Query,
   useGetRegionsPointQuery,
 } = localInfoApi

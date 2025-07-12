@@ -6,9 +6,9 @@ export const regionsApi = createApi({
   baseQuery: baseQueryWithReauth,
   tagTypes: ['Region'],
   endpoints: (builder) => ({
-    // 전체 지역 목록 조회 (실제 백엔드 엔드포인트는 resions - 오타)
+    // 전체 지역 목록 조회
     getRegions: builder.query({
-      query: () => 'local/resions',
+      query: () => 'local/regions',
       providesTags: ['Region'],
       keepUnusedDataFor: 1800, // 30분간 캐싱 (지역 정보는 자주 변경되지 않음)
       transformResponse: (response) => {
@@ -19,7 +19,7 @@ export const regionsApi = createApi({
 
     // 특정 지역 상세 정보 조회
     getRegionDetail: builder.query({
-      query: (regionCode) => `local/resions/${regionCode}`,
+      query: (regionCode) => `local/regions/${regionCode}`,
       providesTags: (result, error, regionCode) => [
         { type: 'Region', id: regionCode },
       ],
@@ -28,7 +28,7 @@ export const regionsApi = createApi({
 
     // 지역별 통계 정보 조회 (관광지 수, 인기도 등)
     getRegionStats: builder.query({
-      query: (regionCode) => `local/resions/${regionCode}/stats`,
+      query: (regionCode) => `local/regions/${regionCode}/stats`,
       providesTags: (result, error, regionCode) => [
         { type: 'Region', id: `stats-${regionCode}` },
       ],
@@ -53,7 +53,7 @@ export const regionsApi = createApi({
     // 지역 검색 (지역명으로 검색)
     searchRegions: builder.query({
       query: (searchTerm) => ({
-        url: 'local/resions/search',
+        url: 'local/regions/search',
         params: { q: searchTerm },
       }),
       providesTags: (result, error, searchTerm) => [
@@ -65,7 +65,7 @@ export const regionsApi = createApi({
     // 지역 정보 업데이트 (관리자 기능)
     updateRegion: builder.mutation({
       query: ({ regionCode, regionData }) => ({
-        url: `local/resions/${regionCode}`,
+        url: `local/regions/${regionCode}`,
         method: 'PUT',
         body: regionData,
       }),
