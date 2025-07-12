@@ -1,0 +1,42 @@
+/* 캐러셀 스크롤바 숨기기 */
+.scrollbar-hide {
+  /* Firefox */
+  scrollbar-width: none;
+  /* Safari and Chrome */
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* 캐러셀 스무스 스크롤 */
+.carousel-container {
+  scroll-behavior: smooth;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.carousel-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* 카드 호버 효과 개선 */
+.weather-card {
+  transition: all 0.3s ease;
+}
+
+.weather-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* 캐러셀 페이드 그라데이션 */
+.carousel-fade-left {
+  background: linear-gradient(90deg, var(--background) 0%, transparent 100%);
+}
+
+.carousel-fade-right {
+  background: linear-gradient(270deg, var(--background) 0%, transparent 100%);
+}

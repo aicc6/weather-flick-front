@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -15,8 +15,8 @@ import {
   Filter,
   Sparkles,
   Settings,
-  Grid3x3,
-  List,
+  ChevronLeft,
+  ChevronRight,
 } from '@/components/icons'
 import { getMultipleRegionImages } from '@/services/imageService'
 import {
@@ -61,6 +61,14 @@ export default function TravelCoursePage() {
   const [imagesLoading, setImagesLoading] = useState(true)
 
   // ===============================
+  // 캐러셀 관련 상태
+  // ===============================
+  const scrollContainerRef = useRef(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(true)
+  const [currentIndex, setCurrentIndex] = useState(0)
+
+  // ===============================
   // 고도 태클- 고급 기능
   // ===============================
   const [showAdvancedFeatures, setShowAdvancedFeatures] = useState(false)
@@ -72,7 +80,7 @@ export default function TravelCoursePage() {
   // ?? ?상??RTK Query ?용 - 검???바?싱?조건부 쿼리
   // ===============================
   const [currentPage, setCurrentPage] = useState(1)
-  const PAGE_SIZE = 20
+  const PAGE_SIZE = 50 // 캐러셀용으로 더 많은 데이터 로드
 
   // 검색 바 입력 시 검색 API 사용, 아니면 목록 API 사용
   const debouncedSearchQuery = useDebounce(searchQuery.trim(), 300)
@@ -586,7 +594,6 @@ export default function TravelCoursePage() {
     if (showAdvancedFeatures) {
       setQuickFilters([])
       setSortBy('recommended')
-      setViewMode('grid')
     }
   }, [showAdvancedFeatures])
 
@@ -594,10 +601,82 @@ export default function TravelCoursePage() {
     setSortBy(sortConfig.field)
   }, [])
 
+  // ===============================
+  // 캐러셀 스크롤 함수들
+  // ===============================
+  const ITEMS_PER_VIEW = 10 // 한 번에 보여줄 아이템 수
+  const CARD_WIDTH = 320 // 카드 너비 (padding 포함)
+
+  const updateScrollButtons = useCallback(() => {
+    if (!scrollContainerRef.current) return
+
+    const container = scrollContainerRef.current
+    const scrollLeft = container.scrollLeft
+    const maxScrollLeft = container.scrollWidth - container.clientWidth
+
+    setCanScrollLeft(scrollLeft > 0)
+    setCanScrollRight(scrollLeft < maxScrollLeft - 1) // -1은 부동소수점 오차 보정
+  }, [])
+
+  const scrollToIndex = useCallback((index) => {
+    if (!scrollContainerRef.current) return
+
+    const container = scrollContainerRef.current
+    const scrollAmount = index * CARD_WIDTH
+
+    container.scrollTo({
+      left: scrollAmount,
+      behavior: 'smooth',
+    })
+
+    setCurrentIndex(index)
+  }, [])
+
+  const scrollLeft = useCallback(() => {
+    const newIndex = Math.max(0, currentIndex - ITEMS_PER_VIEW)
+    scrollToIndex(newIndex)
+  }, [currentIndex, scrollToIndex])
+
+  const scrollRight = useCallback(() => {
+    const maxIndex = Math.max(0, sortedCourses.length - ITEMS_PER_VIEW)
+    const newIndex = Math.min(maxIndex, currentIndex + ITEMS_PER_VIEW)
+    scrollToIndex(newIndex)
+  }, [currentIndex, sortedCourses.length, scrollToIndex])
+
+  // 스크롤 이벤트 리스너
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const handleScroll = () => {
+      updateScrollButtons()
+    }
+
+    container.addEventListener('scroll', handleScroll)
+    // 초기 상태 업데이트
+    updateScrollButtons()
+
+    return () => {
+      container.removeEventListener('scroll', handleScroll)
+    }
+  }, [updateScrollButtons])
+
+  // 데이터 변경 시 스크롤 위치 초기화
+  useEffect(() => {
+    setCurrentIndex(0)
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ left: 0, behavior: 'smooth' })
+    }
+  }, [sortedCourses])
+
   // 스켈레톤 카드 렌더링
   const renderSkeletonCards = () => {
-    return Array.from({ length: 6 }).map((_, index) => (
-      <Card key={`skeleton-${index}`} className="weather-card">
+    return Array.from({ length: ITEMS_PER_VIEW }).map((_, index) => (
+      <Card
+        key={`skeleton-${index}`}
+        className="weather-card flex-shrink-0"
+        style={{ width: '300px' }}
+      >
         <div className="relative h-48 animate-pulse overflow-hidden rounded-t-xl bg-gray-200"></div>
         <CardHeader className="pb-3">
           <div className="space-y-2">
@@ -623,15 +702,20 @@ export default function TravelCoursePage() {
     ))
   }
 
-  // 기존 카드 렌더링 (viewMode 기반)
+  // 기존 카드 렌더링 (캐러셀용)
   const renderCourseCards = () => {
     return sortedCourses.map((course, index) => (
-      <RecommendCourseCard
+      <div
         key={generateSafeKey(course, 'course', index)}
-        course={course}
-        rating={course.rating} // 서버에서 제공하는 기본 평점 사용
-        viewMode={viewMode}
-      />
+        className="flex-shrink-0"
+        style={{ width: '300px' }}
+      >
+        <RecommendCourseCard
+          course={course}
+          rating={course.rating} // 서버에서 제공하는 기본 평점 사용
+          viewMode="grid" // 캐러셀은 항상 grid 모드
+        />
+      </div>
     ))
   }
 
@@ -652,8 +736,8 @@ export default function TravelCoursePage() {
             </h1>
             <p className="text-muted-foreground text-lg">
               {showAdvancedFeatures
-                ? '고도 된 AI 추천 스타일로 여행 계획을 세우세요'
-                : '국내 기준으로 최적의 여행지를 추천드립니다'}
+                ? '고급 AI 추천 기능으로 맞춤형 여행 계획을 세우세요'
+                : '국내 최고의 여행지를 가로 스크롤로 편리하게 탐색하세요'}
             </p>
           </div>
 
@@ -667,22 +751,6 @@ export default function TravelCoursePage() {
               <Settings className="h-4 w-4" />
               {showAdvancedFeatures ? '기본 모드' : '고급 기능'}
             </Button>
-            {showAdvancedFeatures && (
-              <Button
-                onClick={() =>
-                  setViewMode(viewMode === 'grid' ? 'list' : 'grid')
-                }
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                {viewMode === 'grid' ? (
-                  <List className="h-4 w-4" />
-                ) : (
-                  <Grid3x3 className="h-4 w-4" />
-                )}
-                {viewMode === 'grid' ? '리스트' : '그리드'}
-              </Button>
-            )}
           </div>
 
           {/* Search and Filter Section */}
@@ -836,7 +904,7 @@ export default function TravelCoursePage() {
         </section>
       )}
 
-      {/* Courses Grid */}
+      {/* Courses Carousel */}
       <section className="container mx-auto px-4 py-12">
         {isLoading ? (
           // 로딩 중
@@ -862,7 +930,7 @@ export default function TravelCoursePage() {
                 className="flex h-20 w-20 items-center justify-center rounded-full"
                 style={{ backgroundColor: 'var(--accent-red-light)' }}
               >
-                <span className="text-3xl">?�️</span>
+                <span className="text-3xl">⚠️</span>
               </div>
             </div>
             <h3 className="text-foreground mb-2 text-xl font-semibold">
@@ -874,7 +942,7 @@ export default function TravelCoursePage() {
                 onClick={() => activeRefetch()}
                 className="primary-button w-full font-semibold"
               >
-                이번에 불러오기
+                다시 불러오기
               </Button>
               <Button
                 variant="outline"
@@ -885,7 +953,7 @@ export default function TravelCoursePage() {
                 }}
                 className="w-full"
               >
-                필터 초기화{' '}
+                필터 초기화
               </Button>
             </div>
           </div>
@@ -932,25 +1000,102 @@ export default function TravelCoursePage() {
                   variant="outline"
                   className="w-full"
                 >
-                  이번에 불러오기
+                  다시 불러오기
                 </Button>
               )}
             </div>
           </div>
         ) : (
-          // 상태 이상 시
+          // 캐러셀 표시
           <>
-            <div
-              className={
-                showAdvancedFeatures && viewMode === 'list'
-                  ? 'space-y-6'
-                  : 'grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3'
-              }
-            >
-              {imagesLoading ? renderSkeletonCards() : renderCourseCards()}
+            {/* 캐러셀 헤더 */}
+            <div className="mb-8 flex items-center justify-between">
+              <div>
+                <h2 className="text-foreground text-2xl font-bold">
+                  추천 여행 코스
+                </h2>
+                <p className="text-muted-foreground mt-1">
+                  {shouldUseSearch ? (
+                    <>
+                      <span className="font-medium">
+                        &quot;{debouncedSearchQuery}&quot;
+                      </span>{' '}
+                      검색 결과: {sortedCourses.length}개
+                    </>
+                  ) : (
+                    `총 ${sortedCourses.length}개의 여행 코스`
+                  )}
+                </p>
+              </div>
+
+              {/* 캐러셀 네비게이션 화살표 */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={scrollLeft}
+                  disabled={!canScrollLeft}
+                  className="h-10 w-10 rounded-full border-2 transition-all hover:scale-105 disabled:opacity-50"
+                  aria-label="이전 코스들 보기"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={scrollRight}
+                  disabled={!canScrollRight}
+                  className="h-10 w-10 rounded-full border-2 transition-all hover:scale-105 disabled:opacity-50"
+                  aria-label="다음 코스들 보기"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </Button>
+              </div>
             </div>
 
-            {/* 이번에 불러오기 버튼 */}
+            {/* 캐러셀 컨테이너 */}
+            <div className="relative">
+              <div
+                ref={scrollContainerRef}
+                className="carousel-container flex gap-6 pb-4"
+              >
+                {imagesLoading ? renderSkeletonCards() : renderCourseCards()}
+              </div>
+
+              {/* 그라데이션 페이드 효과 */}
+              {canScrollLeft && (
+                <div className="carousel-fade-left pointer-events-none absolute top-0 left-0 h-full w-12" />
+              )}
+              {canScrollRight && (
+                <div className="carousel-fade-right pointer-events-none absolute top-0 right-0 h-full w-12" />
+              )}
+            </div>
+
+            {/* 캐러셀 인디케이터 */}
+            {sortedCourses.length > ITEMS_PER_VIEW && (
+              <div className="mt-6 flex items-center justify-center gap-2">
+                {Array.from({
+                  length: Math.ceil(sortedCourses.length / ITEMS_PER_VIEW),
+                }).map((_, index) => {
+                  const isActive =
+                    Math.floor(currentIndex / ITEMS_PER_VIEW) === index
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => scrollToIndex(index * ITEMS_PER_VIEW)}
+                      className={`h-2 rounded-full transition-all ${
+                        isActive
+                          ? 'w-8 bg-blue-600'
+                          : 'w-2 bg-gray-300 hover:bg-gray-400'
+                      }`}
+                      aria-label={`${index + 1}번째 페이지로 이동`}
+                    />
+                  )
+                })}
+              </div>
+            )}
+
+            {/* 더 많은 코스 로드 버튼 */}
             {activeResponse && activeResponse.total > sortedCourses.length && (
               <div className="mt-12 text-center">
                 <Button
@@ -958,11 +1103,12 @@ export default function TravelCoursePage() {
                   variant="outline"
                   size="lg"
                   disabled={isLoading}
+                  className="px-8 py-3"
                 >
                   {isLoading ? '로딩 중...' : '더 많은 코스 보기'}
                 </Button>
                 <p className="text-muted-foreground mt-2 text-sm">
-                  {sortedCourses.length} / {activeResponse.total} 중에서{' '}
+                  {sortedCourses.length} / {activeResponse.total} 개 표시 중
                 </p>
               </div>
             )}
