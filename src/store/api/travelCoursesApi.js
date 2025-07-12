@@ -50,6 +50,7 @@ const normalizeItem = (item) => {
     return item
   }
 
+  console.log('🔧 데이터 정규화 전:', item)
   const normalized = { ...item }
 
   // 필드명 정규화 (백엔드 필드명 → 프론트엔드 필드명)
@@ -59,11 +60,11 @@ const normalizeItem = (item) => {
     region_name: 'regionName',
 
     // 기본 정보
-    course_id: 'id',
-    course_title: 'title',
+    content_id: 'id',
+    course_name: 'title',
     course_subtitle: 'subtitle',
     course_summary: 'summary',
-    course_description: 'description',
+    overview: 'description',
 
     // 평점 관련
     average_rating: 'rating',
@@ -76,12 +77,12 @@ const normalizeItem = (item) => {
     course_themes: 'theme',
 
     // 이미지 관련
-    main_image: 'mainImage',
+    first_image: 'mainImage',
     course_images: 'images',
 
     // 기타
     best_months: 'bestMonths',
-    travel_duration: 'duration',
+    required_time: 'duration',
     estimated_price: 'price',
   }
 
@@ -92,6 +93,44 @@ const normalizeItem = (item) => {
       delete normalized[backendField]
     }
   })
+
+  // 백엔드 지역 코드를 프론트엔드 지역 코드로 매핑
+  if (normalized.region) {
+    const regionMapping = {
+      // 숫자 코드 → 문자열 코드
+      1: 'seoul',
+      2: 'busan',
+      3: 'daegu',
+      4: 'incheon',
+      5: 'gwangju',
+      6: 'daejeon',
+      7: 'ulsan',
+      8: 'sejong',
+      9: 'gyeonggi',
+      10: 'gangwon',
+      11: 'chungbuk',
+      12: 'chungnam',
+      13: 'jeonbuk',
+      14: 'jeonnam',
+      15: 'gyeongbuk',
+      16: 'gyeongnam',
+      17: 'jeju',
+    }
+
+    const originalRegion = normalized.region
+    normalized.region = regionMapping[normalized.region] || normalized.region
+    console.log(`🗺️ 지역 매핑: ${originalRegion} → ${normalized.region}`)
+  }
+
+  // subtitle이 없으면 description에서 생성
+  if (!normalized.subtitle && normalized.description) {
+    normalized.subtitle = normalized.description.substring(0, 50) + '...'
+  }
+
+  // summary가 없으면 description에서 생성
+  if (!normalized.summary && normalized.description) {
+    normalized.summary = normalized.description.substring(0, 100) + '...'
+  }
 
   // itinerary 필드가 문자열인 경우 JSON 파싱
   if (normalized.itinerary && typeof normalized.itinerary === 'string') {
@@ -162,18 +201,21 @@ const normalizeItem = (item) => {
     duration: '2박 3일',
     summary: '멋진 여행을 즐겨보세요',
     description: '상세한 여행 정보를 확인하세요',
+    theme: ['관광'],
   }
 
   Object.entries(defaultValues).forEach(([field, defaultValue]) => {
     if (
       normalized[field] === undefined ||
       normalized[field] === null ||
-      normalized[field] === ''
+      normalized[field] === '' ||
+      (Array.isArray(normalized[field]) && normalized[field].length === 0)
     ) {
       normalized[field] = defaultValue
     }
   })
 
+  console.log('🔧 데이터 정규화 후:', normalized)
   return normalized
 }
 

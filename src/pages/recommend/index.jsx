@@ -128,44 +128,75 @@ export default function TravelCoursePage() {
   const isActiveError = shouldUseSearch ? isSearchError : isListError
   const activeRefetch = shouldUseSearch ? refetchSearch : refetchList
 
-  // API 응답 서버 코스 이추출
+  // 응답 데이터에서 courses 추출 (memo 최적화)
   const travelCourses = useMemo(() => {
-    if (!activeResponse) return []
-
-    // 디버깅: API 응답 구조 로그
     console.log('=== API 응답 디버깅 ===')
-    console.log('전체 응답:', activeResponse)
+    console.log('전체 응답:', typeof activeResponse, activeResponse)
     console.log('응답 타입:', typeof activeResponse)
     console.log('배열인가?', Array.isArray(activeResponse))
+    console.log('API 타입:', shouldUseSearch ? 'SEARCH' : 'LIST')
+    console.log(
+      '백엔드 연결 상태:',
+      isActiveLoading ? 'Loading...' : 'Complete',
+    )
 
-    // API 응답 구조 조정
-    if (Array.isArray(activeResponse)) {
-      console.log('배열 응답 처리, 길이:', activeResponse.length)
-      if (activeResponse.length > 0) {
-        console.log('배열 첫 번째 아이템:', activeResponse[0])
-        console.log('첫 번째 아이템 키들:', Object.keys(activeResponse[0]))
-      }
-      return activeResponse
+    // 응답이 없거나 null/undefined인 경우
+    if (!activeResponse) {
+      console.log('❌ 응답이 없음 - 빈 배열 반환')
+      return []
     }
 
-    if (activeResponse.courses) {
-      console.log(
-        'courses 필드에서 데이터 추출, 길이:',
-        activeResponse.courses.length,
-      )
-      if (activeResponse.courses.length > 0) {
-        console.log('courses 첫 번째 아이템:', activeResponse.courses[0])
+    // API 응답 구조 조정 - 안전한 처리
+    if (Array.isArray(activeResponse)) {
+      console.log('✅ 배열 응답 처리, 길이:', activeResponse.length)
+      if (activeResponse.length > 0 && activeResponse[0]) {
+        console.log('✅ 배열 첫 번째 아이템:', activeResponse[0])
         console.log(
-          '첫 번째 course 키들:',
-          Object.keys(activeResponse.courses[0]),
+          '✅ 첫 번째 아이템 키들:',
+          Object.keys(activeResponse[0] || {}),
         )
       }
-      return activeResponse.courses
+      return activeResponse.filter(Boolean) // null/undefined 아이템 제거
     }
 
-    console.log('알 수 없는 응답 구조, 빈 배열 반환')
+    // courses 필드 확인 - 안전한 처리
+    if (activeResponse.courses && Array.isArray(activeResponse.courses)) {
+      console.log(
+        '✅ courses 필드에서 데이터 추출, 길이:',
+        activeResponse.courses.length,
+      )
+      if (activeResponse.courses.length > 0 && activeResponse.courses[0]) {
+        console.log('✅ courses 첫 번째 아이템:', activeResponse.courses[0])
+        console.log(
+          '✅ 첫 번째 course 키들:',
+          Object.keys(activeResponse.courses[0] || {}),
+        )
+        console.log(
+          '✅ 첫 번째 course 지역:',
+          activeResponse.courses[0].region_code,
+        )
+        console.log(
+          '✅ 첫 번째 course 제목:',
+          activeResponse.courses[0].course_name,
+        )
+      }
+      return activeResponse.courses.filter(Boolean) // null/undefined 아이템 제거
+    }
+
+    // 응답이 객체이지만 courses 필드가 없거나 배열이 아닌 경우
+    if (typeof activeResponse === 'object') {
+      console.log('⚠️ 객체 응답이지만 courses 필드가 유효하지 않음:', {
+        hasCourses: 'courses' in activeResponse,
+        coursesType: typeof activeResponse.courses,
+        isCoursesArray: Array.isArray(activeResponse.courses),
+        coursesValue: activeResponse.courses,
+        totalCount: activeResponse.total || 'N/A',
+      })
+    }
+
+    console.log('❌ 알 수 없는 응답 구조, 빈 배열 반환')
     return []
-  }, [activeResponse])
+  }, [activeResponse, shouldUseSearch, isActiveLoading])
 
   // 에러 처리
   const error = useMemo(() => {
@@ -198,40 +229,66 @@ export default function TravelCoursePage() {
       try {
         setImagesLoading(true)
 
-        // region 필드 사용 (regionName 대신)
+        // region 필드 사용 - null/undefined 안전 처리
         const regionCodes = travelCourses
-          .map((course) => course.region)
-          .filter(Boolean)
+          .map((course) => course?.region)
+          .filter((region) => region && region !== null && region !== undefined)
         const uniqueRegionCodes = [...new Set(regionCodes)]
 
         console.log('요청 지역 코드:', uniqueRegionCodes)
         console.log('첫 번째 코스 데이터 샘플:', travelCourses[0])
 
-        // 지역 코드를 지역명으로 변환
-        const regionNamesForImages = uniqueRegionCodes.map(
-          (code) => regionNames[code] || code,
-        )
+        // 지역 코드를 지역명으로 변환 - 안전한 매핑
+        const regionNamesForImages = uniqueRegionCodes
+          .map((code) => {
+            const regionName = regionNames[code]
+            if (!regionName) {
+              console.warn(`알 수 없는 지역 코드: ${code}`)
+              return null
+            }
+            return regionName
+          })
+          .filter(Boolean) // null/undefined 제거
+
+        // 빈 배열 처리
+        if (regionNamesForImages.length === 0) {
+          console.warn('유효한 지역이 없어서 기본 이미지 사용')
+          setImages({})
+          setImagesLoading(false)
+          return
+        }
 
         const images = await getMultipleRegionImages(regionNamesForImages)
         console.log('로드 지역 매핑:', images)
 
         setImages(images)
 
-        // 코스별로 어떤 지역이 있는지 확인 (디버깅용)
-        travelCourses.forEach((course) => {
-          const regionDisplayName = regionNames[course.region] || course.region
+        // 코스별로 어떤 지역이 있는지 확인 (디버깅용) - 안전한 처리
+        travelCourses.forEach((course, index) => {
+          const courseRegion = course?.region
+          const regionDisplayName = courseRegion
+            ? regionNames[courseRegion] || courseRegion
+            : '지역 정보 없음'
+          const imageUrl =
+            regionDisplayName && regionDisplayName !== '지역 정보 없음'
+              ? images[regionDisplayName]
+              : undefined
+
           console.log(
-            `${course.title} - 지역: ${course.region} (${regionDisplayName}) - 이미지: ${images[regionDisplayName]}`,
+            `${course?.title || '제목 없음'} - 지역: ${courseRegion || 'undefined'} (${regionDisplayName}) - 이미지: ${imageUrl || 'undefined'}`,
           )
         })
       } catch (error) {
         console.error('지역 로드 실패:', error)
-        // fallback 로직
+        // fallback 로직 - 안전한 처리
         const fallbackImages = {}
         travelCourses.forEach((course) => {
-          const regionDisplayName = regionNames[course.region] || course.region
-          fallbackImages[regionDisplayName] =
-            `https://picsum.photos/800/600?random=${course.id}`
+          const courseRegion = course?.region
+          if (courseRegion) {
+            const regionDisplayName = regionNames[courseRegion] || courseRegion
+            fallbackImages[regionDisplayName] =
+              `https://picsum.photos/800/600?random=${course?.id || Math.random()}`
+          }
         })
         setImages(fallbackImages)
       } finally {
@@ -244,15 +301,56 @@ export default function TravelCoursePage() {
     }
   }, [travelCourses]) // travelCourses가 변경될 때마다 실행
 
-  // 지역 매핑
+  // 지역 매핑 - 네이버/티맵 기준 확장 매핑
   const regionNames = {
+    // 기본 매핑
     all: '전체',
+
+    // 네이버/티맵 기본 숫자 코드 (행정구역 기준)
+    1: '서울',
+    2: '부산',
+    3: '대구',
+    4: '인천',
+    5: '광주',
+    6: '대전',
+    7: '울산',
+    8: '세종',
+
+    // 네이버 지도 API 지역 코드 (표준 행정구역 코드)
+    11: '서울',
+    26: '부산',
+    27: '대구',
+    28: '인천',
+    29: '광주',
+    30: '대전',
+    31: '울산', // 울산 (31번 통합)
+    36: '세종', // 세종 (36번 통합)
+    41: '경기',
+    42: '강원',
+    43: '충북',
+    44: '충남',
+    45: '전북',
+    46: '전남',
+    47: '경북',
+    48: '경남',
+    50: '제주',
+
+    // 도 단위 추가 코드
+    32: '강원', // 강원도 대체 코드
+    33: '충북', // 충북 대체 코드
+    34: '충남', // 충남 대체 코드
+    35: '전북', // 전북 대체 코드
+    37: '경북', // 경북 대체 코드
+    38: '경남', // 경남 대체 코드
+    39: '제주', // 제주 대체 코드
+
+    // 티맵 지역 코드
     seoul: '서울',
     busan: '부산',
-    incheon: '인천',
     daegu: '대구',
-    daejeon: '대전',
+    incheon: '인천',
     gwangju: '광주',
+    daejeon: '대전',
     ulsan: '울산',
     sejong: '세종',
     gyeonggi: '경기',
@@ -264,10 +362,56 @@ export default function TravelCoursePage() {
     gyeongbuk: '경북',
     gyeongnam: '경남',
     jeju: '제주',
+
+    // 관광지 기준 세부 지역
     gangneung: '강릉',
     gyeongju: '경주',
     jeonju: '전주',
     yeosu: '여수',
+    sokcho: '속초',
+    andong: '안동',
+    gongju: '공주',
+    buyeo: '부여',
+    tongyeong: '통영',
+    geoje: '거제',
+    namhae: '남해',
+
+    // 추가 네이버/티맵 형태의 지역 코드
+    'seoul-city': '서울',
+    'busan-city': '부산',
+    'gyeonggi-do': '경기',
+    'gangwon-do': '강원',
+    'jeju-do': '제주',
+    'jeju-island': '제주',
+
+    // 영문 지역명 (해외 API 연동 시)
+    Seoul: '서울',
+    Busan: '부산',
+    Jeju: '제주',
+    Gyeonggi: '경기',
+    Gangwon: '강원',
+    Incheon: '인천',
+    Daegu: '대구',
+    Daejeon: '대전',
+    Gwangju: '광주',
+    Ulsan: '울산',
+
+    // 구 지역 코드 호환성
+    'kr-11': '서울',
+    'kr-26': '부산',
+    'kr-27': '대구',
+    'kr-28': '인천',
+    'kr-29': '광주',
+    'kr-30': '대전',
+    'kr-31': '울산',
+    'kr-50': '제주',
+
+    // 기타 가능한 코드들
+    'metro-seoul': '서울',
+    'metro-busan': '부산',
+    'province-gyeonggi': '경기',
+    'province-gangwon': '강원',
+    'island-jeju': '제주',
   }
 
   // 월 배열
@@ -304,50 +448,74 @@ export default function TravelCoursePage() {
   // ===============================
   const filteredCourses = useMemo(() => {
     return travelCourses.filter((course) => {
-      // 기존 검색 로직 (보존)
+      // 기존 검색 로직 (보존) - 안전한 처리 추가
+      const courseTitle = course?.title || ''
+      const courseSubtitle = course?.subtitle || ''
+      const courseSummary = course?.summary || ''
+
       const matchesSearch =
         searchQuery === '' ||
-        course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        course.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        course.summary.toLowerCase().includes(searchQuery.toLowerCase())
+        courseTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        courseSubtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        courseSummary.toLowerCase().includes(searchQuery.toLowerCase())
 
+      // 지역 필터링 - 안전한 처리
+      const courseRegion = course?.region
       const matchesRegion =
-        selectedRegion === 'all' || course.region === selectedRegion
+        selectedRegion === 'all' ||
+        (courseRegion && courseRegion === selectedRegion)
 
+      // 월 필터링 - 안전한 처리
+      const courseBestMonths = course?.bestMonths || []
       const matchesMonth =
         selectedMonth === 'all' ||
-        course.bestMonths.includes(parseInt(selectedMonth))
+        (Array.isArray(courseBestMonths) &&
+          courseBestMonths.includes(parseInt(selectedMonth)))
 
+      // 테마 필터링 - 안전한 처리
+      const courseThemes = course?.theme || []
       const matchesTheme =
         selectedTheme === 'all' ||
-        course.theme.some((theme) =>
-          theme.toLowerCase().includes(selectedTheme.toLowerCase()),
-        )
+        (Array.isArray(courseThemes) &&
+          courseThemes.some(
+            (theme) =>
+              theme &&
+              theme.toLowerCase().includes(selectedTheme.toLowerCase()),
+          ))
 
-      // 고급 기능 성에 따른 빠른 필터 로직
+      // 고급 기능에 따른 빠른 필터 로직 - 안전한 처리
       if (showAdvancedFeatures) {
-        if (quickFilters.includes('high-rating') && course.rating < 4.0)
+        const courseRating = course?.rating || 0
+        const coursePriceValue = course?.priceValue || 0
+        const coursePopularityScore = course?.popularityScore || 0
+        const courseDuration = course?.duration || ''
+        const courseAmenities = course?.amenities || []
+
+        if (quickFilters.includes('high-rating') && courseRating < 4.0)
           return false
-        if (quickFilters.includes('budget') && course.priceValue > 300000)
+        if (quickFilters.includes('budget') && coursePriceValue > 300000)
           return false
-        if (quickFilters.includes('popular') && course.popularityScore < 80)
+        if (quickFilters.includes('popular') && coursePopularityScore < 80)
           return false
         if (quickFilters.includes('nearby')) {
           // 근처 지역 필터
           const nearbyRegions = ['seoul', 'gyeonggi', 'incheon']
-          if (!nearbyRegions.includes(course.region)) return false
+          if (!courseRegion || !nearbyRegions.includes(courseRegion))
+            return false
         }
         if (quickFilters.includes('weekend')) {
           // 주말 추천
-          if (!course.duration.includes('23')) return false
+          if (!courseDuration.includes('23')) return false
         }
         if (quickFilters.includes('family')) {
           // 가족 여행 친화적인 것들
           const familyThemes = ['자연', '문화', '역사']
-          const hasFamilyTheme = course.theme.some((theme) =>
-            familyThemes.includes(theme),
-          )
-          const hasAccessible = course.amenities?.includes('accessible')
+          const hasFamilyTheme =
+            Array.isArray(courseThemes) &&
+            courseThemes.some((theme) => theme && familyThemes.includes(theme))
+          const hasAccessible =
+            Array.isArray(courseAmenities) &&
+            courseAmenities.includes('accessible')
           if (!hasFamilyTheme && !hasAccessible) return false
         }
       }
@@ -374,21 +542,33 @@ export default function TravelCoursePage() {
     }
 
     return [...filteredCourses].sort((a, b) => {
+      // 안전한 값 추출
+      const aRating = a?.rating || 0
+      const bRating = b?.rating || 0
+      const aLikeCount = a?.likeCount || 0
+      const bLikeCount = b?.likeCount || 0
+      const aPriceValue = a?.priceValue || 0
+      const bPriceValue = b?.priceValue || 0
+      const aWeatherScore = a?.weatherScore || 0
+      const bWeatherScore = b?.weatherScore || 0
+      const aPopularityScore = a?.popularityScore || 0
+      const bPopularityScore = b?.popularityScore || 0
+
       switch (sortBy) {
         case 'rating':
-          return b.rating - a.rating
+          return bRating - aRating
         case 'popularity':
-          return b.likeCount - a.likeCount
+          return bLikeCount - aLikeCount
         case 'price-low':
-          return a.priceValue - b.priceValue
+          return aPriceValue - bPriceValue
         case 'price-high':
-          return b.priceValue - a.priceValue
+          return bPriceValue - aPriceValue
         case 'smart': {
-          // AI 수 계산
+          // AI 스코어 계산 - 안전한 처리
           const scoreA =
-            a.rating * 0.3 + a.weatherScore * 0.2 + a.popularityScore * 0.5
+            aRating * 0.3 + aWeatherScore * 0.2 + aPopularityScore * 0.5
           const scoreB =
-            b.rating * 0.3 + b.weatherScore * 0.2 + b.popularityScore * 0.5
+            bRating * 0.3 + bWeatherScore * 0.2 + bPopularityScore * 0.5
           return scoreB - scoreA
         }
         default:

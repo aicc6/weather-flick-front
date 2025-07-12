@@ -68,7 +68,7 @@ export function TravelPlanDetailPage() {
     useAutoGenerateRoutesMutation()
 
   // 상세 경로 정보 모달 상태
-  const [selectedRoute] = useState(null)
+  const [selectedRoute, setSelectedRoute] = useState(null)
   const [isRouteDetailOpen, setIsRouteDetailOpen] = useState(false)
 
   // 타임머신 경로 정보 조회
@@ -1696,23 +1696,66 @@ export function TravelPlanDetailPage() {
                                   🏨 전일 마지막 장소에서 오늘 첫 번째 목적지로
                                 </div>
                               )}
-                              <EnhancedTransportCard
-                                route={{
-                                  from: route.departure_name,
-                                  to: route.destination_name,
-                                  departure_lat: route.departure_lat,
-                                  departure_lng: route.departure_lng,
-                                  destination_lat: route.destination_lat,
-                                  destination_lng: route.destination_lng,
-                                  duration: route.duration,
-                                  distance: route.distance,
-                                  cost: route.cost,
-                                  transport_type: route.transport_type,
-                                  route_data: route.route_data,
-                                  isInterDay: route.sequence === 0,
-                                }}
-                                travelDate={plan?.start_date}
-                              />
+
+                              {/* 기존 route_data가 있는 경우 직접 렌더링 */}
+                              {route.route_data &&
+                              route.transport_type === 'transit' ? (
+                                <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                                  <div className="mb-4 flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
+                                        <span className="text-lg">🚌</span>
+                                      </div>
+                                      <div>
+                                        <h3 className="font-semibold text-gray-800 dark:text-gray-100">
+                                          {route.departure_name} →{' '}
+                                          {route.destination_name}
+                                        </h3>
+                                        <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                                          <span>🚌 대중교통</span>
+                                          <span>•</span>
+                                          <span>
+                                            {formatDuration(route.duration)}
+                                          </span>
+                                          <span>•</span>
+                                          <span>
+                                            {formatDistance(route.distance)}
+                                          </span>
+                                          <span>•</span>
+                                          <span>{formatCost(route.cost)}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* 대중교통 상세 정보 렌더링 */}
+                                  <div className="space-y-2">
+                                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                      📋 상세 경로 정보
+                                    </div>
+                                    {renderTransitDetails(route.route_data)}
+                                  </div>
+                                </div>
+                              ) : (
+                                /* 기존 EnhancedTransportCard 사용 */
+                                <EnhancedTransportCard
+                                  route={{
+                                    from: route.departure_name,
+                                    to: route.destination_name,
+                                    departure_lat: route.departure_lat,
+                                    departure_lng: route.departure_lng,
+                                    destination_lat: route.destination_lat,
+                                    destination_lng: route.destination_lng,
+                                    duration: route.duration,
+                                    distance: route.distance,
+                                    cost: route.cost,
+                                    transport_type: route.transport_type,
+                                    route_data: route.route_data,
+                                    isInterDay: route.sequence === 0,
+                                  }}
+                                  travelDate={plan?.start_date}
+                                />
+                              )}
                             </div>
                           )
                         })}
@@ -2018,6 +2061,11 @@ export function TravelPlanDetailPage() {
                           <div className="text-xs text-gray-600">예상 비용</div>
                         </div>
                       </div>
+
+                      {/* 대중교통 상세 정보 렌더링 추가 */}
+                      {selectedRoute?.transport_type === 'transit' &&
+                        selectedRoute?.route_data &&
+                        renderTransitDetails(selectedRoute.route_data)}
                     </div>
                   )}
 
