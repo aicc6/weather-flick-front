@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+import { clearRegion } from '@/store/slices/customizedScheduleSlice'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -108,6 +109,7 @@ const companions = [
 
 export default function CustomizedScheduleResultPage() {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const [searchParams] = useSearchParams()
   const [recommendations, setRecommendations] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -299,6 +301,12 @@ export default function CustomizedScheduleResultPage() {
   }
 
   const handleSavePlans = () => {
+    // Redux 상태 초기화
+    dispatch(clearRegion())
+    
+    // localStorage 초기화
+    localStorage.removeItem('customizedSchedule')
+    
     navigate('/planner', {
       state: {
         recommendedPlan: recommendations,

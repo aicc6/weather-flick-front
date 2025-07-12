@@ -1,4 +1,6 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
+import { toast } from 'sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -8,6 +10,7 @@ import { Sparkles, Brain, Cloud, Users } from '@/components/icons'
 import PlannerForm from './PlannerForm'
 import PlanRecommendation from './PlanRecommendation'
 import SavePlanButton from './SavePlanButton'
+import { useCreateTravelPlanMutation } from '@/store/api/travelPlansApi'
 
 // 새로운 고도화 컴포넌트들
 import AIRecommendationEngine from '@/components/planner/AIRecommendationEngine'
@@ -16,6 +19,8 @@ import CollaborativePlanning from '@/components/planner/CollaborativePlanning'
 import TmapRecommendations from '@/components/planner/TmapRecommendations'
 
 export default function PlannerPage() {
+  const location = useLocation()
+  const recommendedPlan = location.state?.recommendedPlan
   // 기존 상태들
   const [formData, setFormData] = useState({
     origin: '서울',
@@ -58,6 +63,7 @@ export default function PlannerPage() {
   ])
 
   const [isLoading, setIsLoading] = useState(false)
+  const [createTravelPlan] = useCreateTravelPlanMutation()
 
   // 새로운 고도화 상태들
   const [currentUser] = useState({
@@ -115,6 +121,124 @@ export default function PlannerPage() {
   // 협업자 업데이트 핸들러
   const handleCollaboratorUpdate = (count) => {
     console.log(`현재 협업자 수: ${count}명`)
+  }
+
+  // 맞춤 일정 데이터 처리
+  useEffect(() => {
+    if (recommendedPlan) {
+      // 추천 데이터를 플래너 폼 데이터로 변환
+      const { summary, itinerary } = recommendedPlan
+      
+      // 시작일과 종료일 계산
+      const today = new Date()
+      const endDate = new Date(today)
+      endDate.setDate(today.getDate() + (summary.days - 1))
+      
+      setFormData({
+        origin: '서울', // 기본값
+        destination: summary.regionName,
+        startDate: today,
+        endDate: endDate,
+        theme: summary.styles?.[0] || '여행',
+        filters: [],
+      })
+      
+      // 추천 결과를 플랜 결과로 변환
+      const planResults = []
+      itinerary.forEach((dayPlan) => {
+        dayPlan.places.forEach((place) => {
+          planResults.push({
+            image: `https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80`,
+            title: place.name,
+            description: place.description,
+            tags: place.tags,
+            dayNumber: dayPlan.day,
+            time: place.time,
+            category: place.category,
+          })
+        })
+      })
+      
+      setPlanResults(planResults)
+      toast.success('맞춤 여행 일정을 불러왔습니다!')
+    }
+  }, [recommendedPlan])
+
+  // 플랜 저장 핸들러
+  const handleSavePlan = async () => {
+    try {
+      setIsLoading(true)
+      
+      // 여행 일정 데이터 구성
+      const itineraryData = {}
+      
+      // recommendedPlan이 있는 경우 해당 데이터 사용
+      if (recommendedPlan) {
+        recommendedPlan.itinerary.forEach((dayPlan) => {
+          itineraryData[`day${dayPlan.day}`] = {
+            date: dayPlan.date || formData.startDate,
+            places: dayPlan.places.map((place) => ({
+              name: place.name,
+              time: place.time,
+              description: place.description,
+              category: place.category,
+              tags: place.tags,
+            })),
+          }
+        })
+      } else {
+        // 기본 플랜 데이터 사용
+        const groupedByDay = {}
+        planResults.forEach((plan) => {
+          const dayKey = `day${plan.dayNumber || 1}`
+          if (!groupedByDay[dayKey]) {
+            groupedByDay[dayKey] = []
+          }
+          groupedByDay[dayKey].push({
+            name: plan.title,
+            description: plan.description,
+            time: plan.time || '미정',
+            category: plan.category || '관광지',
+            tags: plan.tags,
+          })
+        })
+        
+        Object.keys(groupedByDay).forEach((dayKey) => {
+          itineraryData[dayKey] = {
+            date: formData.startDate,
+            places: groupedByDay[dayKey],
+          }
+        })
+      }
+      
+      const planData = {
+        title: recommendedPlan 
+          ? `${recommendedPlan.summary.regionName} ${recommendedPlan.summary.days}일 여행`
+          : `${formData.destination} 여행`,
+        description: recommendedPlan
+          ? `${recommendedPlan.summary.who} 여행 - ${recommendedPlan.summary.styles?.join(', ')}`
+          : `${formData.theme} 테마 여행`,
+        start_date: formData.startDate.toISOString().split('T')[0],
+        end_date: formData.endDate.toISOString().split('T')[0],
+        start_location: formData.origin,
+        destination_ids: [],
+        theme: formData.theme,
+        status: 'PLANNING',
+        itinerary: itineraryData,
+      }
+      
+      const result = await createTravelPlan(planData).unwrap()
+      
+      toast.success('여행 플랜이 성공적으로 저장되었습니다!')
+      
+      // 저장 후 여행 플랜 목록 페이지로 이동
+      window.location.href = '/travel-plans'
+    } catch (error) {
+      console.error('플랜 저장 실패:', error)
+      toast.error('여행 플랜 저장에 실패했습니다. 다시 시도해주세요.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -227,7 +351,11 @@ export default function PlannerPage() {
 
           {/* 기본 추천 결과 */}
           <PlanRecommendation planResults={planResults} isLoading={isLoading} />
-          <SavePlanButton planResults={planResults} />
+          <SavePlanButton 
+            planResults={planResults} 
+            onSave={handleSavePlan}
+            isLoading={isLoading}
+          />
         </TabsContent>
 
         {/* AI 추천 탭 */}
