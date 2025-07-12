@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
-  Navigation,
   Clock,
   MapPin,
   Bus,
@@ -17,6 +16,7 @@ import {
   Star,
   Zap,
 } from '@/components/icons'
+import NavigationDropdown from './NavigationDropdown'
 
 // 교통수단 아이콘 매핑
 const transportIcons = {
@@ -1176,10 +1176,11 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
 
         {/* 액션 버튼들 */}
         <div className="flex space-x-2">
-          <Button variant="outline" className="flex-1">
-            <Navigation className="mr-2 h-4 w-4" />
-            내비게이션 연결
-          </Button>
+          <NavigationDropdown
+            route={route}
+            variant="outline"
+            className="flex-1"
+          />
           <Button className="flex-1">
             <Clock className="mr-2 h-4 w-4" />
             알림 설정
