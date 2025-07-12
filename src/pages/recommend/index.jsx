@@ -420,6 +420,19 @@ export default function TravelCoursePage() {
     'island-jeju': '제주',
   }
 
+  // 더 많은 코스 보기 버튼 클릭 핸들러
+  const handleLoadMoreCourses = useCallback(() => {
+    setCurrentPage((prev) => prev + 1)
+
+    // 새로운 콘텐츠가 로드될 때 페이지 아래로 스크롤
+    setTimeout(() => {
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth',
+      })
+    }, 100)
+  }, [])
+
   // 월 배열
   const monthNames = [
     '전체',
@@ -1097,7 +1110,7 @@ export default function TravelCoursePage() {
             {activeResponse && activeResponse.total > sortedCourses.length && (
               <div className="mt-12 text-center">
                 <Button
-                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                  onClick={handleLoadMoreCourses}
                   variant="outline"
                   size="lg"
                   disabled={isLoading}
@@ -1105,9 +1118,6 @@ export default function TravelCoursePage() {
                 >
                   {isLoading ? '로딩 중...' : '더 많은 코스 보기'}
                 </Button>
-                <p className="text-muted-foreground mt-2 text-sm">
-                  {sortedCourses.length} / {activeResponse.total} 개 표시 중
-                </p>
               </div>
             )}
           </>
