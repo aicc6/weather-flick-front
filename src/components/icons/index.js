@@ -44,6 +44,7 @@ export {
   ThumbsUp,
   ThumbsDown,
   Image,
+  Loader2,
 } from 'lucide-react'
 
 // Weather Icons

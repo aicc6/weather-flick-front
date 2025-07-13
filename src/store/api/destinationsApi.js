@@ -6,7 +6,7 @@ export const destinationsApi = createApi({
   baseQuery: baseQueryWithReauth,
   tagTypes: ['Destination'],
   endpoints: (builder) => ({
-    // 목적지 검색 (자동완성)
+    // 목적지 검색 (자동완성) - destinations API 사용 (Google Places)
     searchDestinations: builder.query({
       query: (searchTerm) => ({
         url: 'destinations/search',
