@@ -17,7 +17,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Calendar, ChevronRight, PlusCircle, Trash2 } from '@/components/icons'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Calendar, ChevronRight, PlusCircle, Trash2, Filter } from '@/components/icons'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { toast } from 'sonner'
 
@@ -44,8 +51,16 @@ export function TravelPlansPage() {
   const [deleteTravelPlan, { isLoading: isDeleting }] =
     useDeleteTravelPlanMutation()
   const [planToDelete, setPlanToDelete] = useState(null)
+  const [filterType, setFilterType] = useState('all') // 'all', 'manual', 'custom'
 
-  const sortedPlans = (plans || [])
+  const filteredPlans = (plans || []).filter(plan => {
+    if (filterType === 'all') return true
+    if (filterType === 'custom') return plan.plan_type === 'custom'
+    if (filterType === 'manual') return !plan.plan_type || plan.plan_type === 'manual'
+    return true
+  })
+
+  const sortedPlans = filteredPlans
     .slice()
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
 
@@ -168,6 +183,55 @@ export function TravelPlansPage() {
         </div>
       </div>
 
+      {/* 필터 섹션 */}
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm font-medium">필터:</span>
+        </div>
+        <Select
+          value={filterType}
+          onValueChange={setFilterType}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="플랜 유형 선택" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">
+              <div className="flex items-center gap-2">
+                <span>전체 플랜</span>
+                <Badge variant="secondary" className="ml-auto text-xs">
+                  {plans?.length || 0}
+                </Badge>
+              </div>
+            </SelectItem>
+            <SelectItem value="manual">
+              <div className="flex items-center gap-2">
+                <span>직접 작성</span>
+                <Badge variant="secondary" className="ml-auto text-xs">
+                  {plans?.filter(p => !p.plan_type || p.plan_type === 'manual').length || 0}
+                </Badge>
+              </div>
+            </SelectItem>
+            <SelectItem value="custom">
+              <div className="flex items-center gap-2">
+                <span>AI 맞춤 추천</span>
+                <Badge variant="secondary" className="ml-auto text-xs">
+                  {plans?.filter(p => p.plan_type === 'custom').length || 0}
+                </Badge>
+              </div>
+            </SelectItem>
+          </SelectContent>
+        </Select>
+        <div className="ml-auto text-sm text-muted-foreground">
+          {filterType === 'all' 
+            ? `전체 ${sortedPlans?.length || 0}개 표시 중` 
+            : filterType === 'manual'
+            ? `직접 작성한 ${sortedPlans?.length || 0}개 표시 중`
+            : `AI 추천 ${sortedPlans?.length || 0}개 표시 중`}
+        </div>
+      </div>
+
       <div>
         {!isLoading && !isError && sortedPlans && sortedPlans.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -176,9 +240,16 @@ export function TravelPlansPage() {
                 <CardHeader className="pb-4">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle className="group-hover:text-primary text-lg font-semibold transition-colors">
-                        {plan.title}
-                      </CardTitle>
+                      <div className="flex items-start gap-2">
+                        <CardTitle className="group-hover:text-primary text-lg font-semibold transition-colors">
+                          {plan.title}
+                        </CardTitle>
+                        {plan.plan_type === 'custom' && (
+                          <Badge variant="secondary" className="text-xs">
+                            AI 추천
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-muted-foreground mt-1 text-sm">
                         {plan.destination || '목적지 미정'}
                       </p>

@@ -17,7 +17,10 @@ import {
 } from '@/components/icons'
 import { http } from '@/lib/http'
 import { useGetCustomTravelRecommendationsMutation } from '@/store/api/customTravelApi'
+import { useCreateTravelPlanMutation } from '@/store/api/travelPlansApi'
 import { toast } from 'sonner'
+import SaveTravelPlanModal from '@/components/SaveTravelPlanModal'
+import { useAuth } from '@/contexts/AuthContextRTK'
 
 // 여행 스타일 정의
 const travelStyles = [
@@ -110,11 +113,15 @@ const companions = [
 export default function CustomizedScheduleResultPage() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const { user, isAuthenticated } = useAuth()
   const [searchParams] = useSearchParams()
   const [recommendations, setRecommendations] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [attractionNames, setAttractionNames] = useState([])
   const [getCustomRecommendations] = useGetCustomTravelRecommendationsMutation()
+  const [createTravelPlan] = useCreateTravelPlanMutation()
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   const region = searchParams.get('region')
   const period = searchParams.get('period')
@@ -164,6 +171,9 @@ export default function CustomizedScheduleResultPage() {
             description: '아름다운 풍경과 포토존으로 유명한 곳',
             rating: 4.5,
             tags: ['사진', '관광', '인기'],
+            address: `${finalRegionName} 주요 관광지`,
+            latitude: 33.3785614 + (Math.random() * 0.2 - 0.1),
+            longitude: 126.5661908 + (Math.random() * 0.2 - 0.1),
           },
           {
             id: `${day}-2`,
@@ -173,6 +183,9 @@ export default function CustomizedScheduleResultPage() {
             description: '현지인들이 추천하는 숨은 맛집',
             rating: 4.7,
             tags: ['맛집', '현지', '추천'],
+            address: `${finalRegionName} 맛집거리`,
+            latitude: 33.3785614 + (Math.random() * 0.2 - 0.1),
+            longitude: 126.5661908 + (Math.random() * 0.2 - 0.1),
           },
           {
             id: `${day}-3`,
@@ -182,6 +195,9 @@ export default function CustomizedScheduleResultPage() {
             description: '여유로운 시간을 보내기 좋은 감성 카페',
             rating: 4.3,
             tags: ['카페', '힐링', '감성'],
+            address: `${finalRegionName} 카페거리`,
+            latitude: 33.3785614 + (Math.random() * 0.2 - 0.1),
+            longitude: 126.5661908 + (Math.random() * 0.2 - 0.1),
           },
         ],
       })
@@ -210,6 +226,7 @@ export default function CustomizedScheduleResultPage() {
         }).unwrap()
 
         // API 응답 데이터 형식 변환
+        console.log('API Response:', result) // 디버깅용
         const formattedData = {
           summary: {
             region: finalRegionCode,
@@ -301,17 +318,74 @@ export default function CustomizedScheduleResultPage() {
   }
 
   const handleSavePlans = () => {
-    // Redux 상태 초기화
-    dispatch(clearRegion())
+    if (!isAuthenticated) {
+      toast.error('로그인이 필요한 기능입니다.')
+      // 현재 URL을 저장하고 로그인 페이지로 이동
+      const currentUrl = window.location.pathname + window.location.search
+      navigate(`/login?redirect=${encodeURIComponent(currentUrl)}`)
+      return
+    }
+    setIsModalOpen(true)
+  }
+  
+  const handleModalSave = async (formData) => {
+    setIsSaving(true)
     
-    // localStorage 초기화
-    localStorage.removeItem('customizedSchedule')
-    
-    navigate('/planner', {
-      state: {
-        recommendedPlan: recommendations,
-      },
-    })
+    try {
+      // 여행 일정 데이터 구성
+      const itineraryData = {}
+      
+      // recommendations.itinerary의 데이터를 day1, day2, day3 형식으로 변환
+      // 백엔드 스키마에 맞게 각 day의 값을 리스트로 변환
+      recommendations.itinerary.forEach((dayPlan) => {
+        itineraryData[`day${dayPlan.day}`] = dayPlan.places.map((place) => ({
+          name: place.name,
+          time: place.time,
+          description: place.description,
+          category: place.category,
+          tags: place.tags,
+          date: dayPlan.date || formData.startDate,
+          address: place.address,
+          latitude: place.latitude,
+          longitude: place.longitude,
+          rating: place.rating,
+          image: place.image
+        }))
+      })
+      
+      const planData = {
+        title: formData.title,
+        description: `${recommendations.summary.who} 여행 - ${recommendations.summary.styles?.join(', ')}`,
+        start_date: formData.startDate.toISOString().split('T')[0],
+        end_date: formData.endDate.toISOString().split('T')[0],
+        start_location: formData.origin,
+        theme: recommendations.summary.styles?.[0] || '여행',
+        status: 'PLANNING',
+        itinerary: itineraryData,
+        plan_type: 'custom',  // 맞춤 일정 표시
+      }
+      
+      // API 호출하여 여행 플랜 저장
+      const result = await createTravelPlan(planData).unwrap()
+      
+      // Redux 상태 초기화
+      dispatch(clearRegion())
+      
+      // localStorage 초기화
+      localStorage.removeItem('customizedSchedule')
+      
+      toast.success('여행 계획이 저장되었습니다!')
+      
+      // 내 여행 플랜 페이지로 이동
+      navigate('/travel-plans')
+      
+    } catch (error) {
+      console.error('저장 중 오류:', error)
+      toast.error('저장 중 오류가 발생했습니다.')
+    } finally {
+      setIsSaving(false)
+      setIsModalOpen(false)
+    }
   }
 
   if (isLoading) {
@@ -552,6 +626,15 @@ export default function CustomizedScheduleResultPage() {
           새로운 추천 받기
         </Button>
       </div>
+      
+      {/* 저장 모달 */}
+      <SaveTravelPlanModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleModalSave}
+        recommendedPlan={recommendations}
+        isLoading={isSaving}
+      />
     </div>
   )
 }

@@ -128,16 +128,20 @@ export default function PlannerPage() {
     if (recommendedPlan) {
       // 추천 데이터를 플래너 폼 데이터로 변환
       const { summary, itinerary } = recommendedPlan
+      const additionalInfo = location.state?.additionalInfo
       
-      // 시작일과 종료일 계산
-      const today = new Date()
-      const endDate = new Date(today)
-      endDate.setDate(today.getDate() + (summary.days - 1))
+      // 추가 정보가 있으면 해당 날짜 사용, 없으면 오늘 날짜
+      const startDate = additionalInfo?.startDate ? new Date(additionalInfo.startDate) : new Date()
+      const endDate = additionalInfo?.endDate ? new Date(additionalInfo.endDate) : new Date(startDate)
+      
+      if (!additionalInfo?.endDate) {
+        endDate.setDate(startDate.getDate() + (summary.days - 1))
+      }
       
       setFormData({
-        origin: '서울', // 기본값
+        origin: additionalInfo?.origin || '서울',
         destination: summary.regionName,
-        startDate: today,
+        startDate: startDate,
         endDate: endDate,
         theme: summary.styles?.[0] || '여행',
         filters: [],
@@ -175,16 +179,19 @@ export default function PlannerPage() {
       // recommendedPlan이 있는 경우 해당 데이터 사용
       if (recommendedPlan) {
         recommendedPlan.itinerary.forEach((dayPlan) => {
-          itineraryData[`day${dayPlan.day}`] = {
+          itineraryData[`day${dayPlan.day}`] = dayPlan.places.map((place) => ({
+            name: place.name,
+            time: place.time,
+            description: place.description,
+            category: place.category,
+            tags: place.tags,
             date: dayPlan.date || formData.startDate,
-            places: dayPlan.places.map((place) => ({
-              name: place.name,
-              time: place.time,
-              description: place.description,
-              category: place.category,
-              tags: place.tags,
-            })),
-          }
+            address: place.address,
+            latitude: place.latitude,
+            longitude: place.longitude,
+            rating: place.rating,
+            image: place.image
+          }))
         })
       } else {
         // 기본 플랜 데이터 사용
@@ -200,31 +207,35 @@ export default function PlannerPage() {
             time: plan.time || '미정',
             category: plan.category || '관광지',
             tags: plan.tags,
+            address: plan.address || `${formData.destination} ${plan.title}`,
+            latitude: plan.latitude,
+            longitude: plan.longitude,
+            rating: plan.rating,
+            image: plan.image
           })
         })
         
         Object.keys(groupedByDay).forEach((dayKey) => {
-          itineraryData[dayKey] = {
-            date: formData.startDate,
-            places: groupedByDay[dayKey],
-          }
+          itineraryData[dayKey] = groupedByDay[dayKey]
         })
       }
       
+      const additionalInfo = location.state?.additionalInfo
+      
       const planData = {
-        title: recommendedPlan 
+        title: additionalInfo?.title || (recommendedPlan 
           ? `${recommendedPlan.summary.regionName} ${recommendedPlan.summary.days}일 여행`
-          : `${formData.destination} 여행`,
+          : `${formData.destination} 여행`),
         description: recommendedPlan
           ? `${recommendedPlan.summary.who} 여행 - ${recommendedPlan.summary.styles?.join(', ')}`
           : `${formData.theme} 테마 여행`,
         start_date: formData.startDate.toISOString().split('T')[0],
         end_date: formData.endDate.toISOString().split('T')[0],
         start_location: formData.origin,
-        destination_ids: [],
         theme: formData.theme,
         status: 'PLANNING',
         itinerary: itineraryData,
+        plan_type: recommendedPlan ? 'custom' : 'manual',  // 맞춤 일정인지 수동 계획인지 구분
       }
       
       const result = await createTravelPlan(planData).unwrap()

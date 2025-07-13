@@ -75,6 +75,25 @@ export function CompactPlaceCard({
                   {place.address}
                 </p>
               )}
+              {/* 태그 표시 */}
+              {place.tags && place.tags.length > 0 && (
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {place.tags.slice(0, 3).map((tag, index) => (
+                    <Badge 
+                      key={index} 
+                      variant="secondary" 
+                      className="px-1.5 py-0 text-xs"
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                  {place.tags.length > 3 && (
+                    <span className="text-xs text-gray-400">
+                      +{place.tags.length - 3}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
