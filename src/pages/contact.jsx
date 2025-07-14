@@ -3,9 +3,14 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardAction,
+} from '@/components/ui/card'
 import {
   Select,
   SelectContent,
@@ -13,11 +18,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { Mail, Phone, Clock, Info } from '@/components/icons'
+import { Mail, Phone, Clock, Info, PlusCircle } from '@/components/icons'
 import { useGetContactsQuery } from '@/store/api/contactApi'
 import { useSubmitContactMutation } from '@/store/api/contactApi'
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import ContactForm from '@/components/contact/ContactForm'
 
 // 문의 스키마 정의
 const contactSchema = z.object({
@@ -82,6 +93,7 @@ export default function ContactPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedInquiry, setSelectedInquiry] = useState(null)
+  const [formOpen, setFormOpen] = useState(false)
 
   const {
     register,
@@ -117,6 +129,11 @@ export default function ContactPage() {
     },
     [reset, submitContact],
   )
+
+  // 문의 등록 성공 시 모달 닫기
+  const handleFormSuccess = useCallback(() => {
+    setFormOpen(false)
+  }, [])
 
   // 필터링된 문의 목록 (항상 훅 최상단에서 호출)
   const filteredInquiries = useMemo(() => {
@@ -199,238 +216,111 @@ export default function ContactPage() {
         </CardContent>
       </Card>
 
-      {/* 탭 네비게이션 */}
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="space-y-6"
-      >
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="write">문의하기</TabsTrigger>
-          <TabsTrigger value="list">문의 목록</TabsTrigger>
-        </TabsList>
-
-        {/* 문의 작성 탭 */}
-        <TabsContent value="write">
-          <Card>
-            <CardHeader>
-              <CardTitle>새로운 문의 작성</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                {/* 문의 분류 */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">문의 분류 *</label>
-                  <Select
-                    onValueChange={(value) => setValue('category', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="문의 분류를 선택해주세요" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {inquiryCategories.map((cat) => (
-                        <SelectItem key={cat.value} value={cat.value}>
-                          {cat.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.category && (
-                    <p className="text-sm text-red-600">
-                      {errors.category.message}
-                    </p>
-                  )}
-                </div>
-
-                {/* 제목 */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">제목 *</label>
-                  <Input
-                    {...register('title')}
-                    placeholder="문의 제목을 입력해주세요"
-                    className={errors.title ? 'border-red-500' : ''}
-                  />
-                  {errors.title && (
-                    <p className="text-sm text-red-600">
-                      {errors.title.message}
-                    </p>
-                  )}
-                </div>
-
-                {/* 문의 내용 */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">문의 내용 *</label>
-                  <Textarea
-                    {...register('content')}
-                    placeholder="문의 내용을 자세히 작성해주세요"
-                    rows={6}
-                    className={errors.content ? 'border-red-500' : ''}
-                  />
-                  <div className="flex justify-between text-xs text-gray-500">
-                    <span>최소 10자 이상 입력해주세요</span>
-                    <span>{watch('content')?.length || 0}/1000</span>
-                  </div>
-                  {errors.content && (
-                    <p className="text-sm text-red-600">
-                      {errors.content.message}
-                    </p>
-                  )}
-                </div>
-
-                {/* 연락처 정보 */}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">이름 *</label>
-                    <Input
-                      {...register('name')}
-                      placeholder="이름을 입력해주세요"
-                      className={errors.name ? 'border-red-500' : ''}
-                    />
-                    {errors.name && (
-                      <p className="text-sm text-red-600">
-                        {errors.name.message}
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">이메일 *</label>
-                    <Input
-                      {...register('email')}
-                      type="email"
-                      placeholder="이메일을 입력해주세요"
-                      className={errors.email ? 'border-red-500' : ''}
-                    />
-                    {errors.email && (
-                      <p className="text-sm text-red-600">
-                        {errors.email.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* 공개 설정 */}
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="isPublic"
-                    {...register('isPublic')}
-                    className="rounded border-gray-300"
-                  />
-                  <label htmlFor="isPublic" className="text-sm">
-                    다른 사용자에게 공개하기 (답변 내용이 공개됩니다)
-                  </label>
-                </div>
-
-                {/* 제출 버튼 */}
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full md:w-auto"
-                >
-                  {isSubmitting ? '문의 접수 중...' : '문의 접수하기'}
+      {/* 문의 목록 탭 */}
+      <Card>
+        <CardHeader>
+          <CardTitle>문의 목록</CardTitle>
+          <CardAction>
+            <Dialog open={formOpen} onOpenChange={setFormOpen}>
+              <DialogTrigger asChild>
+                <Button variant="primary" size="sm" aria-label="문의하기">
+                  <PlusCircle className="mr-1" /> 문의하기
                 </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogTitle>문의하기</DialogTitle>
+                <ContactForm onSuccess={handleFormSuccess} />
+              </DialogContent>
+            </Dialog>
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          {/* 검색 및 필터 */}
+          <div className="mb-6 flex flex-col gap-4 md:flex-row">
+            <Input
+              placeholder="제목으로 검색"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1"
+            />
+            <Select
+              value={selectedCategory}
+              onValueChange={setSelectedCategory}
+            >
+              <SelectTrigger className="w-full md:w-48">
+                <SelectValue placeholder="전체 분류" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">전체 분류</SelectItem>
+                {inquiryCategories.map((cat) => (
+                  <SelectItem key={cat.value} value={cat.label}>
+                    {cat.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        {/* 문의 목록 탭 */}
-        <TabsContent value="list">
-          <Card>
-            <CardHeader>
-              <CardTitle>문의 목록</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {/* 검색 및 필터 */}
-              <div className="mb-6 flex flex-col gap-4 md:flex-row">
-                <Input
-                  placeholder="제목으로 검색"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1"
-                />
-                <Select
-                  value={selectedCategory}
-                  onValueChange={setSelectedCategory}
-                >
-                  <SelectTrigger className="w-full md:w-48">
-                    <SelectValue placeholder="전체 분류" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">전체 분류</SelectItem>
-                    {inquiryCategories.map((cat) => (
-                      <SelectItem key={cat.value} value={cat.label}>
-                        {cat.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* 문의 목록 테이블 */}
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200 dark:border-gray-700">
-                      <th className="px-2 py-3 text-left">번호</th>
-                      <th className="px-2 py-3 text-left">분류</th>
-                      <th className="px-2 py-3 text-left">제목</th>
-                      <th className="px-2 py-3 text-center">답변여부</th>
-                      <th className="px-2 py-3 text-center">조회수</th>
-                      <th className="px-2 py-3 text-center">등록일</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredInquiries.map((inquiry) => (
-                      <tr
-                        key={inquiry.id}
-                        className="border-b border-gray-100 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50"
-                      >
-                        <td className="px-2 py-3">{inquiry.id}</td>
-                        <td className="px-2 py-3">{inquiry.category}</td>
-                        <td className="px-2 py-3">
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              className="max-w-xs truncate text-left text-blue-700 underline hover:text-blue-900 focus:outline-none"
-                              onClick={() => handleTitleClick(inquiry)}
-                              aria-label="문의 상세 보기"
-                            >
-                              {inquiry.title}
-                            </button>
-                            {!inquiry.isPublic && (
-                              <Badge variant="secondary" className="text-xs">
-                                비공개
-                              </Badge>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-2 py-3 text-center">
-                          <Badge className={statusColors[inquiry.status]}>
-                            {inquiry.status}
+          {/* 문의 목록 테이블 */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <th className="px-2 py-3 text-left">번호</th>
+                  <th className="px-2 py-3 text-left">분류</th>
+                  <th className="px-2 py-3 text-left">제목</th>
+                  <th className="px-2 py-3 text-center">답변여부</th>
+                  <th className="px-2 py-3 text-center">조회수</th>
+                  <th className="px-2 py-3 text-center">등록일</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredInquiries.map((inquiry) => (
+                  <tr
+                    key={inquiry.id}
+                    className="border-b border-gray-100 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50"
+                  >
+                    <td className="px-2 py-3">{inquiry.id}</td>
+                    <td className="px-2 py-3">{inquiry.category}</td>
+                    <td className="px-2 py-3">
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          className="max-w-xs truncate text-left text-blue-700 underline hover:text-blue-900 focus:outline-none"
+                          onClick={() => handleTitleClick(inquiry)}
+                          aria-label="문의 상세 보기"
+                        >
+                          {inquiry.title}
+                        </button>
+                        {!inquiry.isPublic && (
+                          <Badge variant="secondary" className="text-xs">
+                            비공개
                           </Badge>
-                        </td>
-                        <td className="px-2 py-3 text-center">
-                          {inquiry.views}
-                        </td>
-                        <td className="px-2 py-3 text-center">
-                          {formatDate(inquiry.created_at || inquiry.date)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-2 py-3 text-center">
+                      <Badge className={statusColors[inquiry.status]}>
+                        {inquiry.status}
+                      </Badge>
+                    </td>
+                    <td className="px-2 py-3 text-center">{inquiry.views}</td>
+                    <td className="px-2 py-3 text-center">
+                      {formatDate(inquiry.created_at || inquiry.date)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-              {filteredInquiries.length === 0 && (
-                <div className="py-8 text-center text-gray-500">
-                  검색 결과가 없습니다.
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          {filteredInquiries.length === 0 && (
+            <div className="py-8 text-center text-gray-500">
+              검색 결과가 없습니다.
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* 상세 모달 */}
       {modalOpen && selectedInquiry && (
