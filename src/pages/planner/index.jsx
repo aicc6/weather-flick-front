@@ -16,7 +16,6 @@ import { useCreateTravelPlanMutation } from '@/store/api/travelPlansApi'
 import AIRecommendationEngine from '@/components/planner/AIRecommendationEngine'
 import WeatherIntelligence from '@/components/planner/WeatherIntelligence'
 import CollaborativePlanning from '@/components/planner/CollaborativePlanning'
-import TmapRecommendations from '@/components/planner/TmapRecommendations'
 
 export default function PlannerPage() {
   const location = useLocation()
@@ -297,9 +296,6 @@ export default function PlannerPage() {
               </CardContent>
             </Card>
           </div>
-
-          {/* T맵 맛집 & 코스 추천 */}
-          <TmapRecommendations destination={formData.destination} />
 
           {/* 기본 추천 결과 */}
           <PlanRecommendation planResults={planResults} isLoading={isLoading} />
