@@ -25,9 +25,10 @@ const ContactForm = ({ onSuccess }) => {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <select {...register('category', { required: true })}>
         <option value="">문의 분류 선택</option>
-        <option value="일반">일반</option>
-        <option value="버그">버그</option>
-        <option value="제안">제안</option>
+        <option value="일반 문의">일반 문의</option>
+        <option value="버그 신고">버그 신고</option>
+        <option value="기능 요청">기능 요청</option>
+        <option value="기타">기타</option>
       </select>
       <input {...register('title', { required: true })} placeholder="제목" />
       <textarea

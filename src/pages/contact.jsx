@@ -48,11 +48,10 @@ const contactSchema = z.object({
 
 // 문의 분류 카테고리
 const inquiryCategories = [
-  { value: 'general', label: '일반 문의' },
-  { value: 'bug', label: '버그 신고' },
-  { value: 'feature', label: '기능 요청' },
-  { value: 'question', label: '질문' },
-  { value: 'other', label: '기타' },
+  { value: '일반 문의', label: '일반 문의' },
+  { value: '버그 신고', label: '버그 신고' },
+  { value: '기능 요청', label: '기능 요청' },
+  { value: '기타', label: '기타' },
 ]
 
 // 문의 상태 색상
@@ -253,7 +252,7 @@ export default function ContactPage() {
               <SelectContent>
                 <SelectItem value="all">전체 분류</SelectItem>
                 {inquiryCategories.map((cat) => (
-                  <SelectItem key={cat.value} value={cat.label}>
+                  <SelectItem key={cat.value} value={cat.value}>
                     {cat.label}
                   </SelectItem>
                 ))}
