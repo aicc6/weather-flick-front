@@ -1,4 +1,12 @@
-import { useState, useEffect, useCallback } from 'react'
+import {
+  useState,
+  useEffect,
+  useCallback,
+  memo,
+  useMemo,
+  lazy,
+  Suspense,
+} from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { clearRegion } from '@/store/slices/customizedScheduleSlice'
@@ -19,8 +27,12 @@ import { http } from '@/lib/http'
 import { useGetCustomTravelRecommendationsMutation } from '@/store/api/customTravelApi'
 import { useCreateTravelPlanMutation } from '@/store/api/travelPlansApi'
 import { toast } from 'sonner'
-import SaveTravelPlanModal from '@/components/SaveTravelPlanModal'
 import { useAuth } from '@/contexts/AuthContextRTK'
+
+// Lazy import for SaveTravelPlanModal
+const SaveTravelPlanModal = lazy(
+  () => import('@/components/SaveTravelPlanModal'),
+)
 
 // 여행 스타일 정의
 const travelStyles = [
@@ -110,10 +122,344 @@ const companions = [
   },
 ]
 
+// 로딩 진행률 컴포넌트
+const LoadingProgress = memo(
+  ({ step, totalSteps, currentStepLabel, estimatedTime, onCancel }) => {
+    const progress = Math.round((step / totalSteps) * 100)
+    const remainingTime = Math.max(
+      0,
+      estimatedTime - (step - 1) * (estimatedTime / totalSteps),
+    )
+
+    return (
+      <div className="mx-auto max-w-md">
+        <div className="mb-6 text-center">
+          <div className="mb-4 inline-block">
+            <RefreshCw className="h-12 w-12 animate-spin text-blue-600" />
+          </div>
+          <h2 className="mb-2 text-2xl font-bold text-gray-900">
+            맞춤 여행 일정을 생성하고 있어요
+          </h2>
+          <p className="mb-4 text-gray-600">{currentStepLabel}</p>
+        </div>
+
+        {/* 진행률 바 */}
+        <div className="mb-4">
+          <div className="mb-2 flex justify-between text-sm text-gray-600">
+            <span>진행률</span>
+            <span>{progress}%</span>
+          </div>
+          <div className="h-3 w-full rounded-full bg-gray-200">
+            <div
+              className="h-3 rounded-full bg-blue-600 transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+
+        {/* 단계 표시 */}
+        <div className="mb-4">
+          <div className="mb-2 flex justify-between text-sm text-gray-600">
+            <span>
+              단계 {step} / {totalSteps}
+            </span>
+            <span>약 {Math.ceil(remainingTime)}초 남음</span>
+          </div>
+        </div>
+
+        {/* 진행 단계들 */}
+        <div className="mb-6 space-y-2">
+          {[
+            { label: '여행 정보 분석', icon: '🔍' },
+            { label: '맞춤 장소 검색', icon: '📍' },
+            { label: '최적 경로 계산', icon: '🗺️' },
+            { label: '일정 최종 조정', icon: '✨' },
+          ].map((stepInfo, index) => (
+            <div
+              key={index}
+              className={`flex items-center space-x-3 rounded p-2 ${
+                index < step
+                  ? 'bg-green-50 text-green-800'
+                  : index === step - 1
+                    ? 'bg-blue-50 text-blue-800'
+                    : 'bg-gray-50 text-gray-500'
+              }`}
+            >
+              <span className="text-lg">{stepInfo.icon}</span>
+              <span className="flex-1">{stepInfo.label}</span>
+              {index < step && <span className="text-green-600">✓</span>}
+              {index === step - 1 && (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* 취소 버튼 */}
+        {onCancel && (
+          <div className="text-center">
+            <Button
+              onClick={onCancel}
+              variant="outline"
+              size="sm"
+              className="text-gray-500 hover:text-gray-700"
+            >
+              취소
+            </Button>
+          </div>
+        )}
+
+        {/* 애니메이션 점들 */}
+        <div className="mt-6 flex justify-center space-x-2">
+          <div className="h-2 w-2 animate-bounce rounded-full bg-blue-600"></div>
+          <div
+            className="h-2 w-2 animate-bounce rounded-full bg-blue-600"
+            style={{ animationDelay: '0.1s' }}
+          ></div>
+          <div
+            className="h-2 w-2 animate-bounce rounded-full bg-blue-600"
+            style={{ animationDelay: '0.2s' }}
+          ></div>
+        </div>
+      </div>
+    )
+  },
+)
+
+LoadingProgress.displayName = 'LoadingProgress'
+
+// 여행 일정 카드 컴포넌트
+const ItineraryDayCard = memo(({ dayPlan }) => (
+  <Card className="dark:border-gray-700 dark:bg-gray-800">
+    <CardHeader>
+      <CardTitle className="flex items-center justify-between dark:text-white">
+        <span>Day {dayPlan.day}</span>
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-4">
+        {dayPlan.places.map((place, placeIndex) => (
+          <div key={place.id}>
+            <PlaceItem place={place} placeIndex={placeIndex} />
+            {placeIndex < dayPlan.places.length - 1 && (
+              <div className="my-4 border-t border-gray-200 dark:border-gray-600" />
+            )}
+          </div>
+        ))}
+      </div>
+    </CardContent>
+  </Card>
+))
+
+ItineraryDayCard.displayName = 'ItineraryDayCard'
+
+// 여행지 아이템 컴포넌트
+const PlaceItem = memo(({ place, placeIndex }) => (
+  <div className="flex items-start gap-4">
+    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20">
+      <span className="font-semibold text-blue-600 dark:text-blue-400">
+        {placeIndex + 1}
+      </span>
+    </div>
+    <div className="flex-1">
+      <div className="mb-2 flex items-start justify-between">
+        <div>
+          <h4 className="font-semibold text-gray-900 dark:text-white">
+            {place.name}
+          </h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {place.time}
+          </p>
+        </div>
+        <div className="flex items-center gap-1">
+          <Star className="h-4 w-4 text-yellow-500" />
+          <span className="text-sm font-medium dark:text-gray-300">
+            {place.rating}
+          </span>
+        </div>
+      </div>
+      <p className="mb-2 text-sm text-gray-700 dark:text-gray-300">
+        {place.description}
+      </p>
+      <div className="flex flex-wrap gap-1">
+        {place.tags.map((tag, tagIndex) => (
+          <Badge
+            key={tagIndex}
+            variant="secondary"
+            className="text-xs dark:bg-gray-700 dark:text-gray-300"
+          >
+            {tag}
+          </Badge>
+        ))}
+      </div>
+    </div>
+  </div>
+))
+
+PlaceItem.displayName = 'PlaceItem'
+
+// 에러 처리 유틸리티 함수
+const getErrorInfo = (error) => {
+  // 네트워크 오류 확인
+  if (!navigator.onLine) {
+    return {
+      type: 'network',
+      title: '🌐 인터넷 연결 확인',
+      message: '인터넷 연결을 확인한 후 다시 시도해주세요.',
+      canRetry: true,
+      suggestedAction: '네트워크 연결 확인',
+    }
+  }
+
+  // RTK Query 에러 구조 확인
+  if (error?.status) {
+    switch (error.status) {
+      case 401:
+        return {
+          type: 'auth',
+          title: '🔐 로그인이 필요합니다',
+          message: '맞춤 일정을 생성하려면 로그인이 필요합니다.',
+          canRetry: false,
+          suggestedAction: '로그인하기',
+        }
+      case 403:
+        return {
+          type: 'forbidden',
+          title: '🚫 접근 권한이 없습니다',
+          message: '이 기능을 사용할 권한이 없습니다.',
+          canRetry: false,
+          suggestedAction: '권한 확인',
+        }
+      case 404:
+        return {
+          type: 'notFound',
+          title: '🔍 요청한 정보를 찾을 수 없습니다',
+          message: '선택하신 지역의 정보를 찾을 수 없습니다.',
+          canRetry: true,
+          suggestedAction: '다른 지역 선택',
+        }
+      case 429:
+        return {
+          type: 'rateLimit',
+          title: '⏰ 요청이 너무 많습니다',
+          message: '잠시 후 다시 시도해주세요.',
+          canRetry: true,
+          suggestedAction: '잠시 후 재시도',
+        }
+      case 500:
+      case 502:
+      case 503:
+        return {
+          type: 'server',
+          title: '🔧 서버 오류가 발생했습니다',
+          message: '일시적인 서버 문제입니다. 잠시 후 다시 시도해주세요.',
+          canRetry: true,
+          suggestedAction: '잠시 후 재시도',
+        }
+      default:
+        return {
+          type: 'unknown',
+          title: '❓ 알 수 없는 오류',
+          message: `오류가 발생했습니다. (코드: ${error.status})`,
+          canRetry: true,
+          suggestedAction: '다시 시도',
+        }
+    }
+  }
+
+  // 일반적인 네트워크 오류
+  if (error?.name === 'TypeError' && error.message.includes('fetch')) {
+    return {
+      type: 'network',
+      title: '🌐 연결 오류',
+      message: '서버에 연결할 수 없습니다. 인터넷 연결을 확인해주세요.',
+      canRetry: true,
+      suggestedAction: '연결 상태 확인',
+    }
+  }
+
+  // 기타 오류
+  return {
+    type: 'unknown',
+    title: '❓ 예상치 못한 오류',
+    message: '알 수 없는 오류가 발생했습니다.',
+    canRetry: true,
+    suggestedAction: '다시 시도',
+  }
+}
+
+// URL 파라미터 검증 함수
+const validateUrlParams = (params) => {
+  const errors = []
+  const { region, period, days, who, styles, schedule } = params
+
+  // 필수 파라미터 검증
+  if (!region) {
+    errors.push({ field: 'region', message: '여행지 정보가 누락되었습니다.' })
+  } else if (!/^\d+$/.test(region)) {
+    errors.push({ field: 'region', message: '올바르지 않은 지역 코드입니다.' })
+  }
+
+  if (!period) {
+    errors.push({ field: 'period', message: '여행 기간이 누락되었습니다.' })
+  }
+
+  if (!days) {
+    errors.push({ field: 'days', message: '여행 일수가 누락되었습니다.' })
+  } else {
+    const daysNum = parseInt(days)
+    if (isNaN(daysNum) || daysNum < 1 || daysNum > 30) {
+      errors.push({
+        field: 'days',
+        message: '여행 일수는 1일에서 30일 사이여야 합니다.',
+      })
+    }
+  }
+
+  if (!who) {
+    errors.push({ field: 'who', message: '동행자 정보가 누락되었습니다.' })
+  } else if (!companions.find((c) => c.id === who)) {
+    errors.push({ field: 'who', message: '올바르지 않은 동행자 정보입니다.' })
+  }
+
+  if (!styles) {
+    errors.push({
+      field: 'styles',
+      message: '여행 스타일 정보가 누락되었습니다.',
+    })
+  } else {
+    const styleList = styles.split(',')
+    const validStyles = travelStyles.map((s) => s.id)
+    const invalidStyles = styleList.filter(
+      (style) => !validStyles.includes(style),
+    )
+    if (invalidStyles.length > 0) {
+      errors.push({
+        field: 'styles',
+        message: `올바르지 않은 여행 스타일입니다: ${invalidStyles.join(', ')}`,
+      })
+    }
+  }
+
+  if (!schedule) {
+    errors.push({
+      field: 'schedule',
+      message: '일정 스타일 정보가 누락되었습니다.',
+    })
+  } else if (!['relaxed', 'busy'].includes(schedule)) {
+    errors.push({
+      field: 'schedule',
+      message: '일정 스타일은 relaxed 또는 busy여야 합니다.',
+    })
+  }
+
+  return errors
+}
+
 export default function CustomizedScheduleResultPage() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const { user, isAuthenticated } = useAuth()
+  const { isAuthenticated } = useAuth()
   const [searchParams] = useSearchParams()
   const [recommendations, setRecommendations] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -122,6 +468,12 @@ export default function CustomizedScheduleResultPage() {
   const [createTravelPlan] = useCreateTravelPlanMutation()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [validationErrors, setValidationErrors] = useState([])
+  const [loadingStep, setLoadingStep] = useState(1)
+  const [loadingStepLabel, setLoadingStepLabel] = useState(
+    '여행 정보를 분석하고 있습니다...',
+  )
+  const [isCancelled, setIsCancelled] = useState(false)
 
   const region = searchParams.get('region')
   const period = searchParams.get('period')
@@ -134,19 +486,84 @@ export default function CustomizedScheduleResultPage() {
     (state) => state.customizedSchedule,
   )
 
-  // URL에서 region 정보를 사용하여 임시로 설정
-  const finalRegionCode = regionCode || region
-  const finalRegionName = displayedRegionName || '서울'
+  // URL에서 region 정보를 사용하여 임시로 설정 (메모이제이션 적용)
+  const finalRegionCode = useMemo(
+    () => regionCode || region,
+    [regionCode, region],
+  )
+  const finalRegionName = useMemo(
+    () => displayedRegionName || '서울',
+    [displayedRegionName],
+  )
+
+  // URL 파라미터 검증 결과 메모이제이션
+  const urlParams = useMemo(
+    () => ({ region, period, days, who, styles, schedule }),
+    [region, period, days, who, styles, schedule],
+  )
+
+  // 동행자 정보 찾기 메모이제이션
+  const companionInfo = useMemo(() => {
+    return companions.find((c) => c.id === who)
+  }, [who])
+
+  // 여행 스타일 처리 메모이제이션
+  const selectedStyles = useMemo(() => {
+    if (!styles) return []
+    return styles
+      .split(',')
+      .map((styleId) => travelStyles.find((s) => s.id === styleId))
+      .filter(Boolean)
+  }, [styles])
+
+  // URL 파라미터 검증
+  useEffect(() => {
+    const errors = validateUrlParams(urlParams)
+
+    if (errors.length > 0) {
+      setValidationErrors(errors)
+      setIsLoading(false)
+      return
+    } else {
+      setValidationErrors([])
+    }
+  }, [urlParams])
 
   useEffect(() => {
     if (!region) return
+
+    let isCancelled = false
+
     // 관광지 이름 불러오기
     http
       .GET(`/attractions/by-region?region_code=${encodeURIComponent(region)}`)
       .then((res) => res.json())
-      .then((data) => setAttractionNames(data))
-      .catch(() => setAttractionNames([]))
+      .then((data) => {
+        if (!isCancelled) {
+          setAttractionNames(data)
+        }
+      })
+      .catch(() => {
+        if (!isCancelled) {
+          setAttractionNames([])
+        }
+      })
+
+    return () => {
+      isCancelled = true
+    }
   }, [region])
+
+  // 컴포넌트 언마운트 시 cleanup
+  useEffect(() => {
+    return () => {
+      // 진행 중인 로딩 취소
+      setIsCancelled(true)
+
+      // 메모리 누수 방지를 위해 타이머 정리
+      // (simulateLoadingSteps에서 사용되는 setTimeout들은 Promise 기반이므로 자동으로 정리됨)
+    }
+  }, [])
 
   const generateMockItinerary = useCallback(() => {
     const daysCount = parseInt(days)
@@ -204,29 +621,78 @@ export default function CustomizedScheduleResultPage() {
     }
 
     return itinerary
-  }, [days, region, attractionNames])
+  }, [days, region, attractionNames, finalRegionName])
+
+  // navigate 함수 메모이제이션
+  const navigateCallback = useCallback((path) => navigate(path), [navigate])
+
+  // 로딩 단계 시뮬레이션 함수
+  const simulateLoadingSteps = useCallback(() => {
+    return new Promise((resolve) => {
+      const steps = [
+        { step: 1, label: '여행 정보를 분석하고 있습니다...', duration: 1000 },
+        { step: 2, label: '맞춤 장소를 검색하고 있습니다...', duration: 1500 },
+        { step: 3, label: '최적 경로를 계산하고 있습니다...', duration: 1200 },
+        { step: 4, label: '일정을 최종 조정하고 있습니다...', duration: 800 },
+      ]
+
+      let currentStep = 0
+      const executeStep = () => {
+        if (currentStep >= steps.length || isCancelled) {
+          resolve()
+          return
+        }
+
+        const step = steps[currentStep]
+        setLoadingStep(step.step)
+        setLoadingStepLabel(step.label)
+
+        setTimeout(() => {
+          currentStep++
+          executeStep()
+        }, step.duration)
+      }
+
+      executeStep()
+    })
+  }, [isCancelled])
+
+  // 로딩 취소 함수
+  const handleCancelLoading = () => {
+    setIsCancelled(true)
+    setIsLoading(false)
+    navigateCallback('/customized-schedule/region')
+  }
 
   // 추천 데이터 생성
   useEffect(() => {
     const generateRecommendations = async () => {
-      if (!finalRegionCode) return
+      if (!finalRegionCode || validationErrors.length > 0 || isCancelled) return
 
       setIsLoading(true)
+      setLoadingStep(1)
+      setLoadingStepLabel('여행 정보를 분석하고 있습니다...')
+      setIsCancelled(false)
 
       try {
-        // RTK Query API 호출
-        const result = await getCustomRecommendations({
-          region_code: finalRegionCode,
-          region_name: finalRegionName,
-          period: period,
-          days: parseInt(days),
-          who: who,
-          styles: styles?.split(',') || [],
-          schedule: schedule,
-        }).unwrap()
+        // 로딩 단계 시뮬레이션과 API 호출을 병렬 처리
+        const [apiResult] = await Promise.all([
+          getCustomRecommendations({
+            region_code: finalRegionCode,
+            region_name: finalRegionName,
+            period: period,
+            days: parseInt(days),
+            who: who,
+            styles: styles?.split(',') || [],
+            schedule: schedule,
+          }).unwrap(),
+          simulateLoadingSteps(), // 로딩 단계 시뮬레이션
+        ])
+
+        if (isCancelled) return // 취소된 경우 중단
 
         // API 응답 데이터 형식 변환
-        console.log('API Response:', result) // 디버깅용
+        console.log('API Response:', apiResult) // 디버깅용
         const formattedData = {
           summary: {
             region: finalRegionCode,
@@ -237,8 +703,8 @@ export default function CustomizedScheduleResultPage() {
             styles: styles?.split(','),
             schedule: schedule,
           },
-          itinerary: result.days,
-          weather_info: result.weather_summary || {
+          itinerary: apiResult.days,
+          weather_info: apiResult.weather_summary || {
             forecast: '맑음, 평균 기온 20°C',
             recommendation: '야외 활동하기 좋은 날씨입니다!',
           },
@@ -255,31 +721,54 @@ export default function CustomizedScheduleResultPage() {
         toast.success('맞춤 여행 일정이 생성되었습니다!')
       } catch (error) {
         console.error('API 호출 실패:', error)
-        toast.error('추천 생성에 실패했습니다. 모의 데이터를 표시합니다.')
 
-        // API 실패 시 모의 데이터 사용
-        const mockData = {
-          summary: {
-            region: finalRegionCode,
-            regionName: finalRegionName,
-            period: period,
-            days: parseInt(days),
-            who: who,
-            styles: styles?.split(','),
-            schedule: schedule,
-          },
-          itinerary: generateMockItinerary(),
-          weather_info: {
-            forecast: '맑음, 평균 기온 20°C',
-            recommendation: '야외 활동하기 좋은 날씨입니다!',
-          },
-          tips: [
-            '선택하신 스타일에 맞는 포토존이 많이 포함되어 있어요',
-            '맛집 위주로 구성된 일정으로 미식 여행을 즐기실 수 있어요',
-            '널널한 일정으로 여유롭게 즐기실 수 있도록 구성했어요',
-          ],
+        if (isCancelled) return // 취소된 경우 중단
+
+        // 로딩 단계 시뮬레이션 실행 (API 실패 시에도)
+        await simulateLoadingSteps()
+
+        if (isCancelled) return // 시뮬레이션 후 다시 취소 확인
+
+        const errorInfo = getErrorInfo(error)
+
+        // 에러 타입에 따른 사용자 친화적 안내
+        if (errorInfo.type === 'auth') {
+          toast.error(errorInfo.title + '\n로그인 후 다시 시도해주세요.')
+          navigateCallback('/login')
+          return
+        } else if (errorInfo.type === 'network') {
+          toast.error(errorInfo.title + '\n인터넷 연결을 확인해주세요.')
+        } else if (errorInfo.type === 'rate_limit') {
+          toast.error(errorInfo.title + '\n잠시 후 다시 시도해주세요.')
+        } else {
+          toast.error('추천 생성에 실패했습니다. 모의 데이터를 표시합니다.')
         }
-        setRecommendations(mockData)
+
+        // 일부 에러의 경우 mock 데이터라도 제공
+        if (errorInfo.type !== 'auth' && errorInfo.type !== 'forbidden') {
+          const mockData = {
+            summary: {
+              region: finalRegionCode,
+              regionName: finalRegionName,
+              period: period,
+              days: parseInt(days),
+              who: who,
+              styles: styles?.split(','),
+              schedule: schedule,
+            },
+            itinerary: generateMockItinerary(),
+            weather_info: {
+              forecast: '맑음, 평균 기온 20°C',
+              recommendation: '야외 활동하기 좋은 날씨입니다!',
+            },
+            tips: [
+              '선택하신 스타일에 맞는 포토존이 많이 포함되어 있어요',
+              '맛집 위주로 구성된 일정으로 미식 여행을 즐기실 수 있어요',
+              '널널한 일정으로 여유롭게 즐기실 수 있도록 구성했어요',
+            ],
+          }
+          setRecommendations(mockData)
+        }
       }
 
       setIsLoading(false)
@@ -296,13 +785,17 @@ export default function CustomizedScheduleResultPage() {
     schedule,
     generateMockItinerary,
     getCustomRecommendations,
+    validationErrors.length,
+    isCancelled,
+    simulateLoadingSteps,
+    navigateCallback,
   ])
 
-  const handleBack = () => {
-    navigate(
+  const handleBack = useCallback(() => {
+    navigateCallback(
       `/recommend/schedule?region=${region}&period=${period}&days=${days}&who=${who}&styles=${styles}`,
     )
-  }
+  }, [navigateCallback, region, period, days, who, styles])
 
   const handleShare = () => {
     if (navigator.share) {
@@ -317,99 +810,139 @@ export default function CustomizedScheduleResultPage() {
     }
   }
 
-  const handleSavePlans = () => {
+  const handleSavePlans = useCallback(() => {
     if (!isAuthenticated) {
       toast.error('로그인이 필요한 기능입니다.')
       // 현재 URL을 저장하고 로그인 페이지로 이동
       const currentUrl = window.location.pathname + window.location.search
-      navigate(`/login?redirect=${encodeURIComponent(currentUrl)}`)
+      navigateCallback(`/login?redirect=${encodeURIComponent(currentUrl)}`)
       return
     }
     setIsModalOpen(true)
-  }
+  }, [isAuthenticated, navigateCallback])
 
-  const handleModalSave = async (formData) => {
-    setIsSaving(true)
+  const handleModalSave = useCallback(
+    async (formData) => {
+      setIsSaving(true)
 
-    try {
-      // 여행 일정 데이터 구성
-      const itineraryData = {}
+      try {
+        // 여행 일정 데이터 구성
+        const itineraryData = {}
 
-      // recommendations.itinerary의 데이터를 day1, day2, day3 형식으로 변환
-      // 백엔드 스키마에 맞게 각 day의 값을 리스트로 변환
-      recommendations.itinerary.forEach((dayPlan) => {
-        itineraryData[`day${dayPlan.day}`] = dayPlan.places.map((place) => ({
-          name: place.name,
-          time: place.time,
-          description: place.description,
-          category: place.category,
-          tags: place.tags,
-          date: dayPlan.date || formData.startDate,
-          address: place.address,
-          latitude: place.latitude,
-          longitude: place.longitude,
-          rating: place.rating,
-          image: place.image,
-        }))
-      })
+        // recommendations.itinerary의 데이터를 day1, day2, day3 형식으로 변환
+        // 백엔드 스키마에 맞게 각 day의 값을 리스트로 변환
+        recommendations.itinerary.forEach((dayPlan) => {
+          itineraryData[`day${dayPlan.day}`] = dayPlan.places.map((place) => ({
+            name: place.name,
+            time: place.time,
+            description: place.description,
+            category: place.category,
+            tags: place.tags,
+            date: dayPlan.date || formData.startDate,
+            address: place.address,
+            latitude: place.latitude,
+            longitude: place.longitude,
+            rating: place.rating,
+            image: place.image,
+          }))
+        })
 
-      const planData = {
-        title: formData.title,
-        description: `${recommendations.summary.who} 여행 - ${recommendations.summary.styles?.join(', ')}`,
-        start_date: formData.startDate.toISOString().split('T')[0],
-        end_date: formData.endDate.toISOString().split('T')[0],
-        start_location: formData.origin,
-        theme: recommendations.summary.styles?.[0] || '여행',
-        status: 'PLANNING',
-        itinerary: itineraryData,
-        plan_type: 'custom', // 맞춤 일정 표시
+        const planData = {
+          title: formData.title,
+          description: `${recommendations.summary.who} 여행 - ${recommendations.summary.styles?.join(', ')}`,
+          start_date: formData.startDate.toISOString().split('T')[0],
+          end_date: formData.endDate.toISOString().split('T')[0],
+          start_location: formData.origin,
+          theme: recommendations.summary.styles?.[0] || '여행',
+          status: 'PLANNING',
+          itinerary: itineraryData,
+          plan_type: 'custom', // 맞춤 일정 표시
+        }
+
+        // API 호출하여 여행 플랜 저장
+        await createTravelPlan(planData).unwrap()
+
+        // Redux 상태 초기화
+        dispatch(clearRegion())
+
+        // localStorage 초기화
+        localStorage.removeItem('customizedSchedule')
+
+        toast.success('여행 계획이 저장되었습니다!')
+
+        // 내 여행 플랜 페이지로 이동
+        navigateCallback('/travel-plans')
+      } catch (error) {
+        console.error('저장 중 오류:', error)
+        toast.error('저장 중 오류가 발생했습니다.')
+      } finally {
+        setIsSaving(false)
+        setIsModalOpen(false)
       }
-
-      // API 호출하여 여행 플랜 저장
-      const result = await createTravelPlan(planData).unwrap()
-
-      // Redux 상태 초기화
-      dispatch(clearRegion())
-
-      // localStorage 초기화
-      localStorage.removeItem('customizedSchedule')
-
-      toast.success('여행 계획이 저장되었습니다!')
-
-      // 내 여행 플랜 페이지로 이동
-      navigate('/travel-plans')
-    } catch (error) {
-      console.error('저장 중 오류:', error)
-      toast.error('저장 중 오류가 발생했습니다.')
-    } finally {
-      setIsSaving(false)
-      setIsModalOpen(false)
-    }
-  }
+    },
+    [recommendations, createTravelPlan, dispatch, navigateCallback],
+  )
 
   if (isLoading) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-16">
-        <div className="text-center">
-          <div className="mb-4 inline-block animate-spin">
-            <RefreshCw className="h-8 w-8 text-blue-600" />
-          </div>
-          <h2 className="mb-2 text-2xl font-bold text-gray-900">
-            맞춤 여행 일정을 생성하고 있어요
+        <LoadingProgress
+          step={loadingStep}
+          totalSteps={4}
+          currentStepLabel={loadingStepLabel}
+          estimatedTime={20} // 총 예상 시간 (초)
+          onCancel={handleCancelLoading}
+        />
+      </div>
+    )
+  }
+
+  // 검증 오류가 있는 경우
+  if (validationErrors.length > 0) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-16">
+        <div className="mb-8 text-center">
+          <h2 className="mb-4 text-2xl font-bold text-red-600">
+            ⚠️ 잘못된 요청 정보
           </h2>
-          <p className="mb-4 text-gray-600">
-            선택해주신 정보를 바탕으로 최적의 여행 코스를 만들고 있습니다.
+          <p className="mb-6 text-gray-600">
+            요청하신 정보에 문제가 있습니다. 아래 내용을 확인해주세요.
           </p>
-          <div className="mb-8 flex justify-center space-x-2">
-            <div className="h-2 w-2 animate-bounce rounded-full bg-blue-600"></div>
-            <div
-              className="h-2 w-2 animate-bounce rounded-full bg-blue-600"
-              style={{ animationDelay: '0.1s' }}
-            ></div>
-            <div
-              className="h-2 w-2 animate-bounce rounded-full bg-blue-600"
-              style={{ animationDelay: '0.2s' }}
-            ></div>
+        </div>
+
+        <Card className="mb-8 border-red-200 bg-red-50">
+          <CardHeader>
+            <CardTitle className="text-red-800">발견된 문제점</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {validationErrors.map((error, index) => (
+                <li key={index} className="flex items-start gap-2">
+                  <span className="mt-1 text-red-500">•</span>
+                  <span className="text-red-700">{error.message}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+
+        <div className="space-y-4 text-center">
+          <p className="text-gray-600">
+            맞춤 일정 만들기를 다시 시작하시거나, 추천 페이지로 이동해주세요.
+          </p>
+          <div className="flex flex-col justify-center gap-4 sm:flex-row">
+            <Button
+              onClick={() => navigateCallback('/customized-schedule/region')}
+              className="bg-blue-600 text-white hover:bg-blue-700"
+            >
+              맞춤 일정 다시 만들기
+            </Button>
+            <Button
+              onClick={() => navigateCallback('/recommend')}
+              variant="outline"
+            >
+              추천 페이지로 이동
+            </Button>
           </div>
         </div>
       </div>
@@ -473,15 +1006,9 @@ export default function CustomizedScheduleResultPage() {
               <Users className="mx-auto mb-1 h-5 w-5 text-purple-600 dark:text-purple-400" />
               <p className="text-xs text-gray-600 dark:text-gray-400">동행자</p>
               <div className="flex items-center justify-center gap-1">
-                <span>
-                  {
-                    companions.find((c) => c.id === recommendations.summary.who)
-                      ?.icon
-                  }
-                </span>
+                <span>{companionInfo?.icon}</span>
                 <p className="font-semibold dark:text-white">
-                  {companions.find((c) => c.id === recommendations.summary.who)
-                    ?.label || recommendations.summary.who}
+                  {companionInfo?.label || recommendations.summary.who}
                 </p>
               </div>
             </div>
@@ -491,19 +1018,16 @@ export default function CustomizedScheduleResultPage() {
                 선호 스타일
               </p>
               <div className="mt-1 flex flex-wrap gap-1">
-                {recommendations.summary.styles.map((styleId) => {
-                  const style = travelStyles.find((s) => s.id === styleId)
-                  return (
-                    <Badge
-                      key={styleId}
-                      variant="outline"
-                      className="flex items-center gap-1 dark:border-gray-600 dark:text-gray-300"
-                    >
-                      <span>{style?.icon}</span>
-                      {style?.label || styleId}
-                    </Badge>
-                  )
-                })}
+                {selectedStyles.map((style, index) => (
+                  <Badge
+                    key={style?.id || index}
+                    variant="outline"
+                    className="flex items-center gap-1 dark:border-gray-600 dark:text-gray-300"
+                  >
+                    <span>{style?.icon}</span>
+                    {style?.label}
+                  </Badge>
+                ))}
               </div>
             </div>
           </div>
@@ -517,67 +1041,8 @@ export default function CustomizedScheduleResultPage() {
           상세 일정
         </h2>
 
-        {recommendations.itinerary.map((dayPlan, _index) => (
-          <Card
-            key={dayPlan.day}
-            className="dark:border-gray-700 dark:bg-gray-800"
-          >
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between dark:text-white">
-                <span>Day {dayPlan.day}</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {dayPlan.places.map((place, placeIndex) => (
-                  <div key={place.id}>
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20">
-                        <span className="font-semibold text-blue-600 dark:text-blue-400">
-                          {placeIndex + 1}
-                        </span>
-                      </div>
-                      <div className="flex-1">
-                        <div className="mb-2 flex items-start justify-between">
-                          <div>
-                            <h4 className="font-semibold text-gray-900 dark:text-white">
-                              {place.name}
-                            </h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {place.time}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 text-yellow-500" />
-                            <span className="text-sm font-medium dark:text-gray-300">
-                              {place.rating}
-                            </span>
-                          </div>
-                        </div>
-                        <p className="mb-2 text-sm text-gray-700 dark:text-gray-300">
-                          {place.description}
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {place.tags.map((tag, tagIndex) => (
-                            <Badge
-                              key={tagIndex}
-                              variant="secondary"
-                              className="text-xs dark:bg-gray-700 dark:text-gray-300"
-                            >
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    {placeIndex < dayPlan.places.length - 1 && (
-                      <div className="my-4 border-t border-gray-200 dark:border-gray-600" />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+        {recommendations.itinerary.map((dayPlan) => (
+          <ItineraryDayCard key={dayPlan.day} dayPlan={dayPlan} />
         ))}
       </div>
 
@@ -617,7 +1082,7 @@ export default function CustomizedScheduleResultPage() {
           공유하기
         </Button>
         <Button
-          onClick={() => navigate('/recommend')}
+          onClick={() => navigateCallback('/recommend')}
           variant="outline"
           size="lg"
           className="dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
@@ -627,13 +1092,15 @@ export default function CustomizedScheduleResultPage() {
       </div>
 
       {/* 저장 모달 */}
-      <SaveTravelPlanModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleModalSave}
-        recommendedPlan={recommendations}
-        isLoading={isSaving}
-      />
+      <Suspense fallback={<div>모달 로딩 중...</div>}>
+        <SaveTravelPlanModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleModalSave}
+          recommendedPlan={recommendations}
+          isLoading={isSaving}
+        />
+      </Suspense>
     </div>
   )
 }
