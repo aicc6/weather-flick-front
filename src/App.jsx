@@ -4,7 +4,9 @@ import { DefaultLayout } from './layouts/default-layout'
 import LoadingSpinner from './components/LoadingSpinner'
 import ErrorBoundary from './components/common/ErrorBoundary'
 import PWAInstallPrompt from './components/common/PWAInstallPrompt'
+import NotificationPermission from './components/common/NotificationPermission'
 import { initializeApiMonitoring } from '@/utils/apiKeyMonitoring'
+import { useNotification } from '@/hooks/useNotification'
 import '@/App.css'
 
 // 핵심 페이지는 즉시 로드
@@ -90,12 +92,16 @@ function App() {
   useEffect(() => {
     initializeApiMonitoring()
   }, [])
+  
+  // 알림 시스템 초기화
+  useNotification()
 
   return (
     <ErrorBoundary>
       <BrowserRouter>
         <DefaultLayout>
           <PWAInstallPrompt />
+          <NotificationPermission />
           <Suspense fallback={<LoadingSpinner />}>
             <Routes>
               <Route path="/" element={<MainPage />} />

@@ -1,11 +1,14 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  
+  return {
   plugins: [
     react(),
     tailwindcss(),
@@ -108,7 +111,26 @@ export default defineConfig({
       devOptions: {
         enabled: true,
       },
+      includeAssets: ['firebase-messaging-sw.js'],
     }),
+    {
+      name: 'firebase-sw-env-replace',
+      transformIndexHtml() {
+        return []
+      },
+      generateBundle(options, bundle) {
+        const swFile = bundle['firebase-messaging-sw.js']
+        if (swFile && 'source' in swFile) {
+          swFile.source = swFile.source
+            .replace('__VITE_FIREBASE_API_KEY__', env.VITE_FIREBASE_API_KEY || '')
+            .replace('__VITE_FIREBASE_AUTH_DOMAIN__', env.VITE_FIREBASE_AUTH_DOMAIN || '')
+            .replace('__VITE_FIREBASE_PROJECT_ID__', env.VITE_FIREBASE_PROJECT_ID || '')
+            .replace('__VITE_FIREBASE_STORAGE_BUCKET__', env.VITE_FIREBASE_STORAGE_BUCKET || '')
+            .replace('__VITE_FIREBASE_MESSAGING_SENDER_ID__', env.VITE_FIREBASE_MESSAGING_SENDER_ID || '')
+            .replace('__VITE_FIREBASE_APP_ID__', env.VITE_FIREBASE_APP_ID || '')
+        }
+      },
+    },
   ],
   server: {
     port: 5173,
@@ -197,4 +219,5 @@ export default defineConfig({
       'sonner',
     ],
   },
+}
 })
