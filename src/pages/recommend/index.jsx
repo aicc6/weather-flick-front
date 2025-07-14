@@ -787,7 +787,6 @@ export default function TravelCoursePage() {
                   <SelectValue placeholder="지역 선택" />
                 </SelectTrigger>
                 <SelectContent className="weather-card">
-                  <SelectItem value="all">전체 지역</SelectItem>
                   {Object.entries(regionNames)
                     .slice(1)
                     .map(([value, label]) => (

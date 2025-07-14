@@ -16,6 +16,8 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Mail, Phone, Clock, Info } from '@/components/icons'
+import { useGetContactsQuery } from '@/store/api/contactApi'
+import { useSubmitContactMutation } from '@/store/api/contactApi'
 
 // 문의 스키마 정의
 const contactSchema = z.object({
@@ -33,64 +35,39 @@ const contactSchema = z.object({
   isPublic: z.boolean().default(false),
 })
 
-// 기존 문의 목록 (예시 데이터)
-const existingInquiries = [
-  {
-    id: 1,
-    category: '서비스 이용',
-    title: '여행지 추천 알고리즘 개선 제안',
-    status: '완료',
-    views: 45,
-    date: '2024-01-15',
-    isPublic: true,
-  },
-  {
-    id: 2,
-    category: '계정/보안',
-    title: '비밀번호 재설정 관련 문의',
-    status: '처리중',
-    views: 12,
-    date: '2024-01-14',
-    isPublic: false,
-  },
-  {
-    id: 3,
-    category: '기술 지원',
-    title: '날씨 정보 업데이트 지연 문제',
-    status: '완료',
-    views: 78,
-    date: '2024-01-13',
-    isPublic: true,
-  },
-  {
-    id: 4,
-    category: '기타',
-    title: '모바일 앱 출시 일정 문의',
-    status: '답변대기',
-    views: 23,
-    date: '2024-01-12',
-    isPublic: true,
-  },
-]
-
+// 문의 분류 카테고리
 const inquiryCategories = [
-  { value: 'service', label: '서비스 이용' },
-  { value: 'account', label: '계정/보안' },
-  { value: 'technical', label: '기술 지원' },
+  { value: 'general', label: '일반 문의' },
+  { value: 'bug', label: '버그 신고' },
+  { value: 'feature', label: '기능 요청' },
+  { value: 'question', label: '질문' },
   { value: 'other', label: '기타' },
 ]
 
+// 문의 상태 색상
 const statusColors = {
-  완료: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  처리중: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  답변대기:
+  대기중:
     'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+  처리중: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  완료: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  '답변 대기':
+    'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+  비공개: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
 }
 
 export default function ContactPage() {
+  // RTK Query로 DB에서 문의 목록 가져오기
+  const {
+    data: existingInquiries = [],
+    isLoading,
+    isError,
+  } = useGetContactsQuery()
+
   const [activeTab, setActiveTab] = useState('write')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
+  const [modalOpen, setModalOpen] = useState(false)
+  const [selectedInquiry, setSelectedInquiry] = useState(null)
 
   const {
     register,
@@ -111,22 +88,23 @@ export default function ContactPage() {
     },
   })
 
+  const [submitContact] = useSubmitContactMutation()
+
   // 문의 제출 핸들러
   const onSubmit = useCallback(
     async (data) => {
       try {
-        console.log('문의 제출:', data)
-        // TODO: API 호출 로직 추가
+        await submitContact(data).unwrap()
         alert('문의가 성공적으로 접수되었습니다.')
         reset()
       } catch (error) {
         alert('문의 접수 중 오류가 발생했습니다.')
       }
     },
-    [reset],
+    [reset, submitContact],
   )
 
-  // 필터링된 문의 목록
+  // 필터링된 문의 목록 (항상 훅 최상단에서 호출)
   const filteredInquiries = useMemo(() => {
     return existingInquiries.filter((inquiry) => {
       const matchesSearch = inquiry.title
@@ -136,7 +114,22 @@ export default function ContactPage() {
         selectedCategory === 'all' || inquiry.category === selectedCategory
       return matchesSearch && matchesCategory
     })
-  }, [searchTerm, selectedCategory])
+  }, [existingInquiries, searchTerm, selectedCategory])
+
+  // 상세 모달 열기
+  const handleTitleClick = (inquiry) => {
+    setSelectedInquiry(inquiry)
+    setModalOpen(true)
+  }
+
+  // 상세 모달 닫기
+  const handleCloseModal = () => {
+    setModalOpen(false)
+    setSelectedInquiry(null)
+  }
+
+  if (isLoading) return <div>문의 목록을 불러오는 중입니다...</div>
+  if (isError) return <div>문의 목록을 불러오지 못했습니다.</div>
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 md:py-16">
@@ -383,9 +376,14 @@ export default function ContactPage() {
                         <td className="px-2 py-3">{inquiry.category}</td>
                         <td className="px-2 py-3">
                           <div className="flex items-center gap-2">
-                            <span className="max-w-xs truncate">
+                            <button
+                              type="button"
+                              className="max-w-xs truncate text-left text-blue-700 underline hover:text-blue-900 focus:outline-none"
+                              onClick={() => handleTitleClick(inquiry)}
+                              aria-label="문의 상세 보기"
+                            >
                               {inquiry.title}
-                            </span>
+                            </button>
                             {!inquiry.isPublic && (
                               <Badge variant="secondary" className="text-xs">
                                 비공개
@@ -420,6 +418,47 @@ export default function ContactPage() {
         </TabsContent>
       </Tabs>
 
+      {/* 상세 모달 */}
+      {modalOpen && selectedInquiry && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-lg dark:bg-gray-900">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-900 dark:hover:text-white"
+              onClick={handleCloseModal}
+              aria-label="닫기"
+            >
+              ×
+            </button>
+            <h3 className="mb-2 text-xl font-bold">{selectedInquiry.title}</h3>
+            <div className="mb-4 whitespace-pre-line text-gray-700 dark:text-gray-200">
+              {selectedInquiry.content}
+            </div>
+            <div className="mb-2 text-sm text-gray-500">
+              <span className="font-medium">분류:</span>{' '}
+              {selectedInquiry.category}
+            </div>
+            <div className="mb-2 text-sm text-gray-500">
+              <span className="font-medium">이름:</span> {selectedInquiry.name}
+            </div>
+            <div className="mb-2 text-sm text-gray-500">
+              <span className="font-medium">이메일:</span>{' '}
+              {selectedInquiry.email}
+            </div>
+            <div className="mb-2 text-sm text-gray-500">
+              <span className="font-medium">등록일:</span>{' '}
+              {selectedInquiry.date}
+            </div>
+            <div className="text-right">
+              <button
+                className="mt-4 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                onClick={handleCloseModal}
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* 하단 안내 */}
       <div className="mt-12 text-center text-sm text-gray-500 dark:text-gray-400">
         <p className="mb-2">

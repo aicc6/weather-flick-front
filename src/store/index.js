@@ -8,6 +8,7 @@ import {
   travelCoursesApi,
   customTravelApi,
 } from './api'
+import { contactApi } from './api/contactApi'
 import { recommendReviewsApi } from './api/recommendReviewsApi'
 import { localInfoApi } from './api/localInfoApi'
 import { chatbotApi } from './api/chatbotApi'
@@ -33,6 +34,7 @@ export const store = configureStore({
     [reviewLikesApi.reducerPath]: reviewLikesApi.reducer,
     [travelCourseLikesApi.reducerPath]: travelCourseLikesApi.reducer,
     [customTravelApi.reducerPath]: customTravelApi.reducer,
+    [contactApi.reducerPath]: contactApi.reducer,
     customizedSchedule: customizedScheduleReducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -54,6 +56,7 @@ export const store = configureStore({
       .concat(recommendLikesApi.middleware)
       .concat(reviewLikesApi.middleware)
       .concat(travelCourseLikesApi.middleware)
-      .concat(customTravelApi.middleware),
+      .concat(customTravelApi.middleware)
+      .concat(contactApi.middleware),
   devTools: import.meta.env.MODE !== 'production',
 })
