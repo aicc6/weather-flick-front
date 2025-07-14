@@ -169,7 +169,7 @@ export function TravelPlansPage() {
   }
 
   return (
-    <div className="container mx-auto space-y-8 p-4 md:p-6">
+    <div className="mx-auto flex max-w-7xl flex-col gap-y-8 p-4 sm:p-8">
       {/* 페이지 헤더 */}
       <div className="flex items-center justify-between">
         <div>
