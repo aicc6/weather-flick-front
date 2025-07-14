@@ -7,7 +7,7 @@ import pluginPrettierRecommanded from 'eslint-plugin-prettier/recommended'
 import pluginUnusedImports from 'eslint-plugin-unused-imports'
 
 export default [
-  { ignores: ['dist'] },
+  { ignores: ['dist/**', 'dev-dist/**', 'node_modules/**', 'coverage/**', 'public/firebase-messaging-sw.js'] },
   {
     files: ['**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}'],
     ...pluginReact.configs.flat.recommended,
@@ -18,6 +18,7 @@ export default [
       globals: {
         ...globals.browser,
         React: 'readonly',
+        process: 'readonly',
       },
       parserOptions: {
         ecmaVersion: 'latest',
