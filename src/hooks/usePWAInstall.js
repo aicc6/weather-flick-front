@@ -56,23 +56,28 @@ export function usePWAInstall() {
       return { outcome: 'unavailable' }
     }
 
-    // 설치 프롬프트 표시
-    deferredPrompt.prompt()
+    try {
+      // 설치 프롬프트 표시
+      await deferredPrompt.prompt()
 
-    // 사용자의 선택 대기
-    const { outcome } = await deferredPrompt.userChoice
+      // 사용자의 선택 대기
+      const { outcome } = await deferredPrompt.userChoice
 
-    // 프롬프트 재사용 방지
-    setDeferredPrompt(null)
-    setCanInstall(false)
+      // 프롬프트 재사용 방지
+      setDeferredPrompt(null)
+      setCanInstall(false)
 
-    if (outcome === 'accepted') {
-      console.log('PWA 설치 승인됨')
-    } else {
-      console.log('PWA 설치 거부됨')
+      if (outcome === 'accepted') {
+        console.log('PWA 설치 승인됨')
+      } else {
+        console.log('PWA 설치 거부됨')
+      }
+
+      return { outcome }
+    } catch (error) {
+      console.error('PWA 설치 프롬프트 오류:', error)
+      return { outcome: 'error', error }
     }
-
-    return { outcome }
   }
 
   return {

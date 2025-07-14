@@ -20,6 +20,8 @@ import { getMultipleRegionImages } from '@/services/imageService'
 import {
   useGetTravelCoursesQuery,
   useSearchTravelCoursesQuery,
+  useGetRegionsQuery,
+  useGetThemesQuery,
 } from '@/store/api/travelCoursesApi'
 import useDebounce from '@/hooks/useDebounce'
 
@@ -57,6 +59,21 @@ export default function TravelCoursePage() {
   const [selectedTheme, setSelectedTheme] = useState('all')
   const [images, setImages] = useState({})
   const [imagesLoading, setImagesLoading] = useState(true)
+
+  // ===============================
+  // API 데이터 로드
+  // ===============================
+  const {
+    data: regions = [],
+    isLoading: regionsLoading,
+    error: regionsError,
+  } = useGetRegionsQuery()
+  
+  const {
+    data: themes = [],
+    isLoading: themesLoading,
+    error: themesError,
+  } = useGetThemesQuery()
 
   // ===============================
   // 캐러셀 관련 상태
@@ -244,15 +261,16 @@ export default function TravelCoursePage() {
         console.log('요청 지역 코드:', uniqueRegionCodes)
         console.log('첫 번째 코스 데이터 샘플:', travelCourses[0])
 
-        // 지역 코드를 지역명으로 변환 - 안전한 매핑
+        // 지역 코드를 지역명으로 변환 - API 데이터 기반 매핑
         const regionNamesForImages = uniqueRegionCodes
           .map((code) => {
-            const regionName = regionNames[code]
-            if (!regionName) {
+            // API에서 받은 지역 데이터에서 찾기
+            const regionData = regions.find(region => region.code === code)
+            if (!regionData) {
               console.warn(`알 수 없는 지역 코드: ${code}`)
               return null
             }
-            return regionName
+            return regionData.name
           })
           .filter(Boolean) // null/undefined 제거
 
@@ -269,12 +287,11 @@ export default function TravelCoursePage() {
 
         setImages(images)
 
-        // 코스별로 어떤 지역이 있는지 확인 (디버깅용) - 안전한 처리
+        // 코스별로 어떤 지역이 있는지 확인 (디버깅용) - API 데이터 기반 처리
         travelCourses.forEach((course, index) => {
           const courseRegion = course?.region
-          const regionDisplayName = courseRegion
-            ? regionNames[courseRegion] || courseRegion
-            : '지역 정보 없음'
+          const regionData = regions.find(region => region.code === courseRegion)
+          const regionDisplayName = regionData?.name || courseRegion || '지역 정보 없음'
           const imageUrl =
             regionDisplayName && regionDisplayName !== '지역 정보 없음'
               ? images[regionDisplayName]
@@ -286,12 +303,13 @@ export default function TravelCoursePage() {
         })
       } catch (error) {
         console.error('지역 로드 실패:', error)
-        // fallback 로직 - 안전한 처리
+        // fallback 로직 - API 데이터 기반 처리
         const fallbackImages = {}
         travelCourses.forEach((course) => {
           const courseRegion = course?.region
           if (courseRegion) {
-            const regionDisplayName = regionNames[courseRegion] || courseRegion
+            const regionData = regions.find(region => region.code === courseRegion)
+            const regionDisplayName = regionData?.name || courseRegion
             fallbackImages[regionDisplayName] =
               `https://picsum.photos/800/600?random=${course?.id || Math.random()}`
           }
@@ -302,123 +320,10 @@ export default function TravelCoursePage() {
       }
     }
 
-    if (travelCourses.length > 0) {
+    if (travelCourses.length > 0 && regions.length > 0) {
       loadImages()
     }
-  }, [travelCourses]) // travelCourses가 변경될 때마다 실행
-
-  // 지역 매핑 - 네이버/티맵 기준 확장 매핑
-  const regionNames = {
-    // 기본 매핑
-    all: '전체',
-
-    // 네이버/티맵 기본 숫자 코드 (행정구역 기준)
-    1: '서울',
-    2: '부산',
-    3: '대구',
-    4: '인천',
-    5: '광주',
-    6: '대전',
-    7: '울산',
-    8: '세종',
-
-    // 네이버 지도 API 지역 코드 (표준 행정구역 코드)
-    11: '서울',
-    26: '부산',
-    27: '대구',
-    28: '인천',
-    29: '광주',
-    30: '대전',
-    31: '울산', // 울산 (31번 통합)
-    36: '세종', // 세종 (36번 통합)
-    41: '경기',
-    42: '강원',
-    43: '충북',
-    44: '충남',
-    45: '전북',
-    46: '전남',
-    47: '경북',
-    48: '경남',
-    50: '제주',
-
-    // 도 단위 추가 코드
-    32: '강원', // 강원도 대체 코드
-    33: '충북', // 충북 대체 코드
-    34: '충남', // 충남 대체 코드
-    35: '전북', // 전북 대체 코드
-    37: '경북', // 경북 대체 코드
-    38: '경남', // 경남 대체 코드
-    39: '제주', // 제주 대체 코드
-
-    // 티맵 지역 코드
-    seoul: '서울',
-    busan: '부산',
-    daegu: '대구',
-    incheon: '인천',
-    gwangju: '광주',
-    daejeon: '대전',
-    ulsan: '울산',
-    sejong: '세종',
-    gyeonggi: '경기',
-    gangwon: '강원',
-    chungbuk: '충북',
-    chungnam: '충남',
-    jeonbuk: '전북',
-    jeonnam: '전남',
-    gyeongbuk: '경북',
-    gyeongnam: '경남',
-    jeju: '제주',
-
-    // 관광지 기준 세부 지역
-    gangneung: '강릉',
-    gyeongju: '경주',
-    jeonju: '전주',
-    yeosu: '여수',
-    sokcho: '속초',
-    andong: '안동',
-    gongju: '공주',
-    buyeo: '부여',
-    tongyeong: '통영',
-    geoje: '거제',
-    namhae: '남해',
-
-    // 추가 네이버/티맵 형태의 지역 코드
-    'seoul-city': '서울',
-    'busan-city': '부산',
-    'gyeonggi-do': '경기',
-    'gangwon-do': '강원',
-    'jeju-do': '제주',
-    'jeju-island': '제주',
-
-    // 영문 지역명 (해외 API 연동 시)
-    Seoul: '서울',
-    Busan: '부산',
-    Jeju: '제주',
-    Gyeonggi: '경기',
-    Gangwon: '강원',
-    Incheon: '인천',
-    Daegu: '대구',
-    Daejeon: '대전',
-    Gwangju: '광주',
-    Ulsan: '울산',
-
-    // 구 지역 코드 호환성
-    'kr-11': '서울',
-    'kr-26': '부산',
-    'kr-27': '대구',
-    'kr-28': '인천',
-    'kr-29': '광주',
-    'kr-30': '대전',
-    'kr-31': '울산',
-    'kr-50': '제주',
-
-    // 기타 가능한 코드들
-    'metro-seoul': '서울',
-    'metro-busan': '부산',
-    'province-gyeonggi': '경기',
-    'province-gangwon': '강원',
-    'island-jeju': '제주',
-  }
+  }, [travelCourses, regions]) // travelCourses와 regions가 변경될 때마다 실행
 
   // 더 많은 코스 보기 버튼 클릭 핸들러
   const handleLoadMoreCourses = useCallback(() => {
@@ -433,7 +338,7 @@ export default function TravelCoursePage() {
     }, 100)
   }, [])
 
-  // 월 배열
+  // 월 배열 - 정적 데이터는 유지 (변경 필요 없음)
   const monthNames = [
     '전체',
     '1월',
@@ -450,17 +355,25 @@ export default function TravelCoursePage() {
     '12월',
   ]
 
-  // 테마 옵션
-  const themeOptions = [
-    { value: 'all', label: '전체 테마' },
-    { value: 'nature', label: '자연' },
-    { value: 'city', label: '도시' },
-    { value: 'beach', label: '바다' },
-    { value: 'history', label: '역사' },
-    { value: 'food', label: '맛집' },
-    { value: 'healing', label: '힐링' },
-    { value: 'activity', label: '액티비티' },
-  ]
+  // API에서 받은 데이터를 변환하여 사용
+  const regionNames = useMemo(() => {
+    if (!regions || regions.length === 0) return { all: '전체' }
+    
+    const regionMap = {}
+    regions.forEach(region => {
+      regionMap[region.code] = region.name
+    })
+    return regionMap
+  }, [regions])
+
+  const themeOptions = useMemo(() => {
+    if (!themes || themes.length === 0) return [{ value: 'all', label: '전체 테마' }]
+    
+    return themes.map(theme => ({
+      value: theme.code,
+      label: theme.name
+    }))
+  }, [themes])
 
   // ===============================
   // 기존 + 고급 기능에 따른 빠른 필터 로직
@@ -784,26 +697,34 @@ export default function TravelCoursePage() {
               {/* Region Filter */}
               <Select value={selectedRegion} onValueChange={setSelectedRegion}>
                 <SelectTrigger className="form-input">
-                  <SelectValue placeholder="지역 선택" />
+                  <SelectValue placeholder="지역" />
                 </SelectTrigger>
                 <SelectContent className="weather-card">
-                  {Object.entries(regionNames)
-                    .slice(1)
-                    .map(([value, label]) => (
+                  {regionsLoading ? (
+                    <SelectItem value="loading" disabled>
+                      로딩 중...
+                    </SelectItem>
+                  ) : regionsError ? (
+                    <SelectItem value="error" disabled>
+                      오류 발생
+                    </SelectItem>
+                  ) : (
+                    regions.map((region) => (
                       <SelectItem
-                        key={generateSafeKeyWithValue('region', value, label)}
-                        value={value}
+                        key={generateSafeKeyWithValue('region', region.code, region.name)}
+                        value={region.code}
                       >
-                        {label}
+                        {region.name}
                       </SelectItem>
-                    ))}
+                    ))
+                  )}
                 </SelectContent>
               </Select>
 
               {/* Month Filter */}
               <Select value={selectedMonth} onValueChange={setSelectedMonth}>
                 <SelectTrigger className="form-input">
-                  <SelectValue placeholder="여행 월" />
+                  <SelectValue placeholder="해당 월" />
                 </SelectTrigger>
                 <SelectContent className="weather-card">
                   {monthNames.map((month, index) => (
@@ -820,17 +741,27 @@ export default function TravelCoursePage() {
               {/* Theme Filter */}
               <Select value={selectedTheme} onValueChange={setSelectedTheme}>
                 <SelectTrigger className="form-input">
-                  <SelectValue placeholder="여행 테마" />
+                  <SelectValue placeholder="테마" />
                 </SelectTrigger>
                 <SelectContent className="weather-card">
-                  {themeOptions.map((option, index) => (
-                    <SelectItem
-                      key={generateSafeKey(option, 'theme', index)}
-                      value={option.value}
-                    >
-                      {option.label}
+                  {themesLoading ? (
+                    <SelectItem value="loading" disabled>
+                      로딩 중...
                     </SelectItem>
-                  ))}
+                  ) : themesError ? (
+                    <SelectItem value="error" disabled>
+                      오류 발생
+                    </SelectItem>
+                  ) : (
+                    themeOptions.map((option, index) => (
+                      <SelectItem
+                        key={generateSafeKey(option, 'theme', index)}
+                        value={option.value}
+                      >
+                        {option.label}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>

@@ -256,7 +256,7 @@ const TRAVEL_COURSES_LIST_DEFAULTS = {
 export const travelCoursesApi = createApi({
   reducerPath: 'travelCoursesApi',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['TravelCourse', 'TravelCourseList'],
+  tagTypes: ['TravelCourse', 'TravelCourseList', 'Regions', 'Themes'],
   endpoints: (builder) => ({
     // 여행 코스 목록 조회
     getTravelCourses: builder.query({
@@ -373,6 +373,26 @@ export const travelCoursesApi = createApi({
         )
       },
     }),
+
+    // 지역 목록 조회
+    getRegions: builder.query({
+      query: () => 'travel-courses/regions',
+      providesTags: ['Regions'],
+      keepUnusedDataFor: 3600, // 1시간 캐싱
+      transformResponse: (response) => {
+        return response?.regions || []
+      },
+    }),
+
+    // 테마 목록 조회
+    getThemes: builder.query({
+      query: () => 'travel-courses/themes',
+      providesTags: ['Themes'],
+      keepUnusedDataFor: 3600, // 1시간 캐싱
+      transformResponse: (response) => {
+        return response?.themes || []
+      },
+    }),
   }),
 })
 
@@ -382,4 +402,6 @@ export const {
   useGetTravelCourseDetailQuery,
   useGetCoursesByRegionQuery,
   useSearchTravelCoursesQuery,
+  useGetRegionsQuery,
+  useGetThemesQuery,
 } = travelCoursesApi
