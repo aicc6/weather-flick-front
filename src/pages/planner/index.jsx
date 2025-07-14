@@ -1,14 +1,13 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Sparkles, Brain, Cloud, Users } from '@/components/icons'
+import { Sparkles, Brain } from '@/components/icons'
 
 // 기존 컴포넌트들
 import PlannerForm from './PlannerForm'
-import PlanRecommendation from './PlanRecommendation'
 import SavePlanButton from './SavePlanButton'
 import { useCreateTravelPlanMutation } from '@/store/api/travelPlansApi'
 
@@ -297,8 +296,6 @@ export default function PlannerPage() {
             </Card>
           </div>
 
-          {/* 기본 추천 결과 */}
-          <PlanRecommendation planResults={planResults} isLoading={isLoading} />
           <SavePlanButton
             planResults={planResults}
             onSave={handleSavePlan}
