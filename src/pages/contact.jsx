@@ -55,6 +55,20 @@ const statusColors = {
   비공개: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
 }
 
+// 날짜 포맷 함수
+function formatDate(dateString) {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Asia/Seoul', // KST로 변환
+  })
+}
+
 export default function ContactPage() {
   // RTK Query로 DB에서 문의 목록 가져오기
   const {
@@ -400,7 +414,7 @@ export default function ContactPage() {
                           {inquiry.views}
                         </td>
                         <td className="px-2 py-3 text-center">
-                          {inquiry.date}
+                          {formatDate(inquiry.created_at || inquiry.date)}
                         </td>
                       </tr>
                     ))}
@@ -446,7 +460,7 @@ export default function ContactPage() {
             </div>
             <div className="mb-2 text-sm text-gray-500">
               <span className="font-medium">등록일:</span>{' '}
-              {selectedInquiry.date}
+              {formatDate(selectedInquiry.created_at || selectedInquiry.date)}
             </div>
             <div className="text-right">
               <button
