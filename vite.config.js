@@ -2,10 +2,114 @@ import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import tsconfigPaths from 'vite-tsconfig-paths'
+import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss(), tsconfigPaths()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    tsconfigPaths(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      injectRegister: 'auto',
+      manifest: {
+        name: 'Weather Flick',
+        short_name: 'WeatherFlick',
+        description: '날씨 기반 여행지 추천 서비스',
+        theme_color: '#1e293b',
+        background_color: '#ffffff',
+        display: 'standalone',
+        orientation: 'portrait',
+        scope: '/',
+        start_url: '/',
+        icons: [
+          {
+            src: '/pwa-64x64.png',
+            sizes: '64x64',
+            type: 'image/png',
+          },
+          {
+            src: '/pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+          },
+          {
+            src: '/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+          },
+          {
+            src: '/maskable-icon-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+          {
+            src: '/maskable-icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+        ],
+        categories: ['travel', 'weather', 'lifestyle'],
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+        navigateFallback: '/offline',
+        navigateFallbackDenylist: [/^\/api/],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/pixabay\.com\/api\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'pixabay-images',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          {
+            urlPattern: /^http:\/\/localhost:8000\/api\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-cache',
+              networkTimeoutSeconds: 10,
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24, // 1 day
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+        ],
+      },
+      devOptions: {
+        enabled: true,
+      },
+    }),
+  ],
   server: {
     port: 5173,
     allowedHosts: true,

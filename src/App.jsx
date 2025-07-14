@@ -3,6 +3,7 @@ import { Suspense, lazy, useEffect } from 'react'
 import { DefaultLayout } from './layouts/default-layout'
 import LoadingSpinner from './components/LoadingSpinner'
 import ErrorBoundary from './components/common/ErrorBoundary'
+import PWAInstallPrompt from './components/common/PWAInstallPrompt'
 import { initializeApiMonitoring } from '@/utils/apiKeyMonitoring'
 import '@/App.css'
 
@@ -13,6 +14,7 @@ import { LoginPage } from './pages/login'
 // 필수 페이지들
 const NotFoundPage = lazy(() => import('./pages/404'))
 const PrivacyPolicyPage = lazy(() => import('./pages/privacy'))
+const OfflinePage = lazy(() => import('./pages/offline'))
 
 // 나머지 페이지들은 지연 로딩
 const SignUpPage = lazy(() =>
@@ -93,6 +95,7 @@ function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <DefaultLayout>
+          <PWAInstallPrompt />
           <Suspense fallback={<LoadingSpinner />}>
             <Routes>
               <Route path="/" element={<MainPage />} />
@@ -151,6 +154,7 @@ function App() {
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/privacy" element={<PrivacyPolicyPage />} />
+              <Route path="/offline" element={<OfflinePage />} />
               {/* 404 페이지 - 모든 라우트의 마지막에 위치 */}
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

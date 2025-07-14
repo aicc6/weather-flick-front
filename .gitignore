@@ -235,3 +235,14 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,macos,visualstudiocode,node,react,dotenv
+
+# PWA files
+dev-dist
+.vite-pwa-dist
+workbox-*.js
+workbox-*.js.map
+sw.js
+sw.js.map
+registerSW.js
+manifest.webmanifest
+pwa-assets.config.js
