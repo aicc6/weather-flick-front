@@ -278,34 +278,6 @@ export function MainPage() {
             )
           })}
         </div>
-
-        {/* Bottom CTA Section */}
-        <section className="from-sky-blue-light/30 via-sunshine-yellow-light/20 to-sunset-orange-light/30 dark:from-sky-blue/10 dark:via-sunshine-yellow/5 dark:to-sunset-orange/10 bg-gradient-to-br py-16">
-          <div className="container mx-auto px-4 text-center">
-            <div className="weather-card glass-effect mx-auto max-w-2xl p-8">
-              <h2 className="text-foreground mb-4 text-3xl font-bold">
-                🌟 지금 바로 시작하세요!
-              </h2>
-              <p className="text-muted-foreground mb-8 text-lg">
-                날씨를 고려한 완벽한 여행 계획을 세워보세요
-              </p>
-              <div className="flex flex-col justify-center gap-4 sm:flex-row">
-                <Link
-                  to="/planner"
-                  className="sunny-button rounded-full px-8 py-3 font-semibold"
-                >
-                  ✈️ 여행 계획 세우기
-                </Link>
-                <Link
-                  to="/recommend"
-                  className="weather-button rounded-full px-8 py-3 font-semibold"
-                >
-                  🗺️ 여행지 둘러보기
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
       </div>
 
       <Chatbot />
