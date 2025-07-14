@@ -18,7 +18,6 @@ import {
 } from '@/components/icons'
 import NavigationDropdown from './NavigationDropdown'
 import NotificationSettings from './NotificationSettings'
-import TimelinePrediction from './TimelinePrediction'
 import SmartTimeSelector from './SmartTimeSelector'
 import RealTimeTrafficWidget from './RealTimeTrafficWidget'
 import AdvancedTimeMachineInsights from './AdvancedTimeMachineInsights'

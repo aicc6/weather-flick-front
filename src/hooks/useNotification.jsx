@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { onMessageListener } from '@/lib/firebase'
+import { messaging } from '@/lib/firebase'
+import { onMessage } from 'firebase/messaging'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
 
@@ -13,7 +14,14 @@ export function useNotification() {
 
     const setupListener = async () => {
       try {
-        await onMessageListener().then((payload) => {
+        // messaging이 없으면 early return
+        if (!messaging) {
+          console.log('Firebase Messaging이 초기화되지 않았습니다.')
+          return
+        }
+
+        // onMessage 리스너 설정
+        unsubscribe = onMessage(messaging, (payload) => {
           console.log('포그라운드 알림 수신:', payload)
 
           const { notification, data } = payload

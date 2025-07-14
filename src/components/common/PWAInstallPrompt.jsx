@@ -43,13 +43,13 @@ export default function PWAInstallPrompt() {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 animate-in slide-in-from-bottom-5 md:bottom-8 md:left-auto md:right-8 md:max-w-sm">
-      <div className="relative rounded-lg bg-white p-4 shadow-lg ring-1 ring-black ring-opacity-5">
+    <div className="animate-in slide-in-from-bottom-5 fixed right-4 bottom-4 left-4 z-50 md:right-8 md:bottom-8 md:left-auto md:max-w-sm">
+      <div className="ring-opacity-5 relative rounded-lg bg-white p-4 shadow-lg ring-1 ring-black">
         <Button
           onClick={handleDismiss}
           size="icon"
           variant="ghost"
-          className="absolute right-2 top-2 h-8 w-8"
+          className="absolute top-2 right-2 h-8 w-8"
         >
           <X className="h-4 w-4" />
         </Button>
@@ -65,16 +65,12 @@ export default function PWAInstallPrompt() {
           </div>
 
           <p className="mb-4 text-sm text-gray-600">
-            홈 화면에 추가하여 더 빠르고 편리하게 이용하세요.
-            오프라인에서도 일부 기능을 사용할 수 있습니다.
+            홈 화면에 추가하여 더 빠르고 편리하게 이용하세요. 오프라인에서도
+            일부 기능을 사용할 수 있습니다.
           </p>
 
           <div className="flex gap-2">
-            <Button
-              onClick={handleInstall}
-              size="sm"
-              className="flex-1"
-            >
+            <Button onClick={handleInstall} size="sm" className="flex-1">
               <Download className="mr-2 h-4 w-4" />
               설치하기
             </Button>

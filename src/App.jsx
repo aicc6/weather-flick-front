@@ -87,85 +87,93 @@ const HelpPage = lazy(() => import('./pages/help/help'))
 const ContactPage = lazy(() => import('./pages/contact'))
 const TermsPage = lazy(() => import('./pages/terms'))
 
+// 내부 컴포넌트 - BrowserRouter 내부에서 실행
+function AppContent() {
+  // 알림 시스템 초기화
+  useNotification()
+
+  return (
+    <DefaultLayout>
+      <PWAInstallPrompt />
+      <NotificationPermission />
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
+          <Route path="/" element={<MainPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/sign-up" element={<SignUpPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/recommend" element={<TravelCoursePage />} />
+          <Route
+            path="/recommend/detail/:id"
+            element={<TravelCourseDetailPage />}
+          />
+          <Route
+            path="/customized-schedule"
+            element={<CustomizedSchedulePage />}
+          />
+          <Route
+            path="/customized-schedule/region"
+            element={<CustomizedScheduleRegionPage />}
+          />
+          <Route
+            path="/customized-schedule/period"
+            element={<CustomizedSchedulePeriodPage />}
+          />
+          <Route
+            path="/customized-schedule/who"
+            element={<CustomizedScheduleWhoPage />}
+          />
+          <Route
+            path="/customized-schedule/style"
+            element={<CustomizedScheduleStylePage />}
+          />
+          <Route
+            path="/customized-schedule/schedule"
+            element={<CustomizedScheduleSchedulePage />}
+          />
+          <Route
+            path="/customized-schedule/result"
+            element={<CustomizedScheduleResultPage />}
+          />
+          <Route path="/planner" element={<PlannerPage />} />
+          <Route path="/travel-plans" element={<TravelPlansPage />} />
+          <Route
+            path="/travel-plans/:planId"
+            element={<TravelPlanDetailPage />}
+          />
+          <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
+          <Route
+            path="/auth/google/callback"
+            element={<GoogleCallbackPage />}
+          />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/edit" element={<ProfileEditPage />} />
+          <Route path="/change-password" element={<ChangePasswordPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/help" element={<HelpPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/offline" element={<OfflinePage />} />
+          {/* 404 페이지 - 모든 라우트의 마지막에 위치 */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Suspense>
+    </DefaultLayout>
+  )
+}
+
+// 메인 App 컴포넌트
 function App() {
   // API 모니터링 시스템 초기화
   useEffect(() => {
     initializeApiMonitoring()
   }, [])
-  
-  // 알림 시스템 초기화
-  useNotification()
 
   return (
     <ErrorBoundary>
       <BrowserRouter>
-        <DefaultLayout>
-          <PWAInstallPrompt />
-          <NotificationPermission />
-          <Suspense fallback={<LoadingSpinner />}>
-            <Routes>
-              <Route path="/" element={<MainPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/sign-up" element={<SignUpPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/recommend" element={<TravelCoursePage />} />
-              <Route
-                path="/recommend/detail/:id"
-                element={<TravelCourseDetailPage />}
-              />
-              <Route
-                path="/customized-schedule"
-                element={<CustomizedSchedulePage />}
-              />
-              <Route
-                path="/customized-schedule/region"
-                element={<CustomizedScheduleRegionPage />}
-              />
-              <Route
-                path="/customized-schedule/period"
-                element={<CustomizedSchedulePeriodPage />}
-              />
-              <Route
-                path="/customized-schedule/who"
-                element={<CustomizedScheduleWhoPage />}
-              />
-              <Route
-                path="/customized-schedule/style"
-                element={<CustomizedScheduleStylePage />}
-              />
-              <Route
-                path="/customized-schedule/schedule"
-                element={<CustomizedScheduleSchedulePage />}
-              />
-              <Route
-                path="/customized-schedule/result"
-                element={<CustomizedScheduleResultPage />}
-              />
-              <Route path="/planner" element={<PlannerPage />} />
-              <Route path="/travel-plans" element={<TravelPlansPage />} />
-              <Route
-                path="/travel-plans/:planId"
-                element={<TravelPlanDetailPage />}
-              />
-              <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
-              <Route
-                path="/auth/google/callback"
-                element={<GoogleCallbackPage />}
-              />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/profile/edit" element={<ProfileEditPage />} />
-              <Route path="/change-password" element={<ChangePasswordPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/help" element={<HelpPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/terms" element={<TermsPage />} />
-              <Route path="/privacy" element={<PrivacyPolicyPage />} />
-              <Route path="/offline" element={<OfflinePage />} />
-              {/* 404 페이지 - 모든 라우트의 마지막에 위치 */}
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Suspense>
-        </DefaultLayout>
+        <AppContent />
       </BrowserRouter>
     </ErrorBoundary>
   )

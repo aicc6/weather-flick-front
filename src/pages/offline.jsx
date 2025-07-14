@@ -22,7 +22,9 @@ export default function OfflinePage() {
           </div>
         </div>
 
-        <h1 className="mb-4 text-3xl font-bold text-gray-900">오프라인 상태입니다</h1>
+        <h1 className="mb-4 text-3xl font-bold text-gray-900">
+          오프라인 상태입니다
+        </h1>
 
         <p className="mb-8 text-lg text-gray-600">
           인터넷 연결이 끊어진 것 같습니다.

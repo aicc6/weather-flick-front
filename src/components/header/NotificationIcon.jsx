@@ -8,8 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Bell, X, Clock, Check } from '@/components/icons'
+import { Bell, X, Clock } from '@/components/icons'
 import {
   getScheduledNotifications,
   removeScheduledNotification,

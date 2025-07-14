@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react'
-import { Bell, BellOff } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { getNotificationSettings, updateNotificationSettings } from '@/services/notificationService'
+import {
+  getNotificationSettings,
+  updateNotificationSettings,
+} from '@/services/notificationService'
 import { toast } from 'sonner'
 
 export default function NotificationSettings() {
@@ -36,9 +44,9 @@ export default function NotificationSettings() {
   }
 
   const handleToggle = (key) => {
-    setSettings(prev => ({
+    setSettings((prev) => ({
       ...prev,
-      [key]: !prev[key]
+      [key]: !prev[key],
     }))
   }
 
@@ -60,9 +68,7 @@ export default function NotificationSettings() {
       <Card>
         <CardHeader>
           <CardTitle>알림 설정</CardTitle>
-          <CardDescription>
-            Weather Flick의 알림을 관리하세요
-          </CardDescription>
+          <CardDescription>Weather Flick의 알림을 관리하세요</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
@@ -70,7 +76,7 @@ export default function NotificationSettings() {
               <Label htmlFor="push-enabled" className="text-base">
                 푸시 알림
               </Label>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 모든 알림을 받습니다
               </p>
             </div>
@@ -85,13 +91,13 @@ export default function NotificationSettings() {
 
           <div className="space-y-4">
             <h3 className="text-sm font-medium">알림 유형</h3>
-            
+
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <Label htmlFor="travel-updates" className="text-base">
                   여행 계획 업데이트
                 </Label>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   여행 계획 변경사항 알림
                 </p>
               </div>
@@ -108,7 +114,7 @@ export default function NotificationSettings() {
                 <Label htmlFor="weather-alerts" className="text-base">
                   날씨 알림
                 </Label>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   여행지 날씨 변화 알림
                 </p>
               </div>
@@ -125,7 +131,7 @@ export default function NotificationSettings() {
                 <Label htmlFor="recommendations" className="text-base">
                   추천 업데이트
                 </Label>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   새로운 여행지 추천 알림
                 </p>
               </div>
@@ -142,7 +148,7 @@ export default function NotificationSettings() {
                 <Label htmlFor="marketing" className="text-base">
                   마케팅 메시지
                 </Label>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   프로모션 및 이벤트 알림
                 </p>
               </div>
@@ -163,7 +169,7 @@ export default function NotificationSettings() {
                 <Label htmlFor="quiet-hours" className="text-base">
                   방해 금지 시간
                 </Label>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   설정한 시간에는 알림을 받지 않습니다
                 </p>
               </div>
@@ -183,8 +189,13 @@ export default function NotificationSettings() {
                     id="quiet-start"
                     type="time"
                     value={settings.quiet_hours_start}
-                    onChange={(e) => setSettings(prev => ({ ...prev, quiet_hours_start: e.target.value }))}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    onChange={(e) =>
+                      setSettings((prev) => ({
+                        ...prev,
+                        quiet_hours_start: e.target.value,
+                      }))
+                    }
+                    className="border-input bg-background flex h-10 w-full rounded-md border px-3 py-2 text-sm"
                     disabled={!settings.push_enabled}
                   />
                 </div>
@@ -194,8 +205,13 @@ export default function NotificationSettings() {
                     id="quiet-end"
                     type="time"
                     value={settings.quiet_hours_end}
-                    onChange={(e) => setSettings(prev => ({ ...prev, quiet_hours_end: e.target.value }))}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    onChange={(e) =>
+                      setSettings((prev) => ({
+                        ...prev,
+                        quiet_hours_end: e.target.value,
+                      }))
+                    }
+                    className="border-input bg-background flex h-10 w-full rounded-md border px-3 py-2 text-sm"
                     disabled={!settings.push_enabled}
                   />
                 </div>

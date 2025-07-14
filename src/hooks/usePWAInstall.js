@@ -9,12 +9,15 @@ export function usePWAInstall() {
     // PWA가 이미 설치되었는지 확인
     const checkIfInstalled = () => {
       // 1. 미디어 쿼리로 확인
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+      const isStandalone = window.matchMedia(
+        '(display-mode: standalone)',
+      ).matches
       // 2. navigator.standalone 확인 (iOS Safari)
       const isIOSStandalone = window.navigator.standalone === true
       // 3. URL에서 확인 (일부 브라우저)
-      const isInStandaloneMode = window.location.search.includes('mode=standalone')
-      
+      const isInStandaloneMode =
+        window.location.search.includes('mode=standalone')
+
       return isStandalone || isIOSStandalone || isInStandaloneMode
     }
 
@@ -40,7 +43,10 @@ export function usePWAInstall() {
     window.addEventListener('appinstalled', handleAppInstalled)
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+      window.removeEventListener(
+        'beforeinstallprompt',
+        handleBeforeInstallPrompt,
+      )
       window.removeEventListener('appinstalled', handleAppInstalled)
     }
   }, [])

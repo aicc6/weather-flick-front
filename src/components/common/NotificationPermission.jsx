@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Bell, BellOff, X } from 'lucide-react'
+import { Bell, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { requestNotificationPermission, getFCMToken } from '@/lib/firebase'
@@ -14,8 +14,10 @@ export default function NotificationPermission() {
   useEffect(() => {
     // 알림 권한이 기본값이고 로그인한 상태일 때만 프롬프트 표시
     const token = localStorage.getItem('access_token')
-    const promptDismissed = localStorage.getItem('notification-prompt-dismissed')
-    
+    const promptDismissed = localStorage.getItem(
+      'notification-prompt-dismissed',
+    )
+
     if (token && permission === 'default' && !promptDismissed) {
       const timer = setTimeout(() => {
         setShowPrompt(true)
@@ -34,7 +36,7 @@ export default function NotificationPermission() {
       if (result === 'granted') {
         // FCM 토큰 가져오기
         const fcmToken = await getFCMToken()
-        
+
         if (fcmToken) {
           // 백엔드에 FCM 토큰 전송
           try {
@@ -52,7 +54,9 @@ export default function NotificationPermission() {
           toast.error('알림 토큰을 가져올 수 없습니다.')
         }
       } else if (result === 'denied') {
-        toast.error('알림 권한이 거부되었습니다. 브라우저 설정에서 변경할 수 있습니다.')
+        toast.error(
+          '알림 권한이 거부되었습니다. 브라우저 설정에서 변경할 수 있습니다.',
+        )
         setShowPrompt(false)
       }
     } catch (error) {
@@ -73,7 +77,7 @@ export default function NotificationPermission() {
   }
 
   return (
-    <div className="fixed bottom-20 right-4 z-40 animate-in slide-in-from-right-5 md:right-8">
+    <div className="animate-in slide-in-from-right-5 fixed right-4 bottom-20 z-40 md:right-8">
       <Card className="w-80 p-4 shadow-lg">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
@@ -83,7 +87,8 @@ export default function NotificationPermission() {
             <div className="flex-1">
               <h3 className="font-semibold text-gray-900">알림 받기</h3>
               <p className="mt-1 text-sm text-gray-600">
-                여행 계획 업데이트, 날씨 변화 등 중요한 정보를 실시간으로 받아보세요.
+                여행 계획 업데이트, 날씨 변화 등 중요한 정보를 실시간으로
+                받아보세요.
               </p>
             </div>
           </div>

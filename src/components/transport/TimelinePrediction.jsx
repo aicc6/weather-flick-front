@@ -2,13 +2,7 @@ import { useState, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import {
-  Clock,
-  TrendingUp,
-  TrendingDown,
-  Zap,
-  AlertTriangle,
-} from '@/components/icons'
+import { Clock, Zap, AlertTriangle } from '@/components/icons'
 
 /**
  * 고급 시간대별 예측 타임라인 컴포넌트

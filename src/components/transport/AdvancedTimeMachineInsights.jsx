@@ -7,11 +7,9 @@ import {
   Clock,
   TrendingUp,
   TrendingDown,
-  AlertCircle,
   BarChart3,
   Users,
   DollarSign,
-  Route,
 } from '@/components/icons'
 
 /**
@@ -52,7 +50,7 @@ export function AdvancedTimeMachineInsights({
         </div>
       )
     }
-    
+
     return (
       <div className="space-y-4">
         {/* 핵심 메트릭 카드들 */}
@@ -95,20 +93,24 @@ export function AdvancedTimeMachineInsights({
                 <Zap className="h-5 w-5 text-blue-600" />
               </div>
               <div className="flex-1">
-                <h4 className="mb-1 font-medium text-blue-900">AI 스마트 추천</h4>
+                <h4 className="mb-1 font-medium text-blue-900">
+                  AI 스마트 추천
+                </h4>
                 <p className="mb-2 text-sm text-blue-800">
                   {enrichedPredictions.aiRecommendation.summary}
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {enrichedPredictions.aiRecommendation.tags.map((tag, index) => (
-                    <Badge
-                      key={index}
-                      variant="secondary"
-                      className="bg-blue-100 text-xs text-blue-700"
-                    >
-                      {tag}
-                    </Badge>
-                  ))}
+                  {enrichedPredictions.aiRecommendation.tags.map(
+                    (tag, index) => (
+                      <Badge
+                        key={index}
+                        variant="secondary"
+                        className="bg-blue-100 text-xs text-blue-700"
+                      >
+                        {tag}
+                      </Badge>
+                    ),
+                  )}
                 </div>
               </div>
             </div>
@@ -132,7 +134,9 @@ export function AdvancedTimeMachineInsights({
                   <div className="flex items-center space-x-3">
                     <span className="text-xl">{transport.icon}</span>
                     <div>
-                      <div className="text-sm font-medium">{transport.name}</div>
+                      <div className="text-sm font-medium">
+                        {transport.name}
+                      </div>
                       <div className="text-xs text-gray-600">
                         {transport.time}분 • {transport.cost}원
                       </div>
@@ -249,7 +253,9 @@ export function AdvancedTimeMachineInsights({
                               : 'bg-red-500'
                         }`}
                       />
-                      <span className="text-sm font-medium">{segment.name}</span>
+                      <span className="text-sm font-medium">
+                        {segment.name}
+                      </span>
                     </div>
                     <div className="text-right">
                       <div className="text-sm">{segment.estimatedTime}분</div>
@@ -326,7 +332,9 @@ export function AdvancedTimeMachineInsights({
                     <div className="text-lg font-bold text-blue-600">
                       {analysis.value}
                     </div>
-                    <div className="text-sm text-gray-600">{analysis.label}</div>
+                    <div className="text-sm text-gray-600">
+                      {analysis.label}
+                    </div>
                     <div className="mt-1 text-xs text-gray-500">
                       {analysis.description}
                     </div>
@@ -594,8 +602,12 @@ const generateEnrichedPredictions = (
 
   // 개발 환경에서만 콘솔 로그 출력
   if (import.meta.env.DEV) {
-    console.log('AdvancedTimeMachineInsights - 현재는 데모 데이터를 사용 중입니다.')
-    console.log('실제 API 연동 시 해당 데이터를 사용하여 현실적인 정보를 제공할 예정입니다.')
+    console.log(
+      'AdvancedTimeMachineInsights - 현재는 데모 데이터를 사용 중입니다.',
+    )
+    console.log(
+      '실제 API 연동 시 해당 데이터를 사용하여 현실적인 정보를 제공할 예정입니다.',
+    )
   }
 
   // 실제 데이터가 없을 때는 null 반환

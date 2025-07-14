@@ -20,7 +20,7 @@ export const saveFCMToken = async (token) => {
 export const deleteFCMToken = async (token) => {
   try {
     const response = await http.delete('/api/notifications/fcm-token', {
-      data: { token }
+      data: { token },
     })
     return response.data
   } catch (error) {
@@ -88,17 +88,17 @@ export const markAllNotificationsAsRead = async () => {
 export const initializeFCMToken = async () => {
   try {
     const permission = await Notification.requestPermission()
-    
+
     if (permission === 'granted') {
       const token = await getFCMToken()
-      
+
       if (token) {
         await saveFCMToken(token)
         localStorage.setItem('fcm_token', token)
         return token
       }
     }
-    
+
     return null
   } catch (error) {
     console.error('FCM 토큰 초기화 오류:', error)
@@ -110,7 +110,7 @@ export const initializeFCMToken = async () => {
 export const cleanupFCMToken = async () => {
   try {
     const token = localStorage.getItem('fcm_token')
-    
+
     if (token) {
       await deleteFCMToken(token)
       localStorage.removeItem('fcm_token')

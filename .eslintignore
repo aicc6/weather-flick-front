@@ -1,0 +1,6 @@
+dist
+dev-dist
+node_modules
+.DS_Store
+coverage
+public/firebase-messaging-sw.js

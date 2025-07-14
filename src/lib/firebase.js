@@ -21,12 +21,12 @@ let analytics
 
 try {
   app = initializeApp(firebaseConfig)
-  
+
   // Analytics 초기화 (선택사항)
   if (typeof window !== 'undefined' && firebaseConfig.measurementId) {
     analytics = getAnalytics(app)
   }
-  
+
   // Messaging 초기화
   if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
     messaging = getMessaging(app)
@@ -63,13 +63,13 @@ export const onMessageListener = () => {
     console.error('Firebase Messaging이 초기화되지 않았습니다.')
     return Promise.reject(new Error('Messaging not initialized'))
   }
-  
+
   return new Promise((resolve) => {
     const unsubscribe = onMessage(messaging, (payload) => {
       console.log('포그라운드 메시지 수신:', payload)
       resolve(payload)
     })
-    
+
     // unsubscribe 함수를 반환하여 정리할 수 있도록 함
     return unsubscribe
   })
