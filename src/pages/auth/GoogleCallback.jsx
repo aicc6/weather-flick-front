@@ -45,7 +45,11 @@ export function GoogleCallbackPage() {
 
             // AuthContext의 Google 인증 성공 처리 함수 사용
             try {
-              handleGoogleAuthSuccess(response.user_info, response.access_token, response.refresh_token)
+              handleGoogleAuthSuccess(
+                response.user_info,
+                response.access_token,
+                response.refresh_token,
+              )
             } catch (authError) {
               console.warn('Auth context update error:', authError)
               // 토큰은 이미 저장되었으므로 계속 진행

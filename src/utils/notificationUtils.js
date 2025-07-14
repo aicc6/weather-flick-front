@@ -42,7 +42,7 @@ export const requestNotificationPermission = async () => {
  */
 export const showNotification = (title, options = {}) => {
   const permission = getNotificationPermission()
-  
+
   if (permission !== 'granted') {
     console.warn('알림 권한이 없습니다:', permission)
     return null
@@ -227,23 +227,23 @@ export const calculateNotificationTime = (departureTime, minutesBefore) => {
 
   // 출발 시간이 이미 지났는지 확인
   const isDepartureInPast = departure.getTime() <= now.getTime()
-  
+
   // 알림 시간이 이미 지났는지 확인
   const isNotificationInPast = notification.getTime() <= now.getTime()
-  
+
   // 최종 알림 시간 결정
   let finalNotificationTime = notification
-  
+
   if (isDepartureInPast) {
     // 출발 시간이 과거면 알림 불가
     return {
       notificationTime: null,
       delayMs: 0,
       isInPast: true,
-      isImmediateNotification: false
+      isImmediateNotification: false,
     }
   }
-  
+
   if (isNotificationInPast) {
     // 알림 시간이 과거이지만 출발 시간이 미래라면 즉시 알림
     finalNotificationTime = new Date(now.getTime() + 2000) // 2초 후
@@ -253,7 +253,7 @@ export const calculateNotificationTime = (departureTime, minutesBefore) => {
     notificationTime: finalNotificationTime,
     delayMs: Math.max(0, finalNotificationTime.getTime() - now.getTime()),
     isInPast: false,
-    isImmediateNotification: isNotificationInPast
+    isImmediateNotification: isNotificationInPast,
   }
 }
 
@@ -296,27 +296,27 @@ export const validateNotificationSettings = (settings) => {
 export const showTestNotification = () => {
   // 권한 상태 확인
   const permission = getNotificationPermission()
-  
+
   // 브라우저 지원 여부 확인
   const supported = isNotificationSupported()
-  
+
   if (!supported) {
     console.error('브라우저가 알림을 지원하지 않습니다')
     return null
   }
-  
+
   if (permission !== 'granted') {
     console.error('알림 권한이 허용되지 않았습니다:', permission)
     return null
   }
-  
+
   const result = showNotification('🧪 테스트 알림', {
     body: '알림이 정상적으로 작동합니다!',
     tag: 'test-notification',
     autoClose: true,
     autoCloseDelay: 3000,
   })
-  
+
   console.log('테스트 알림 전송:', result ? '성공' : '실패')
   return result
 }

@@ -40,7 +40,7 @@ export function NotificationIcon({ className = '' }) {
 
     // 10초마다 알림 목록 업데이트 (만료된 알림 정리용)
     const interval = setInterval(loadNotifications, 10000)
-    
+
     return () => {
       unsubscribe()
       clearInterval(interval)
@@ -51,12 +51,12 @@ export function NotificationIcon({ className = '' }) {
   const loadNotifications = () => {
     // 만료된 알림 먼저 정리
     cleanupExpiredNotifications()
-    
+
     const scheduled = getScheduledNotifications()
-    
+
     // 현재 시간 기준으로 유효한 알림만 필터링
     const now = new Date()
-    const validNotifications = scheduled.filter(notification => {
+    const validNotifications = scheduled.filter((notification) => {
       const scheduledTime = new Date(notification.scheduledTime)
       return scheduledTime > now && notification.status === 'scheduled'
     })
@@ -69,7 +69,7 @@ export function NotificationIcon({ className = '' }) {
     cancelScheduledNotification(notificationId)
     removeScheduledNotification(notificationId)
     loadNotifications()
-    
+
     toast.success('알림이 취소되었습니다')
   }
 
@@ -81,11 +81,11 @@ export function NotificationIcon({ className = '' }) {
 
   // 모든 알림 삭제
   const handleClearAll = () => {
-    notifications.forEach(notification => {
+    notifications.forEach((notification) => {
       cancelScheduledNotification(notification.id)
       removeScheduledNotification(notification.id)
     })
-    
+
     loadNotifications()
     setIsOpen(false)
     toast.success('모든 알림이 삭제되었습니다')
@@ -115,13 +115,13 @@ export function NotificationIcon({ className = '' }) {
     const now = new Date()
     const scheduled = new Date(scheduledTime)
     const diffMs = scheduled.getTime() - now.getTime()
-    
+
     if (diffMs <= 0) return '곧 알림'
-    
+
     const diffMinutes = Math.floor(diffMs / (1000 * 60))
     const diffHours = Math.floor(diffMinutes / 60)
     const diffDays = Math.floor(diffHours / 24)
-    
+
     if (diffDays > 0) return `${diffDays}일 후`
     if (diffHours > 0) return `${diffHours}시간 후`
     if (diffMinutes > 0) return `${diffMinutes}분 후`
@@ -141,7 +141,7 @@ export function NotificationIcon({ className = '' }) {
           {activeCount > 0 && (
             <Badge
               variant="destructive"
-              className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center p-0 text-xs"
+              className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center p-0 text-xs"
             >
               {activeCount > 99 ? '99+' : activeCount}
             </Badge>
@@ -149,12 +149,12 @@ export function NotificationIcon({ className = '' }) {
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent 
-        className="w-96 max-h-96 overflow-y-auto" 
+      <DropdownMenuContent
+        className="max-h-96 w-96 overflow-y-auto"
         align="end"
         sideOffset={5}
       >
-        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+        <div className="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold">예약된 알림</h3>
             {activeCount > 0 && (
@@ -175,11 +175,11 @@ export function NotificationIcon({ className = '' }) {
 
         {activeCount === 0 ? (
           <div className="px-4 py-8 text-center">
-            <Bell className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+            <Bell className="mx-auto mb-2 h-8 w-8 text-gray-400" />
             <p className="text-sm text-gray-500 dark:text-gray-400">
               예약된 알림이 없습니다
             </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+            <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
               여행 계획에서 알림을 설정해보세요
             </p>
           </div>
@@ -187,41 +187,47 @@ export function NotificationIcon({ className = '' }) {
           <div className="max-h-80 overflow-y-auto">
             {notifications.map((notification, index) => (
               <div key={notification.id}>
-                <DropdownMenuItem 
-                  className="px-4 py-3 cursor-default focus:bg-transparent"
+                <DropdownMenuItem
+                  className="cursor-default px-4 py-3 focus:bg-transparent"
                   onSelect={(e) => e.preventDefault()}
                 >
                   <div className="flex w-full items-start justify-between space-x-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2 mb-1">
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-1 flex items-center space-x-2">
                         <span className="text-base">
                           {getNotificationIcon(notification.type)}
                         </span>
-                        <span className="text-sm font-medium truncate">
+                        <span className="truncate text-sm font-medium">
                           {notification.title}
                         </span>
                       </div>
-                      
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+
+                      <p className="mb-2 line-clamp-2 text-xs text-gray-600 dark:text-gray-400">
                         {notification.body}
                       </p>
-                      
+
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-1 text-xs text-gray-500">
                           <Clock className="h-3 w-3" />
-                          <span>{getTimeRemaining(notification.scheduledTime)}</span>
+                          <span>
+                            {getTimeRemaining(notification.scheduledTime)}
+                          </span>
                         </div>
                         <div className="text-xs text-gray-400">
-                          {formatNotificationTime(new Date(notification.scheduledTime))}
+                          {formatNotificationTime(
+                            new Date(notification.scheduledTime),
+                          )}
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex flex-col space-y-1">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleCancelNotification(notification.id)}
+                        onClick={() =>
+                          handleCancelNotification(notification.id)
+                        }
                         className="h-6 w-6 p-0 text-gray-400 hover:text-red-500"
                       >
                         <X className="h-3 w-3" />
@@ -229,10 +235,8 @@ export function NotificationIcon({ className = '' }) {
                     </div>
                   </div>
                 </DropdownMenuItem>
-                
-                {index < notifications.length - 1 && (
-                  <DropdownMenuSeparator />
-                )}
+
+                {index < notifications.length - 1 && <DropdownMenuSeparator />}
               </div>
             ))}
           </div>

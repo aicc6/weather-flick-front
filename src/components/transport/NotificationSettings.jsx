@@ -58,7 +58,7 @@ export function NotificationSettings({
   const loadSettings = () => {
     if (route?.route_id) {
       const routeSettings = getRouteNotificationSettings(route.route_id, planId)
-      
+
       // 출발 시간이 없으면 현재 시간에서 1시간 후로 기본 설정
       if (!routeSettings.departureTime) {
         const now = new Date()
@@ -66,7 +66,7 @@ export function NotificationSettings({
         const defaultTime = oneHourLater.toISOString().slice(0, 16) // YYYY-MM-DDTHH:mm 형식
         routeSettings.departureTime = defaultTime
       }
-      
+
       setSettings(routeSettings)
     }
   }
@@ -79,7 +79,7 @@ export function NotificationSettings({
   const loadScheduledNotifications = () => {
     // 먼저 중복 알림 정리
     cleanupDuplicateNotifications(planId)
-    
+
     const scheduled = getScheduledNotifications(planId)
     const routeNotifications = scheduled.filter(
       (n) =>
@@ -167,22 +167,25 @@ export function NotificationSettings({
     // 즉시 알림인 경우 사용자에게 안내
     if (isImmediateNotification) {
       toast.info('알림 시간이 이미 지나서 곧바로 알림을 전송합니다', {
-        duration: 3000
+        duration: 3000,
       })
     }
 
     // 기존 알림이 있다면 먼저 취소
     const baseNotificationId = `departure_${route.route_id}`
-    
+
     // 기존 동일 경로 알림들 취소 및 제거
     const existingNotifications = getScheduledNotifications(planId)
-    existingNotifications.forEach(notification => {
-      if (notification.routeId === route.route_id && notification.type === 'departure') {
+    existingNotifications.forEach((notification) => {
+      if (
+        notification.routeId === route.route_id &&
+        notification.type === 'departure'
+      ) {
         cancelScheduledNotification(notification.id)
         removeScheduledNotification(notification.id)
       }
     })
-    
+
     // 새로운 알림 ID 생성
     const notificationId = `${baseNotificationId}_${Date.now()}`
     const notificationData = {
@@ -228,7 +231,7 @@ export function NotificationSettings({
     const successMessage = isImmediateNotification
       ? '출발 알림이 곧바로 전송됩니다'
       : '출발 알림이 예약되었습니다'
-    
+
     const successDescription = isImmediateNotification
       ? '알림 시간이 지나서 즉시 알림을 보냅니다'
       : `${formatNotificationTime(notificationTime)}에 알림이 전송됩니다`
@@ -406,7 +409,7 @@ export function NotificationSettings({
           {scheduledNotifications.length > 0 && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm flex items-center justify-between">
+                <CardTitle className="flex items-center justify-between text-sm">
                   예약된 알림
                   <Button
                     onClick={handleCleanupDuplicates}
@@ -452,10 +455,12 @@ export function NotificationSettings({
 
           {/* 도움말 */}
           <div className="rounded-lg bg-blue-50 p-3 text-sm text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
-            💡 <strong>사용 팁:</strong><br/>
-            • 출발 시간을 설정하고 "출발 알림 예약" 버튼을 클릭하세요<br/>
-            • 설정한 시간 전에 알림이 자동으로 전송됩니다<br/>
-            • 브라우저가 열려있을 때만 알림이 작동합니다
+            💡 <strong>사용 팁:</strong>
+            <br />
+            • 출발 시간을 설정하고 "출발 알림 예약" 버튼을 클릭하세요
+            <br />
+            • 설정한 시간 전에 알림이 자동으로 전송됩니다
+            <br />• 브라우저가 열려있을 때만 알림이 작동합니다
           </div>
         </div>
       </DialogContent>

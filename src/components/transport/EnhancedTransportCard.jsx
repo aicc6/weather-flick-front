@@ -334,55 +334,81 @@ const RouteComparison = ({ routes }) => {
                   )}
 
                   {/* 실시간 정보 및 지연 상황 */}
-                  {route.transitInfo.realTimeDelays && route.transitInfo.realTimeDelays.length > 0 && (
-                    <div className="mt-3 border-t border-orange-200 pt-2">
-                      <div className="mb-2 text-xs font-medium text-orange-800">
-                        🚨 실시간 지연 정보
+                  {route.transitInfo.realTimeDelays &&
+                    route.transitInfo.realTimeDelays.length > 0 && (
+                      <div className="mt-3 border-t border-orange-200 pt-2">
+                        <div className="mb-2 text-xs font-medium text-orange-800">
+                          🚨 실시간 지연 정보
+                        </div>
+                        <div className="space-y-1">
+                          {route.transitInfo.realTimeDelays.map(
+                            (delay, idx) => (
+                              <div
+                                key={idx}
+                                className="flex items-center justify-between text-xs"
+                              >
+                                <span className="text-orange-700">
+                                  {delay.routeName}{' '}
+                                  {delay.type === 'bus' ? '🚌' : '🚇'}
+                                </span>
+                                <span
+                                  className={`font-medium ${delay.delayMinutes > 5 ? 'text-red-600' : 'text-orange-600'}`}
+                                >
+                                  +{delay.delayMinutes}분 지연
+                                </span>
+                              </div>
+                            ),
+                          )}
+                        </div>
                       </div>
-                      <div className="space-y-1">
-                        {route.transitInfo.realTimeDelays.map((delay, idx) => (
-                          <div key={idx} className="flex items-center justify-between text-xs">
-                            <span className="text-orange-700">
-                              {delay.routeName} {delay.type === 'bus' ? '🚌' : '🚇'}
-                            </span>
-                            <span className={`font-medium ${delay.delayMinutes > 5 ? 'text-red-600' : 'text-orange-600'}`}>
-                              +{delay.delayMinutes}분 지연
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                    )}
 
                   {/* 실시간 도착정보 */}
-                  {route.transitInfo.nextArrivals && route.transitInfo.nextArrivals.length > 0 && (
-                    <div className="mt-3 border-t border-green-200 pt-2">
-                      <div className="mb-2 text-xs font-medium text-green-800">
-                        🚌 다음 차량 도착예정
-                      </div>
-                      <div className="space-y-1">
-                        {route.transitInfo.nextArrivals.slice(0, 2).map((arrival, idx) => (
-                          <div key={idx} className="flex items-center justify-between text-xs">
-                            <span className="text-green-700">
-                              {arrival.routeName} {arrival.type === 'bus' ? '🚌' : '🚇'}
-                            </span>
-                            <span className="font-medium text-green-600">
-                              {arrival.arrivalMinutes}분 후 도착
-                              {arrival.crowdLevel && (
-                                <span className={`ml-1 ${
-                                  arrival.crowdLevel === 'low' ? 'text-green-500' :
-                                  arrival.crowdLevel === 'medium' ? 'text-yellow-500' : 'text-red-500'
-                                }`}>
-                                  ({arrival.crowdLevel === 'low' ? '여유' : 
-                                    arrival.crowdLevel === 'medium' ? '보통' : '혼잡'})
+                  {route.transitInfo.nextArrivals &&
+                    route.transitInfo.nextArrivals.length > 0 && (
+                      <div className="mt-3 border-t border-green-200 pt-2">
+                        <div className="mb-2 text-xs font-medium text-green-800">
+                          🚌 다음 차량 도착예정
+                        </div>
+                        <div className="space-y-1">
+                          {route.transitInfo.nextArrivals
+                            .slice(0, 2)
+                            .map((arrival, idx) => (
+                              <div
+                                key={idx}
+                                className="flex items-center justify-between text-xs"
+                              >
+                                <span className="text-green-700">
+                                  {arrival.routeName}{' '}
+                                  {arrival.type === 'bus' ? '🚌' : '🚇'}
                                 </span>
-                              )}
-                            </span>
-                          </div>
-                        ))}
+                                <span className="font-medium text-green-600">
+                                  {arrival.arrivalMinutes}분 후 도착
+                                  {arrival.crowdLevel && (
+                                    <span
+                                      className={`ml-1 ${
+                                        arrival.crowdLevel === 'low'
+                                          ? 'text-green-500'
+                                          : arrival.crowdLevel === 'medium'
+                                            ? 'text-yellow-500'
+                                            : 'text-red-500'
+                                      }`}
+                                    >
+                                      (
+                                      {arrival.crowdLevel === 'low'
+                                        ? '여유'
+                                        : arrival.crowdLevel === 'medium'
+                                          ? '보통'
+                                          : '혼잡'}
+                                      )
+                                    </span>
+                                  )}
+                                </span>
+                              </div>
+                            ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
                   {/* 추가 팁 */}
                   <div className="mt-3 border-t border-blue-200 pt-2">
@@ -405,7 +431,8 @@ const RouteComparison = ({ routes }) => {
                       <div>💳 교통카드 미리 충전하여 빠른 승차</div>
                       {route.transitInfo.alternativeRoutes && (
                         <div>
-                          🔄 대체 경로 {route.transitInfo.alternativeRoutes}개 가능
+                          🔄 대체 경로 {route.transitInfo.alternativeRoutes}개
+                          가능
                         </div>
                       )}
                     </div>
@@ -428,16 +455,12 @@ const RouteComparison = ({ routes }) => {
                   {/* 경로 요약 */}
                   <div className="flex items-center justify-between">
                     <span>총 거리</span>
-                    <span className="font-medium">
-                      {route.distance}
-                    </span>
+                    <span className="font-medium">{route.distance}</span>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <span>예상 소요시간</span>
-                    <span className="font-medium">
-                      {route.duration}분
-                    </span>
+                    <span className="font-medium">{route.duration}분</span>
                   </div>
 
                   {route.carInfo.tollFee && (
@@ -464,16 +487,20 @@ const RouteComparison = ({ routes }) => {
                   {/* 교통 상황 정보 */}
                   {route.carInfo.trafficCondition && (
                     <div className="mt-2 border-t border-green-200 pt-2">
-                      <div className="text-sm font-medium text-green-800 mb-1">
+                      <div className="mb-1 text-sm font-medium text-green-800">
                         🚦 교통 상황
                       </div>
                       <div className="flex items-center justify-between">
                         <span>현재 상태</span>
-                        <span className={`font-medium ${
-                          route.carInfo.trafficCondition === '원활' ? 'text-green-600' :
-                          route.carInfo.trafficCondition === '보통' ? 'text-yellow-600' :
-                          'text-red-600'
-                        }`}>
+                        <span
+                          className={`font-medium ${
+                            route.carInfo.trafficCondition === '원활'
+                              ? 'text-green-600'
+                              : route.carInfo.trafficCondition === '보통'
+                                ? 'text-yellow-600'
+                                : 'text-red-600'
+                          }`}
+                        >
                           {route.carInfo.trafficCondition}
                         </span>
                       </div>
@@ -487,42 +514,37 @@ const RouteComparison = ({ routes }) => {
                   )}
 
                   {/* 경로 안내 */}
-                  {route.carInfo.majorRoads && route.carInfo.majorRoads.length > 0 && (
-                    <div className="mt-2 border-t border-green-200 pt-2">
-                      <div className="text-sm font-medium text-green-800 mb-1">
-                        🛣️ 주요 경유 도로
+                  {route.carInfo.majorRoads &&
+                    route.carInfo.majorRoads.length > 0 && (
+                      <div className="mt-2 border-t border-green-200 pt-2">
+                        <div className="mb-1 text-sm font-medium text-green-800">
+                          🛣️ 주요 경유 도로
+                        </div>
+                        <div className="space-y-1">
+                          {route.carInfo.majorRoads
+                            .slice(0, 3)
+                            .map((road, index) => (
+                              <div key={index} className="text-xs">
+                                • {road}
+                              </div>
+                            ))}
+                        </div>
                       </div>
-                      <div className="space-y-1">
-                        {route.carInfo.majorRoads.slice(0, 3).map((road, index) => (
-                          <div key={index} className="text-xs">
-                            • {road}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                    )}
 
                   {/* 추가 팁 */}
                   <div className="mt-3 border-t border-green-200 pt-2">
                     <div className="space-y-1 text-xs text-green-600">
                       {route.carInfo.avoidTolls && (
-                        <div>
-                          💡 무료도로 우선 경로
-                        </div>
+                        <div>💡 무료도로 우선 경로</div>
                       )}
                       {route.carInfo.fastestRoute && (
-                        <div>
-                          ⚡ 최단시간 경로
-                        </div>
+                        <div>⚡ 최단시간 경로</div>
                       )}
                       {route.carInfo.ecoFriendly && (
-                        <div>
-                          🌱 친환경 경로 (연비 최적화)
-                        </div>
+                        <div>🌱 친환경 경로 (연비 최적화)</div>
                       )}
-                      <div>
-                        🅿️ 목적지 주변 주차장 정보 확인 권장
-                      </div>
+                      <div>🅿️ 목적지 주변 주차장 정보 확인 권장</div>
                     </div>
                   </div>
                 </div>
@@ -587,35 +609,53 @@ const formatTransportType = (type) => {
 // 목적지 기반 주차비 추정 함수
 const estimateParkingFee = (destinationName) => {
   if (!destinationName) return 2000 // 기본값
-  
+
   const destination = destinationName.toLowerCase()
-  
+
   // 도심/상업지역 (높은 주차비)
-  if (destination.includes('강남') || destination.includes('여의도') || 
-      destination.includes('명동') || destination.includes('중구') ||
-      destination.includes('종로') || destination.includes('서초') ||
-      destination.includes('압구정') || destination.includes('청담') ||
-      destination.includes('역삼') || destination.includes('삼성동')) {
+  if (
+    destination.includes('강남') ||
+    destination.includes('여의도') ||
+    destination.includes('명동') ||
+    destination.includes('중구') ||
+    destination.includes('종로') ||
+    destination.includes('서초') ||
+    destination.includes('압구정') ||
+    destination.includes('청담') ||
+    destination.includes('역삼') ||
+    destination.includes('삼성동')
+  ) {
     return Math.floor(Math.random() * 2000) + 4000 // 4000-6000원
   }
-  
+
   // 번화가/관광지 (중간 주차비)
-  if (destination.includes('홍대') || destination.includes('신촌') ||
-      destination.includes('이태원') || destination.includes('성수') ||
-      destination.includes('건대') || destination.includes('잠실') ||
-      destination.includes('코엑스') || destination.includes('lotte') ||
-      destination.includes('롯데')) {
+  if (
+    destination.includes('홍대') ||
+    destination.includes('신촌') ||
+    destination.includes('이태원') ||
+    destination.includes('성수') ||
+    destination.includes('건대') ||
+    destination.includes('잠실') ||
+    destination.includes('코엑스') ||
+    destination.includes('lotte') ||
+    destination.includes('롯데')
+  ) {
     return Math.floor(Math.random() * 1500) + 2500 // 2500-4000원
   }
-  
+
   // 주거지역/외곽 (낮은 주차비)
-  if (destination.includes('구로') || destination.includes('금천') ||
-      destination.includes('도봉') || destination.includes('노원') ||
-      destination.includes('은평') || destination.includes('관악') ||
-      destination.includes('동작')) {
+  if (
+    destination.includes('구로') ||
+    destination.includes('금천') ||
+    destination.includes('도봉') ||
+    destination.includes('노원') ||
+    destination.includes('은평') ||
+    destination.includes('관악') ||
+    destination.includes('동작')
+  ) {
     return Math.floor(Math.random() * 1000) + 1000 // 1000-2000원
   }
-  
+
   // 기본값 (일반 지역)
   return Math.floor(Math.random() * 1500) + 1500 // 1500-3000원
 }
@@ -623,22 +663,22 @@ const estimateParkingFee = (destinationName) => {
 // 시간대 기반 교통상황 예측 함수
 const getTrafficConditionByTime = () => {
   const hour = new Date().getHours()
-  
+
   // 출퇴근 시간대 (7-9시, 18-20시)
   if ((hour >= 7 && hour <= 9) || (hour >= 18 && hour <= 20)) {
     return ['혼잡', '매우혼잡'][Math.floor(Math.random() * 2)]
   }
-  
+
   // 점심시간대 (12-13시)
   if (hour >= 12 && hour <= 13) {
     return '보통'
   }
-  
+
   // 심야시간 (23-6시)
   if (hour >= 23 || hour <= 6) {
     return '원활'
   }
-  
+
   // 일반 시간대
   return ['원활', '보통'][Math.floor(Math.random() * 2)]
 }
@@ -646,10 +686,10 @@ const getTrafficConditionByTime = () => {
 // 혼잡도 계산 함수 (거리 대비 소요시간으로 계산)
 const calculateCongestionLevel = (distance, duration) => {
   if (!distance || !duration) return 5
-  
+
   const distanceKm = parseFloat(distance)
   const avgSpeed = distanceKm / (duration / 60) // km/h
-  
+
   // 평균 속도 기반 혼잡도 계산
   if (avgSpeed >= 40) return Math.floor(Math.random() * 2) + 1 // 1-2 (원활)
   if (avgSpeed >= 25) return Math.floor(Math.random() * 2) + 3 // 3-4 (보통)
@@ -658,7 +698,12 @@ const calculateCongestionLevel = (distance, duration) => {
 }
 
 // 주요 도로명 추출 함수 (지역별 적절한 도로명 반환)
-const extractMajorRoads = (routeSummary, distance, departureCoords, destinationCoords) => {
+const extractMajorRoads = (
+  routeSummary,
+  distance,
+  departureCoords,
+  destinationCoords,
+) => {
   // API에서 제공하는 경로 요약에서 도로명 추출 시도
   if (routeSummary && typeof routeSummary === 'string') {
     const roads = []
@@ -672,20 +717,20 @@ const extractMajorRoads = (routeSummary, distance, departureCoords, destinationC
       return roads
     }
   }
-  
+
   // API 데이터가 없을 때 거리와 지역 기반으로 적절한 도로명 반환
   const distanceKm = parseFloat(distance) || 0
-  
+
   // 근거리 이동 (3km 미만) - 지역 도로 우선
   if (distanceKm < 3) {
     return getLocalRoads(departureCoords, destinationCoords)
   }
-  
+
   // 중거리 이동 (3-15km) - 주요 간선도로
   if (distanceKm < 15) {
     return getArterialRoads(departureCoords, destinationCoords)
   }
-  
+
   // 장거리 이동 (15km 이상) - 고속도로/외곽순환로 포함
   return getHighwayRoads(departureCoords, destinationCoords)
 }
@@ -694,32 +739,52 @@ const extractMajorRoads = (routeSummary, distance, departureCoords, destinationC
 const getLocalRoads = (departureCoords, destinationCoords) => {
   // 서울 구로/금천/관악 지역 (가산디지털단지 주변)
   const localRoads = [
-    '디지털로', '가산로', '구로중앙로', '경인로',
-    '시흥대로', '새말로', '벚꽃로'
+    '디지털로',
+    '가산로',
+    '구로중앙로',
+    '경인로',
+    '시흥대로',
+    '새말로',
+    '벚꽃로',
   ]
-  
+
   // 지역별 세분화 (좌표 기반으로 더 정확하게 할 수 있음)
   return localRoads.slice(0, Math.floor(Math.random() * 2) + 1) // 1-2개
 }
 
-// 중거리 간선도로명 반환 함수  
+// 중거리 간선도로명 반환 함수
 const getArterialRoads = (departureCoords, destinationCoords) => {
   const arterialRoads = [
-    '경인로', '시흥대로', '도림로', '영등포로',
-    '여의대로', '국회대로', '마포대로', '서부간선도로'
+    '경인로',
+    '시흥대로',
+    '도림로',
+    '영등포로',
+    '여의대로',
+    '국회대로',
+    '마포대로',
+    '서부간선도로',
   ]
-  
+
   return arterialRoads.slice(0, Math.floor(Math.random() * 2) + 1) // 1-2개
 }
 
 // 장거리 고속도로/간선도로명 반환 함수
 const getHighwayRoads = (departureCoords, destinationCoords) => {
   const highwayRoads = [
-    '경부고속도로', '올림픽대로', '강변북로', '내부순환로', 
-    '외곽순환고속도로', '서울양양고속도로', '경인고속도로',
-    '강남대로', '테헤란로', '논현로', '선릉로', '영동대로'
+    '경부고속도로',
+    '올림픽대로',
+    '강변북로',
+    '내부순환로',
+    '외곽순환고속도로',
+    '서울양양고속도로',
+    '경인고속도로',
+    '강남대로',
+    '테헤란로',
+    '논현로',
+    '선릉로',
+    '영동대로',
   ]
-  
+
   return highwayRoads.slice(0, Math.floor(Math.random() * 3) + 1) // 1-3개
 }
 
@@ -728,24 +793,25 @@ const generateRealTimeDelays = (transitData) => {
   if (!transitData?.route_info || !transitData.real_time_info) {
     return []
   }
-  
+
   const delays = []
   const hour = new Date().getHours()
-  
+
   // 출퇴근 시간대에 지연 가능성 높음
-  const delayProbability = (hour >= 7 && hour <= 9) || (hour >= 18 && hour <= 20) ? 0.4 : 0.1
-  
-  transitData.route_info.forEach(route => {
+  const delayProbability =
+    (hour >= 7 && hour <= 9) || (hour >= 18 && hour <= 20) ? 0.4 : 0.1
+
+  transitData.route_info.forEach((route) => {
     if (Math.random() < delayProbability) {
       delays.push({
         routeName: route.name || route.line_name,
         type: route.type,
         delayMinutes: Math.floor(Math.random() * 8) + 2, // 2-10분 지연
-        reason: getDelayReason()
+        reason: getDelayReason(),
       })
     }
   })
-  
+
   return delays
 }
 
@@ -754,30 +820,30 @@ const generateNextArrivals = (transitData) => {
   if (!transitData?.route_info || !transitData.real_time_info) {
     return []
   }
-  
+
   const arrivals = []
-  
-  transitData.route_info.forEach(route => {
+
+  transitData.route_info.forEach((route) => {
     // 배차간격 기반으로 다음 차량 시간 계산
-    const interval = transitData.service_interval || 
-                    (route.type === 'subway' ? 4 : 8) // 지하철 4분, 버스 8분 기본
-    
+    const interval =
+      transitData.service_interval || (route.type === 'subway' ? 4 : 8) // 지하철 4분, 버스 8분 기본
+
     arrivals.push({
       routeName: route.name || route.line_name,
       type: route.type,
       arrivalMinutes: Math.floor(Math.random() * interval) + 1,
-      crowdLevel: getCrowdLevel()
+      crowdLevel: getCrowdLevel(),
     })
-    
+
     // 다음 차량도 추가
     arrivals.push({
       routeName: route.name || route.line_name,
       type: route.type,
       arrivalMinutes: Math.floor(Math.random() * interval) + interval,
-      crowdLevel: getCrowdLevel()
+      crowdLevel: getCrowdLevel(),
     })
   })
-  
+
   return arrivals.sort((a, b) => a.arrivalMinutes - b.arrivalMinutes)
 }
 
@@ -789,7 +855,7 @@ const getDelayReason = () => {
     '승객 집중',
     '도로 공사',
     '차량 점검',
-    '날씨 영향'
+    '날씨 영향',
   ]
   return reasons[Math.floor(Math.random() * reasons.length)]
 }
@@ -797,17 +863,17 @@ const getDelayReason = () => {
 // 혼잡도 계산 함수
 const getCrowdLevel = () => {
   const hour = new Date().getHours()
-  
+
   // 출퇴근 시간대 혼잡도 높음
   if ((hour >= 7 && hour <= 9) || (hour >= 18 && hour <= 20)) {
     return ['medium', 'high'][Math.floor(Math.random() * 2)]
   }
-  
+
   // 점심시간
   if (hour >= 12 && hour <= 13) {
     return ['low', 'medium'][Math.floor(Math.random() * 2)]
   }
-  
+
   // 기타 시간대
   return ['low', 'medium'][Math.floor(Math.random() * 2)]
 }
@@ -821,9 +887,9 @@ const getServiceDisruption = () => {
     null,
     '일부 구간 서행 운행',
     '신호 점검으로 일시 지연',
-    '앞차 지연으로 배차간격 조정'
+    '앞차 지연으로 배차간격 조정',
   ]
-  
+
   return disruptions[Math.floor(Math.random() * disruptions.length)]
 }
 
@@ -1009,7 +1075,7 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
 
         const data = await response.json()
         setTransportData(data)
-        
+
         // API 사용량 기록
         recordApiUsage('GOOGLE_MAPS', 1, 'enhanced-multi-route')
         if (data.routes?.car?.success) {
@@ -1020,27 +1086,34 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
         }
       } catch (err) {
         console.error('교통 정보 로딩 오류:', err)
-        
+
         // 사용자 친화적인 오류 메시지 생성
         let userErrorMessage = '교통 정보를 불러오는 중 문제가 발생했습니다.'
-        
+
         if (err.message.includes('로그인')) {
           userErrorMessage = '로그인이 필요합니다. 다시 로그인해주세요.'
-        } else if (err.message.includes('network') || err.name === 'TypeError') {
-          userErrorMessage = '네트워크 연결을 확인해주세요. 잠시 후 다시 시도해보세요.'
+        } else if (
+          err.message.includes('network') ||
+          err.name === 'TypeError'
+        ) {
+          userErrorMessage =
+            '네트워크 연결을 확인해주세요. 잠시 후 다시 시도해보세요.'
         } else if (err.message.includes('429')) {
-          userErrorMessage = 'API 사용량이 초과되었습니다. 잠시 후 다시 시도해주세요.'
+          userErrorMessage =
+            'API 사용량이 초과되었습니다. 잠시 후 다시 시도해주세요.'
         } else if (err.message.includes('500')) {
-          userErrorMessage = '서버에 일시적인 문제가 있습니다. 잠시 후 다시 시도해주세요.'
+          userErrorMessage =
+            '서버에 일시적인 문제가 있습니다. 잠시 후 다시 시도해주세요.'
         } else if (err.message.includes('좌표')) {
           userErrorMessage = '출발지 또는 도착지 정보가 부정확합니다.'
         }
-        
+
         setError({
           message: userErrorMessage,
           technical: err.message,
-          canRetry: !err.message.includes('로그인') && !err.message.includes('좌표'),
-          timestamp: new Date().toISOString()
+          canRetry:
+            !err.message.includes('로그인') && !err.message.includes('좌표'),
+          timestamp: new Date().toISOString(),
         })
 
         // 오류 발생 시 기본 데이터 사용
@@ -1253,8 +1326,11 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
           // 실시간 정보 추가
           realTimeDelays: generateRealTimeDelays(transit),
           nextArrivals: generateNextArrivals(transit),
-          serviceDisruption: transit.service_disruption || getServiceDisruption(),
-          alternativeRoutes: transit.alternative_routes_count || Math.floor(Math.random() * 3) + 1,
+          serviceDisruption:
+            transit.service_disruption || getServiceDisruption(),
+          alternativeRoutes:
+            transit.alternative_routes_count ||
+            Math.floor(Math.random() * 3) + 1,
         },
       })
     }
@@ -1262,26 +1338,32 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
     // 자동차 경로
     if (apiData.routes.car?.success) {
       const car = apiData.routes.car
-      
+
       // 자동차 상세 정보 생성
       const carInfo = {
         tollFee: car.toll_fee || 0,
-        fuelCost: car.fuel_efficiency?.estimated_cost || 
-                  Math.round((car.distance || 2) * 150), // 대략적인 연료비 계산
-        parkingFee: car.parking_fee || estimateParkingFee(route?.destination_name), // 목적지 기반 주차비 추정
+        fuelCost:
+          car.fuel_efficiency?.estimated_cost ||
+          Math.round((car.distance || 2) * 150), // 대략적인 연료비 계산
+        parkingFee:
+          car.parking_fee || estimateParkingFee(route?.destination_name), // 목적지 기반 주차비 추정
         trafficCondition: car.traffic_condition || getTrafficConditionByTime(),
-        congestionLevel: car.congestion_level || calculateCongestionLevel(car.distance, car.duration),
-        majorRoads: car.major_roads || extractMajorRoads(
-          car.route_summary, 
-          car.distance, 
-          { lat: route?.departure_lat, lng: route?.departure_lng },
-          { lat: route?.destination_lat, lng: route?.destination_lng }
-        ),
+        congestionLevel:
+          car.congestion_level ||
+          calculateCongestionLevel(car.distance, car.duration),
+        majorRoads:
+          car.major_roads ||
+          extractMajorRoads(
+            car.route_summary,
+            car.distance,
+            { lat: route?.departure_lat, lng: route?.departure_lng },
+            { lat: route?.destination_lat, lng: route?.destination_lng },
+          ),
         avoidTolls: car.avoid_tolls || false,
         fastestRoute: car.route_type === 'fastest' || !car.toll_fee,
         ecoFriendly: car.eco_friendly || false,
       }
-      
+
       routes.push({
         name: car.display_name || '자동차',
         mode: 'car',
@@ -1359,39 +1441,43 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
   }
 
   if (error && !transportData) {
-    const isAuthError = error.message?.includes('로그인') || typeof error === 'string' && error.includes('로그인')
+    const isAuthError =
+      error.message?.includes('로그인') ||
+      (typeof error === 'string' && error.includes('로그인'))
     const errorMessage = typeof error === 'object' ? error.message : error
     const canRetry = typeof error === 'object' ? error.canRetry : !isAuthError
 
     return (
       <Card className="transport-card w-full border-red-200">
         <CardContent className="py-6">
-          <div className="text-center space-y-4">
+          <div className="space-y-4 text-center">
             {/* 오류 아이콘 */}
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
               <span className="text-2xl">⚠️</span>
             </div>
-            
+
             {/* 오류 메시지 */}
             <div>
-              <h3 className="text-sm font-medium text-red-800 mb-1">
+              <h3 className="mb-1 text-sm font-medium text-red-800">
                 교통정보 불러오기 실패
               </h3>
-              <p className="text-sm text-red-600 mb-2">{errorMessage}</p>
-              
+              <p className="mb-2 text-sm text-red-600">{errorMessage}</p>
+
               {/* 기술적 세부사항 (개발 모드에서만) */}
-              {import.meta.env.DEV && typeof error === 'object' && error.technical && (
-                <details className="mt-2 text-left">
-                  <summary className="text-xs text-gray-500 cursor-pointer">
-                    기술적 세부사항
-                  </summary>
-                  <pre className="mt-1 text-xs text-gray-400 bg-gray-50 p-2 rounded overflow-auto">
-                    {error.technical}
-                  </pre>
-                </details>
-              )}
+              {import.meta.env.DEV &&
+                typeof error === 'object' &&
+                error.technical && (
+                  <details className="mt-2 text-left">
+                    <summary className="cursor-pointer text-xs text-gray-500">
+                      기술적 세부사항
+                    </summary>
+                    <pre className="mt-1 overflow-auto rounded bg-gray-50 p-2 text-xs text-gray-400">
+                      {error.technical}
+                    </pre>
+                  </details>
+                )}
             </div>
-            
+
             {/* 액션 버튼 */}
             <div className="flex justify-center space-x-2">
               {isAuthError ? (
@@ -1428,7 +1514,7 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
                       setTransportData({
                         success: false,
                         fallback: true,
-                        routes: {}
+                        routes: {},
                       })
                     }}
                     className="text-gray-600 hover:bg-gray-100"
@@ -1438,13 +1524,15 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
                 </>
               )}
             </div>
-            
+
             {/* 도움말 */}
-            <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
-              <strong>문제 해결 팁:</strong><br/>
-              • 네트워크 연결 상태를 확인해주세요<br/>
-              • 잠시 후 다시 시도해보세요<br/>
-              • 문제가 지속되면 고객센터에 문의하세요
+            <div className="rounded-lg bg-gray-50 p-3 text-xs text-gray-500">
+              <strong>문제 해결 팁:</strong>
+              <br />
+              • 네트워크 연결 상태를 확인해주세요
+              <br />
+              • 잠시 후 다시 시도해보세요
+              <br />• 문제가 지속되면 고객센터에 문의하세요
             </div>
           </div>
         </CardContent>
@@ -1626,7 +1714,7 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
               onChange={setSelectedTime}
               route={route}
             />
-            
+
             {/* 실시간 교통 상황 위젯 */}
             {isToday && (
               <RealTimeTrafficWidget

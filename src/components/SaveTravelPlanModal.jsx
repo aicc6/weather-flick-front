@@ -25,18 +25,18 @@ import useDestinationSearchRTK from '@/hooks/useDestinationSearchRTK'
 import useGeolocation from '@/hooks/useGeolocation'
 import { toast } from 'sonner'
 
-export default function SaveTravelPlanModal({ 
-  isOpen, 
-  onClose, 
-  onSave, 
+export default function SaveTravelPlanModal({
+  isOpen,
+  onClose,
+  onSave,
   recommendedPlan,
-  isLoading = false 
+  isLoading = false,
 }) {
   const [title, setTitle] = useState('')
   const [startDate, setStartDate] = useState(null)
   const [origin, setOrigin] = useState('')
   const [isValid, setIsValid] = useState(false)
-  
+
   const { getCurrentLocation, isLocating } = useGeolocation()
   const {
     destInputs,
@@ -52,22 +52,24 @@ export default function SaveTravelPlanModal({
   useEffect(() => {
     if (isOpen && recommendedPlan && !title) {
       const { regionName, days, who } = recommendedPlan.summary
-      const companionLabel = {
-        solo: '혼자',
-        couple: '연인과',
-        family: '가족과',
-        friends: '친구와',
-        colleagues: '동료와',
-        group: '단체로',
-      }[who] || ''
-      
+      const companionLabel =
+        {
+          solo: '혼자',
+          couple: '연인과',
+          family: '가족과',
+          friends: '친구와',
+          colleagues: '동료와',
+          group: '단체로',
+        }[who] || ''
+
       setTitle(`${regionName} ${days}일 ${companionLabel} 여행`)
     }
   }, [isOpen, recommendedPlan, title])
 
   // 유효성 검사
   useEffect(() => {
-    const isFormValid = title.trim() && startDate && (origin.trim() || destInputs.origin?.trim())
+    const isFormValid =
+      title.trim() && startDate && (origin.trim() || destInputs.origin?.trim())
     setIsValid(isFormValid)
   }, [title, startDate, origin, destInputs.origin])
 
@@ -83,18 +85,19 @@ export default function SaveTravelPlanModal({
   }
 
   const handleOriginSelect = (suggestion) => {
-    const value = typeof suggestion === 'string' ? suggestion : suggestion.description
+    const value =
+      typeof suggestion === 'string' ? suggestion : suggestion.description
     setFinalDestinationValue('origin', value)
     setOrigin(value)
   }
 
   const handleSave = () => {
     if (!isValid) return
-    
+
     // 종료일 계산
     const endDate = new Date(startDate)
     endDate.setDate(startDate.getDate() + recommendedPlan.summary.days - 1)
-    
+
     onSave({
       title,
       startDate,
@@ -121,7 +124,7 @@ export default function SaveTravelPlanModal({
             여행 플랜을 저장하기 위해 필요한 정보를 입력해주세요.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="grid gap-6 py-4">
           {/* 여행 제목 */}
           <div className="grid gap-2">
@@ -145,11 +148,13 @@ export default function SaveTravelPlanModal({
                   variant="outline"
                   className={cn(
                     'w-full justify-start text-left font-normal',
-                    !startDate && 'text-muted-foreground'
+                    !startDate && 'text-muted-foreground',
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate ? format(startDate, 'PPP', { locale: ko }) : '날짜를 선택하세요'}
+                  {startDate
+                    ? format(startDate, 'PPP', { locale: ko })
+                    : '날짜를 선택하세요'}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -162,8 +167,9 @@ export default function SaveTravelPlanModal({
                 />
               </PopoverContent>
             </Popover>
-            <p className="text-sm text-muted-foreground">
-              종료일은 {recommendedPlan?.summary.days}일 일정에 맞춰 자동으로 설정됩니다.
+            <p className="text-muted-foreground text-sm">
+              종료일은 {recommendedPlan?.summary.days}일 일정에 맞춰 자동으로
+              설정됩니다.
             </p>
           </div>
 
@@ -208,8 +214,8 @@ export default function SaveTravelPlanModal({
           <Button variant="outline" onClick={handleClose}>
             취소
           </Button>
-          <Button 
-            onClick={handleSave} 
+          <Button
+            onClick={handleSave}
             disabled={!isValid || isLoading}
             className="bg-blue-600 text-white hover:bg-blue-700"
           >

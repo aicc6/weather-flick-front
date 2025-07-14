@@ -58,10 +58,22 @@ export function TravelPlanDetailPage() {
   } = useGetTravelPlanQuery(planId)
 
   // 경로 정보 조회
-  const { data: routes, isLoading: routesLoading } =
-    useGetTravelPlanRoutesQuery(planId, {
-      skip: !planId,
-    })
+  const {
+    data: routes,
+    isLoading: routesLoading,
+    error: routesError,
+  } = useGetTravelPlanRoutesQuery(planId, {
+    skip: !planId,
+  })
+
+  // 디버깅을 위한 로그
+  console.log('Routes Debug:', {
+    planId,
+    routes,
+    routesLoading,
+    routesError,
+    routesLength: routes?.length || 0,
+  })
 
   // 자동 경로 생성
   const [autoGenerateRoutes, { isLoading: isGeneratingRoutes }] =
@@ -247,8 +259,12 @@ export function TravelPlanDetailPage() {
       <div className="container mx-auto max-w-4xl p-4 md:p-6">
         <div className="flex flex-col items-center justify-center py-12">
           <LoadingSpinner />
-          <p className="mt-4 text-gray-600">여행 계획을 불러오는 중...</p>
-          <p className="mt-1 text-sm text-gray-400">잠시만 기다려 주세요</p>
+          <p className="mt-4 text-gray-700 dark:text-gray-300">
+            여행 계획을 불러오는 중...
+          </p>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            잠시만 기다려 주세요
+          </p>
         </div>
       </div>
     )
@@ -422,7 +438,7 @@ export function TravelPlanDetailPage() {
           {transitPaths.map((path, index) => (
             <div
               key={generateSafeKey(path, 'transit', index)}
-              className="flex items-center space-x-2 text-xs text-gray-500"
+              className="flex items-center space-x-2 text-xs text-gray-700 dark:text-gray-300"
             >
               {path.type === 'subway' && (
                 <>
@@ -433,12 +449,14 @@ export function TravelPlanDetailPage() {
                     {path.start_station} → {path.end_station}
                   </span>
                   {path.station_count > 0 && (
-                    <span className="text-gray-400">
+                    <span className="text-gray-600 dark:text-gray-400">
                       ({path.station_count}개 역)
                     </span>
                   )}
                   {path.section_time > 0 && (
-                    <span className="text-gray-400">{path.section_time}분</span>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      {path.section_time}분
+                    </span>
                   )}
                 </>
               )}
@@ -451,19 +469,21 @@ export function TravelPlanDetailPage() {
                     {path.start_station} → {path.end_station}
                   </span>
                   {path.station_count > 0 && (
-                    <span className="text-gray-400">
+                    <span className="text-gray-600 dark:text-gray-400">
                       ({path.station_count}개 정류장)
                     </span>
                   )}
                   {path.section_time > 0 && (
-                    <span className="text-gray-400">{path.section_time}분</span>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      {path.section_time}분
+                    </span>
                   )}
                 </>
               )}
             </div>
           ))}
           {routeData.summary && (
-            <div className="mt-2 text-xs text-gray-400">
+            <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
               {routeData.summary.bus_transit_count > 0 && (
                 <span className="mr-3">
                   🚌 버스 환승 {routeData.summary.bus_transit_count}회
@@ -499,7 +519,7 @@ export function TravelPlanDetailPage() {
             return (
               <div
                 key={generateSafeKey(step, 'step', index)}
-                className="flex items-center space-x-2 text-xs text-gray-500"
+                className="flex items-center space-x-2 text-xs text-gray-700 dark:text-gray-300"
               >
                 {vehicle.type === 'SUBWAY' && (
                   <>
@@ -511,7 +531,7 @@ export function TravelPlanDetailPage() {
                       {transitDetails.arrival_stop?.name}
                     </span>
                     {transitDetails.num_stops > 0 && (
-                      <span className="text-gray-400">
+                      <span className="text-gray-600 dark:text-gray-400">
                         ({transitDetails.num_stops}개 역)
                       </span>
                     )}
@@ -527,7 +547,7 @@ export function TravelPlanDetailPage() {
                       {transitDetails.arrival_stop?.name}
                     </span>
                     {transitDetails.num_stops > 0 && (
-                      <span className="text-gray-400">
+                      <span className="text-gray-600 dark:text-gray-400">
                         ({transitDetails.num_stops}개 정류장)
                       </span>
                     )}
@@ -536,7 +556,7 @@ export function TravelPlanDetailPage() {
               </div>
             )
           })}
-          <div className="mt-2 text-xs text-gray-400">
+          <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
             🗺️ Google Maps 기반 대중교통 경로
           </div>
         </div>
@@ -546,7 +566,7 @@ export function TravelPlanDetailPage() {
     // 기타 API 응답 - 간단한 정보만 표시
     if (routeData.method) {
       return (
-        <div className="mt-2 text-xs text-gray-400">
+        <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
           📊{' '}
           {routeData.method === 'estimated_calculation'
             ? '추정 계산'
@@ -567,7 +587,9 @@ export function TravelPlanDetailPage() {
     if (routeData.detailed_guides && routeData.detailed_guides.length > 0) {
       return (
         <div className="mt-2 space-y-2">
-          <div className="text-xs font-medium text-gray-500">🗺️ 경로 안내</div>
+          <div className="text-xs font-medium text-gray-700 dark:text-gray-300">
+            🗺️ 경로 안내
+          </div>
           {routeData.detailed_guides.map((guide, index) => (
             <div
               key={generateSafeKey(guide, 'guide', index)}
@@ -577,10 +599,10 @@ export function TravelPlanDetailPage() {
                 {guide.step}
               </span>
               <div className="flex-1">
-                <div className="font-medium text-gray-700">
+                <div className="font-medium text-gray-800">
                   {guide.description}
                 </div>
-                <div className="mt-1 flex items-center space-x-2 text-gray-400">
+                <div className="mt-1 flex items-center space-x-2 text-gray-600">
                   <span className="inline-flex items-center">
                     📍 {guide.distance}
                   </span>
@@ -600,10 +622,10 @@ export function TravelPlanDetailPage() {
           {/* 경로 요약 정보 */}
           {routeData.route_summary && (
             <div className="mt-3 rounded-lg bg-gray-50 p-2">
-              <div className="mb-1 text-xs font-medium text-gray-600">
+              <div className="mb-1 text-xs font-medium text-gray-800">
                 경로 요약
               </div>
-              <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
+              <div className="grid grid-cols-2 gap-2 text-xs text-gray-700">
                 <div>총 {routeData.route_summary.total_steps}개 안내점</div>
                 <div>주요 구간 {routeData.route_summary.major_steps}개</div>
                 <div>
@@ -620,7 +642,7 @@ export function TravelPlanDetailPage() {
             </div>
           )}
 
-          <div className="mt-2 flex items-center space-x-4 text-xs text-gray-400">
+          <div className="mt-2 flex items-center space-x-4 text-xs text-gray-600">
             {routeData.toll_fee > 0 && (
               <span className="inline-flex items-center">
                 🛣️ 통행료 {routeData.toll_fee.toLocaleString()}원
@@ -643,20 +665,22 @@ export function TravelPlanDetailPage() {
 
       return (
         <div className="mt-2 space-y-1">
-          <div className="text-xs font-medium text-gray-500">🗺️ 경로 안내</div>
+          <div className="text-xs font-medium text-gray-700 dark:text-gray-300">
+            🗺️ 경로 안내
+          </div>
           {guidePoints.map((point, index) => (
             <div
               key={generateSafeKey(point, 'point', index)}
-              className="flex items-start space-x-2 text-xs text-gray-500"
+              className="flex items-start space-x-2 text-xs text-gray-700"
             >
               <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-800">
                 {index + 1}
               </span>
               <div className="flex-1">
-                <div className="font-medium text-gray-700">
+                <div className="font-medium text-gray-800">
                   {point.description}
                 </div>
-                <div className="mt-1 flex items-center space-x-2 text-gray-400">
+                <div className="mt-1 flex items-center space-x-2 text-gray-600">
                   <span className="inline-flex items-center">
                     📍 {point.distance}
                   </span>
@@ -693,20 +717,20 @@ export function TravelPlanDetailPage() {
             <div className="text-2xl font-bold text-blue-600">
               {formatDuration(route.duration)}
             </div>
-            <div className="text-sm text-gray-600">소요시간</div>
+            <div className="text-sm text-gray-700">소요시간</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-green-600">
               {formatDistance(route.distance)}
             </div>
-            <div className="text-sm text-gray-600">이동거리</div>
+            <div className="text-sm text-gray-700">이동거리</div>
           </div>
           {route.cost !== undefined && (
             <div className="col-span-2 text-center">
               <div className="text-2xl font-bold text-purple-600">
                 {formatCost(route.cost)}
               </div>
-              <div className="text-sm text-gray-600">예상 비용</div>
+              <div className="text-sm text-gray-700">예상 비용</div>
             </div>
           )}
         </div>
@@ -731,7 +755,7 @@ export function TravelPlanDetailPage() {
                     <div className="font-medium text-gray-800">
                       {guide.description}
                     </div>
-                    <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
+                    <div className="mt-1 flex items-center space-x-4 text-sm text-gray-700">
                       <span>📍 {guide.distance}</span>
                       <span>⏱️ {guide.time}</span>
                       {guide.instruction && (
@@ -770,7 +794,7 @@ export function TravelPlanDetailPage() {
                       <div className="font-medium text-gray-800">
                         {point.description}
                       </div>
-                      <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
+                      <div className="mt-1 flex items-center space-x-4 text-sm text-gray-700">
                         {point.distance > 0 && (
                           <span>
                             {point.distance >= 1000
@@ -784,7 +808,7 @@ export function TravelPlanDetailPage() {
                           </Badge>
                         )}
                         {point.road_name && (
-                          <span className="text-gray-400">
+                          <span className="text-gray-600 dark:text-gray-400">
                             • {point.road_name}
                           </span>
                         )}
@@ -891,7 +915,7 @@ export function TravelPlanDetailPage() {
           <CardHeader className="pb-6">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <CardTitle className="mb-4 text-3xl leading-tight font-bold text-gray-800 dark:text-gray-100">
+                <CardTitle className="mb-4 text-3xl leading-tight font-bold text-gray-900 dark:text-gray-100">
                   {plan.title}
                 </CardTitle>
                 <div className="flex items-center gap-4">
@@ -931,7 +955,7 @@ export function TravelPlanDetailPage() {
                             ? '완료'
                             : '취소'}
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-sm text-gray-700 dark:text-gray-400">
                     <Calendar className="mr-2 inline h-4 w-4" />
                     {formatDate(plan.start_date)} ~ {formatDate(plan.end_date)}
                   </div>
@@ -1001,7 +1025,7 @@ export function TravelPlanDetailPage() {
                     </div>
                   )}
                   {plan.start_location && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                    <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                       <MapPin className="h-4 w-4 text-green-500 dark:text-green-400" />
                       <span>출발지: {plan.start_location}</span>
                     </div>
@@ -1113,7 +1137,7 @@ export function TravelPlanDetailPage() {
                       <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                      <div className="text-sm text-gray-700 dark:text-gray-400">
                         여행 기간
                       </div>
                       <div className="font-semibold text-gray-800 dark:text-gray-100">
@@ -1131,7 +1155,7 @@ export function TravelPlanDetailPage() {
                       <MapPin className="h-5 w-5 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                      <div className="text-sm text-gray-700 dark:text-gray-400">
                         방문 장소
                       </div>
                       <div className="font-semibold text-gray-800 dark:text-gray-100">
@@ -1152,7 +1176,7 @@ export function TravelPlanDetailPage() {
                       <Navigation className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                      <div className="text-sm text-gray-700 dark:text-gray-400">
                         생성된 경로
                       </div>
                       <div className="font-semibold text-gray-800 dark:text-gray-100">
@@ -1590,7 +1614,7 @@ export function TravelPlanDetailPage() {
                           <h4 className="mb-1 font-medium text-blue-800 dark:text-blue-300">
                             교통 정보
                           </h4>
-                          <p className="text-sm text-blue-700 dark:text-blue-400">
+                          <p className="text-sm text-blue-800 dark:text-blue-400">
                             총 {routes.length}개의 경로가 생성되어 있습니다.
                             타임머신 기능으로 실시간 교통상황을 확인할 수
                             있습니다.
@@ -1671,7 +1695,7 @@ export function TravelPlanDetailPage() {
                     )
                     .map((dayKey) => (
                       <div key={dayKey} className="space-y-4">
-                        <h4 className="flex items-center text-lg font-semibold text-blue-600 dark:text-blue-400">
+                        <h4 className="flex items-center text-lg font-semibold text-blue-800 dark:text-blue-400">
                           {dayKey.replace('day', '') + '일차 이동 정보'}
                           <span className="ml-2 rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
                             🕐 타임머신 예측 지원
@@ -1687,12 +1711,12 @@ export function TravelPlanDetailPage() {
                           return (
                             <div key={route.route_id || index}>
                               {isStartRoute && (
-                                <div className="mb-2 inline-block rounded-full bg-green-50 px-3 py-1 text-sm font-medium text-green-600 dark:bg-green-900/30 dark:text-green-400">
+                                <div className="mb-2 inline-block rounded-full bg-green-50 px-3 py-1 text-sm font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
                                   🏠 출발지에서 첫 번째 목적지로
                                 </div>
                               )}
                               {isInterDayRoute && (
-                                <div className="mb-2 inline-block rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                                <div className="mb-2 inline-block rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
                                   🏨 전일 마지막 장소에서 오늘 첫 번째 목적지로
                                 </div>
                               )}
@@ -1774,6 +1798,19 @@ export function TravelPlanDetailPage() {
                     <p className="mb-4 text-gray-600 dark:text-gray-300">
                       여행 일정이 있는 경우 자동으로 경로를 생성할 수 있습니다
                     </p>
+                    {import.meta.env.DEV && (
+                      <div className="mb-4 rounded bg-gray-100 p-3 text-left text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                        <div>디버그 정보:</div>
+                        <div>Routes Loading: {routesLoading.toString()}</div>
+                        <div>Routes Length: {routes?.length || 0}</div>
+                        <div>
+                          Routes Error:{' '}
+                          {routesError ? JSON.stringify(routesError) : 'None'}
+                        </div>
+                        <div>Plan ID: {planId}</div>
+                        <div>Itinerary Days: {itineraryDays.length}</div>
+                      </div>
+                    )}
                     {itineraryDays.length > 0 && (
                       <Button
                         onClick={handleAutoGenerateRoutes}
@@ -1812,7 +1849,7 @@ export function TravelPlanDetailPage() {
                 {weatherData && weatherData.forecast ? (
                   <div className="space-y-3">
                     <div className="mb-4 rounded-md border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20">
-                      <p className="text-sm text-blue-700 dark:text-blue-300">
+                      <p className="text-sm text-blue-800 dark:text-blue-300">
                         🌤️ 날씨 정보는 예측 데이터이며, 여행 전 최신 날씨를
                         확인해 주세요
                       </p>
@@ -1958,7 +1995,7 @@ export function TravelPlanDetailPage() {
 
             {selectedRoute && (
               <div className="px-6 pb-2">
-                <div className="rounded-lg bg-blue-50 p-3 text-sm text-blue-600">
+                <div className="rounded-lg bg-blue-50 p-3 text-sm text-blue-800">
                   ⏰ 여행 계획 일정 기준으로 교통상황 예측
                 </div>
               </div>
@@ -2016,7 +2053,7 @@ export function TravelPlanDetailPage() {
                       🕐 TMAP 타임머신 예측
                     </span>
                   </div>
-                  <div className="text-xs text-blue-600">
+                  <div className="text-xs text-blue-800">
                     {timemachineRouteInfo.prediction_info?.departure_time
                       ? new Date(
                           timemachineRouteInfo.prediction_info.departure_time,
@@ -2115,10 +2152,10 @@ export function TravelPlanDetailPage() {
                                   {formatDuration(route.duration)} •{' '}
                                   {formatDistance(route.distance)}
                                 </div>
-                                <div className="text-sm text-gray-600">
+                                <div className="text-sm text-gray-700">
                                   {formatCost(route.cost + route.toll_fee)}
                                   {route.toll_fee > 0 && (
-                                    <span className="ml-1 text-xs text-blue-600">
+                                    <span className="ml-1 text-xs text-blue-800">
                                       (통행료 {route.toll_fee.toLocaleString()}
                                       원)
                                     </span>
@@ -2130,12 +2167,12 @@ export function TravelPlanDetailPage() {
                             {/* 교통 예측 정보 */}
                             {route.route_data?.route_summary && (
                               <div className="mt-3 rounded border bg-blue-50 p-3">
-                                <div className="mb-2 text-sm font-medium text-blue-800">
+                                <div className="mb-2 text-sm font-medium text-gray-800">
                                   🚦 실시간 교통 예측
                                 </div>
                                 {route.route_data.route_summary
                                   .traffic_prediction && (
-                                  <div className="mb-2 text-sm text-blue-700">
+                                  <div className="mb-2 text-sm text-blue-800">
                                     전체 교통량:{' '}
                                     <span className="font-medium">
                                       {
@@ -2218,7 +2255,7 @@ export function TravelPlanDetailPage() {
                     {/* 비교 요약 */}
                     {timemachineRouteInfo.timemachine_info.comparison
                       .comparison_summary && (
-                      <div className="mt-4 rounded bg-gray-50 p-3 text-sm text-gray-600">
+                      <div className="mt-4 rounded bg-gray-50 p-3 text-sm text-gray-800">
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             소요시간 범위:{' '}
@@ -2299,7 +2336,7 @@ export function TravelPlanDetailPage() {
                         {timemachineRouteInfo.timemachine_info.predicted_route
                           .route_data?.route_summary && (
                           <div className="mb-4 rounded border bg-white p-3">
-                            <div className="mb-2 text-sm font-medium text-blue-800">
+                            <div className="mb-2 text-sm font-medium text-gray-800">
                               🚦 실시간 교통 예측
                             </div>
                             {timemachineRouteInfo.timemachine_info
@@ -2404,7 +2441,7 @@ export function TravelPlanDetailPage() {
                               <div className="font-medium text-gray-800">
                                 {guide.description}
                               </div>
-                              <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
+                              <div className="mt-1 flex items-center space-x-4 text-sm text-gray-700">
                                 {guide.distance && (
                                   <span>📍 {guide.distance}</span>
                                 )}

@@ -168,7 +168,7 @@ export const addNotificationChangeListener = (listener) => {
  * 알림 변경 이벤트 발생
  */
 const notifyListeners = () => {
-  notificationChangeListeners.forEach(listener => {
+  notificationChangeListeners.forEach((listener) => {
     try {
       listener()
     } catch (error) {

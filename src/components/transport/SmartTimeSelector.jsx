@@ -2,7 +2,14 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Clock, ChevronDown, ChevronUp, Zap, Settings, BarChart3 } from '@/components/icons'
+import {
+  Clock,
+  ChevronDown,
+  ChevronUp,
+  Zap,
+  Settings,
+  BarChart3,
+} from '@/components/icons'
 import TimelinePrediction from './TimelinePrediction'
 
 /**
@@ -21,9 +28,9 @@ export function SmartTimeSelector({ value, onChange, route, className = '' }) {
   const getRecommendedTimes = () => {
     const now = new Date()
     const hour = now.getHours()
-    
+
     const recommendations = []
-    
+
     // 현재가 혼잡시간이면 대안 제시
     if ((hour >= 7 && hour <= 9) || (hour >= 18 && hour <= 20)) {
       recommendations.push({
@@ -31,10 +38,10 @@ export function SmartTimeSelector({ value, onChange, route, className = '' }) {
         label: '혼잡 회피 (30분 일찍)',
         time: new Date(now.getTime() - 30 * 60 * 1000),
         benefit: '30% 시간 단축',
-        icon: '⚡'
+        icon: '⚡',
       })
     }
-    
+
     // 점심시간 추천
     if (hour < 12) {
       recommendations.push({
@@ -42,10 +49,10 @@ export function SmartTimeSelector({ value, onChange, route, className = '' }) {
         label: '점심시간 이용',
         time: new Date(now.setHours(12, 30, 0, 0)),
         benefit: '한산한 도로',
-        icon: '🍽️'
+        icon: '🍽️',
       })
     }
-    
+
     // 야간 추천 (빠른 이동)
     if (hour < 22) {
       recommendations.push({
@@ -53,10 +60,10 @@ export function SmartTimeSelector({ value, onChange, route, className = '' }) {
         label: '야간 고속 이동',
         time: new Date(now.setHours(22, 0, 0, 0)),
         benefit: '최대 50% 단축',
-        icon: '🌙'
+        icon: '🌙',
       })
     }
-    
+
     return recommendations
   }
 
@@ -75,14 +82,14 @@ export function SmartTimeSelector({ value, onChange, route, className = '' }) {
     }
 
     const timeMap = {
-      'now': '지금 출발',
-      'optimal': '최적 시간',
-      'hour1': '1시간 후',
-      'hour2': '2시간 후',
-      'hour4': '4시간 후',
-      'optimal_early': '혼잡 회피',
-      'lunch_time': '점심시간',
-      'night_fast': '야간 이동'
+      now: '지금 출발',
+      optimal: '최적 시간',
+      hour1: '1시간 후',
+      hour2: '2시간 후',
+      hour4: '4시간 후',
+      optimal_early: '혼잡 회피',
+      lunch_time: '점심시간',
+      night_fast: '야간 이동',
     }
 
     return timeMap[value] || '시간 선택'
@@ -95,7 +102,10 @@ export function SmartTimeSelector({ value, onChange, route, className = '' }) {
         <div className="flex items-center space-x-2">
           <Clock className="h-4 w-4 text-gray-500" />
           <span className="text-sm text-gray-600">출발시간:</span>
-          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+          <Badge
+            variant="outline"
+            className="border-blue-200 bg-blue-50 text-blue-700"
+          >
             {getSelectedTimeDisplay()}
           </Badge>
         </div>
@@ -105,7 +115,7 @@ export function SmartTimeSelector({ value, onChange, route, className = '' }) {
           onClick={() => setMode('advanced')}
           className="text-xs text-blue-600 hover:text-blue-800"
         >
-          <Settings className="h-3 w-3 mr-1" />
+          <Settings className="mr-1 h-3 w-3" />
           고급설정
         </Button>
       </div>
@@ -116,7 +126,7 @@ export function SmartTimeSelector({ value, onChange, route, className = '' }) {
           { value: 'now', label: '지금', icon: '⚡' },
           { value: 'hour1', label: '1시간후', icon: '🕐' },
           { value: 'hour2', label: '2시간후', icon: '🕑' },
-          { value: 'optimal', label: '최적시간', icon: '🎯' }
+          { value: 'optimal', label: '최적시간', icon: '🎯' },
         ].map((option) => (
           <Button
             key={option.value}
@@ -135,7 +145,7 @@ export function SmartTimeSelector({ value, onChange, route, className = '' }) {
 
   const renderAdvancedMode = () => {
     const recommendations = getRecommendedTimes()
-    
+
     return (
       <div className="space-y-4">
         {/* 헤더 */}
@@ -159,18 +169,20 @@ export function SmartTimeSelector({ value, onChange, route, className = '' }) {
               onClick={() => setMode('full')}
               className="text-xs text-blue-600"
             >
-              <BarChart3 className="h-3 w-3 mr-1" />
+              <BarChart3 className="mr-1 h-3 w-3" />
               전체분석
             </Button>
           </div>
         </div>
 
         {/* 현재 선택 */}
-        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
           <div className="flex items-center justify-between">
             <div>
               <div className="font-medium text-blue-800">선택된 시간</div>
-              <div className="text-sm text-blue-600">{getSelectedTimeDisplay()}</div>
+              <div className="text-sm text-blue-600">
+                {getSelectedTimeDisplay()}
+              </div>
             </div>
             <Badge variant="default" className="bg-blue-600">
               {value === 'now' ? '즉시' : '예약'}
@@ -181,17 +193,17 @@ export function SmartTimeSelector({ value, onChange, route, className = '' }) {
         {/* AI 추천 시간대 */}
         {recommendations.length > 0 && (
           <div>
-            <h4 className="font-medium mb-2 flex items-center">
-              <Zap className="h-4 w-4 mr-1 text-yellow-500" />
+            <h4 className="mb-2 flex items-center font-medium">
+              <Zap className="mr-1 h-4 w-4 text-yellow-500" />
               AI 추천 시간
             </h4>
             <div className="space-y-2">
               {recommendations.map((rec) => (
                 <div
                   key={rec.value}
-                  className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                    value === rec.value 
-                      ? 'border-green-500 bg-green-50' 
+                  className={`cursor-pointer rounded-lg border p-3 transition-all ${
+                    value === rec.value
+                      ? 'border-green-500 bg-green-50'
                       : 'border-gray-200 bg-white hover:border-green-300'
                   }`}
                   onClick={() => onChange(rec.value)}
@@ -200,7 +212,7 @@ export function SmartTimeSelector({ value, onChange, route, className = '' }) {
                     <div className="flex items-center space-x-3">
                       <span className="text-xl">{rec.icon}</span>
                       <div>
-                        <div className="font-medium text-sm">{rec.label}</div>
+                        <div className="text-sm font-medium">{rec.label}</div>
                         <div className="text-xs text-gray-600">
                           {formatTimeToAmPm(rec.time)}
                         </div>
@@ -218,26 +230,46 @@ export function SmartTimeSelector({ value, onChange, route, className = '' }) {
 
         {/* 기본 옵션들 */}
         <div>
-          <h4 className="font-medium mb-2">기본 옵션</h4>
+          <h4 className="mb-2 font-medium">기본 옵션</h4>
           <div className="grid grid-cols-2 gap-2">
             {[
-              { value: 'now', label: '지금 출발', desc: '즉시 이동', icon: '⚡' },
-              { value: 'hour1', label: '1시간 후', desc: '여유있게', icon: '🕐' },
-              { value: 'hour2', label: '2시간 후', desc: '계획적으로', icon: '🕑' },
-              { value: 'optimal', label: '최적 시간', desc: 'AI가 선택', icon: '🎯' }
+              {
+                value: 'now',
+                label: '지금 출발',
+                desc: '즉시 이동',
+                icon: '⚡',
+              },
+              {
+                value: 'hour1',
+                label: '1시간 후',
+                desc: '여유있게',
+                icon: '🕐',
+              },
+              {
+                value: 'hour2',
+                label: '2시간 후',
+                desc: '계획적으로',
+                icon: '🕑',
+              },
+              {
+                value: 'optimal',
+                label: '최적 시간',
+                desc: 'AI가 선택',
+                icon: '🎯',
+              },
             ].map((option) => (
               <div
                 key={option.value}
-                className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                  value === option.value 
-                    ? 'border-blue-500 bg-blue-50' 
+                className={`cursor-pointer rounded-lg border p-3 transition-all ${
+                  value === option.value
+                    ? 'border-blue-500 bg-blue-50'
                     : 'border-gray-200 bg-white hover:border-blue-300'
                 }`}
                 onClick={() => onChange(option.value)}
               >
                 <div className="text-center">
-                  <div className="text-lg mb-1">{option.icon}</div>
-                  <div className="font-medium text-sm">{option.label}</div>
+                  <div className="mb-1 text-lg">{option.icon}</div>
+                  <div className="text-sm font-medium">{option.label}</div>
                   <div className="text-xs text-gray-600">{option.desc}</div>
                 </div>
               </div>
@@ -247,7 +279,7 @@ export function SmartTimeSelector({ value, onChange, route, className = '' }) {
 
         {/* 사용자 정의 시간 */}
         <div>
-          <div className="flex items-center justify-between mb-2">
+          <div className="mb-2 flex items-center justify-between">
             <h4 className="font-medium">사용자 정의</h4>
             <Button
               variant="ghost"
@@ -255,19 +287,23 @@ export function SmartTimeSelector({ value, onChange, route, className = '' }) {
               onClick={() => setShowCustomTime(!showCustomTime)}
               className="text-xs"
             >
-              {showCustomTime ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+              {showCustomTime ? (
+                <ChevronUp className="h-3 w-3" />
+              ) : (
+                <ChevronDown className="h-3 w-3" />
+              )}
               {showCustomTime ? '접기' : '펼치기'}
             </Button>
           </div>
-          
+
           {showCustomTime && (
-            <div className="p-3 border rounded-lg bg-gray-50">
+            <div className="rounded-lg border bg-gray-50 p-3">
               <div className="flex items-center space-x-2">
                 <input
                   type="time"
                   value={customTime}
                   onChange={(e) => setCustomTime(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
                 />
                 <Button
                   size="sm"
@@ -282,7 +318,7 @@ export function SmartTimeSelector({ value, onChange, route, className = '' }) {
                   적용
                 </Button>
               </div>
-              <p className="text-xs text-gray-600 mt-2">
+              <p className="mt-2 text-xs text-gray-600">
                 정확한 출발 시간을 설정하여 맞춤 예측을 받아보세요
               </p>
             </div>
@@ -306,7 +342,7 @@ export function SmartTimeSelector({ value, onChange, route, className = '' }) {
           onClick={() => setMode('advanced')}
           className="text-xs"
         >
-          <ChevronUp className="h-3 w-3 mr-1" />
+          <ChevronUp className="mr-1 h-3 w-3" />
           접기
         </Button>
       </div>

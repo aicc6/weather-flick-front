@@ -183,7 +183,7 @@ export function Header() {
                     <Calendar className="h-4 w-4" />
                     <span>나의 플랜</span>
                   </Button>
-                  
+
                   {/* 알림 아이콘 */}
                   <NotificationIcon className="hidden sm:flex" />
                   <DropdownMenu>
@@ -383,7 +383,7 @@ export function Header() {
                     <Calendar className="mr-2 h-4 w-4" />
                     나의 플랜
                   </Button>
-                  
+
                   {/* 모바일용 알림 */}
                   <div className="flex justify-start">
                     <NotificationIcon />

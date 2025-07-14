@@ -327,14 +327,14 @@ export default function CustomizedScheduleResultPage() {
     }
     setIsModalOpen(true)
   }
-  
+
   const handleModalSave = async (formData) => {
     setIsSaving(true)
-    
+
     try {
       // 여행 일정 데이터 구성
       const itineraryData = {}
-      
+
       // recommendations.itinerary의 데이터를 day1, day2, day3 형식으로 변환
       // 백엔드 스키마에 맞게 각 day의 값을 리스트로 변환
       recommendations.itinerary.forEach((dayPlan) => {
@@ -349,10 +349,10 @@ export default function CustomizedScheduleResultPage() {
           latitude: place.latitude,
           longitude: place.longitude,
           rating: place.rating,
-          image: place.image
+          image: place.image,
         }))
       })
-      
+
       const planData = {
         title: formData.title,
         description: `${recommendations.summary.who} 여행 - ${recommendations.summary.styles?.join(', ')}`,
@@ -362,23 +362,22 @@ export default function CustomizedScheduleResultPage() {
         theme: recommendations.summary.styles?.[0] || '여행',
         status: 'PLANNING',
         itinerary: itineraryData,
-        plan_type: 'custom',  // 맞춤 일정 표시
+        plan_type: 'custom', // 맞춤 일정 표시
       }
-      
+
       // API 호출하여 여행 플랜 저장
       const result = await createTravelPlan(planData).unwrap()
-      
+
       // Redux 상태 초기화
       dispatch(clearRegion())
-      
+
       // localStorage 초기화
       localStorage.removeItem('customizedSchedule')
-      
+
       toast.success('여행 계획이 저장되었습니다!')
-      
+
       // 내 여행 플랜 페이지로 이동
       navigate('/travel-plans')
-      
     } catch (error) {
       console.error('저장 중 오류:', error)
       toast.error('저장 중 오류가 발생했습니다.')
@@ -626,7 +625,7 @@ export default function CustomizedScheduleResultPage() {
           새로운 추천 받기
         </Button>
       </div>
-      
+
       {/* 저장 모달 */}
       <SaveTravelPlanModal
         isOpen={isModalOpen}

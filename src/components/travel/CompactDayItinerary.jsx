@@ -69,10 +69,10 @@ export function CompactDayItinerary({
               </span>
             </div>
             <div>
-              <CardTitle className="text-base text-gray-800">
+              <CardTitle className="text-base text-gray-900 dark:text-gray-100">
                 {dayNumber}일차
               </CardTitle>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+              <div className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
                 <MapPin className="h-3 w-3" />
                 <span>{places.length}개 장소</span>
                 {validPlaces.length !== places.length && (
@@ -126,12 +126,12 @@ export function CompactDayItinerary({
 
         {/* 일차 요약 정보 (접혔을 때 표시) */}
         {!isExpanded && (
-          <div className="mt-2 flex items-center gap-4 text-xs text-gray-600">
+          <div className="mt-2 flex items-center gap-4 text-xs text-gray-700 dark:text-gray-300">
             <div className="flex items-center gap-1">
               <span>총 {places.length}곳</span>
             </div>
             {hasMultiplePlaces && (
-              <div className="flex items-center gap-1 text-blue-600">
+              <div className="flex items-center gap-1 text-blue-700 dark:text-blue-300">
                 <Route className="h-3 w-3" />
                 <span>경로 연결 가능</span>
               </div>

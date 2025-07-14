@@ -2,20 +2,31 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { AlertTriangle, TrendingUp, TrendingDown, RefreshCw, MapPin, Clock } from '@/components/icons'
+import {
+  AlertTriangle,
+  TrendingUp,
+  TrendingDown,
+  RefreshCw,
+  MapPin,
+  Clock,
+} from '@/components/icons'
 
 /**
  * 실시간 교통 상황 위젯
- * 
+ *
  * 주요 기능:
  * - 현재 교통 상황 모니터링
- * - 주요 도로별 혼잡도 표시  
+ * - 주요 도로별 혼잡도 표시
  * - 사고/공사 정보 알림
  * - 예상 지연시간 계산
  * - 대체 경로 제안
  */
 
-export function RealTimeTrafficWidget({ route, onRouteChange, className = '' }) {
+export function RealTimeTrafficWidget({
+  route,
+  onRouteChange,
+  className = '',
+}) {
   const [trafficData, setTrafficData] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [lastUpdate, setLastUpdate] = useState(new Date())
@@ -25,7 +36,7 @@ export function RealTimeTrafficWidget({ route, onRouteChange, className = '' }) 
   useEffect(() => {
     const fetchTrafficData = () => {
       setIsLoading(true)
-      
+
       // 실제로는 교통 API에서 데이터를 가져와야 함
       setTimeout(() => {
         const mockData = generateRealTimeTrafficData(route)
@@ -62,19 +73,23 @@ export function RealTimeTrafficWidget({ route, onRouteChange, className = '' }) 
   }
 
   const getOverallStatus = () => {
-    if (!trafficData) return { level: 'unknown', text: '정보 없음', color: 'gray' }
-    
-    const avgDelay = trafficData.roads.reduce((sum, road) => sum + road.delayMinutes, 0) / trafficData.roads.length
-    
+    if (!trafficData)
+      return { level: 'unknown', text: '정보 없음', color: 'gray' }
+
+    const avgDelay =
+      trafficData.roads.reduce((sum, road) => sum + road.delayMinutes, 0) /
+      trafficData.roads.length
+
     if (avgDelay < 5) return { level: 'smooth', text: '원활', color: 'green' }
-    if (avgDelay < 15) return { level: 'moderate', text: '보통', color: 'yellow' }
+    if (avgDelay < 15)
+      return { level: 'moderate', text: '보통', color: 'yellow' }
     return { level: 'heavy', text: '혼잡', color: 'red' }
   }
 
   const formatLastUpdate = () => {
     const now = new Date()
     const diff = Math.floor((now - lastUpdate) / 1000)
-    
+
     if (diff < 60) return `${diff}초 전`
     if (diff < 3600) return `${Math.floor(diff / 60)}분 전`
     return `${Math.floor(diff / 3600)}시간 전`
@@ -86,9 +101,7 @@ export function RealTimeTrafficWidget({ route, onRouteChange, className = '' }) 
     return (
       <Card className={`w-full ${className}`}>
         <CardContent className="p-4 text-center">
-          <div className="text-gray-500">
-            교통정보를 불러올 수 없습니다
-          </div>
+          <div className="text-gray-500">교통정보를 불러올 수 없습니다</div>
         </CardContent>
       </Card>
     )
@@ -104,7 +117,13 @@ export function RealTimeTrafficWidget({ route, onRouteChange, className = '' }) 
           </CardTitle>
           <div className="flex items-center space-x-2">
             <Badge
-              variant={status.color === 'green' ? 'default' : status.color === 'yellow' ? 'secondary' : 'destructive'}
+              variant={
+                status.color === 'green'
+                  ? 'default'
+                  : status.color === 'yellow'
+                    ? 'secondary'
+                    : 'destructive'
+              }
               className="text-xs"
             >
               {status.text}
@@ -116,7 +135,9 @@ export function RealTimeTrafficWidget({ route, onRouteChange, className = '' }) 
               disabled={isLoading}
               className="h-6 w-6 p-0"
             >
-              <RefreshCw className={`h-3 w-3 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`h-3 w-3 ${isLoading ? 'animate-spin' : ''}`}
+              />
             </Button>
           </div>
         </div>
@@ -130,23 +151,27 @@ export function RealTimeTrafficWidget({ route, onRouteChange, className = '' }) 
           </button>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {/* 전체 상황 요약 */}
-        <div className={`p-3 rounded-lg ${
-          status.color === 'green' ? 'bg-green-50 border border-green-200' :
-          status.color === 'yellow' ? 'bg-yellow-50 border border-yellow-200' :
-          'bg-red-50 border border-red-200'
-        }`}>
+        <div
+          className={`rounded-lg p-3 ${
+            status.color === 'green'
+              ? 'border border-green-200 bg-green-50'
+              : status.color === 'yellow'
+                ? 'border border-yellow-200 bg-yellow-50'
+                : 'border border-red-200 bg-red-50'
+          }`}
+        >
           <div className="flex items-center justify-between">
             <div>
-              <div className="font-medium text-sm">
+              <div className="text-sm font-medium">
                 {trafficData?.summary?.routeName || '선택된 경로'}
               </div>
               <div className="text-xs text-gray-600">
                 예상 소요시간: {trafficData?.summary?.totalTime || '계산중'}분
                 {trafficData?.summary?.delayFromNormal > 0 && (
-                  <span className="text-red-600 ml-1">
+                  <span className="ml-1 text-red-600">
                     (+{trafficData.summary.delayFromNormal}분 지연)
                   </span>
                 )}
@@ -164,23 +189,35 @@ export function RealTimeTrafficWidget({ route, onRouteChange, className = '' }) 
         {/* 도로별 상세 정보 */}
         {trafficData?.roads && (
           <div>
-            <h4 className="font-medium text-sm mb-2">주요 경로 상황</h4>
+            <h4 className="mb-2 text-sm font-medium">주요 경로 상황</h4>
             <div className="space-y-2">
               {trafficData.roads.map((road, index) => (
-                <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <div
+                  key={index}
+                  className="flex items-center justify-between rounded bg-gray-50 p-2"
+                >
                   <div className="flex items-center space-x-2">
-                    <div className={`w-2 h-2 rounded-full ${
-                      road.level === 'smooth' ? 'bg-green-500' :
-                      road.level === 'moderate' ? 'bg-yellow-500' : 'bg-red-500'
-                    }`} />
+                    <div
+                      className={`h-2 w-2 rounded-full ${
+                        road.level === 'smooth'
+                          ? 'bg-green-500'
+                          : road.level === 'moderate'
+                            ? 'bg-yellow-500'
+                            : 'bg-red-500'
+                      }`}
+                    />
                     <span className="text-sm font-medium">{road.name}</span>
                   </div>
                   <div className="text-right">
                     <div className="text-xs text-gray-600">
-                      {road.delayMinutes > 0 ? `+${road.delayMinutes}분` : '정상'}
+                      {road.delayMinutes > 0
+                        ? `+${road.delayMinutes}분`
+                        : '정상'}
                     </div>
                     {road.incident && (
-                      <div className="text-xs text-red-600">⚠️ {road.incident}</div>
+                      <div className="text-xs text-red-600">
+                        ⚠️ {road.incident}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -192,21 +229,28 @@ export function RealTimeTrafficWidget({ route, onRouteChange, className = '' }) 
         {/* 교통 사고/공사 알림 */}
         {trafficData?.alerts && trafficData.alerts.length > 0 && (
           <div>
-            <h4 className="font-medium text-sm mb-2 flex items-center">
-              <AlertTriangle className="h-4 w-4 mr-1 text-orange-500" />
+            <h4 className="mb-2 flex items-center text-sm font-medium">
+              <AlertTriangle className="mr-1 h-4 w-4 text-orange-500" />
               교통 정보
             </h4>
             <div className="space-y-2">
               {trafficData.alerts.map((alert, index) => (
-                <div key={index} className={`p-2 rounded border-l-4 text-sm ${
-                  alert.severity === 'high' ? 'border-red-500 bg-red-50' :
-                  alert.severity === 'medium' ? 'border-yellow-500 bg-yellow-50' :
-                  'border-blue-500 bg-blue-50'
-                }`}>
+                <div
+                  key={index}
+                  className={`rounded border-l-4 p-2 text-sm ${
+                    alert.severity === 'high'
+                      ? 'border-red-500 bg-red-50'
+                      : alert.severity === 'medium'
+                        ? 'border-yellow-500 bg-yellow-50'
+                        : 'border-blue-500 bg-blue-50'
+                  }`}
+                >
                   <div className="font-medium">{alert.title}</div>
-                  <div className="text-xs text-gray-600">{alert.description}</div>
+                  <div className="text-xs text-gray-600">
+                    {alert.description}
+                  </div>
                   {alert.estimatedDelay && (
-                    <div className="text-xs mt-1">
+                    <div className="mt-1 text-xs">
                       예상 지연: {alert.estimatedDelay}분
                     </div>
                   )}
@@ -219,17 +263,17 @@ export function RealTimeTrafficWidget({ route, onRouteChange, className = '' }) 
         {/* 대체 경로 제안 */}
         {trafficData?.alternatives && trafficData.alternatives.length > 0 && (
           <div>
-            <h4 className="font-medium text-sm mb-2">대체 경로</h4>
+            <h4 className="mb-2 text-sm font-medium">대체 경로</h4>
             <div className="space-y-2">
               {trafficData.alternatives.map((alt, index) => (
                 <div
                   key={index}
-                  className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                  className="cursor-pointer rounded-lg border p-3 transition-colors hover:bg-gray-50"
                   onClick={() => onRouteChange && onRouteChange(alt)}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="font-medium text-sm">{alt.name}</div>
+                      <div className="text-sm font-medium">{alt.name}</div>
                       <div className="text-xs text-gray-600">
                         {alt.distance}km • {alt.time}분
                       </div>
@@ -242,7 +286,7 @@ export function RealTimeTrafficWidget({ route, onRouteChange, className = '' }) 
                         {alt.savings > 0 ? `-${alt.savings}분` : '비슷함'}
                       </Badge>
                       {alt.savings > 0 && (
-                        <div className="text-xs text-green-600 mt-1">
+                        <div className="mt-1 text-xs text-green-600">
                           추천 경로
                         </div>
                       )}
@@ -257,9 +301,9 @@ export function RealTimeTrafficWidget({ route, onRouteChange, className = '' }) 
         {/* 교통 트렌드 */}
         {trafficData?.trends && (
           <div>
-            <h4 className="font-medium text-sm mb-2">교통 트렌드</h4>
+            <h4 className="mb-2 text-sm font-medium">교통 트렌드</h4>
             <div className="grid grid-cols-2 gap-3">
-              <div className="text-center p-2 bg-blue-50 rounded">
+              <div className="rounded bg-blue-50 p-2 text-center">
                 <div className="flex items-center justify-center space-x-1">
                   {trafficData.trends.direction === 'improving' ? (
                     <TrendingDown className="h-4 w-4 text-green-500" />
@@ -267,19 +311,21 @@ export function RealTimeTrafficWidget({ route, onRouteChange, className = '' }) 
                     <TrendingUp className="h-4 w-4 text-red-500" />
                   )}
                   <span className="text-xs font-medium">
-                    {trafficData.trends.direction === 'improving' ? '개선중' : '악화중'}
+                    {trafficData.trends.direction === 'improving'
+                      ? '개선중'
+                      : '악화중'}
                   </span>
                 </div>
-                <div className="text-xs text-gray-600 mt-1">
+                <div className="mt-1 text-xs text-gray-600">
                   {trafficData.trends.prediction}
                 </div>
               </div>
-              <div className="text-center p-2 bg-purple-50 rounded">
+              <div className="rounded bg-purple-50 p-2 text-center">
                 <div className="flex items-center justify-center space-x-1">
                   <Clock className="h-4 w-4 text-purple-500" />
                   <span className="text-xs font-medium">최적 시간</span>
                 </div>
-                <div className="text-xs text-gray-600 mt-1">
+                <div className="mt-1 text-xs text-gray-600">
                   {trafficData.trends.bestTime}
                 </div>
               </div>
@@ -294,72 +340,76 @@ export function RealTimeTrafficWidget({ route, onRouteChange, className = '' }) 
 // 모의 실시간 교통 데이터 생성 함수
 const generateRealTimeTrafficData = (route) => {
   const currentHour = new Date().getHours()
-  const isRushHour = (currentHour >= 7 && currentHour <= 9) || (currentHour >= 18 && currentHour <= 20)
-  
+  const isRushHour =
+    (currentHour >= 7 && currentHour <= 9) ||
+    (currentHour >= 18 && currentHour <= 20)
+
   // 기본 지연시간 계산
-  const baseDelay = isRushHour ? Math.floor(Math.random() * 15) + 5 : Math.floor(Math.random() * 5)
-  
+  const baseDelay = isRushHour
+    ? Math.floor(Math.random() * 15) + 5
+    : Math.floor(Math.random() * 5)
+
   const roads = [
     {
       name: '디지털로',
       level: isRushHour ? 'moderate' : 'smooth',
       delayMinutes: Math.floor(Math.random() * 8),
-      incident: Math.random() < 0.1 ? '공사 중' : null
+      incident: Math.random() < 0.1 ? '공사 중' : null,
     },
     {
-      name: '가산로', 
+      name: '가산로',
       level: isRushHour ? 'heavy' : 'moderate',
       delayMinutes: Math.floor(Math.random() * 12),
-      incident: Math.random() < 0.05 ? '사고 발생' : null
+      incident: Math.random() < 0.05 ? '사고 발생' : null,
     },
     {
       name: '경인로',
       level: 'moderate',
       delayMinutes: Math.floor(Math.random() * 6),
-      incident: null
-    }
+      incident: null,
+    },
   ]
-  
+
   const alerts = []
   if (isRushHour) {
     alerts.push({
       severity: 'medium',
       title: '출퇴근 시간대 혼잡',
       description: '평소보다 10-15분 더 소요될 수 있습니다',
-      estimatedDelay: Math.floor(Math.random() * 10) + 10
+      estimatedDelay: Math.floor(Math.random() * 10) + 10,
     })
   }
-  
+
   if (Math.random() < 0.2) {
     alerts.push({
       severity: 'high',
       title: '교통사고 발생',
       description: '구로구 디지털로 일대에서 접촉사고 발생',
-      estimatedDelay: Math.floor(Math.random() * 20) + 5
+      estimatedDelay: Math.floor(Math.random() * 20) + 5,
     })
   }
-  
+
   const alternatives = [
     {
       name: '시흥대로 경유',
       distance: '2.8',
       time: '18',
-      savings: Math.floor(Math.random() * 8)
+      savings: Math.floor(Math.random() * 8),
     },
     {
       name: '도림로 우회',
-      distance: '3.2', 
+      distance: '3.2',
       time: '22',
-      savings: Math.floor(Math.random() * 5)
-    }
+      savings: Math.floor(Math.random() * 5),
+    },
   ]
-  
+
   return {
     summary: {
       routeName: '가산디지털단지 → 구로디지털단지',
       totalTime: 15 + baseDelay,
       delayFromNormal: baseDelay,
-      distance: '2.1'
+      distance: '2.1',
     },
     roads,
     alerts,
@@ -367,8 +417,8 @@ const generateRealTimeTrafficData = (route) => {
     trends: {
       direction: isRushHour ? 'worsening' : 'improving',
       prediction: isRushHour ? '1시간 후 개선 예상' : '현재 원활한 흐름',
-      bestTime: isRushHour ? '오후 8시 이후' : '현재 최적'
-    }
+      bestTime: isRushHour ? '오후 8시 이후' : '현재 최적',
+    },
   }
 }
 

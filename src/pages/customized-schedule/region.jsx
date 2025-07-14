@@ -223,7 +223,6 @@ export default function CustomizedScheduleRegionPage() {
           도시 1곳을 선택해주세요.
         </p>
 
-
         {/* regionCode가 있을 때만 상단 중앙에 '다음' 버튼 노출 */}
         {regionCode && <div className="mt-6 flex justify-center"></div>}
       </div>

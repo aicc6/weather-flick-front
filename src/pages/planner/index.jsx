@@ -129,15 +129,19 @@ export default function PlannerPage() {
       // 추천 데이터를 플래너 폼 데이터로 변환
       const { summary, itinerary } = recommendedPlan
       const additionalInfo = location.state?.additionalInfo
-      
+
       // 추가 정보가 있으면 해당 날짜 사용, 없으면 오늘 날짜
-      const startDate = additionalInfo?.startDate ? new Date(additionalInfo.startDate) : new Date()
-      const endDate = additionalInfo?.endDate ? new Date(additionalInfo.endDate) : new Date(startDate)
-      
+      const startDate = additionalInfo?.startDate
+        ? new Date(additionalInfo.startDate)
+        : new Date()
+      const endDate = additionalInfo?.endDate
+        ? new Date(additionalInfo.endDate)
+        : new Date(startDate)
+
       if (!additionalInfo?.endDate) {
         endDate.setDate(startDate.getDate() + (summary.days - 1))
       }
-      
+
       setFormData({
         origin: additionalInfo?.origin || '서울',
         destination: summary.regionName,
@@ -146,7 +150,7 @@ export default function PlannerPage() {
         theme: summary.styles?.[0] || '여행',
         filters: [],
       })
-      
+
       // 추천 결과를 플랜 결과로 변환
       const planResults = []
       itinerary.forEach((dayPlan) => {
@@ -162,7 +166,7 @@ export default function PlannerPage() {
           })
         })
       })
-      
+
       setPlanResults(planResults)
       toast.success('맞춤 여행 일정을 불러왔습니다!')
     }
@@ -172,10 +176,10 @@ export default function PlannerPage() {
   const handleSavePlan = async () => {
     try {
       setIsLoading(true)
-      
+
       // 여행 일정 데이터 구성
       const itineraryData = {}
-      
+
       // recommendedPlan이 있는 경우 해당 데이터 사용
       if (recommendedPlan) {
         recommendedPlan.itinerary.forEach((dayPlan) => {
@@ -190,7 +194,7 @@ export default function PlannerPage() {
             latitude: place.latitude,
             longitude: place.longitude,
             rating: place.rating,
-            image: place.image
+            image: place.image,
           }))
         })
       } else {
@@ -211,21 +215,23 @@ export default function PlannerPage() {
             latitude: plan.latitude,
             longitude: plan.longitude,
             rating: plan.rating,
-            image: plan.image
+            image: plan.image,
           })
         })
-        
+
         Object.keys(groupedByDay).forEach((dayKey) => {
           itineraryData[dayKey] = groupedByDay[dayKey]
         })
       }
-      
+
       const additionalInfo = location.state?.additionalInfo
-      
+
       const planData = {
-        title: additionalInfo?.title || (recommendedPlan 
-          ? `${recommendedPlan.summary.regionName} ${recommendedPlan.summary.days}일 여행`
-          : `${formData.destination} 여행`),
+        title:
+          additionalInfo?.title ||
+          (recommendedPlan
+            ? `${recommendedPlan.summary.regionName} ${recommendedPlan.summary.days}일 여행`
+            : `${formData.destination} 여행`),
         description: recommendedPlan
           ? `${recommendedPlan.summary.who} 여행 - ${recommendedPlan.summary.styles?.join(', ')}`
           : `${formData.theme} 테마 여행`,
@@ -235,13 +241,13 @@ export default function PlannerPage() {
         theme: formData.theme,
         status: 'PLANNING',
         itinerary: itineraryData,
-        plan_type: recommendedPlan ? 'custom' : 'manual',  // 맞춤 일정인지 수동 계획인지 구분
+        plan_type: recommendedPlan ? 'custom' : 'manual', // 맞춤 일정인지 수동 계획인지 구분
       }
-      
+
       const result = await createTravelPlan(planData).unwrap()
-      
+
       toast.success('여행 플랜이 성공적으로 저장되었습니다!')
-      
+
       // 저장 후 여행 플랜 목록 페이지로 이동
       window.location.href = '/travel-plans'
     } catch (error) {
@@ -362,8 +368,8 @@ export default function PlannerPage() {
 
           {/* 기본 추천 결과 */}
           <PlanRecommendation planResults={planResults} isLoading={isLoading} />
-          <SavePlanButton 
-            planResults={planResults} 
+          <SavePlanButton
+            planResults={planResults}
             onSave={handleSavePlan}
             isLoading={isLoading}
           />

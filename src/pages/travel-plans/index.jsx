@@ -24,7 +24,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Calendar, ChevronRight, PlusCircle, Trash2, Filter } from '@/components/icons'
+import {
+  Calendar,
+  ChevronRight,
+  PlusCircle,
+  Trash2,
+  Filter,
+} from '@/components/icons'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { toast } from 'sonner'
 
@@ -53,10 +59,11 @@ export function TravelPlansPage() {
   const [planToDelete, setPlanToDelete] = useState(null)
   const [filterType, setFilterType] = useState('all') // 'all', 'manual', 'custom'
 
-  const filteredPlans = (plans || []).filter(plan => {
+  const filteredPlans = (plans || []).filter((plan) => {
     if (filterType === 'all') return true
     if (filterType === 'custom') return plan.plan_type === 'custom'
-    if (filterType === 'manual') return !plan.plan_type || plan.plan_type === 'manual'
+    if (filterType === 'manual')
+      return !plan.plan_type || plan.plan_type === 'manual'
     return true
   })
 
@@ -186,13 +193,10 @@ export function TravelPlansPage() {
       {/* 필터 섹션 */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
+          <Filter className="text-muted-foreground h-4 w-4" />
           <span className="text-sm font-medium">필터:</span>
         </div>
-        <Select
-          value={filterType}
-          onValueChange={setFilterType}
-        >
+        <Select value={filterType} onValueChange={setFilterType}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="플랜 유형 선택" />
           </SelectTrigger>
@@ -209,7 +213,9 @@ export function TravelPlansPage() {
               <div className="flex items-center gap-2">
                 <span>직접 작성</span>
                 <Badge variant="secondary" className="ml-auto text-xs">
-                  {plans?.filter(p => !p.plan_type || p.plan_type === 'manual').length || 0}
+                  {plans?.filter(
+                    (p) => !p.plan_type || p.plan_type === 'manual',
+                  ).length || 0}
                 </Badge>
               </div>
             </SelectItem>
@@ -217,18 +223,18 @@ export function TravelPlansPage() {
               <div className="flex items-center gap-2">
                 <span>AI 맞춤 추천</span>
                 <Badge variant="secondary" className="ml-auto text-xs">
-                  {plans?.filter(p => p.plan_type === 'custom').length || 0}
+                  {plans?.filter((p) => p.plan_type === 'custom').length || 0}
                 </Badge>
               </div>
             </SelectItem>
           </SelectContent>
         </Select>
-        <div className="ml-auto text-sm text-muted-foreground">
-          {filterType === 'all' 
-            ? `전체 ${sortedPlans?.length || 0}개 표시 중` 
+        <div className="text-muted-foreground ml-auto text-sm">
+          {filterType === 'all'
+            ? `전체 ${sortedPlans?.length || 0}개 표시 중`
             : filterType === 'manual'
-            ? `직접 작성한 ${sortedPlans?.length || 0}개 표시 중`
-            : `AI 추천 ${sortedPlans?.length || 0}개 표시 중`}
+              ? `직접 작성한 ${sortedPlans?.length || 0}개 표시 중`
+              : `AI 추천 ${sortedPlans?.length || 0}개 표시 중`}
         </div>
       </div>
 

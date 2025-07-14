@@ -49,7 +49,7 @@ let refreshPromise = null
 // refresh token으로 access token 갱신
 const refreshAccessToken = async () => {
   const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
-  
+
   if (!refreshToken) {
     return null
   }

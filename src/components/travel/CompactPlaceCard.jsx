@@ -67,11 +67,11 @@ export function CompactPlaceCard({
 
             {/* 장소 이름과 정보 */}
             <div className="min-w-0 flex-1">
-              <h4 className="truncate text-sm font-medium text-gray-900">
+              <h4 className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
                 {place.description || place.name || '이름 없음'}
               </h4>
               {place.address && (
-                <p className="mt-0.5 truncate text-xs text-gray-500">
+                <p className="mt-0.5 truncate text-xs text-gray-700 dark:text-gray-300">
                   {place.address}
                 </p>
               )}
@@ -79,16 +79,16 @@ export function CompactPlaceCard({
               {place.tags && place.tags.length > 0 && (
                 <div className="mt-1 flex flex-wrap gap-1">
                   {place.tags.slice(0, 3).map((tag, index) => (
-                    <Badge 
-                      key={index} 
-                      variant="secondary" 
+                    <Badge
+                      key={index}
+                      variant="secondary"
                       className="px-1.5 py-0 text-xs"
                     >
                       {tag}
                     </Badge>
                   ))}
                   {place.tags.length > 3 && (
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
                       +{place.tags.length - 3}
                     </span>
                   )}
@@ -101,7 +101,7 @@ export function CompactPlaceCard({
           {showWeather && weather && (
             <div className="mx-3 flex flex-shrink-0 items-center gap-1">
               {getWeatherIcon(weather.condition)}
-              <span className="text-xs text-gray-600">
+              <span className="text-xs text-gray-700 dark:text-gray-300">
                 {weather.temperature}°
               </span>
             </div>
@@ -111,7 +111,9 @@ export function CompactPlaceCard({
           {showWeather && !weather && (
             <div className="mx-3 flex flex-shrink-0 items-center gap-1">
               <Cloud className="h-3 w-3 text-gray-300" />
-              <span className="text-xs text-gray-400">-°</span>
+              <span className="text-xs text-gray-600 dark:text-gray-400">
+                -°
+              </span>
             </div>
           )}
 
@@ -143,7 +145,7 @@ export function CompactPlaceCard({
 
         {/* 메모 (있는 경우만 표시) */}
         {place.memo && (
-          <div className="mt-2 rounded border-l-2 border-blue-200 bg-blue-50 p-2 text-xs text-gray-600">
+          <div className="mt-2 rounded border-l-2 border-blue-200 bg-blue-50 p-2 text-xs text-gray-800 dark:border-blue-700 dark:bg-blue-900/20 dark:text-gray-200">
             💭 {place.memo}
           </div>
         )}

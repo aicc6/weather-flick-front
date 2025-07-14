@@ -2,11 +2,17 @@ import { useState, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Clock, TrendingUp, TrendingDown, Zap, AlertTriangle } from '@/components/icons'
+import {
+  Clock,
+  TrendingUp,
+  TrendingDown,
+  Zap,
+  AlertTriangle,
+} from '@/components/icons'
 
 /**
  * 고급 시간대별 예측 타임라인 컴포넌트
- * 
+ *
  * 주요 기능:
  * - 24시간 비주얼 타임라인
  * - 실시간 교통 혼잡도 예측
@@ -15,11 +21,11 @@ import { Clock, TrendingUp, TrendingDown, Zap, AlertTriangle } from '@/component
  * - 날씨 영향 반영
  */
 
-export function TimelinePrediction({ 
-  route, 
-  onTimeSelect, 
+export function TimelinePrediction({
+  route,
+  onTimeSelect,
   selectedTime,
-  currentPredictions = {} 
+  currentPredictions = {},
 }) {
   const [viewMode, setViewMode] = useState('timeline') // 'timeline', 'comparison', 'trends'
   const [detailHour, setDetailHour] = useState(null)
@@ -28,25 +34,25 @@ export function TimelinePrediction({
   const hourlyPredictions = useMemo(() => {
     const predictions = []
     const now = new Date()
-    
+
     for (let hour = 0; hour < 24; hour++) {
       const targetTime = new Date()
       targetTime.setHours(hour, 0, 0, 0)
-      
+
       // 현재 시간보다 이전이면 다음날로 설정
       if (targetTime <= now) {
         targetTime.setDate(targetTime.getDate() + 1)
       }
-      
+
       const prediction = generateHourlyPrediction(hour, route)
       predictions.push({
         hour,
         time: targetTime,
         displayTime: formatDisplayTime(hour),
-        ...prediction
+        ...prediction,
       })
     }
-    
+
     return predictions
   }, [route])
 
@@ -64,7 +70,9 @@ export function TimelinePrediction({
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold">24시간 교통 예측</h3>
-          <p className="text-sm text-gray-600">시간대별 소요시간 및 비용 변화</p>
+          <p className="text-sm text-gray-600">
+            시간대별 소요시간 및 비용 변화
+          </p>
         </div>
         <div className="flex space-x-2">
           <Button
@@ -92,9 +100,9 @@ export function TimelinePrediction({
       </div>
 
       {/* 최적 시간 추천 */}
-      <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+      <Card className="border-green-200 bg-gradient-to-r from-green-50 to-blue-50">
         <CardContent className="p-4">
-          <div className="flex items-center space-x-2 mb-3">
+          <div className="mb-3 flex items-center space-x-2">
             <Zap className="h-5 w-5 text-green-600" />
             <h4 className="font-medium text-green-800">추천 출발 시간</h4>
           </div>
@@ -102,22 +110,25 @@ export function TimelinePrediction({
             {optimalTimes.map((optimal, index) => (
               <div
                 key={optimal.hour}
-                className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                  selectedTime === `hour_${optimal.hour}` 
-                    ? 'border-green-500 bg-green-100' 
+                className={`cursor-pointer rounded-lg border p-3 transition-all ${
+                  selectedTime === `hour_${optimal.hour}`
+                    ? 'border-green-500 bg-green-100'
                     : 'border-green-200 bg-white hover:border-green-300'
                 }`}
                 onClick={() => onTimeSelect(`hour_${optimal.hour}`)}
               >
-                <div className="flex items-center justify-between mb-1">
+                <div className="mb-1 flex items-center justify-between">
                   <span className="font-medium text-green-800">
                     {optimal.displayTime}
                   </span>
-                  <Badge variant={index === 0 ? 'default' : 'secondary'} className="text-xs">
+                  <Badge
+                    variant={index === 0 ? 'default' : 'secondary'}
+                    className="text-xs"
+                  >
                     {index === 0 ? '최적' : index === 1 ? '차선' : '3순위'}
                   </Badge>
                 </div>
-                <div className="text-sm space-y-1">
+                <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">소요시간:</span>
                     <span className="font-medium">{optimal.duration}분</span>
@@ -143,7 +154,7 @@ export function TimelinePrediction({
             key={prediction.hour}
             prediction={prediction}
             isSelected={selectedTime === `hour_${prediction.hour}`}
-            isOptimal={optimalTimes.some(opt => opt.hour === prediction.hour)}
+            isOptimal={optimalTimes.some((opt) => opt.hour === prediction.hour)}
             onClick={() => {
               onTimeSelect(`hour_${prediction.hour}`)
               setDetailHour(prediction.hour)
@@ -154,7 +165,7 @@ export function TimelinePrediction({
 
       {/* 상세 정보 패널 */}
       {detailHour !== null && (
-        <HourDetailPanel 
+        <HourDetailPanel
           prediction={hourlyPredictions[detailHour]}
           onClose={() => setDetailHour(null)}
         />
@@ -165,8 +176,8 @@ export function TimelinePrediction({
   const renderComparisonView = () => (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">교통수단별 시간대 비교</h3>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {['car', 'transit', 'walk'].map(mode => (
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        {['car', 'transit', 'walk'].map((mode) => (
           <TransportModeComparison
             key={mode}
             mode={mode}
@@ -181,7 +192,7 @@ export function TimelinePrediction({
   const renderTrendsView = () => (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">교통 트렌드 분석</h3>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <TrendChart
           title="시간대별 소요시간 변화"
           data={hourlyPredictions}
@@ -221,32 +232,39 @@ const TimelineHourCard = ({ prediction, isSelected, isOptimal, onClick }) => {
   const getCardStyle = () => {
     if (isSelected) return 'border-blue-500 bg-blue-50'
     if (isOptimal) return 'border-green-500 bg-green-50'
-    
+
     const congestionColor = {
       low: 'border-green-200 bg-green-25',
-      medium: 'border-yellow-200 bg-yellow-25', 
-      high: 'border-red-200 bg-red-25'
+      medium: 'border-yellow-200 bg-yellow-25',
+      high: 'border-red-200 bg-red-25',
     }
-    
-    return congestionColor[prediction.congestionLevel] || 'border-gray-200 bg-gray-25'
+
+    return (
+      congestionColor[prediction.congestionLevel] ||
+      'border-gray-200 bg-gray-25'
+    )
   }
 
   const getCongestionIcon = () => {
     switch (prediction.congestionLevel) {
-      case 'low': return '🟢'
-      case 'medium': return '🟡'
-      case 'high': return '🔴'
-      default: return '⚪'
+      case 'low':
+        return '🟢'
+      case 'medium':
+        return '🟡'
+      case 'high':
+        return '🔴'
+      default:
+        return '⚪'
     }
   }
 
   return (
     <div
-      className={`p-3 rounded-lg border cursor-pointer transition-all hover:shadow-md ${getCardStyle()}`}
+      className={`cursor-pointer rounded-lg border p-3 transition-all hover:shadow-md ${getCardStyle()}`}
       onClick={onClick}
     >
-      <div className="text-center space-y-1">
-        <div className="font-medium text-sm">{prediction.displayTime}</div>
+      <div className="space-y-1 text-center">
+        <div className="text-sm font-medium">{prediction.displayTime}</div>
         <div className="text-xs text-gray-600">{prediction.duration}분</div>
         <div className="text-xs">
           {getCongestionIcon()} {prediction.congestionText}
@@ -280,28 +298,36 @@ const HourDetailPanel = ({ prediction, onClose }) => (
       </div>
     </CardHeader>
     <CardContent className="space-y-4">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="text-center p-3 bg-blue-50 rounded-lg">
-          <div className="text-2xl font-bold text-blue-600">{prediction.duration}분</div>
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="rounded-lg bg-blue-50 p-3 text-center">
+          <div className="text-2xl font-bold text-blue-600">
+            {prediction.duration}분
+          </div>
           <div className="text-sm text-blue-800">예상 소요시간</div>
         </div>
-        <div className="text-center p-3 bg-green-50 rounded-lg">
-          <div className="text-2xl font-bold text-green-600">{prediction.cost}원</div>
+        <div className="rounded-lg bg-green-50 p-3 text-center">
+          <div className="text-2xl font-bold text-green-600">
+            {prediction.cost}원
+          </div>
           <div className="text-sm text-green-800">예상 비용</div>
         </div>
-        <div className="text-center p-3 bg-purple-50 rounded-lg">
-          <div className="text-2xl font-bold text-purple-600">{prediction.reliability}%</div>
+        <div className="rounded-lg bg-purple-50 p-3 text-center">
+          <div className="text-2xl font-bold text-purple-600">
+            {prediction.reliability}%
+          </div>
           <div className="text-sm text-purple-800">예측 신뢰도</div>
         </div>
-        <div className="text-center p-3 bg-orange-50 rounded-lg">
-          <div className="text-2xl font-bold text-orange-600">{prediction.crowdLevel}</div>
+        <div className="rounded-lg bg-orange-50 p-3 text-center">
+          <div className="text-2xl font-bold text-orange-600">
+            {prediction.crowdLevel}
+          </div>
           <div className="text-sm text-orange-800">혼잡도</div>
         </div>
       </div>
-      
+
       <div className="space-y-2">
         <h4 className="font-medium">이 시간대 특징</h4>
-        <ul className="text-sm space-y-1">
+        <ul className="space-y-1 text-sm">
           {prediction.advantages.map((advantage, index) => (
             <li key={index} className="flex items-center space-x-2">
               <span className="text-green-500">✓</span>
@@ -316,14 +342,14 @@ const HourDetailPanel = ({ prediction, onClose }) => (
           ))}
         </ul>
       </div>
-      
+
       {prediction.alerts && prediction.alerts.length > 0 && (
-        <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <div className="flex items-center space-x-2 mb-2">
+        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3">
+          <div className="mb-2 flex items-center space-x-2">
             <AlertTriangle className="h-4 w-4 text-yellow-600" />
             <span className="font-medium text-yellow-800">주의사항</span>
           </div>
-          <ul className="text-sm text-yellow-700 space-y-1">
+          <ul className="space-y-1 text-sm text-yellow-700">
             {prediction.alerts.map((alert, index) => (
               <li key={index}>• {alert}</li>
             ))}
@@ -339,12 +365,12 @@ const TransportModeComparison = ({ mode, predictions, route }) => {
   const modeConfig = {
     car: { name: '자동차', icon: '🚗', color: 'blue' },
     transit: { name: '대중교통', icon: '🚇', color: 'green' },
-    walk: { name: '도보', icon: '🚶', color: 'purple' }
+    walk: { name: '도보', icon: '🚶', color: 'purple' },
   }
-  
+
   const config = modeConfig[mode]
   const bestTimes = predictions
-    .filter(p => p[mode])
+    .filter((p) => p[mode])
     .sort((a, b) => a[mode].duration - b[mode].duration)
     .slice(0, 3)
 
@@ -361,9 +387,9 @@ const TransportModeComparison = ({ mode, predictions, route }) => {
           {bestTimes.map((time, index) => (
             <div
               key={time.hour}
-              className={`p-3 rounded-lg border-l-4 border-${config.color}-500 bg-${config.color}-25`}
+              className={`rounded-lg border-l-4 p-3 border-${config.color}-500 bg-${config.color}-25`}
             >
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">{time.displayTime}</div>
                   <div className="text-sm text-gray-600">
@@ -384,10 +410,10 @@ const TransportModeComparison = ({ mode, predictions, route }) => {
 
 // 트렌드 차트 컴포넌트 (간단한 SVG 구현)
 const TrendChart = ({ title, data, dataKey, color }) => {
-  const max = Math.max(...data.map(d => d[dataKey]))
-  const min = Math.min(...data.map(d => d[dataKey]))
+  const max = Math.max(...data.map((d) => d[dataKey]))
+  const min = Math.min(...data.map((d) => d[dataKey]))
   const range = max - min
-  
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -400,24 +426,18 @@ const TrendChart = ({ title, data, dataKey, color }) => {
               fill="none"
               stroke={color}
               strokeWidth="2"
-              points={data.map((d, i) => {
-                const x = (i / (data.length - 1)) * 280 + 10
-                const y = 90 - ((d[dataKey] - min) / range) * 70
-                return `${x},${y}`
-              }).join(' ')}
+              points={data
+                .map((d, i) => {
+                  const x = (i / (data.length - 1)) * 280 + 10
+                  const y = 90 - ((d[dataKey] - min) / range) * 70
+                  return `${x},${y}`
+                })
+                .join(' ')}
             />
             {data.map((d, i) => {
               const x = (i / (data.length - 1)) * 280 + 10
               const y = 90 - ((d[dataKey] - min) / range) * 70
-              return (
-                <circle
-                  key={i}
-                  cx={x}
-                  cy={y}
-                  r="3"
-                  fill={color}
-                />
-              )
+              return <circle key={i} cx={x} cy={y} r="3" fill={color} />
             })}
           </svg>
         </div>
@@ -429,16 +449,16 @@ const TrendChart = ({ title, data, dataKey, color }) => {
 // 교통 인사이트 컴포넌트
 const TrafficInsights = ({ predictions }) => {
   const insights = analyzeTrafficPatterns(predictions)
-  
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>교통 패턴 분석</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <h4 className="font-medium mb-2">🕐 피크 시간대</h4>
+            <h4 className="mb-2 font-medium">🕐 피크 시간대</h4>
             <div className="space-y-1 text-sm">
               <div>• 오전 피크: {insights.morningPeak}</div>
               <div>• 오후 피크: {insights.eveningPeak}</div>
@@ -446,7 +466,7 @@ const TrafficInsights = ({ predictions }) => {
             </div>
           </div>
           <div>
-            <h4 className="font-medium mb-2">💡 추천 사항</h4>
+            <h4 className="mb-2 font-medium">💡 추천 사항</h4>
             <div className="space-y-1 text-sm">
               {insights.recommendations.map((rec, index) => (
                 <div key={index}>• {rec}</div>
@@ -471,14 +491,14 @@ const generateHourlyPrediction = (hour, route) => {
   // 실제로는 백엔드 API에서 받아올 데이터
   const baseTime = 25
   const baseCost = 1500
-  
+
   // 시간대별 교통 패턴 시뮬레이션
   let multiplier = 1
   let congestionLevel = 'low'
   let advantages = []
   let disadvantages = []
   let alerts = []
-  
+
   if (hour >= 7 && hour <= 9) {
     multiplier = 1.5
     congestionLevel = 'high'
@@ -498,12 +518,17 @@ const generateHourlyPrediction = (hour, route) => {
     congestionLevel = 'medium'
     advantages.push('적정 교통량')
   }
-  
+
   return {
     duration: Math.round(baseTime * multiplier),
     cost: Math.round(baseCost * (multiplier * 0.8)),
     congestionLevel,
-    congestionText: congestionLevel === 'low' ? '원활' : congestionLevel === 'medium' ? '보통' : '혼잡',
+    congestionText:
+      congestionLevel === 'low'
+        ? '원활'
+        : congestionLevel === 'medium'
+          ? '보통'
+          : '혼잡',
     reliability: Math.round(100 - (multiplier - 1) * 30),
     crowdLevel: Math.round(multiplier * 3),
     advantages,
@@ -513,32 +538,32 @@ const generateHourlyPrediction = (hour, route) => {
     weather: hour >= 14 && hour <= 16 ? { icon: '☀️', impact: '맑음' } : null,
     car: {
       duration: Math.round(baseTime * 0.8 * multiplier),
-      cost: Math.round(3000 * multiplier)
+      cost: Math.round(3000 * multiplier),
     },
     transit: {
       duration: Math.round(baseTime * multiplier),
-      cost: baseCost
+      cost: baseCost,
     },
     walk: {
       duration: Math.round(baseTime * 2),
-      cost: 0
-    }
+      cost: 0,
+    },
   }
 }
 
 const analyzeTrafficPatterns = (predictions) => {
-  const morningWorst = predictions.slice(7, 10).reduce((prev, curr) => 
-    prev.duration > curr.duration ? prev : curr
+  const morningWorst = predictions
+    .slice(7, 10)
+    .reduce((prev, curr) => (prev.duration > curr.duration ? prev : curr))
+
+  const eveningWorst = predictions
+    .slice(18, 21)
+    .reduce((prev, curr) => (prev.duration > curr.duration ? prev : curr))
+
+  const overall = predictions.reduce((prev, curr) =>
+    prev.duration > curr.duration ? prev : curr,
   )
-  
-  const eveningWorst = predictions.slice(18, 21).reduce((prev, curr) => 
-    prev.duration > curr.duration ? prev : curr
-  )
-  
-  const overall = predictions.reduce((prev, curr) => 
-    prev.duration > curr.duration ? prev : curr
-  )
-  
+
   return {
     morningPeak: `${morningWorst.displayTime} (${morningWorst.duration}분)`,
     eveningPeak: `${eveningWorst.displayTime} (${eveningWorst.duration}분)`,
@@ -546,8 +571,8 @@ const analyzeTrafficPatterns = (predictions) => {
     recommendations: [
       '오전 6시 이전 출발 시 30% 시간 단축',
       '점심시간(12-13시) 이동 권장',
-      '야간(22시 이후) 고속 이동 가능'
-    ]
+      '야간(22시 이후) 고속 이동 가능',
+    ],
   }
 }
 
