@@ -45,6 +45,9 @@ export {
   ThumbsDown,
   Image,
   Loader2,
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
 } from 'lucide-react'
 
 // Weather Icons
@@ -70,6 +73,7 @@ export {
   Star,
   Settings,
   Bell,
+  BellOff,
   Heart,
   Edit,
   Trash2,

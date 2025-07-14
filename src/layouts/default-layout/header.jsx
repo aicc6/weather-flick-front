@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import NotificationIcon from '@/components/header/NotificationIcon'
 
 export function Header() {
   const [isDark, setIsDark] = useState(false)
@@ -182,6 +183,9 @@ export function Header() {
                     <Calendar className="h-4 w-4" />
                     <span>나의 플랜</span>
                   </Button>
+                  
+                  {/* 알림 아이콘 */}
+                  <NotificationIcon className="hidden sm:flex" />
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -379,6 +383,11 @@ export function Header() {
                     <Calendar className="mr-2 h-4 w-4" />
                     나의 플랜
                   </Button>
+                  
+                  {/* 모바일용 알림 */}
+                  <div className="flex justify-start">
+                    <NotificationIcon />
+                  </div>
                   <Button
                     variant="ghost"
                     className="w-full justify-start"

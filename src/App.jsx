@@ -1,8 +1,9 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { DefaultLayout } from './layouts/default-layout'
 import LoadingSpinner from './components/LoadingSpinner'
 import ErrorBoundary from './components/common/ErrorBoundary'
+import { initializeApiMonitoring } from '@/utils/apiKeyMonitoring'
 import '@/App.css'
 
 // 핵심 페이지는 즉시 로드
@@ -83,6 +84,11 @@ const ContactPage = lazy(() => import('./pages/contact'))
 const TermsPage = lazy(() => import('./pages/terms'))
 
 function App() {
+  // API 모니터링 시스템 초기화
+  useEffect(() => {
+    initializeApiMonitoring()
+  }, [])
+
   return (
     <ErrorBoundary>
       <BrowserRouter>
