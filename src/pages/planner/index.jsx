@@ -266,84 +266,19 @@ export default function PlannerPage() {
           여행 플래너
           <Badge variant="secondary" className="ml-3">
             <Sparkles className="mr-1 h-3 w-3" />
-            AI 고도화
+            날씨 교통 정보 추천
           </Badge>
         </h1>
         <p className="text-lg text-gray-600 dark:text-gray-300">
-          AI와 함께하는 스마트한 여행 계획! 날씨, 협업, 개인화 추천까지
+          날씨와 교통정보를 한 눈에 볼 수 있는 여행 플래너
         </p>
       </div>
 
       {/* 메인 탭 인터페이스 */}
       <Tabs defaultValue="planner" className="w-full">
-        <TabsList className="mb-8 grid w-full grid-cols-4">
-          <TabsTrigger value="planner" className="flex items-center space-x-2">
-            <span>📝</span>
-            <span>기본 계획</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="ai-recommendations"
-            className="flex items-center space-x-2"
-          >
-            <Brain className="h-4 w-4" />
-            <span>AI 추천</span>
-          </TabsTrigger>
-          <TabsTrigger value="weather" className="flex items-center space-x-2">
-            <Cloud className="h-4 w-4" />
-            <span>날씨 분석</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="collaboration"
-            className="flex items-center space-x-2"
-          >
-            <Users className="h-4 w-4" />
-            <span>협업</span>
-          </TabsTrigger>
-        </TabsList>
-
         {/* 기본 계획 탭 */}
         <TabsContent value="planner" className="space-y-6">
           {/* 상단 - 여행 요약 및 날씨 미리보기 */}
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* 여행 요약 */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">🗓️ 여행 요약</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">목적지:</span>
-                  <span className="font-medium">{formData.destination}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">기간:</span>
-                  <span className="font-medium">{travelDates.length}일</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">테마:</span>
-                  <Badge variant="outline">{formData.theme}</Badge>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 날씨 미리보기 */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">🌤️ 날씨 미리보기</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center">
-                  <div className="text-3xl">{weatherData.icon}</div>
-                  <div className="mt-2 text-lg font-semibold">
-                    {weatherData.temp}°C
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {weatherData.summary}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
 
           {/* 하단 - 여행 기본 정보 */}
           <div className="w-full">
