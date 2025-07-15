@@ -485,8 +485,7 @@ export default function ContactPage() {
                   try {
                     await verifyContactPassword({
                       contactId: selectedInquiry.id,
-                      email: user.email,
-                      password,
+                      password, // email은 필요 없음, password만 전달
                     }).unwrap()
                     setDetailInquiry(selectedInquiry)
                     setModalOpen(true)
