@@ -49,7 +49,7 @@ const contactSchema = z.object({
     .max(1000, '문의 내용은 1000자 이내로 입력해주세요'),
   email: z.string().email('올바른 이메일 형식이 아닙니다'),
   name: z.string().min(1, '이름을 입력해주세요'),
-  isPublic: z.boolean().default(false),
+  isPrivate: z.boolean().default(false),
 })
 
 // 문의 분류 카테고리
@@ -133,7 +133,7 @@ export default function ContactPage() {
       content: '',
       email: '',
       name: '',
-      isPublic: true, // 기본값을 true(공개)로 변경
+      isPrivate: false, // 기본값을 false(공개)로 변경
     },
   })
 
@@ -175,13 +175,13 @@ export default function ContactPage() {
     })
   }, [existingInquiries, searchTerm, selectedCategory])
 
-  // isPublic: true = 비공개글, false = 공개글
+  // isPrivate: true = 비공개글, false = 공개글
   // 상세 모달 열기 (조회수 증가 포함)
   const handleTitleClick = async (inquiryId) => {
     try {
       const result = await trigger(inquiryId).unwrap()
       // 공개글: 누구나 열람 가능
-      if (result.isPublic === true || result.is_public === true) {
+      if (result.isPrivate === false || result.is_private === false || (!result.isPrivate && !result.is_private)) {
         setDetailInquiry(result)
         setModalOpen(true)
         return
@@ -359,22 +359,22 @@ export default function ContactPage() {
                           {inquiry.title}
                         </button>
                         {/* 비공개 아이콘: 비공개글이면 모두 표시 */}
-                        {inquiry.isPublic != true &&
-                          inquiry.is_public != true && (
-                            <span title="비공개" className="text-gray-400">
-                              <svg
-                                width="16"
-                                height="16"
-                                fill="none"
-                                viewBox="0 0 20 20"
-                              >
-                                <path
-                                  fill="currentColor"
-                                  d="M10 2a4 4 0 0 1 4 4v2h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2h1V6a4 4 0 0 1 4-4zm2 6V6a2 2 0 1 0-4 0v2h4z"
-                                />
-                              </svg>
-                            </span>
-                          )}
+                        {(inquiry.isPrivate === true ||
+                          inquiry.is_private === true) && (
+                          <span title="비공개" className="text-gray-400">
+                            <svg
+                              width="16"
+                              height="16"
+                              fill="none"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill="currentColor"
+                                d="M10 2a4 4 0 0 1 4 4v2h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2h1V6a4 4 0 0 1 4-4zm2 6V6a2 2 0 1 0-4 0v2h4z"
+                              />
+                            </svg>
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="px-2 py-3 text-center">

@@ -19,16 +19,16 @@ const ContactForm = ({ onSuccess, defaultName = '', defaultEmail = '' }) => {
     useSubmitContactMutation()
   const [infoFilled, setInfoFilled] = useState(false)
 
-  const isPublic = watch('is_public')
+  const isPrivate = watch('is_private')
 
   const onSubmit = async (data) => {
     // 비공개일 때 password 유효성 검사
-    if (data.is_public && (!data.password || data.password.length < 4)) {
+    if (data.is_private && (!data.password || data.password.length < 4)) {
       alert('비공개 문의는 4자 이상 비밀번호를 입력해야 합니다.')
       return
     }
     try {
-      await submitContact({ ...data, is_public: !data.is_public }).unwrap()
+      await submitContact(data).unwrap()
       reset()
       setInfoFilled(false)
       onSuccess?.()
@@ -150,22 +150,22 @@ const ContactForm = ({ onSuccess, defaultName = '', defaultEmail = '' }) => {
       {/* 비공개 체크박스 */}
       <div className="flex items-center gap-2">
         <input
-          id="is_public"
+          id="is_private"
           type="checkbox"
-          {...register('is_public')}
+          {...register('is_private')}
           className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
         />
-        <Label htmlFor="is_public" className="cursor-pointer select-none">
+        <Label htmlFor="is_private" className="cursor-pointer select-none">
           비공개
         </Label>
         {/* 비공개 체크 시 비밀번호 입력란 동적 표시 */}
-        {isPublic && (
+        {isPrivate && (
           <Input
             id="password"
             type="password"
             placeholder="비밀번호(4자 이상)"
             {...register('password', {
-              required: isPublic,
+              required: isPrivate,
               minLength: { value: 4, message: '4자 이상 입력' },
             })}
             className="ml-4 w-48 border border-gray-300 bg-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
@@ -173,7 +173,7 @@ const ContactForm = ({ onSuccess, defaultName = '', defaultEmail = '' }) => {
           />
         )}
       </div>
-      {isPublic && errors.password && (
+      {isPrivate && errors.password && (
         <p className="mt-1 text-sm text-red-600">
           {errors.password.message || '비밀번호를 입력해주세요.'}
         </p>
