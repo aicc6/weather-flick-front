@@ -70,6 +70,18 @@ const statusColors = {
   비공개: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
 }
 
+// 승인상태(approval_status) 색상 및 라벨 매핑
+const approvalStatusLabels = {
+  PENDING: '대기중',
+  PROCESSING: '처리중',
+  COMPLETE: '완료',
+}
+const approvalStatusColors = {
+  PENDING: 'bg-yellow-50 text-yellow-700 border border-yellow-200',
+  PROCESSING: 'bg-blue-50 text-blue-700 border border-blue-200',
+  COMPLETE: 'bg-green-50 text-green-700 border border-green-200',
+}
+
 // 날짜 포맷 함수
 function formatDate(dateString) {
   if (!dateString) return ''
@@ -330,20 +342,38 @@ export default function ContactPage() {
                         >
                           {inquiry.title}
                         </button>
-                        {/* 대기중 뱃지 항상 표시 */}
-                        <Badge className={statusColors['대기중']}>대기중</Badge>
-                        {/* 비공개 뱃지는 isPublic true일 때만 표시 */}
+                        {/* 비공개 아이콘만 표시 */}
                         {(inquiry.isPublic || inquiry.is_public) && (
-                          <Badge variant="secondary" className="text-xs">
-                            비공개
-                          </Badge>
+                          <span title="비공개" className="text-gray-400">
+                            <svg
+                              width="16"
+                              height="16"
+                              fill="none"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill="currentColor"
+                                d="M10 2a4 4 0 0 1 4 4v2h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2h1V6a4 4 0 0 1 4-4zm2 6V6a2 2 0 1 0-4 0v2h4z"
+                              />
+                            </svg>
+                          </span>
                         )}
                       </div>
                     </td>
                     <td className="px-2 py-3 text-center">
-                      <Badge className={statusColors[inquiry.status]}>
-                        {inquiry.status}
-                      </Badge>
+                      <div className="flex flex-col items-center gap-1">
+                        {inquiry.approval_status &&
+                          approvalStatusLabels[inquiry.approval_status] && (
+                            <Badge
+                              className={
+                                approvalStatusColors[inquiry.approval_status] +
+                                ' mt-1 text-xs'
+                              }
+                            >
+                              {approvalStatusLabels[inquiry.approval_status]}
+                            </Badge>
+                          )}
+                      </div>
                     </td>
                     <td className="px-2 py-3 text-center">{inquiry.views}</td>
                     <td className="px-2 py-3 text-center">
