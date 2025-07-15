@@ -24,7 +24,7 @@ import {
   useGetContactsQuery,
   useSubmitContactMutation,
   useVerifyContactPasswordMutation,
-  useIncrementContactViewsMutation, // 추가
+  useLazyGetContactQuery,
 } from '@/store/api/contactApi'
 import {
   Dialog,
@@ -61,7 +61,7 @@ const inquiryCategories = [
 ]
 
 // 문의 상태 색상
-const statusColors = {
+const _statusColors = {
   대기중:
     'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
   처리중: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
@@ -139,7 +139,7 @@ export default function ContactPage() {
 
   const [submitContact] = useSubmitContactMutation()
   const [verifyContactPassword] = useVerifyContactPasswordMutation()
-  const [incrementViews] = useIncrementContactViewsMutation() // 추가
+  const [trigger, { data: inquiry }] = useLazyGetContactQuery()
 
   const { user } = useAuth() || {}
 
@@ -176,12 +176,10 @@ export default function ContactPage() {
 
   // isPublic: true = 비공개글, false = 공개글
   // 상세 모달 열기 (조회수 증가 포함)
-  const handleTitleClick = async (inquiry) => {
-    console.log('handleTitleClick 실행', inquiry)
+  const handleTitleClick = async (inquiryId) => {
+    console.log('handleTitleClick 실행', inquiryId)
     try {
-      const result = await incrementViews(inquiry.id).unwrap()
-      console.log('incrementViews result:', result)
-      await refetch()
+      trigger(inquiryId)
     } catch (e) {
       console.error('조회수 증가 에러:', e)
     }
@@ -353,7 +351,7 @@ export default function ContactPage() {
                             'hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-300',
                             'rounded px-1 focus:outline-none',
                           )}
-                          onClick={() => handleTitleClick(inquiry)}
+                          onClick={() => handleTitleClick(inquiry.id)}
                           aria-label="문의 상세 보기"
                         >
                           {inquiry.title}

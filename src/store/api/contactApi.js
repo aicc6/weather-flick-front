@@ -25,16 +25,9 @@ export const contactApi = createApi({
         body: { email, password },
       }),
     }),
-    // 조회수 증가
-    incrementContactViews: builder.mutation({
-      query: (contactId) => ({
-        url: `contact/${contactId}/increment-views`,
-        method: 'POST',
-      }),
-      invalidatesTags: (result, error, contactId) => [
-        { type: 'Contact', id: contactId },
-        'Contact',
-      ],
+    getContact: builder.query({
+      query: (contactId) => `contact/${contactId}`,
+      providesTags: ['Contact'],
     }),
   }),
 })
@@ -42,6 +35,6 @@ export const contactApi = createApi({
 export const {
   useSubmitContactMutation,
   useGetContactsQuery,
+  useLazyGetContactQuery,
   useVerifyContactPasswordMutation,
-  useIncrementContactViewsMutation,
 } = contactApi
