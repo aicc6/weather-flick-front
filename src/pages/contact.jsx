@@ -300,7 +300,10 @@ export default function ContactPage() {
                         >
                           {inquiry.title}
                         </button>
-                        {!inquiry.isPublic && (
+                        {/* 대기중 뱃지 항상 표시 */}
+                        <Badge className={statusColors['대기중']}>대기중</Badge>
+                        {/* 비공개 뱃지는 조건부 표시 */}
+                        {(inquiry.isPublic || inquiry.is_public) && (
                           <Badge variant="secondary" className="text-xs">
                             비공개
                           </Badge>
