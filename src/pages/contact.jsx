@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/dialog'
 import ContactForm from '@/components/contact/ContactForm'
 import { useAuth } from '@/contexts/AuthContextRTK'
+import { cn } from '@/lib/utils'
 
 // 문의 스키마 정의
 const contactSchema = z.object({
@@ -318,7 +319,12 @@ export default function ContactPage() {
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          className="max-w-xs truncate text-left text-blue-700 underline hover:text-blue-900 focus:outline-none"
+                          className={cn(
+                            'max-w-xs truncate text-left font-medium transition-colors duration-200',
+                            'text-gray-900 dark:text-gray-100',
+                            'hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-300',
+                            'rounded px-1 focus:outline-none',
+                          )}
                           onClick={() => handleTitleClick(inquiry)}
                           aria-label="문의 상세 보기"
                         >
@@ -426,7 +432,7 @@ export default function ContactPage() {
               onChange={(e) => setPassword(e.target.value)}
             />
             {passwordError && (
-              <div 
+              <div
                 className={`mb-2 text-sm text-red-600 ${shakeError ? 'animate-shake' : ''}`}
                 onAnimationEnd={() => setShakeError(false)}
               >
