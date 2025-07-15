@@ -24,6 +24,7 @@ import {
   useGetContactsQuery,
   useSubmitContactMutation,
   useVerifyContactPasswordMutation,
+  useIncrementContactViewsMutation, // 추가
 } from '@/store/api/contactApi'
 import {
   Dialog,
@@ -102,6 +103,7 @@ export default function ContactPage() {
     data: existingInquiries = [],
     isLoading,
     isError,
+    refetch, // 추가
   } = useGetContactsQuery()
 
   const [_activeTab, _setActiveTab] = useState('write')
@@ -137,6 +139,7 @@ export default function ContactPage() {
 
   const [submitContact] = useSubmitContactMutation()
   const [verifyContactPassword] = useVerifyContactPasswordMutation()
+  const [incrementViews] = useIncrementContactViewsMutation() // 추가
 
   const { user } = useAuth() || {}
 
@@ -172,8 +175,16 @@ export default function ContactPage() {
   }, [existingInquiries, searchTerm, selectedCategory])
 
   // isPublic: true = 비공개글, false = 공개글
-  // 상세 모달 열기
-  const handleTitleClick = (inquiry) => {
+  // 상세 모달 열기 (조회수 증가 포함)
+  const handleTitleClick = async (inquiry) => {
+    console.log('handleTitleClick 실행', inquiry)
+    try {
+      const result = await incrementViews(inquiry.id).unwrap()
+      console.log('incrementViews result:', result)
+      await refetch()
+    } catch (e) {
+      console.error('조회수 증가 에러:', e)
+    }
     // 비공개 문의: 작성자만 열람
     if (inquiry.isPublic || inquiry.is_public) {
       if (!user || user.email !== inquiry.email) {
@@ -196,6 +207,11 @@ export default function ContactPage() {
   const handleCloseModal = () => {
     setModalOpen(false)
     setSelectedInquiry(null)
+  }
+
+  // 상세 모달 오픈 핸들러 등 필요시 정의
+  const handleOpenDetail = (contact) => {
+    // 상세 모달 오픈 로직
   }
 
   if (isLoading) return <div>문의 목록을 불러오는 중입니다...</div>
