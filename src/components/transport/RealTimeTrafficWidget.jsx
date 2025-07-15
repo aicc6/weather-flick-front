@@ -338,7 +338,7 @@ export function RealTimeTrafficWidget({
 }
 
 // 모의 실시간 교통 데이터 생성 함수
-const generateRealTimeTrafficData = (route) => {
+const generateRealTimeTrafficData = (_route) => {
   const currentHour = new Date().getHours()
   const isRushHour =
     (currentHour >= 7 && currentHour <= 9) ||

@@ -11,7 +11,7 @@ import { Route, Clock, Navigation, Zap } from '@/components/icons'
  */
 export function RouteNavigation({
   itinerary,
-  startLocation = null,
+  _startLocation = null,
   className = '',
 }) {
   const [isGeneratingRoute, setIsGeneratingRoute] = useState(false)

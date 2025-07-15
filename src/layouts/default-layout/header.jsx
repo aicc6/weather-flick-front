@@ -128,7 +128,7 @@ export function Header() {
   }
 
   // 인증이 필요한 페이지 네비게이션 처리
-  const handleAuthRequiredNavigation = (path) => {
+  const _handleAuthRequiredNavigation = (path) => {
     if (!user) {
       navigate('/login')
       return

@@ -50,9 +50,40 @@ export function NotificationSettings({
 
   // 컴포넌트 마운트 시 설정 로드
   useEffect(() => {
-    loadSettings()
-    checkPermission()
-    loadScheduledNotifications()
+    const loadSettingsLocal = () => {
+      if (route?.route_id) {
+        const routeSettings = getRouteNotificationSettings(
+          route.route_id,
+          planId,
+        )
+
+        // 출발 시간이 없으면 현재 시간에서 1시간 후로 기본 설정
+        if (!routeSettings.departureTime) {
+          const now = new Date()
+          const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000)
+          const defaultTime = oneHourLater.toISOString().slice(0, 16) // YYYY-MM-DDTHH:mm 형식
+          routeSettings.departureTime = defaultTime
+        }
+
+        setSettings(routeSettings)
+      }
+    }
+
+    const checkPermissionLocal = () => {
+      const currentPermission = getNotificationPermission()
+      setPermission(currentPermission)
+    }
+
+    const loadScheduledNotificationsLocal = () => {
+      if (route?.route_id) {
+        const scheduled = getScheduledNotifications(route.route_id, planId)
+        setScheduledNotifications(scheduled)
+      }
+    }
+
+    loadSettingsLocal()
+    checkPermissionLocal()
+    loadScheduledNotificationsLocal()
   }, [route?.route_id, planId])
 
   const loadSettings = () => {
@@ -201,7 +232,7 @@ export function NotificationSettings({
       },
     }
 
-    const scheduled = scheduleNotification(
+    const _scheduled = scheduleNotification(
       notificationData,
       delayMs,
       notificationId,
@@ -457,7 +488,7 @@ export function NotificationSettings({
           <div className="rounded-lg bg-blue-50 p-3 text-sm text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
             💡 <strong>사용 팁:</strong>
             <br />
-            • 출발 시간을 설정하고 "출발 알림 예약" 버튼을 클릭하세요
+            • 출발 시간을 설정하고 &quot;출발 알림 예약&quot; 버튼을 클릭하세요
             <br />
             • 설정한 시간 전에 알림이 자동으로 전송됩니다
             <br />• 브라우저가 열려있을 때만 알림이 작동합니다

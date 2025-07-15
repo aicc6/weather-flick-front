@@ -25,7 +25,7 @@ const ContactForm = ({ onSuccess, defaultName = '', defaultEmail = '' }) => {
       reset()
       setInfoFilled(false)
       onSuccess?.()
-    } catch (e) {
+    } catch (_e) {
       // 에러 처리
     }
   }

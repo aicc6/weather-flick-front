@@ -19,7 +19,7 @@ import { NavigationButton } from '@/components/navigation'
  */
 export function PlaceCard({
   place,
-  dayNumber,
+  _dayNumber,
   placeIndex,
   weather = null,
   showWeather = true,

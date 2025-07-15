@@ -15,7 +15,7 @@ import CompactPlaceCard from './CompactPlaceCard'
  * 컴팩트한 일차별 여행 일정 컴포넌트
  */
 export function CompactDayItinerary({
-  day,
+  _day,
   places = [],
   dayNumber,
   weatherData = {},

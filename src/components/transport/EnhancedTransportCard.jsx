@@ -32,7 +32,7 @@ const transportIcons = {
 }
 
 // 시간대별 선택 컴포넌트
-const TimeSelector = ({ value, onChange, options }) => {
+const _TimeSelector = ({ value, onChange, _options }) => {
   const [showCustomTime, setShowCustomTime] = useState(false)
   const [customTime, setCustomTime] = useState('')
 
@@ -557,7 +557,7 @@ const RouteComparison = ({ routes }) => {
 }
 
 // 타임머신 인사이트 컴포넌트
-const TimeMachineInsights = ({ time, predictions }) => {
+const _TimeMachineInsights = ({ time, predictions }) => {
   if (!predictions || !predictions[time]) return null
 
   const insight = predictions[time]
@@ -735,7 +735,7 @@ const extractMajorRoads = (
 }
 
 // 근거리 지역 도로명 반환 함수
-const getLocalRoads = (departureCoords, destinationCoords) => {
+const getLocalRoads = (_departureCoords, _destinationCoords) => {
   // 서울 구로/금천/관악 지역 (가산디지털단지 주변)
   const localRoads = [
     '디지털로',
@@ -752,7 +752,7 @@ const getLocalRoads = (departureCoords, destinationCoords) => {
 }
 
 // 중거리 간선도로명 반환 함수
-const getArterialRoads = (departureCoords, destinationCoords) => {
+const getArterialRoads = (_departureCoords, _destinationCoords) => {
   const arterialRoads = [
     '경인로',
     '시흥대로',
@@ -768,7 +768,7 @@ const getArterialRoads = (departureCoords, destinationCoords) => {
 }
 
 // 장거리 고속도로/간선도로명 반환 함수
-const getHighwayRoads = (departureCoords, destinationCoords) => {
+const getHighwayRoads = (_departureCoords, _destinationCoords) => {
   const highwayRoads = [
     '경부고속도로',
     '올림픽대로',
@@ -1659,7 +1659,7 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
   }
 
   // 교통수단 이름 반환 (컴포넌트 내부 함수)
-  function getTransportName(transportType) {
+  function _getTransportName(transportType) {
     switch (transportType) {
       case 'walk':
         return '도보'

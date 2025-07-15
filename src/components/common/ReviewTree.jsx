@@ -55,7 +55,7 @@ function splitBestAndNormal(reviews) {
 const ReviewTree = memo(function ReviewTree({
   reviews = [],
   onReply,
-  parentId,
+  _parentId,
   depth = 0,
 }) {
   // 최상위 댓글만 분리
@@ -68,15 +68,15 @@ const ReviewTree = memo(function ReviewTree({
   const [tab, setTab] = useState('best')
 
   // 최상위 댓글 폼 별점 상태
-  const [rootRating, setRootRating] = useState(5)
+  const [_rootRating, _setRootRating] = useState(5)
 
   // 최상위 댓글 등록 핸들러
-  const handleRootSubmit = useCallback(
+  const _handleRootSubmit = useCallback(
     async (content) => {
-      await onReply?.(undefined, content, rootRating)
+      await onReply?.(undefined, content, _rootRating)
       // setRootRating(5) 제거: 등록 후에도 사용자가 선택한 별점 유지
     },
-    [onReply, rootRating],
+    [onReply, _rootRating],
   )
 
   return (
@@ -140,7 +140,7 @@ const ReviewNode = memo(function ReviewNode({
 }) {
   const [showReply, setShowReply] = useState(false)
   const [replyContent, setReplyContent] = useState('')
-  const [replyRating, setReplyRating] = useState(5)
+  const [replyRating, _setReplyRating] = useState(5)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showChildren, setShowChildren] = useState(true)
   const { data: likeData, isLoading: likeLoading } = useGetReviewLikeQuery(
@@ -300,7 +300,7 @@ const ReviewNode = memo(function ReviewNode({
         showChildren &&
         depth === 0 && (
           <div className="mt-2 ml-6">
-            {review.children.map((child, idx) => (
+            {review.children.map((child, _idx) => (
               <div key={child.id} className="relative mb-2 pl-5">
                 {/* ㄴ자 선: 각 답글마다 앞에 개별적으로 */}
                 <div className="pointer-events-none absolute top-2 left-0 h-4 w-4">

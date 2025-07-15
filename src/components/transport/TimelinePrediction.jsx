@@ -19,7 +19,7 @@ export function TimelinePrediction({
   route,
   onTimeSelect,
   selectedTime,
-  currentPredictions = {},
+  _currentPredictions = {},
 }) {
   const [viewMode, setViewMode] = useState('timeline') // 'timeline', 'comparison', 'trends'
   const [detailHour, setDetailHour] = useState(null)
@@ -355,7 +355,7 @@ const HourDetailPanel = ({ prediction, onClose }) => (
 )
 
 // 교통수단별 비교 컴포넌트
-const TransportModeComparison = ({ mode, predictions, route }) => {
+const TransportModeComparison = ({ mode, predictions, _route }) => {
   const modeConfig = {
     car: { name: '자동차', icon: '🚗', color: 'blue' },
     transit: { name: '대중교통', icon: '🚇', color: 'green' },
@@ -481,7 +481,7 @@ const formatDisplayTime = (hour) => {
   return `오후 ${hour - 12}시`
 }
 
-const generateHourlyPrediction = (hour, route) => {
+const generateHourlyPrediction = (hour, _route) => {
   // 실제로는 백엔드 API에서 받아올 데이터
   const baseTime = 25
   const baseCost = 1500

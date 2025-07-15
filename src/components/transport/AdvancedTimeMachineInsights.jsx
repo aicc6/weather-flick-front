@@ -121,40 +121,42 @@ export function AdvancedTimeMachineInsights({
         <div>
           <h4 className="mb-3 font-medium">교통수단 비교</h4>
           <div className="grid gap-3">
-            {enrichedPredictions.transportComparison.map((transport, index) => (
-              <div
-                key={transport.mode}
-                className={`rounded-lg border p-3 transition-all ${
-                  transport.recommended
-                    ? 'border-green-500 bg-green-50'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-xl">{transport.icon}</span>
-                    <div>
-                      <div className="text-sm font-medium">
-                        {transport.name}
-                      </div>
-                      <div className="text-xs text-gray-600">
-                        {transport.time}분 • {transport.cost}원
+            {enrichedPredictions.transportComparison.map(
+              (transport, _index) => (
+                <div
+                  key={transport.mode}
+                  className={`rounded-lg border p-3 transition-all ${
+                    transport.recommended
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-gray-200 bg-white hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-xl">{transport.icon}</span>
+                      <div>
+                        <div className="text-sm font-medium">
+                          {transport.name}
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          {transport.time}분 • {transport.cost}원
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    {transport.recommended && (
-                      <Badge variant="default" className="mb-1 text-xs">
-                        추천
-                      </Badge>
-                    )}
-                    <div className="text-xs text-gray-600">
-                      {transport.advantages.slice(0, 2).join(', ')}
+                    <div className="text-right">
+                      {transport.recommended && (
+                        <Badge variant="default" className="mb-1 text-xs">
+                          추천
+                        </Badge>
+                      )}
+                      <div className="text-xs text-gray-600">
+                        {transport.advantages.slice(0, 2).join(', ')}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ),
+            )}
           </div>
         </div>
       </div>
@@ -591,7 +593,7 @@ const generateEnrichedPredictions = (
   time,
   predictions,
   route,
-  userPreferences,
+  _userPreferences,
 ) => {
   if (!time || time === 'now') return null
 

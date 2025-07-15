@@ -91,7 +91,7 @@ export default function ContactPage() {
     isError,
   } = useGetContactsQuery()
 
-  const [activeTab, setActiveTab] = useState('write')
+  const [_activeTab, _setActiveTab] = useState('write')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [modalOpen, setModalOpen] = useState(false)
@@ -103,12 +103,12 @@ export default function ContactPage() {
   const [detailInquiry, setDetailInquiry] = useState(null)
 
   const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
+    _register,
+    _handleSubmit,
+    formState: { _errors, _isSubmitting },
     reset,
-    watch,
-    setValue,
+    _watch,
+    _setValue,
   } = useForm({
     resolver: zodResolver(contactSchema),
     defaultValues: {
@@ -127,13 +127,13 @@ export default function ContactPage() {
   const { user } = useAuth() || {}
 
   // 문의 제출 핸들러
-  const onSubmit = useCallback(
+  const _onSubmit = useCallback(
     async (data) => {
       try {
         await submitContact(data).unwrap()
         alert('문의가 성공적으로 접수되었습니다.')
         reset()
-      } catch (error) {
+      } catch (_error) {
         alert('문의 접수 중 오류가 발생했습니다.')
       }
     },

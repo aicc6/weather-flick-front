@@ -20,7 +20,7 @@ import { toast } from 'sonner'
  * 실시간 공동 편집, 투표, 댓글 기능 제공
  */
 const CollaborativePlanning = memo(
-  ({ planId, currentUser, onCollaboratorUpdate, className }) => {
+  ({ _planId, currentUser, onCollaboratorUpdate, className }) => {
     const [collaborators, setCollaborators] = useState([
       {
         id: 1,
@@ -54,7 +54,7 @@ const CollaborativePlanning = memo(
         status: 'active',
       },
     ])
-    const [comments, setComments] = useState([
+    const [comments, _setComments] = useState([
       {
         id: 1,
         user: '박영희',
@@ -93,7 +93,7 @@ const CollaborativePlanning = memo(
         setInviteEmail('')
         toast.success(`${inviteEmail}에게 초대장을 보냈습니다`)
         onCollaboratorUpdate?.(collaborators.length + 1)
-      } catch (error) {
+      } catch (_error) {
         toast.error('초대 전송에 실패했습니다')
       }
     }, [inviteEmail, collaborators.length, onCollaboratorUpdate])

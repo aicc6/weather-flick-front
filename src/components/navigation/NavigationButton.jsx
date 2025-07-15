@@ -57,7 +57,7 @@ export function NavigationButton({
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
   // 지도 서비스별 URL 생성 함수들
-  const getKakaoMapUrl = (transportType = 'car') => {
+  const getKakaoMapUrl = (_transportType = 'car') => {
     const encodedName = encodeURIComponent(
       name || destination.description || 'Unknown',
     )
@@ -71,7 +71,7 @@ export function NavigationButton({
     return null
   }
 
-  const getNaverMapUrl = (transportType = 'car') => {
+  const getNaverMapUrl = (_transportType = 'car') => {
     const encodedName = encodeURIComponent(
       name || destination.description || 'Unknown',
     )
@@ -80,7 +80,7 @@ export function NavigationButton({
       transit: 'transit',
       walk: 'walk',
     }
-    const naverTransport = transportMap[transportType] || 'car'
+    const naverTransport = transportMap[_transportType] || 'car'
     if (lat && lng) {
       // 네이버맵에서는 자동으로 현재 위치에서 출발하는 길찾기 제공
       return `https://map.naver.com/v5/${naverTransport}/-/-/${lat},${lng},name=${encodedName}`

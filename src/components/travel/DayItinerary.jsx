@@ -17,7 +17,7 @@ import PlaceCard from './PlaceCard'
  * 깔끔하고 간결한 디자인으로 일차별 장소들을 표시
  */
 export function DayItinerary({
-  day,
+  _day,
   places = [],
   dayNumber,
   weatherData = {},

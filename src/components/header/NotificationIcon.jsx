@@ -73,7 +73,7 @@ export function NotificationIcon({ className = '' }) {
   }
 
   // 알림 읽음 처리
-  const handleMarkAsRead = (notificationId) => {
+  const _handleMarkAsRead = (notificationId) => {
     updateScheduledNotificationStatus(notificationId, 'read')
     loadNotifications()
   }

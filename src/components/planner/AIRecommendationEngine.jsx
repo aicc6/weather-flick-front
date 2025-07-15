@@ -39,7 +39,7 @@ const AIRecommendationEngine = memo(
 
       try {
         // AI 분석 요소들
-        const analysisFactors = {
+        const _analysisFactors = {
           userProfile: {
             age: userPreferences.age,
             interests: userPreferences.interests || [],

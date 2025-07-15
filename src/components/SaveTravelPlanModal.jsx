@@ -79,7 +79,7 @@ export default function SaveTravelPlanModal({
       updateDestInput('origin', address)
       setOrigin(address)
       toast.success('현재 위치가 설정되었습니다')
-    } catch (error) {
+    } catch (_error) {
       toast.error('위치를 가져올 수 없습니다. 직접 입력해 주세요')
     }
   }

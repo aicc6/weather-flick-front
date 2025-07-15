@@ -109,7 +109,7 @@ export default function CustomizedScheduleRegionPage() {
     loadRegionImages()
   }, [cities])
 
-  const getSelectedCityData = () => {
+  const _getSelectedCityData = () => {
     if (!regionCode) return null
     const cityData = cities.find((city) => city.region_code === regionCode)
     if (cityData) {

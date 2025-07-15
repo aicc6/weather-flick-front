@@ -61,7 +61,7 @@ const WeatherIntelligence = memo(
         setLoading(true)
         try {
           // 실제로는 날씨 API 호출
-          const mockWeatherData = travelDates.map((date, index) => ({
+          const mockWeatherData = travelDates.map((date, _index) => ({
             date,
             temperature: 22 + Math.random() * 8,
             humidity: 60 + Math.random() * 30,
@@ -90,7 +90,7 @@ const WeatherIntelligence = memo(
     const generateWeatherAlerts = (data) => {
       const newAlerts = []
 
-      data.forEach((dayWeather, index) => {
+      data.forEach((dayWeather, _index) => {
         // 강수량 경고
         if (dayWeather.precipitation > 30) {
           newAlerts.push({
