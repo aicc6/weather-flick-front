@@ -46,7 +46,7 @@ const ContactForm = ({ onSuccess, defaultName = '', defaultEmail = '' }) => {
         <select
           id="category"
           {...register('category', { required: true })}
-          className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+          className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
         >
           <option value="">문의 분류 선택</option>
           <option value="일반 문의">일반 문의</option>
@@ -69,6 +69,7 @@ const ContactForm = ({ onSuccess, defaultName = '', defaultEmail = '' }) => {
           {...register('title', { required: true })}
           placeholder="제목을 입력하세요"
           aria-invalid={!!errors.title}
+          className="border border-gray-300 bg-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
         />
         {errors.title && (
           <p className="mt-1 text-sm text-red-600">제목을 입력해주세요.</p>
@@ -86,6 +87,7 @@ const ContactForm = ({ onSuccess, defaultName = '', defaultEmail = '' }) => {
           placeholder="문의 내용을 입력하세요"
           rows={5}
           aria-invalid={!!errors.content}
+          className="border border-gray-300 bg-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
         />
         {errors.content && (
           <p className="mt-1 text-sm text-red-600">문의 내용을 입력해주세요.</p>
@@ -103,6 +105,7 @@ const ContactForm = ({ onSuccess, defaultName = '', defaultEmail = '' }) => {
             {...register('name', { required: true })}
             placeholder="이름을 입력하세요"
             aria-invalid={!!errors.name}
+            className="border border-gray-300 bg-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
           />
           <Button
             type="button"
@@ -129,6 +132,7 @@ const ContactForm = ({ onSuccess, defaultName = '', defaultEmail = '' }) => {
           {...register('email', { required: true })}
           placeholder="이메일을 입력하세요"
           aria-invalid={!!errors.email}
+          className="border border-gray-300 bg-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
         />
         {errors.email && (
           <p className="mt-1 text-sm text-red-600">이메일을 입력해주세요.</p>
