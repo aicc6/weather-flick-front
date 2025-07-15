@@ -67,13 +67,26 @@ export function TravelPlanDetailPage() {
   })
 
   // 디버깅을 위한 로그
-  console.log('Routes Debug:', {
-    planId,
-    routes,
-    routesLoading,
-    routesError,
-    routesLength: routes?.length || 0,
-  })
+  console.log('Routes Loading:', routesLoading)
+  console.log('Routes Length:', routes?.length || 0)
+  console.log('Routes Error:', routesError)
+  console.log('Plan ID:', planId)
+  if (routes && routes.length > 0) {
+    console.log('First Route Sample:', routes[0])
+    console.log('Route Fields:', Object.keys(routes[0]))
+    console.log('Sample Coordinates:', {
+      departure_lat: routes[0].departure_lat,
+      departure_lng: routes[0].departure_lng,
+      destination_lat: routes[0].destination_lat,
+      destination_lng: routes[0].destination_lng
+    })
+    console.log('Day Info:', {
+      day: routes[0].day,
+      sequence: routes[0].sequence,
+      route_order: routes[0].route_order
+    })
+    console.log('All Routes Day Info:', routes.map(r => ({ route_order: r.route_order, day: r.day, sequence: r.sequence })))
+  }
 
   // 자동 경로 생성
   const [autoGenerateRoutes, { isLoading: isGeneratingRoutes }] =
