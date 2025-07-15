@@ -20,8 +20,11 @@ import {
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Mail, Phone, Clock, Info, PlusCircle } from '@/components/icons'
-import { useGetContactsQuery } from '@/store/api/contactApi'
-import { useSubmitContactMutation } from '@/store/api/contactApi'
+import {
+  useGetContactsQuery,
+  useSubmitContactMutation,
+  useVerifyContactPasswordMutation,
+} from '@/store/api/contactApi'
 import {
   Dialog,
   DialogTrigger,
@@ -94,6 +97,10 @@ export default function ContactPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedInquiry, setSelectedInquiry] = useState(null)
   const [formOpen, setFormOpen] = useState(false)
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false)
+  const [password, setPassword] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  const [detailInquiry, setDetailInquiry] = useState(null)
 
   const {
     register,
@@ -115,6 +122,7 @@ export default function ContactPage() {
   })
 
   const [submitContact] = useSubmitContactMutation()
+  const [verifyContactPassword] = useVerifyContactPasswordMutation()
 
   const { user } = useAuth() || {}
 
@@ -149,9 +157,23 @@ export default function ContactPage() {
     })
   }, [existingInquiries, searchTerm, selectedCategory])
 
+  // isPublic: true = 비공개글, false = 공개글
   // 상세 모달 열기
   const handleTitleClick = (inquiry) => {
-    setSelectedInquiry(inquiry)
+    // 비공개 문의: 작성자만 열람
+    if (inquiry.isPublic || inquiry.is_public) {
+      if (!user || user.email !== inquiry.email) {
+        alert('비공개 문의입니다. 작성자만 열람할 수 있습니다.')
+        return
+      }
+      setSelectedInquiry(inquiry)
+      setPasswordModalOpen(true)
+      setPassword('')
+      setPasswordError('')
+      return
+    }
+    // 공개 문의: 누구나 바로 열람
+    setDetailInquiry(inquiry)
     setModalOpen(true)
   }
 
@@ -300,7 +322,10 @@ export default function ContactPage() {
                         >
                           {inquiry.title}
                         </button>
-                        {!inquiry.isPublic && (
+                        {/* 대기중 뱃지 항상 표시 */}
+                        <Badge className={statusColors['대기중']}>대기중</Badge>
+                        {/* 비공개 뱃지는 isPublic true일 때만 표시 */}
+                        {(inquiry.isPublic || inquiry.is_public) && (
                           <Badge variant="secondary" className="text-xs">
                             비공개
                           </Badge>
@@ -331,7 +356,7 @@ export default function ContactPage() {
       </Card>
 
       {/* 상세 모달 */}
-      {modalOpen && selectedInquiry && (
+      {modalOpen && (detailInquiry || selectedInquiry) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-lg dark:bg-gray-900">
             <button
@@ -341,24 +366,30 @@ export default function ContactPage() {
             >
               ×
             </button>
-            <h3 className="mb-2 text-xl font-bold">{selectedInquiry.title}</h3>
+            <h3 className="mb-2 text-xl font-bold">
+              {(detailInquiry || selectedInquiry).title}
+            </h3>
             <div className="mb-4 whitespace-pre-line text-gray-700 dark:text-gray-200">
-              {selectedInquiry.content}
+              {(detailInquiry || selectedInquiry).content}
             </div>
             <div className="mb-2 text-sm text-gray-500">
               <span className="font-medium">분류:</span>{' '}
-              {selectedInquiry.category}
+              {(detailInquiry || selectedInquiry).category}
             </div>
             <div className="mb-2 text-sm text-gray-500">
-              <span className="font-medium">이름:</span> {selectedInquiry.name}
+              <span className="font-medium">이름:</span>{' '}
+              {(detailInquiry || selectedInquiry).name}
             </div>
             <div className="mb-2 text-sm text-gray-500">
               <span className="font-medium">이메일:</span>{' '}
-              {selectedInquiry.email}
+              {(detailInquiry || selectedInquiry).email}
             </div>
             <div className="mb-2 text-sm text-gray-500">
               <span className="font-medium">등록일:</span>{' '}
-              {formatDate(selectedInquiry.created_at || selectedInquiry.date)}
+              {formatDate(
+                (detailInquiry || selectedInquiry).created_at ||
+                  (detailInquiry || selectedInquiry).date,
+              )}
             </div>
             <div className="text-right">
               <button
@@ -366,6 +397,66 @@ export default function ContactPage() {
                 onClick={handleCloseModal}
               >
                 닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {passwordModalOpen && selectedInquiry && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="relative w-full max-w-sm rounded-lg bg-white p-6 shadow-lg dark:bg-gray-900">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-900 dark:hover:text-white"
+              onClick={() => {
+                setPasswordModalOpen(false)
+                setSelectedInquiry(null)
+              }}
+              aria-label="닫기"
+            >
+              ×
+            </button>
+            <h3 className="mb-4 text-lg font-bold">비밀번호 확인</h3>
+            <input
+              type="password"
+              className="mb-2 w-full rounded border px-3 py-2"
+              placeholder="비밀번호를 입력하세요"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            {passwordError && (
+              <div className="mb-2 text-sm text-red-600">{passwordError}</div>
+            )}
+            <div className="flex justify-end gap-2">
+              <button
+                className="rounded bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
+                onClick={() => {
+                  setPasswordModalOpen(false)
+                  setSelectedInquiry(null)
+                }}
+              >
+                취소
+              </button>
+              <button
+                className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                onClick={async () => {
+                  try {
+                    await verifyContactPassword({
+                      contactId: selectedInquiry.id,
+                      email: user.email,
+                      password,
+                    }).unwrap()
+                    setDetailInquiry(selectedInquiry)
+                    setModalOpen(true)
+                    setPasswordModalOpen(false)
+                    setSelectedInquiry(null)
+                    setPassword('')
+                    setPasswordError('')
+                  } catch (e) {
+                    setPasswordError('비밀번호가 올바르지 않습니다.')
+                  }
+                }}
+              >
+                확인
               </button>
             </div>
           </div>

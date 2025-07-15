@@ -19,6 +19,7 @@ const ContactForm = ({ onSuccess, defaultName = '', defaultEmail = '' }) => {
   const [infoFilled, setInfoFilled] = useState(false)
 
   const onSubmit = async (data) => {
+    console.log('onSubmit data:', data)
     try {
       await submitContact(data).unwrap()
       reset()
@@ -137,6 +138,19 @@ const ContactForm = ({ onSuccess, defaultName = '', defaultEmail = '' }) => {
         {errors.email && (
           <p className="mt-1 text-sm text-red-600">이메일을 입력해주세요.</p>
         )}
+      </div>
+
+      {/* 비공개 체크박스 */}
+      <div className="flex items-center gap-2">
+        <input
+          id="is_public"
+          type="checkbox"
+          {...register('is_public')}
+          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        />
+        <Label htmlFor="is_public" className="cursor-pointer select-none">
+          비공개
+        </Label>
       </div>
 
       {/* 제출 버튼 */}
