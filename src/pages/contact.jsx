@@ -133,13 +133,14 @@ export default function ContactPage() {
       content: '',
       email: '',
       name: '',
-      isPublic: false,
+      isPublic: true, // 기본값을 true(공개)로 변경
     },
   })
 
   const [submitContact] = useSubmitContactMutation()
   const [verifyContactPassword] = useVerifyContactPasswordMutation()
-  const [trigger, { data: inquiry }] = useLazyGetContactQuery()
+  const [trigger, { data: inquiry, isFetching, isSuccess }] =
+    useLazyGetContactQuery()
 
   const { user } = useAuth() || {}
 
@@ -177,28 +178,29 @@ export default function ContactPage() {
   // isPublic: true = 비공개글, false = 공개글
   // 상세 모달 열기 (조회수 증가 포함)
   const handleTitleClick = async (inquiryId) => {
-    console.log('handleTitleClick 실행', inquiryId)
     try {
-      trigger(inquiryId)
-    } catch (e) {
-      console.error('조회수 증가 에러:', e)
-    }
-    // 비공개 문의: 작성자만 열람
-    if (inquiry.isPublic || inquiry.is_public) {
-      if (!user || user.email !== inquiry.email) {
-        alert('비공개 문의입니다. 작성자만 열람할 수 있습니다.')
+      const result = await trigger(inquiryId).unwrap()
+      // 공개글: 누구나 열람 가능
+      if (result.isPublic === true || result.is_public === true) {
+        setDetailInquiry(result)
+        setModalOpen(true)
         return
       }
-      setSelectedInquiry(inquiry)
-      setPasswordModalOpen(true)
-      setPassword('')
-      setPasswordError('')
-      setShakeError(false)
-      return
+      // 비공개글: 본인만 비밀번호 입력 후 열람 가능
+      if (user && user.email === result.email) {
+        setSelectedInquiry(result)
+        setPasswordModalOpen(true)
+        setPassword('')
+        setPasswordError('')
+        setShakeError(false)
+        return
+      }
+      // 비공개글: 타인은 열람 불가
+      alert('비공개 문의입니다. 작성자만 열람할 수 있습니다.')
+    } catch (e) {
+      alert('문의글을 불러오지 못했습니다.')
+      console.error(e)
     }
-    // 공개 문의: 누구나 바로 열람
-    setDetailInquiry(inquiry)
-    setModalOpen(true)
   }
 
   // 상세 모달 닫기
@@ -356,22 +358,23 @@ export default function ContactPage() {
                         >
                           {inquiry.title}
                         </button>
-                        {/* 비공개 아이콘만 표시 */}
-                        {(inquiry.isPublic || inquiry.is_public) && (
-                          <span title="비공개" className="text-gray-400">
-                            <svg
-                              width="16"
-                              height="16"
-                              fill="none"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fill="currentColor"
-                                d="M10 2a4 4 0 0 1 4 4v2h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2h1V6a4 4 0 0 1 4-4zm2 6V6a2 2 0 1 0-4 0v2h4z"
-                              />
-                            </svg>
-                          </span>
-                        )}
+                        {/* 비공개 아이콘: 비공개글이면 모두 표시 */}
+                        {inquiry.isPublic != true &&
+                          inquiry.is_public != true && (
+                            <span title="비공개" className="text-gray-400">
+                              <svg
+                                width="16"
+                                height="16"
+                                fill="none"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fill="currentColor"
+                                  d="M10 2a4 4 0 0 1 4 4v2h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2h1V6a4 4 0 0 1 4-4zm2 6V6a2 2 0 1 0-4 0v2h4z"
+                                />
+                              </svg>
+                            </span>
+                          )}
                       </div>
                     </td>
                     <td className="px-2 py-3 text-center">

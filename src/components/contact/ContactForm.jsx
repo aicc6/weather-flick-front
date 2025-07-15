@@ -28,7 +28,7 @@ const ContactForm = ({ onSuccess, defaultName = '', defaultEmail = '' }) => {
       return
     }
     try {
-      await submitContact(data).unwrap()
+      await submitContact({ ...data, is_public: !data.is_public }).unwrap()
       reset()
       setInfoFilled(false)
       onSuccess?.()
