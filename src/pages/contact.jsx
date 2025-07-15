@@ -29,6 +29,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import ContactForm from '@/components/contact/ContactForm'
+import { useAuth } from '@/contexts/AuthContextRTK'
 
 // 문의 스키마 정의
 const contactSchema = z.object({
@@ -114,6 +115,8 @@ export default function ContactPage() {
   })
 
   const [submitContact] = useSubmitContactMutation()
+
+  const { user } = useAuth() || {}
 
   // 문의 제출 핸들러
   const onSubmit = useCallback(
@@ -228,7 +231,11 @@ export default function ContactPage() {
               </DialogTrigger>
               <DialogContent>
                 <DialogTitle>문의하기</DialogTitle>
-                <ContactForm onSuccess={handleFormSuccess} />
+                <ContactForm
+                  onSuccess={handleFormSuccess}
+                  defaultName={user?.nickname || ''}
+                  defaultEmail={user?.email || ''}
+                />
               </DialogContent>
             </Dialog>
           </CardAction>

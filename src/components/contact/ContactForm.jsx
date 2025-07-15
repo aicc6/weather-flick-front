@@ -4,25 +4,36 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
+import { useState } from 'react'
 
-const ContactForm = ({ onSuccess }) => {
+const ContactForm = ({ onSuccess, defaultName = '', defaultEmail = '' }) => {
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm()
   const [submitContact, { isLoading, isError, error }] =
     useSubmitContactMutation()
+  const [infoFilled, setInfoFilled] = useState(false)
 
   const onSubmit = async (data) => {
     try {
       await submitContact(data).unwrap()
       reset()
+      setInfoFilled(false)
       onSuccess?.()
     } catch (e) {
       // 에러 처리
     }
+  }
+
+  // 내 정보 넣기 버튼 클릭 시
+  const handleFillMyInfo = () => {
+    setValue('name', defaultName)
+    setValue('email', defaultEmail)
+    setInfoFilled(true)
   }
 
   return (
@@ -86,12 +97,22 @@ const ContactForm = ({ onSuccess }) => {
         <Label htmlFor="name" className="mb-1 block">
           이름 <span className="text-red-500">*</span>
         </Label>
-        <Input
-          id="name"
-          {...register('name', { required: true })}
-          placeholder="이름을 입력하세요"
-          aria-invalid={!!errors.name}
-        />
+        <div className="flex gap-2">
+          <Input
+            id="name"
+            {...register('name', { required: true })}
+            placeholder="이름을 입력하세요"
+            aria-invalid={!!errors.name}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleFillMyInfo}
+            aria-label="내 정보 넣기"
+          >
+            내 정보 넣기
+          </Button>
+        </div>
         {errors.name && (
           <p className="mt-1 text-sm text-red-600">이름을 입력해주세요.</p>
         )}
