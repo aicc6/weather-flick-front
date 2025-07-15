@@ -101,6 +101,7 @@ export default function ContactPage() {
   const [password, setPassword] = useState('')
   const [passwordError, setPasswordError] = useState('')
   const [detailInquiry, setDetailInquiry] = useState(null)
+  const [shakeError, setShakeError] = useState(false)
 
   const {
     _register,
@@ -170,6 +171,7 @@ export default function ContactPage() {
       setPasswordModalOpen(true)
       setPassword('')
       setPasswordError('')
+      setShakeError(false)
       return
     }
     // 공개 문의: 누구나 바로 열람
@@ -424,7 +426,12 @@ export default function ContactPage() {
               onChange={(e) => setPassword(e.target.value)}
             />
             {passwordError && (
-              <div className="mb-2 text-sm text-red-600">{passwordError}</div>
+              <div 
+                className={`mb-2 text-sm text-red-600 ${shakeError ? 'animate-shake' : ''}`}
+                onAnimationEnd={() => setShakeError(false)}
+              >
+                {passwordError}
+              </div>
             )}
             <div className="flex justify-end gap-2">
               <button
@@ -453,6 +460,7 @@ export default function ContactPage() {
                     setPasswordError('')
                   } catch (e) {
                     setPasswordError('비밀번호가 올바르지 않습니다.')
+                    setShakeError(true)
                   }
                 }}
               >
