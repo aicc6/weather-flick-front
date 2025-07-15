@@ -309,7 +309,7 @@ export function TravelPlanDetailPage() {
               뒤로가기
             </button>
           </div>
-          {/* eslint-disable-next-line no-undef */}
+          {}
           {process.env.NODE_ENV === 'development' && (
             <details className="mt-4 text-left">
               <summary className="cursor-pointer text-sm text-red-600">

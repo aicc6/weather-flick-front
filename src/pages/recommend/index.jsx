@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -9,13 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  Search,
-  Filter,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
-} from '@/components/icons'
+import { Search, Filter, Settings } from '@/components/icons'
 import { getMultipleRegionImages } from '@/services/imageService'
 import {
   useGetTravelCoursesQuery,
@@ -64,16 +58,90 @@ export default function TravelCoursePage() {
   // API 데이터 로드
   // ===============================
   const {
-    data: regions = [],
+    data: regionsData = [],
     isLoading: regionsLoading,
     error: regionsError,
   } = useGetRegionsQuery()
-  
+
+  // regions 데이터 처리 - 전체 옵션이 이미 포함되어 있는지 확인 및 ㄱㄴㄷ 순 정렬
+  const regions = useMemo(() => {
+    console.log('=== Regions 데이터 ===', regionsData)
+    console.log(
+      '각 지역 상세:',
+      regionsData.map((r) => ({ code: r.code, name: r.name })),
+    )
+
+    if (!Array.isArray(regionsData)) return []
+
+    // "전체" 관련 옵션들을 필터링 (code가 'all'이거나 name에 '전체'가 포함된 경우)
+    const allOptions = regionsData.filter(
+      (r) =>
+        r.code === 'all' ||
+        r.name?.includes('전체') ||
+        r.name?.toLowerCase().includes('all'),
+    )
+    const normalRegions = regionsData.filter(
+      (r) =>
+        r.code !== 'all' &&
+        !r.name?.includes('전체') &&
+        !r.name?.toLowerCase().includes('all'),
+    )
+
+    console.log('전체 옵션들:', allOptions)
+    console.log('일반 지역들:', normalRegions)
+
+    // 일반 지역들을 한글 ㄱㄴㄷ 순으로 정렬
+    const sortedRegions = normalRegions.sort((a, b) => {
+      return a.name.localeCompare(b.name, 'ko', { sensitivity: 'base' })
+    })
+
+    // 첫 번째 "전체" 옵션만 사용 (중복 방지)
+    const firstAllOption = allOptions[0]
+    return firstAllOption ? [firstAllOption, ...sortedRegions] : sortedRegions
+  }, [regionsData])
+
   const {
-    data: themes = [],
+    data: themesData = [],
     isLoading: themesLoading,
     error: themesError,
   } = useGetThemesQuery()
+
+  // themes 데이터 처리 - 전체 옵션이 이미 포함되어 있는지 확인 및 ㄱㄴㄷ 순 정렬
+  const themes = useMemo(() => {
+    console.log('=== Themes 데이터 ===', themesData)
+    console.log(
+      '각 테마 상세:',
+      themesData.map((t) => ({ code: t.code, name: t.name })),
+    )
+
+    if (!Array.isArray(themesData)) return []
+
+    // "전체" 관련 옵션들을 필터링 (code가 'all'이거나 name에 '전체'가 포함된 경우)
+    const allOptions = themesData.filter(
+      (t) =>
+        t.code === 'all' ||
+        t.name?.includes('전체') ||
+        t.name?.toLowerCase().includes('all'),
+    )
+    const normalThemes = themesData.filter(
+      (t) =>
+        t.code !== 'all' &&
+        !t.name?.includes('전체') &&
+        !t.name?.toLowerCase().includes('all'),
+    )
+
+    console.log('전체 옵션들:', allOptions)
+    console.log('일반 테마들:', normalThemes)
+
+    // 일반 테마들을 한글 ㄱㄴㄷ 순으로 정렬
+    const sortedThemes = normalThemes.sort((a, b) => {
+      return a.name.localeCompare(b.name, 'ko', { sensitivity: 'base' })
+    })
+
+    // 첫 번째 "전체" 옵션만 사용 (중복 방지)
+    const firstAllOption = allOptions[0]
+    return firstAllOption ? [firstAllOption, ...sortedThemes] : sortedThemes
+  }, [themesData])
 
   // ===============================
   // 표시 및 페이지네이션 관련 상태
@@ -102,24 +170,41 @@ export default function TravelCoursePage() {
   // 검색 바 입력 시 검색 API 사용, 아니면 목록 API 사용
   const shouldUseSearch = debouncedSearchQuery.length >= 2
 
-  // ?반 ?행 코스 목록 조회
+  // API 쿼리 파라미터 생성
+  const listQueryParams = useMemo(() => {
+    const params = {
+      page: currentPage,
+      page_size: PAGE_SIZE,
+      region_code: selectedRegion !== 'all' ? selectedRegion : undefined,
+      // course_theme: selectedTheme !== 'all' ? selectedTheme : undefined, // 클라이언트에서 필터링
+    }
+    console.log('=== API 쿼리 파라미터 ===', params)
+    return params
+  }, [currentPage, selectedRegion])
+
+  // 일반 여행 코스 목록 조회
   const {
     data: travelCoursesResponse,
     error: listError,
     isLoading: isListLoading,
     isError: isListError,
     refetch: refetchList,
-  } = useGetTravelCoursesQuery(
-    {
+  } = useGetTravelCoursesQuery(listQueryParams, {
+    skip: shouldUseSearch, // 검색 중일 때는 쿼리 건너뛰기
+  })
+
+  // 검색 API 쿼리 파라미터 생성
+  const searchQueryParams = useMemo(() => {
+    const params = {
+      searchQuery: debouncedSearchQuery,
+      region_code: selectedRegion !== 'all' ? selectedRegion : undefined,
+      // theme: selectedTheme !== 'all' ? selectedTheme : undefined, // 클라이언트에서 필터링
       page: currentPage,
       page_size: PAGE_SIZE,
-      region_code: selectedRegion !== 'all' ? selectedRegion : undefined,
-      course_theme: selectedTheme !== 'all' ? selectedTheme : undefined,
-    },
-    {
-      skip: shouldUseSearch, // 검색 중일 때는 쿼리 건너뛰기
-    },
-  )
+    }
+    console.log('=== 검색 API 쿼리 파라미터 ===', params)
+    return params
+  }, [debouncedSearchQuery, currentPage, selectedRegion])
 
   // 검색 API 사용
   const {
@@ -128,18 +213,9 @@ export default function TravelCoursePage() {
     isLoading: isSearchLoading,
     isError: isSearchError,
     refetch: refetchSearch,
-  } = useSearchTravelCoursesQuery(
-    {
-      searchQuery: debouncedSearchQuery,
-      region_code: selectedRegion !== 'all' ? selectedRegion : undefined,
-      theme: selectedTheme !== 'all' ? selectedTheme : undefined,
-      page: currentPage,
-      page_size: PAGE_SIZE,
-    },
-    {
-      skip: !shouldUseSearch, // 검색 중일 때는 쿼리 건너뛰기
-    },
-  )
+  } = useSearchTravelCoursesQuery(searchQueryParams, {
+    skip: !shouldUseSearch, // 검색 중일 때는 쿼리 건너뛰기
+  })
 
   // 재 사용 여부 태그 결정
   const activeResponse = shouldUseSearch
@@ -153,10 +229,10 @@ export default function TravelCoursePage() {
   // 응답 데이터에서 courses 추출 (memo 최적화)
   const travelCourses = useMemo(() => {
     console.log('=== API 응답 디버깅 ===')
-    console.log('전체 응답:', typeof activeResponse, activeResponse)
-    console.log('응답 타입:', typeof activeResponse)
-    console.log('배열인가?', Array.isArray(activeResponse))
+    console.log('선택된 지역:', selectedRegion)
     console.log('API 타입:', shouldUseSearch ? 'SEARCH' : 'LIST')
+    console.log('전체 응답:', typeof activeResponse, activeResponse)
+    console.log('응답이 배열인가?', Array.isArray(activeResponse))
     console.log(
       '백엔드 연결 상태:',
       isActiveLoading ? 'Loading...' : 'Complete',
@@ -265,7 +341,7 @@ export default function TravelCoursePage() {
         const regionNamesForImages = uniqueRegionCodes
           .map((code) => {
             // API에서 받은 지역 데이터에서 찾기
-            const regionData = regions.find(region => region.code === code)
+            const regionData = regions.find((region) => region.code === code)
             if (!regionData) {
               console.warn(`알 수 없는 지역 코드: ${code}`)
               return null
@@ -290,8 +366,11 @@ export default function TravelCoursePage() {
         // 코스별로 어떤 지역이 있는지 확인 (디버깅용) - API 데이터 기반 처리
         travelCourses.forEach((course, index) => {
           const courseRegion = course?.region
-          const regionData = regions.find(region => region.code === courseRegion)
-          const regionDisplayName = regionData?.name || courseRegion || '지역 정보 없음'
+          const regionData = regions.find(
+            (region) => region.code === courseRegion,
+          )
+          const regionDisplayName =
+            regionData?.name || courseRegion || '지역 정보 없음'
           const imageUrl =
             regionDisplayName && regionDisplayName !== '지역 정보 없음'
               ? images[regionDisplayName]
@@ -308,7 +387,9 @@ export default function TravelCoursePage() {
         travelCourses.forEach((course) => {
           const courseRegion = course?.region
           if (courseRegion) {
-            const regionData = regions.find(region => region.code === courseRegion)
+            const regionData = regions.find(
+              (region) => region.code === courseRegion,
+            )
             const regionDisplayName = regionData?.name || courseRegion
             fallbackImages[regionDisplayName] =
               `https://picsum.photos/800/600?random=${course?.id || Math.random()}`
@@ -324,7 +405,6 @@ export default function TravelCoursePage() {
       loadImages()
     }
   }, [travelCourses, regions]) // travelCourses와 regions가 변경될 때마다 실행
-
 
   // 월 배열 - 정적 데이터는 유지 (변경 필요 없음)
   const monthNames = [
@@ -346,44 +426,43 @@ export default function TravelCoursePage() {
   // API에서 받은 데이터를 변환하여 사용
   const regionNames = useMemo(() => {
     if (!regions || regions.length === 0) return { all: '전체' }
-    
+
     const regionMap = {}
-    regions.forEach(region => {
+    regions.forEach((region) => {
       regionMap[region.code] = region.name
     })
     return regionMap
   }, [regions])
 
   const themeOptions = useMemo(() => {
-    if (!themes || themes.length === 0) return [{ value: 'all', label: '전체 테마' }]
-    
-    return themes.map(theme => ({
+    if (!themes || themes.length === 0)
+      return [{ value: 'all', label: '전체 테마' }]
+
+    return themes.map((theme) => ({
       value: theme.code,
-      label: theme.name
+      label: theme.name,
     }))
   }, [themes])
 
   // ===============================
-  // 기존 + 고급 기능에 따른 빠른 필터 로직
+  // 클라이언트 사이드 필터링 로직 (검색어는 API에서 처리되므로 제외)
   // ===============================
   const filteredCourses = useMemo(() => {
-    return travelCourses.filter((course) => {
-      // 기존 검색 로직 (보존) - 안전한 처리 추가
-      const courseTitle = course?.title || ''
-      const courseSubtitle = course?.subtitle || ''
-      const courseSummary = course?.summary || ''
+    console.log('=== 필터링 디버깅 ===')
+    console.log('원본 데이터 개수:', travelCourses.length)
+    console.log('선택된 필터:', {
+      selectedMonth,
+      selectedTheme,
+      selectedRegion,
+    })
 
-      const matchesSearch =
-        searchQuery === '' ||
-        courseTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        courseSubtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        courseSummary.toLowerCase().includes(searchQuery.toLowerCase())
+    if (!Array.isArray(travelCourses)) {
+      console.log('❌ travelCourses가 배열이 아님')
+      return []
+    }
 
-      // 지역 필터링 - 안전한 처리
-      const courseRegion = course?.region
-      const matchesRegion =
-        selectedRegion === 'all' ||
-        (courseRegion && courseRegion === selectedRegion)
+    const filtered = travelCourses.filter((course) => {
+      if (!course) return false
 
       // 월 필터링 - 안전한 처리
       const courseBestMonths = course?.bestMonths || []
@@ -392,7 +471,7 @@ export default function TravelCoursePage() {
         (Array.isArray(courseBestMonths) &&
           courseBestMonths.includes(parseInt(selectedMonth)))
 
-      // 테마 필터링 - 안전한 처리
+      // 테마 필터링 - 안전한 처리 (코드 기반 매칭)
       const courseThemes = course?.theme || []
       const matchesTheme =
         selectedTheme === 'all' ||
@@ -400,8 +479,21 @@ export default function TravelCoursePage() {
           courseThemes.some(
             (theme) =>
               theme &&
-              theme.toLowerCase().includes(selectedTheme.toLowerCase()),
+              (theme === selectedTheme ||
+                theme.toLowerCase().includes(selectedTheme.toLowerCase())),
           ))
+
+      // 디버깅: 각 코스별 필터링 결과
+      if (selectedMonth !== 'all' || selectedTheme !== 'all') {
+        console.log(`코스: ${course.title}`, {
+          courseBestMonths,
+          courseThemes,
+          matchesMonth,
+          matchesTheme,
+          selectedMonth,
+          selectedTheme,
+        })
+      }
 
       // 고급 기능에 따른 빠른 필터 로직 - 안전한 처리
       if (showAdvancedFeatures) {
@@ -410,6 +502,7 @@ export default function TravelCoursePage() {
         const coursePopularityScore = course?.popularityScore || 0
         const courseDuration = course?.duration || ''
         const courseAmenities = course?.amenities || []
+        const courseRegion = course?.region
 
         if (quickFilters.includes('high-rating') && courseRating < 4.0)
           return false
@@ -440,12 +533,16 @@ export default function TravelCoursePage() {
         }
       }
 
-      return matchesSearch && matchesRegion && matchesMonth && matchesTheme
+      const result = matchesMonth && matchesTheme
+      return result
     })
+
+    console.log(
+      `필터링 결과: ${filtered.length}개 (원본: ${travelCourses.length}개)`,
+    )
+    return filtered
   }, [
     travelCourses,
-    searchQuery,
-    selectedRegion,
     selectedMonth,
     selectedTheme,
     showAdvancedFeatures,
@@ -520,11 +617,14 @@ export default function TravelCoursePage() {
 
   // 더보기 버튼 표시 여부
   const hasMoreToShow = displayedCourses < sortedCourses.length
-  const hasMoreFromAPI = activeResponse && activeResponse.total > sortedCourses.length
+  const hasMoreFromAPI =
+    activeResponse && activeResponse.total > sortedCourses.length
 
   // 더 많은 코스 보기 버튼 클릭 핸들러 (표시 개수 증가)
   const handleLoadMoreCourses = useCallback(() => {
-    setDisplayedCourses(prev => Math.min(prev + LOAD_MORE_COUNT, sortedCourses.length))
+    setDisplayedCourses((prev) =>
+      Math.min(prev + LOAD_MORE_COUNT, sortedCourses.length),
+    )
   }, [sortedCourses.length])
 
   // API에서 더 많은 데이터를 가져오는 핸들러
@@ -543,10 +643,7 @@ export default function TravelCoursePage() {
   // 스켈레톤 카드 렌더링
   const renderSkeletonCards = () => {
     return Array.from({ length: INITIAL_DISPLAY_COUNT }).map((_, index) => (
-      <Card
-        key={`skeleton-${index}`}
-        className="weather-card"
-      >
+      <Card key={`skeleton-${index}`} className="weather-card">
         <div className="relative h-48 animate-pulse overflow-hidden rounded-t-xl bg-gray-200"></div>
         <CardHeader className="pb-3">
           <div className="space-y-2">
@@ -574,18 +671,20 @@ export default function TravelCoursePage() {
 
   // 코스 카드 렌더링 (그리드 레이아웃용)
   const renderCourseCards = () => {
-    return currentDisplayedCourses.map((course, index) => (
-      <div
-        key={generateSafeKey(course, 'course', index)}
-        className="w-full"
-      >
-        <RecommendCourseCard
-          course={course}
-          rating={course.rating} // 서버에서 제공하는 기본 평점 사용
-          viewMode="grid"
-        />
-      </div>
-    ))
+    return currentDisplayedCourses.map((course, index) => {
+      // 더 고유한 키 생성 (course ID + index + 필터 상태)
+      const uniqueKey = `course-${course?.id || index}-${selectedRegion}-${selectedMonth}-${selectedTheme}-${index}`
+
+      return (
+        <div key={uniqueKey} className="w-full">
+          <RecommendCourseCard
+            course={course}
+            rating={course.rating} // 서버에서 제공하는 기본 평점 사용
+            viewMode="grid"
+          />
+        </div>
+      )
+    })
   }
 
   return (
@@ -624,7 +723,7 @@ export default function TravelCoursePage() {
 
           {/* Search and Filter Section */}
           <div className="weather-card glass-effect mx-auto max-w-4xl p-6">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
               {/* Search Input */}
               <div className="relative">
                 <Search
@@ -642,7 +741,11 @@ export default function TravelCoursePage() {
               {/* Region Filter */}
               <Select value={selectedRegion} onValueChange={setSelectedRegion}>
                 <SelectTrigger className="form-input">
-                  <SelectValue placeholder="지역" />
+                  <SelectValue placeholder="지역">
+                    {selectedRegion === 'all'
+                      ? '지역'
+                      : regions.find((r) => r.code === selectedRegion)?.name}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="weather-card">
                   {regionsLoading ? (
@@ -654,14 +757,24 @@ export default function TravelCoursePage() {
                       오류 발생
                     </SelectItem>
                   ) : (
-                    regions.map((region) => (
-                      <SelectItem
-                        key={generateSafeKeyWithValue('region', region.code, region.name)}
-                        value={region.code}
-                      >
-                        {region.name}
-                      </SelectItem>
-                    ))
+                    <>
+                      {/* API에서 "전체" 옵션이 없는 경우에만 수동 추가 */}
+                      {!regions.some((r) => r.code === 'all') && (
+                        <SelectItem value="all">전체</SelectItem>
+                      )}
+                      {regions.map((region) => (
+                        <SelectItem
+                          key={generateSafeKeyWithValue(
+                            'region',
+                            region.code,
+                            region.name,
+                          )}
+                          value={region.code}
+                        >
+                          {region.name}
+                        </SelectItem>
+                      ))}
+                    </>
                   )}
                 </SelectContent>
               </Select>
@@ -669,7 +782,11 @@ export default function TravelCoursePage() {
               {/* Month Filter */}
               <Select value={selectedMonth} onValueChange={setSelectedMonth}>
                 <SelectTrigger className="form-input">
-                  <SelectValue placeholder="해당 월" />
+                  <SelectValue placeholder="해당 월">
+                    {selectedMonth === 'all'
+                      ? '해당 월'
+                      : monthNames[parseInt(selectedMonth)] || '해당 월'}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="weather-card">
                   {monthNames.map((month, index) => (
@@ -686,7 +803,11 @@ export default function TravelCoursePage() {
               {/* Theme Filter */}
               <Select value={selectedTheme} onValueChange={setSelectedTheme}>
                 <SelectTrigger className="form-input">
-                  <SelectValue placeholder="테마" />
+                  <SelectValue placeholder="테마">
+                    {selectedTheme === 'all'
+                      ? '테마'
+                      : themes.find((t) => t.code === selectedTheme)?.name}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="weather-card">
                   {themesLoading ? (
@@ -698,14 +819,24 @@ export default function TravelCoursePage() {
                       오류 발생
                     </SelectItem>
                   ) : (
-                    themeOptions.map((option, index) => (
-                      <SelectItem
-                        key={generateSafeKey(option, 'theme', index)}
-                        value={option.value}
-                      >
-                        {option.label}
-                      </SelectItem>
-                    ))
+                    <>
+                      {/* API에서 "전체" 옵션이 없는 경우에만 수동 추가 */}
+                      {!themes.some((t) => t.code === 'all') && (
+                        <SelectItem value="all">전체</SelectItem>
+                      )}
+                      {themes.map((theme) => (
+                        <SelectItem
+                          key={generateSafeKeyWithValue(
+                            'theme',
+                            theme.code,
+                            theme.name,
+                          )}
+                          value={theme.code}
+                        >
+                          {theme.name}
+                        </SelectItem>
+                      ))}
+                    </>
                   )}
                 </SelectContent>
               </Select>
@@ -724,7 +855,19 @@ export default function TravelCoursePage() {
                       {` ${sortedCourses.length}개`}
                     </>
                   ) : (
-                    `${sortedCourses.length}개의 여행 코스를 찾았습니다`
+                    <>
+                      {`${sortedCourses.length}개의 여행 코스를 찾았습니다`}
+                      {(selectedRegion !== 'all' ||
+                        selectedMonth !== 'all' ||
+                        selectedTheme !== 'all') && (
+                        <span className="ml-2 text-blue-600">
+                          (필터 적용됨:
+                          {selectedRegion !== 'all' && ` 지역`}
+                          {selectedMonth !== 'all' && ` 월`}
+                          {selectedTheme !== 'all' && ` 테마`})
+                        </span>
+                      )}
+                    </>
                   )}
                 </span>
                 {isLoading && (
@@ -896,7 +1039,7 @@ export default function TravelCoursePage() {
           <>
             {/* 헤더 */}
             <div className="mb-8">
-              <h2 className="text-foreground text-2xl font-bold mb-2">
+              <h2 className="text-foreground mb-2 text-2xl font-bold">
                 추천 여행 코스
               </h2>
               <p className="text-muted-foreground">
@@ -905,7 +1048,8 @@ export default function TravelCoursePage() {
                     <span className="font-medium">
                       &quot;{debouncedSearchQuery}&quot;
                     </span>{' '}
-                    검색 결과: {sortedCourses.length}개 중 {displayedCourses}개 표시
+                    검색 결과: {sortedCourses.length}개 중 {displayedCourses}개
+                    표시
                   </>
                 ) : (
                   `총 ${sortedCourses.length}개 중 ${displayedCourses}개 표시`
@@ -914,7 +1058,7 @@ export default function TravelCoursePage() {
             </div>
 
             {/* 그리드 컨테이너 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 mb-8">
+            <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
               {imagesLoading ? renderSkeletonCards() : renderCourseCards()}
             </div>
 
@@ -928,10 +1072,15 @@ export default function TravelCoursePage() {
                   size="lg"
                   className="px-8 py-3"
                 >
-                  더 많은 코스 보기 ({Math.min(LOAD_MORE_COUNT, sortedCourses.length - displayedCourses)}개 더)
+                  더 많은 코스 보기 (
+                  {Math.min(
+                    LOAD_MORE_COUNT,
+                    sortedCourses.length - displayedCourses,
+                  )}
+                  개 더)
                 </Button>
               )}
-              
+
               {/* API에서 더 많은 데이터를 가져올 수 있는 경우 */}
               {!hasMoreToShow && hasMoreFromAPI && (
                 <Button

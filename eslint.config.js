@@ -7,7 +7,15 @@ import pluginPrettierRecommanded from 'eslint-plugin-prettier/recommended'
 import pluginUnusedImports from 'eslint-plugin-unused-imports'
 
 export default [
-  { ignores: ['dist/**', 'dev-dist/**', 'node_modules/**', 'coverage/**', 'public/firebase-messaging-sw.js'] },
+  {
+    ignores: [
+      'dist/**',
+      'dev-dist/**',
+      'node_modules/**',
+      'coverage/**',
+      'public/firebase-messaging-sw.js',
+    ],
+  },
   {
     files: ['**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}'],
     ...pluginReact.configs.flat.recommended,
