@@ -25,6 +25,44 @@ import SmartSorting from '@/components/recommend/SmartSorting'
 
 import RecommendCourseCard from './RecommendCourseCard'
 
+// 임시 대체 데이터 (컴포넌트 외부에 정의)
+const FALLBACK_REGIONS = [
+  // 서울 추가 (사용자 요청에 따라)
+  { code: 'seoul', name: '서울특별시' },
+  // 콘솔 로그에서 확인된 실제 여행 코스 데이터의 지역 코드 사용
+  { code: 'jeju', name: '제주' },
+  { code: 'jeonju', name: '전주' },
+  { code: 'busan', name: '부산' },
+  { code: 'gyeongju', name: '경주' },
+  { code: 'gangneung', name: '강릉' },
+  { code: 'yeosu', name: '여수' },
+  { code: 'incheon', name: '인천' },
+  { code: 'daegu', name: '대구' },
+  { code: 'gwangju', name: '광주' },
+  { code: 'daejeon', name: '대전' },
+  { code: 'ulsan', name: '울산' },
+  { code: 'sejong', name: '세종' },
+  { code: 'gyeonggi', name: '경기도' },
+  { code: 'gangwon', name: '강원도' },
+  { code: 'chungbuk', name: '충청북도' },
+  { code: 'chungnam', name: '충청남도' },
+  { code: 'jeonbuk', name: '전라북도' },
+  { code: 'jeonnam', name: '전라남도' },
+]
+
+const FALLBACK_THEMES = [
+  { code: 'nature', name: '자연' },
+  { code: 'culture', name: '문화' },
+  { code: 'history', name: '역사' },
+  { code: 'food', name: '맛집' },
+  { code: 'shopping', name: '쇼핑' },
+  { code: 'activity', name: '액티비티' },
+  { code: 'healing', name: '힐링' },
+  { code: 'family', name: '가족' },
+  { code: 'couple', name: '커플' },
+  { code: 'friend', name: '친구' },
+]
+
 // 안전한 key 생성 유틸리티 함수
 const generateSafeKey = (item, prefix = '', index = 0) => {
   const safeId = item?.id || item?.course_id || item?.plan_id || index
@@ -70,7 +108,69 @@ export default function TravelCoursePage() {
     data: regionsData = [],
     isLoading: regionsLoading,
     error: regionsError,
+    isError: regionsIsError,
+    refetch: regionsRefetch,
   } = useGetRegionsQuery()
+
+  // Regions API 상태 디버깅
+  useEffect(() => {
+    console.log('=== Regions API 상태 ===', {
+      regionsData,
+      regionsLoading,
+      regionsError,
+      regionsIsError,
+      dataType: typeof regionsData,
+      isArray: Array.isArray(regionsData),
+      length: regionsData?.length,
+    })
+
+    if (regionsError) {
+      console.error('Regions API 에러:', regionsError)
+      console.error('Error status:', regionsError.status)
+      console.error('Error data:', regionsError.data)
+    }
+
+    if (regionsIsError) {
+      console.error('Regions API 호출 실패')
+    }
+
+    // 수동 API 테스트
+    if (!regionsLoading && (!regionsData || regionsData.length === 0)) {
+      console.log('수동 API 테스트 시작...')
+      fetch('/api/travel-courses/regions')
+        .then((res) => {
+          console.log('Manual API response status:', res.status)
+          return res.json()
+        })
+        .then((data) => {
+          console.log('Manual API response data:', data)
+        })
+        .catch((err) => {
+          console.error('Manual API error:', err)
+        })
+    }
+  }, [regionsData, regionsLoading, regionsError, regionsIsError])
+
+  // 임시 대체 지역 데이터 (API 문제 해결 전까지)
+  const fallbackRegions = [
+    { code: 'seoul', name: '서울특별시' },
+    { code: 'busan', name: '부산광역시' },
+    { code: 'daegu', name: '대구광역시' },
+    { code: 'incheon', name: '인천광역시' },
+    { code: 'gwangju', name: '광주광역시' },
+    { code: 'daejeon', name: '대전광역시' },
+    { code: 'ulsan', name: '울산광역시' },
+    { code: 'sejong', name: '세종특별자치시' },
+    { code: 'gyeonggi', name: '경기도' },
+    { code: 'gangwon', name: '강원특별자치도' },
+    { code: 'chungbuk', name: '충청북도' },
+    { code: 'chungnam', name: '충청남도' },
+    { code: 'jeonbuk', name: '전라북도' },
+    { code: 'jeonnam', name: '전라남도' },
+    { code: 'gyeongbuk', name: '경상북도' },
+    { code: 'gyeongnam', name: '경상남도' },
+    { code: 'jeju', name: '제주특별자치도' },
+  ]
 
   // regions 데이터 처리 - "전체" 관련 옵션 제거하고 ㄱㄴㄷ 순 정렬
   const regions = useMemo(() => {
@@ -87,7 +187,11 @@ export default function TravelCoursePage() {
     )
     console.log('서울 지역 존재 여부:', seoulExists)
 
-    if (!Array.isArray(regionsData)) return []
+    // API 데이터가 비어있거나 문제가 있으면 대체 데이터 사용
+    if (!Array.isArray(regionsData) || regionsData.length === 0) {
+      console.log('⚠️ API 데이터가 비어있음 - 대체 데이터 사용')
+      return FALLBACK_REGIONS
+    }
 
     // "전체" 관련 옵션들을 모두 제거 (더 정확한 필터링)
     const normalRegions = regionsData.filter((r) => {
@@ -109,6 +213,12 @@ export default function TravelCoursePage() {
 
     console.log('필터링된 일반 지역들:', normalRegions)
 
+    // API 데이터가 비어있으면 대체 데이터 사용
+    if (normalRegions.length === 0) {
+      console.log('⚠️ 필터링 후 데이터가 비어있음 - 대체 데이터 사용')
+      return FALLBACK_REGIONS
+    }
+
     // 일반 지역들을 한글 ㄱㄴㄷ 순으로 정렬
     const sortedRegions = normalRegions.sort((a, b) => {
       return a.name.localeCompare(b.name, 'ko', { sensitivity: 'base' })
@@ -116,7 +226,7 @@ export default function TravelCoursePage() {
 
     console.log('정렬된 지역들:', sortedRegions)
 
-    // "전체" 옵션 없이 정렬된 지역들만 반환
+    // API 데이터가 정상이면 API 데이터 사용
     return sortedRegions
   }, [regionsData])
 
@@ -126,6 +236,20 @@ export default function TravelCoursePage() {
     error: themesError,
   } = useGetThemesQuery()
 
+  // 임시 대체 테마 데이터 (API 문제 해결 전까지)
+  const fallbackThemes = [
+    { code: 'nature', name: '자연' },
+    { code: 'culture', name: '문화' },
+    { code: 'history', name: '역사' },
+    { code: 'food', name: '맛집' },
+    { code: 'shopping', name: '쇼핑' },
+    { code: 'activity', name: '액티비티' },
+    { code: 'healing', name: '힐링' },
+    { code: 'family', name: '가족' },
+    { code: 'couple', name: '커플' },
+    { code: 'friend', name: '친구' },
+  ]
+
   // themes 데이터 처리 - "전체" 관련 옵션 제거하고 ㄱㄴㄷ 순 정렬
   const themes = useMemo(() => {
     console.log('=== Themes 데이터 ===', themesData)
@@ -134,7 +258,11 @@ export default function TravelCoursePage() {
       themesData.map((t) => ({ code: t.code, name: t.name })),
     )
 
-    if (!Array.isArray(themesData)) return []
+    // API 데이터가 비어있거나 문제가 있으면 대체 데이터 사용
+    if (!Array.isArray(themesData) || themesData.length === 0) {
+      console.log('⚠️ Themes API 데이터가 비어있음 - 대체 데이터 사용')
+      return FALLBACK_THEMES
+    }
 
     // "전체" 관련 옵션들을 모두 제거 (더 정확한 필터링)
     const normalThemes = themesData.filter((t) => {
@@ -156,6 +284,12 @@ export default function TravelCoursePage() {
 
     console.log('필터링된 일반 테마들:', normalThemes)
 
+    // API 데이터가 비어있으면 대체 데이터 사용
+    if (normalThemes.length === 0) {
+      console.log('⚠️ 필터링 후 테마 데이터가 비어있음 - 대체 데이터 사용')
+      return FALLBACK_THEMES
+    }
+
     // 일반 테마들을 한글 ㄱㄴㄷ 순으로 정렬
     const sortedThemes = normalThemes.sort((a, b) => {
       return a.name.localeCompare(b.name, 'ko', { sensitivity: 'base' })
@@ -163,7 +297,7 @@ export default function TravelCoursePage() {
 
     console.log('정렬된 테마들:', sortedThemes)
 
-    // "전체" 옵션 없이 정렬된 테마들만 반환
+    // API 데이터가 정상이면 API 데이터 사용
     return sortedThemes
   }, [themesData])
 
@@ -380,13 +514,28 @@ export default function TravelCoursePage() {
         console.log('첫 번째 코스 데이터 샘플:', travelCourses[0])
 
         // 지역 코드를 지역명으로 변환 - API 데이터 기반 매핑
+        console.log(
+          '현재 여행 코스에서 사용 중인 지역 코드:',
+          uniqueRegionCodes,
+        )
+
+        // 서울 관련 데이터 확인
+        const seoulInCourses = uniqueRegionCodes.find(
+          (code) => code && (code.includes('seoul') || code.includes('서울')),
+        )
+        console.log('여행 코스에 서울 지역 코드 있나?', seoulInCourses)
+
         const regionNamesForImages = uniqueRegionCodes
           .map((code) => {
             // API에서 받은 지역 데이터에서 찾기
             const regionData = regions.find((region) => region.code === code)
             if (!regionData) {
-              console.warn(`알 수 없는 지역 코드: ${code}`)
-              return null
+              console.warn(
+                `알 수 없는 지역 코드: ${code} - 대체 데이터에서 찾는 중...`,
+              )
+              // 대체 데이터에서 찾기
+              const fallbackData = FALLBACK_REGIONS.find((r) => r.code === code)
+              return fallbackData ? fallbackData.name : null
             }
             return regionData.name
           })
@@ -1064,12 +1213,16 @@ export default function TravelCoursePage() {
               </div>
             </div>
             <h3 className="text-foreground mb-2 text-xl font-semibold">
-              {travelCourses.length === 0
+              {selectedRegion === 'seoul' && travelCourses.length > 0 && sortedCourses.length === 0
+                ? '서울 여행 코스 준비 중'
+                : travelCourses.length === 0
                 ? '여행 코스가 없습니다'
                 : '검색 결과가 없습니다'}
             </h3>
             <p className="text-muted-foreground mb-6">
-              {travelCourses.length === 0
+              {selectedRegion === 'seoul' && travelCourses.length > 0 && sortedCourses.length === 0
+                ? '서울 지역의 매력적인 여행 코스를 준비하고 있습니다. 잠시 후 다시 시도해주세요!'
+                : travelCourses.length === 0
                 ? '관리자가 여행 코스를 등록하면 기다려주세요'
                 : '다른 검색어를 입력해보세요'}
             </p>
@@ -1084,8 +1237,39 @@ export default function TravelCoursePage() {
                 }}
                 className="primary-button w-full font-semibold"
               >
-                {travelCourses.length === 0 ? '기본 로딩' : '전체 코스 보기'}
+                {selectedRegion === 'seoul' && travelCourses.length > 0 && sortedCourses.length === 0
+                  ? '전체 코스 보기'
+                  : travelCourses.length === 0 ? '기본 로딩' : '전체 코스 보기'}
               </Button>
+              {/* 서울 선택 시 추천 지역 */}
+              {selectedRegion === 'seoul' && travelCourses.length > 0 && sortedCourses.length === 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600">서울 근처 인기 여행지를 추천드려요:</p>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => setSelectedRegion('incheon')}
+                      variant="outline"
+                      size="sm"
+                    >
+                      인천 해벼
+                    </Button>
+                    <Button
+                      onClick={() => setSelectedRegion('gyeonggi')}
+                      variant="outline"
+                      size="sm"
+                    >
+                      경기도
+                    </Button>
+                    <Button
+                      onClick={() => setSelectedRegion('gangneung')}
+                      variant="outline"
+                      size="sm"
+                    >
+                      강릉 바다
+                    </Button>
+                  </div>
+                </div>
+              )}
               {travelCourses.length === 0 && (
                 <Button
                   onClick={() => activeRefetch()}

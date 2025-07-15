@@ -380,7 +380,14 @@ export const travelCoursesApi = createApi({
       providesTags: ['Regions'],
       keepUnusedDataFor: 3600, // 1시간 캐싱
       transformResponse: (response) => {
-        return response?.regions || []
+        console.log('=== Regions API 원본 응답 ===', response)
+        console.log('response type:', typeof response)
+        console.log('response.regions:', response?.regions)
+        console.log('regions array length:', response?.regions?.length)
+
+        const result = response?.regions || []
+        console.log('최종 regions 결과:', result)
+        return result
       },
     }),
 
@@ -390,7 +397,14 @@ export const travelCoursesApi = createApi({
       providesTags: ['Themes'],
       keepUnusedDataFor: 3600, // 1시간 캐싱
       transformResponse: (response) => {
-        return response?.themes || []
+        console.log('=== Themes API 원본 응답 ===', response)
+        console.log('response type:', typeof response)
+        console.log('response.themes:', response?.themes)
+        console.log('themes array length:', response?.themes?.length)
+
+        const result = response?.themes || []
+        console.log('최종 themes 결과:', result)
+        return result
       },
     }),
   }),
