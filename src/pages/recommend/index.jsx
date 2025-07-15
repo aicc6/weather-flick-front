@@ -51,6 +51,15 @@ export default function TravelCoursePage() {
   const [selectedRegion, setSelectedRegion] = useState('all')
   const [selectedMonth, setSelectedMonth] = useState('all')
   const [selectedTheme, setSelectedTheme] = useState('all')
+
+  // 디버깅용 로그
+  useEffect(() => {
+    console.log('=== 필터 상태 변경 ===', {
+      selectedRegion,
+      selectedMonth,
+      selectedTheme,
+    })
+  }, [selectedRegion, selectedMonth, selectedTheme])
   const [images, setImages] = useState({})
   const [imagesLoading, setImagesLoading] = useState(true)
 
@@ -63,41 +72,52 @@ export default function TravelCoursePage() {
     error: regionsError,
   } = useGetRegionsQuery()
 
-  // regions 데이터 처리 - 전체 옵션이 이미 포함되어 있는지 확인 및 ㄱㄴㄷ 순 정렬
+  // regions 데이터 처리 - "전체" 관련 옵션 제거하고 ㄱㄴㄷ 순 정렬
   const regions = useMemo(() => {
     console.log('=== Regions 데이터 ===', regionsData)
+    console.log('API에서 받은 전체 지역 데이터:', regionsData)
     console.log(
       '각 지역 상세:',
       regionsData.map((r) => ({ code: r.code, name: r.name })),
     )
 
+    // 서울 지역 존재 여부 확인
+    const seoulExists = regionsData.find(
+      (r) => r.name?.includes('서울') || r.code?.includes('seoul'),
+    )
+    console.log('서울 지역 존재 여부:', seoulExists)
+
     if (!Array.isArray(regionsData)) return []
 
-    // "전체" 관련 옵션들을 필터링 (code가 'all'이거나 name에 '전체'가 포함된 경우)
-    const allOptions = regionsData.filter(
-      (r) =>
-        r.code === 'all' ||
-        r.name?.includes('전체') ||
-        r.name?.toLowerCase().includes('all'),
-    )
-    const normalRegions = regionsData.filter(
-      (r) =>
-        r.code !== 'all' &&
-        !r.name?.includes('전체') &&
-        !r.name?.toLowerCase().includes('all'),
-    )
+    // "전체" 관련 옵션들을 모두 제거 (더 정확한 필터링)
+    const normalRegions = regionsData.filter((r) => {
+      if (!r || !r.code || !r.name) return false
 
-    console.log('전체 옵션들:', allOptions)
-    console.log('일반 지역들:', normalRegions)
+      // 정확한 '전체' 관련 필터링
+      const isAllOption =
+        r.code === 'all' ||
+        r.name === '전체' ||
+        r.name === '전체 지역' ||
+        r.name.startsWith('전체')
+
+      console.log(
+        `지역 필터링 체크: ${r.name} (${r.code}) - ${isAllOption ? '제외' : '포함'}`,
+      )
+
+      return !isAllOption
+    })
+
+    console.log('필터링된 일반 지역들:', normalRegions)
 
     // 일반 지역들을 한글 ㄱㄴㄷ 순으로 정렬
     const sortedRegions = normalRegions.sort((a, b) => {
       return a.name.localeCompare(b.name, 'ko', { sensitivity: 'base' })
     })
 
-    // 첫 번째 "전체" 옵션만 사용 (중복 방지)
-    const firstAllOption = allOptions[0]
-    return firstAllOption ? [firstAllOption, ...sortedRegions] : sortedRegions
+    console.log('정렬된 지역들:', sortedRegions)
+
+    // "전체" 옵션 없이 정렬된 지역들만 반환
+    return sortedRegions
   }, [regionsData])
 
   const {
@@ -106,7 +126,7 @@ export default function TravelCoursePage() {
     error: themesError,
   } = useGetThemesQuery()
 
-  // themes 데이터 처리 - 전체 옵션이 이미 포함되어 있는지 확인 및 ㄱㄴㄷ 순 정렬
+  // themes 데이터 처리 - "전체" 관련 옵션 제거하고 ㄱㄴㄷ 순 정렬
   const themes = useMemo(() => {
     console.log('=== Themes 데이터 ===', themesData)
     console.log(
@@ -116,31 +136,35 @@ export default function TravelCoursePage() {
 
     if (!Array.isArray(themesData)) return []
 
-    // "전체" 관련 옵션들을 필터링 (code가 'all'이거나 name에 '전체'가 포함된 경우)
-    const allOptions = themesData.filter(
-      (t) =>
-        t.code === 'all' ||
-        t.name?.includes('전체') ||
-        t.name?.toLowerCase().includes('all'),
-    )
-    const normalThemes = themesData.filter(
-      (t) =>
-        t.code !== 'all' &&
-        !t.name?.includes('전체') &&
-        !t.name?.toLowerCase().includes('all'),
-    )
+    // "전체" 관련 옵션들을 모두 제거 (더 정확한 필터링)
+    const normalThemes = themesData.filter((t) => {
+      if (!t || !t.code || !t.name) return false
 
-    console.log('전체 옵션들:', allOptions)
-    console.log('일반 테마들:', normalThemes)
+      // 정확한 '전체' 관련 필터링
+      const isAllOption =
+        t.code === 'all' ||
+        t.name === '전체' ||
+        t.name === '전체 테마' ||
+        t.name.startsWith('전체')
+
+      console.log(
+        `테마 필터링 체크: ${t.name} (${t.code}) - ${isAllOption ? '제외' : '포함'}`,
+      )
+
+      return !isAllOption
+    })
+
+    console.log('필터링된 일반 테마들:', normalThemes)
 
     // 일반 테마들을 한글 ㄱㄴㄷ 순으로 정렬
     const sortedThemes = normalThemes.sort((a, b) => {
       return a.name.localeCompare(b.name, 'ko', { sensitivity: 'base' })
     })
 
-    // 첫 번째 "전체" 옵션만 사용 (중복 방지)
-    const firstAllOption = allOptions[0]
-    return firstAllOption ? [firstAllOption, ...sortedThemes] : sortedThemes
+    console.log('정렬된 테마들:', sortedThemes)
+
+    // "전체" 옵션 없이 정렬된 테마들만 반환
+    return sortedThemes
   }, [themesData])
 
   // ===============================
@@ -175,10 +199,15 @@ export default function TravelCoursePage() {
     const params = {
       page: currentPage,
       page_size: PAGE_SIZE,
-      region_code: selectedRegion !== 'all' ? selectedRegion : undefined,
-      // course_theme: selectedTheme !== 'all' ? selectedTheme : undefined, // 클라이언트에서 필터링
     }
+
+    // selectedRegion이 'all'이 아닌 경우에만 region_code 추가
+    if (selectedRegion !== 'all') {
+      params.region_code = selectedRegion
+    }
+
     console.log('=== API 쿼리 파라미터 ===', params)
+    console.log('선택된 지역:', selectedRegion)
     return params
   }, [currentPage, selectedRegion])
 
@@ -197,12 +226,17 @@ export default function TravelCoursePage() {
   const searchQueryParams = useMemo(() => {
     const params = {
       searchQuery: debouncedSearchQuery,
-      region_code: selectedRegion !== 'all' ? selectedRegion : undefined,
-      // theme: selectedTheme !== 'all' ? selectedTheme : undefined, // 클라이언트에서 필터링
       page: currentPage,
       page_size: PAGE_SIZE,
     }
+
+    // selectedRegion이 'all'이 아닌 경우에만 region_code 추가
+    if (selectedRegion !== 'all') {
+      params.region_code = selectedRegion
+    }
+
     console.log('=== 검색 API 쿼리 파라미터 ===', params)
+    console.log('선택된 지역:', selectedRegion)
     return params
   }, [debouncedSearchQuery, currentPage, selectedRegion])
 
@@ -248,11 +282,14 @@ export default function TravelCoursePage() {
     if (Array.isArray(activeResponse)) {
       console.log('✅ 배열 응답 처리, 길이:', activeResponse.length)
       if (activeResponse.length > 0 && activeResponse[0]) {
-        console.log('✅ 배열 첫 번째 아이템:', activeResponse[0])
-        console.log(
-          '✅ 첫 번째 아이템 키들:',
-          Object.keys(activeResponse[0] || {}),
-        )
+        const firstItem = activeResponse[0]
+        console.log('✅ 배열 첫 번째 아이템:', firstItem)
+        console.log('✅ 첫 번째 아이템 키들:', Object.keys(firstItem || {}))
+        console.log('✅ 첫 번째 아이템 지역 데이터:', {
+          region: firstItem.region,
+          region_code: firstItem.region_code,
+          region_name: firstItem.region_name,
+        })
       }
       return activeResponse.filter(Boolean) // null/undefined 아이템 제거
     }
@@ -264,19 +301,24 @@ export default function TravelCoursePage() {
         activeResponse.courses.length,
       )
       if (activeResponse.courses.length > 0 && activeResponse.courses[0]) {
-        console.log('✅ courses 첫 번째 아이템:', activeResponse.courses[0])
-        console.log(
-          '✅ 첫 번째 course 키들:',
-          Object.keys(activeResponse.courses[0] || {}),
-        )
-        console.log(
-          '✅ 첫 번째 course 지역:',
-          activeResponse.courses[0].region_code,
-        )
-        console.log(
-          '✅ 첫 번째 course 제목:',
-          activeResponse.courses[0].course_name,
-        )
+        const firstCourse = activeResponse.courses[0]
+        console.log('✅ courses 첫 번째 아이템:', firstCourse)
+        console.log('✅ 첫 번째 course 키들:', Object.keys(firstCourse || {}))
+        console.log('✅ 첫 번째 course 지역 데이터:', {
+          region: firstCourse.region,
+          region_code: firstCourse.region_code,
+          region_name: firstCourse.region_name,
+        })
+        console.log('✅ 첫 번째 course 테마 데이터:', {
+          theme: firstCourse.theme,
+          themes: firstCourse.themes,
+          course_theme: firstCourse.course_theme,
+        })
+        console.log('✅ 첫 번째 course 월 데이터:', {
+          bestMonths: firstCourse.bestMonths,
+          best_months: firstCourse.best_months,
+          recommended_months: firstCourse.recommended_months,
+        })
       }
       return activeResponse.courses.filter(Boolean) // null/undefined 아이템 제거
     }
@@ -464,15 +506,20 @@ export default function TravelCoursePage() {
     const filtered = travelCourses.filter((course) => {
       if (!course) return false
 
+      // 지역 필터링 - API와 클라이언트 모두 확인
+      const courseRegion = course?.region || course?.region_code
+      const matchesRegion =
+        selectedRegion === 'all' || courseRegion === selectedRegion
+
       // 월 필터링 - 안전한 처리
-      const courseBestMonths = course?.bestMonths || []
+      const courseBestMonths = course?.bestMonths || course?.best_months || []
       const matchesMonth =
         selectedMonth === 'all' ||
         (Array.isArray(courseBestMonths) &&
           courseBestMonths.includes(parseInt(selectedMonth)))
 
       // 테마 필터링 - 안전한 처리 (코드 기반 매칭)
-      const courseThemes = course?.theme || []
+      const courseThemes = course?.theme || course?.themes || []
       const matchesTheme =
         selectedTheme === 'all' ||
         (Array.isArray(courseThemes) &&
@@ -484,14 +531,22 @@ export default function TravelCoursePage() {
           ))
 
       // 디버깅: 각 코스별 필터링 결과
-      if (selectedMonth !== 'all' || selectedTheme !== 'all') {
-        console.log(`코스: ${course.title}`, {
+      const isFiltered =
+        selectedRegion !== 'all' ||
+        selectedMonth !== 'all' ||
+        selectedTheme !== 'all'
+      if (isFiltered) {
+        console.log(`코스: ${course.title || course.course_name}`, {
+          courseRegion,
           courseBestMonths,
           courseThemes,
+          matchesRegion,
           matchesMonth,
           matchesTheme,
+          selectedRegion,
           selectedMonth,
           selectedTheme,
+          courseData: course,
         })
       }
 
@@ -533,7 +588,12 @@ export default function TravelCoursePage() {
         }
       }
 
-      const result = matchesMonth && matchesTheme
+      const result = matchesRegion && matchesMonth && matchesTheme
+
+      if (isFiltered) {
+        console.log(`최종 결과: ${result ? '✅ 포함' : '❌ 제외'}`)
+      }
+
       return result
     })
 
@@ -543,6 +603,7 @@ export default function TravelCoursePage() {
     return filtered
   }, [
     travelCourses,
+    selectedRegion,
     selectedMonth,
     selectedTheme,
     showAdvancedFeatures,
@@ -739,13 +800,15 @@ export default function TravelCoursePage() {
               </div>
 
               {/* Region Filter */}
-              <Select value={selectedRegion} onValueChange={setSelectedRegion}>
+              <Select
+                value={selectedRegion}
+                onValueChange={(value) => {
+                  console.log('지역 선택 변경:', value)
+                  setSelectedRegion(value)
+                }}
+              >
                 <SelectTrigger className="form-input">
-                  <SelectValue placeholder="지역">
-                    {selectedRegion === 'all'
-                      ? '지역'
-                      : regions.find((r) => r.code === selectedRegion)?.name}
-                  </SelectValue>
+                  <SelectValue placeholder="지역" />
                 </SelectTrigger>
                 <SelectContent className="weather-card">
                   {regionsLoading ? (
@@ -758,10 +821,8 @@ export default function TravelCoursePage() {
                     </SelectItem>
                   ) : (
                     <>
-                      {/* API에서 "전체" 옵션이 없는 경우에만 수동 추가 */}
-                      {!regions.some((r) => r.code === 'all') && (
-                        <SelectItem value="all">전체</SelectItem>
-                      )}
+                      {/* 항상 "전체" 옵션을 맨 위에 추가 */}
+                      <SelectItem value="all">전체</SelectItem>
                       {regions.map((region) => (
                         <SelectItem
                           key={generateSafeKeyWithValue(
@@ -780,13 +841,15 @@ export default function TravelCoursePage() {
               </Select>
 
               {/* Month Filter */}
-              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <Select
+                value={selectedMonth}
+                onValueChange={(value) => {
+                  console.log('월 선택 변경:', value)
+                  setSelectedMonth(value)
+                }}
+              >
                 <SelectTrigger className="form-input">
-                  <SelectValue placeholder="해당 월">
-                    {selectedMonth === 'all'
-                      ? '해당 월'
-                      : monthNames[parseInt(selectedMonth)] || '해당 월'}
-                  </SelectValue>
+                  <SelectValue placeholder="해당 월" />
                 </SelectTrigger>
                 <SelectContent className="weather-card">
                   {monthNames.map((month, index) => (
@@ -801,13 +864,15 @@ export default function TravelCoursePage() {
               </Select>
 
               {/* Theme Filter */}
-              <Select value={selectedTheme} onValueChange={setSelectedTheme}>
+              <Select
+                value={selectedTheme}
+                onValueChange={(value) => {
+                  console.log('테마 선택 변경:', value)
+                  setSelectedTheme(value)
+                }}
+              >
                 <SelectTrigger className="form-input">
-                  <SelectValue placeholder="테마">
-                    {selectedTheme === 'all'
-                      ? '테마'
-                      : themes.find((t) => t.code === selectedTheme)?.name}
-                  </SelectValue>
+                  <SelectValue placeholder="테마" />
                 </SelectTrigger>
                 <SelectContent className="weather-card">
                   {themesLoading ? (
@@ -820,10 +885,8 @@ export default function TravelCoursePage() {
                     </SelectItem>
                   ) : (
                     <>
-                      {/* API에서 "전체" 옵션이 없는 경우에만 수동 추가 */}
-                      {!themes.some((t) => t.code === 'all') && (
-                        <SelectItem value="all">전체</SelectItem>
-                      )}
+                      {/* 항상 "전체" 옵션을 맨 위에 추가 */}
+                      <SelectItem value="all">전체</SelectItem>
                       {themes.map((theme) => (
                         <SelectItem
                           key={generateSafeKeyWithValue(
