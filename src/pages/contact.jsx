@@ -177,24 +177,32 @@ export default function ContactPage() {
 
   // isPrivate: true = 비공개글, false = 공개글
   // 상세 모달 열기 (조회수 증가 포함)
-  const handleTitleClick = async (inquiryId) => {
+  const handleTitleClick = async (inquiry) => {
     try {
-      const result = await trigger(inquiryId).unwrap()
-      // 공개글: 누구나 열람 가능
-      if (result.isPrivate === false || result.is_private === false || (!result.isPrivate && !result.is_private)) {
+      // 목록에서 이미 가진 정보로 비공개 여부 체크
+      const isPrivate = inquiry.isPrivate || inquiry.is_private
+      
+      // 공개글: 바로 상세 정보 조회
+      if (!isPrivate) {
+        const result = await trigger(inquiry.id).unwrap()
+        // 공개글은 조회하자마자 조회수가 증가했으므로 목록을 다시 불러옴
+        refetch()
         setDetailInquiry(result)
         setModalOpen(true)
         return
       }
-      // 비공개글: 본인만 비밀번호 입력 후 열람 가능
-      if (user && user.email === result.email) {
-        setSelectedInquiry(result)
+      
+      // 비공개글: 본인 확인 필요 (이메일은 목록에 있음)
+      if (user && user.email === inquiry.email) {
+        // 비공개글은 비밀번호 확인 전까지 상세 정보를 조회하지 않음
+        setSelectedInquiry(inquiry)
         setPasswordModalOpen(true)
         setPassword('')
         setPasswordError('')
         setShakeError(false)
         return
       }
+      
       // 비공개글: 타인은 열람 불가
       alert('비공개 문의입니다. 작성자만 열람할 수 있습니다.')
     } catch (e) {
@@ -353,7 +361,7 @@ export default function ContactPage() {
                             'hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-300',
                             'rounded px-1 focus:outline-none',
                           )}
-                          onClick={() => handleTitleClick(inquiry.id)}
+                          onClick={() => handleTitleClick(inquiry)}
                           aria-label="문의 상세 보기"
                         >
                           {inquiry.title}
@@ -504,7 +512,13 @@ export default function ContactPage() {
                       contactId: selectedInquiry.id,
                       password, // email은 필요 없음, password만 전달
                     }).unwrap()
-                    setDetailInquiry(selectedInquiry)
+                    
+                    // 비밀번호 확인 성공 후 상세 정보 조회
+                    const result = await trigger(selectedInquiry.id).unwrap()
+                    
+                    // 비밀번호 확인 성공 후 조회수가 증가했으므로 목록을 다시 불러옴
+                    refetch()
+                    setDetailInquiry(result)
                     setModalOpen(true)
                     setPasswordModalOpen(false)
                     setSelectedInquiry(null)
