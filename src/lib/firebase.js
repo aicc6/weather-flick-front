@@ -5,7 +5,8 @@ import { getAnalytics } from 'firebase/analytics'
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'weather-flick-default',
+  projectId:
+    import.meta.env.VITE_FIREBASE_PROJECT_ID || 'weather-flick-default',
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
@@ -22,7 +23,9 @@ let analytics
 try {
   // Firebase 필수 설정 확인
   if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-    console.warn('Firebase 설정이 완전하지 않습니다. 일부 기능이 비활성화됩니다.')
+    console.warn(
+      'Firebase 설정이 완전하지 않습니다. 일부 기능이 비활성화됩니다.',
+    )
     throw new Error('Firebase configuration incomplete')
   }
 
