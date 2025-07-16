@@ -118,12 +118,14 @@ export default function RecommendListPage() {
                 {/* 정보 */}
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 text-xl font-bold">{course.title}</div>
+                  {/* 주소 표시 */}
                   <div className="mb-1 text-sm text-gray-600">
-                    {getRegionName(course.region_code)}
+                    {course.address}
                   </div>
-                  <div className="mb-2 line-clamp-2 text-gray-700">
+                  {/* 기존 summary/설명 대신 address만 표시 */}
+                  {/* <div className="mb-2 line-clamp-2 text-gray-700">
                     {course.summary || course.description}
-                  </div>
+                  </div> */}
                   {/* 해시태그 */}
                   <div className="flex flex-wrap gap-2">
                     {(course.theme || []).map((tag) => (
