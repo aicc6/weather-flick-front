@@ -1,7 +1,7 @@
 // 동적 지역 감지 및 코스 생성 서비스
 // 전국 244개 지역 중 어떤 지역이든 요청 시 자동 생성
 
-import { getAllRegionsFlat, getRegionNameByCode, REGION_TOURISM_INFO } from '@/data/koreaRegions'
+import { getAllRegionsFlat, REGION_TOURISM_INFO } from '@/data/koreaRegions'
 import { generateTravelCourse } from './tmapCourseService'
 import { checkTmapApiStatus } from './tmapService'
 
@@ -18,54 +18,58 @@ const CACHE_EXPIRY_TIME = 30 * 60 * 1000 // 30분
  */
 export const checkRegionSupport = (regionIdentifier) => {
   const allRegions = getAllRegionsFlat()
-  
+
   // 정확한 매칭 시도
-  let matchedRegion = allRegions.find(region => 
-    region.code === regionIdentifier ||
-    region.name === regionIdentifier ||
-    region.shortName === regionIdentifier ||
-    region.fullName === regionIdentifier
+  let matchedRegion = allRegions.find(
+    (region) =>
+      region.code === regionIdentifier ||
+      region.name === regionIdentifier ||
+      region.shortName === regionIdentifier ||
+      region.fullName === regionIdentifier,
   )
-  
+
   if (matchedRegion) {
     return {
       isSupported: true,
       regionCode: matchedRegion.code,
       regionName: matchedRegion.shortName || matchedRegion.name,
       exact: true,
-      suggestions: []
+      suggestions: [],
     }
   }
-  
+
   // 유사 지역명 검색 (부분 매칭)
-  const similarRegions = allRegions.filter(region =>
-    region.name.includes(regionIdentifier) ||
-    region.shortName?.includes(regionIdentifier) ||
-    regionIdentifier.includes(region.name) ||
-    regionIdentifier.includes(region.shortName || '')
-  ).slice(0, 5) // 최대 5개 제안
-  
+  const similarRegions = allRegions
+    .filter(
+      (region) =>
+        region.name.includes(regionIdentifier) ||
+        region.shortName?.includes(regionIdentifier) ||
+        regionIdentifier.includes(region.name) ||
+        regionIdentifier.includes(region.shortName || ''),
+    )
+    .slice(0, 5) // 최대 5개 제안
+
   if (similarRegions.length > 0) {
     return {
       isSupported: true,
       regionCode: similarRegions[0].code,
       regionName: similarRegions[0].shortName || similarRegions[0].name,
       exact: false,
-      suggestions: similarRegions.map(r => ({
+      suggestions: similarRegions.map((r) => ({
         code: r.code,
         name: r.shortName || r.name,
-        fullName: r.fullName
-      }))
+        fullName: r.fullName,
+      })),
     }
   }
-  
+
   // 지원하지 않는 지역
   return {
     isSupported: false,
     regionCode: null,
     regionName: null,
     exact: false,
-    suggestions: getPopularRegionSuggestions()
+    suggestions: getPopularRegionSuggestions(),
   }
 }
 
@@ -79,7 +83,7 @@ const getPopularRegionSuggestions = () => {
     { code: 'busan', name: '부산', fullName: '부산광역시' },
     { code: 'seoul', name: '서울', fullName: '서울특별시' },
     { code: 'gyeongju', name: '경주', fullName: '경북 경주시' },
-    { code: 'jeonju', name: '전주', fullName: '전북 전주시' }
+    { code: 'jeonju', name: '전주', fullName: '전북 전주시' },
   ]
 }
 
@@ -93,24 +97,24 @@ export const generateRegionCourse = async (regionIdentifier, options = {}) => {
   try {
     // 1. 지역 지원 여부 확인
     const regionInfo = checkRegionSupport(regionIdentifier)
-    
+
     if (!regionInfo.isSupported) {
       return {
         success: false,
         error: 'UNSUPPORTED_REGION',
         message: `${regionIdentifier} 지역은 현재 지원하지 않습니다.`,
-        suggestions: regionInfo.suggestions
+        suggestions: regionInfo.suggestions,
       }
     }
-    
+
     const { regionCode, regionName } = regionInfo
     const cacheKey = `${regionCode}_${JSON.stringify(options)}`
-    
+
     // 2. 캐시 확인
     if (GENERATED_COURSE_CACHE.has(cacheKey)) {
       const cached = GENERATED_COURSE_CACHE.get(cacheKey)
       const now = Date.now()
-      
+
       if (now - cached.timestamp < CACHE_EXPIRY_TIME) {
         if (import.meta.env.DEV) {
           console.log(`캐시에서 ${regionName} 코스 반환`)
@@ -119,62 +123,65 @@ export const generateRegionCourse = async (regionIdentifier, options = {}) => {
           success: true,
           course: cached.course,
           fromCache: true,
-          regionInfo
+          regionInfo,
         }
       } else {
         // 만료된 캐시 제거
         GENERATED_COURSE_CACHE.delete(cacheKey)
       }
     }
-    
+
     // 3. API 상태 확인
     const apiAvailable = await checkTmapApiStatus()
-    
+
     // 4. 지역 특성 기반 옵션 조정
     const enhancedOptions = enhanceOptionsForRegion(regionName, options)
-    
+
     // 5. 코스 생성
     if (import.meta.env.DEV) {
       console.log(`${regionName} 코스 동적 생성 시작:`, enhancedOptions)
     }
-    
+
     const course = await generateTravelCourse(regionName, enhancedOptions)
-    
+
     if (!course) {
       throw new Error('코스 생성 실패')
     }
-    
+
     // 6. 생성된 코스에 메타정보 추가
-    const enrichedCourse = enrichCourseWithRegionInfo(course, regionInfo, apiAvailable)
-    
+    const enrichedCourse = enrichCourseWithRegionInfo(
+      course,
+      regionInfo,
+      apiAvailable,
+    )
+
     // 7. 캐시에 저장
     GENERATED_COURSE_CACHE.set(cacheKey, {
       course: enrichedCourse,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     })
-    
+
     if (import.meta.env.DEV) {
       console.log(`${regionName} 코스 생성 완료:`, enrichedCourse.title)
     }
-    
+
     return {
       success: true,
       course: enrichedCourse,
       fromCache: false,
       regionInfo,
-      apiUsed: apiAvailable
+      apiUsed: apiAvailable,
     }
-    
   } catch (error) {
     if (import.meta.env.DEV) {
       console.error(`${regionIdentifier} 코스 생성 실패:`, error)
     }
-    
+
     return {
       success: false,
       error: 'GENERATION_FAILED',
       message: `${regionIdentifier} 지역의 여행 코스 생성에 실패했습니다.`,
-      details: error.message
+      details: error.message,
     }
   }
 }
@@ -187,27 +194,27 @@ export const generateRegionCourse = async (regionIdentifier, options = {}) => {
  */
 const enhanceOptionsForRegion = (regionName, options) => {
   const enhanced = { ...options }
-  
+
   // 지역별 관광 정보 활용
   const tourismInfo = REGION_TOURISM_INFO[regionName]
-  
+
   if (tourismInfo) {
     // 테마가 지정되지 않은 경우 지역 특색 테마 사용
     if (!enhanced.theme || enhanced.theme === 'all') {
       enhanced.theme = tourismInfo.themes[0] // 첫 번째 특색 테마 사용
     }
-    
+
     // 지역별 추가 키워드
     enhanced.keywords = tourismInfo.keywords
   }
-  
+
   // 지역 크기에 따른 일정 조정
   if (isSmallRegion(regionName)) {
     enhanced.duration = enhanced.duration || '1박 2일' // 소도시는 짧은 일정
   } else if (isMajorCity(regionName)) {
     enhanced.duration = enhanced.duration || '3박 4일' // 대도시는 긴 일정
   }
-  
+
   return enhanced
 }
 
@@ -218,8 +225,20 @@ const enhanceOptionsForRegion = (regionName, options) => {
  */
 const isSmallRegion = (regionName) => {
   const smallRegions = [
-    '가평', '양평', '단양', '영월', '정선', '화천', '인제', 
-    '태백', '삼척', '영덕', '울진', '봉화', '진안', '무주'
+    '가평',
+    '양평',
+    '단양',
+    '영월',
+    '정선',
+    '화천',
+    '인제',
+    '태백',
+    '삼척',
+    '영덕',
+    '울진',
+    '봉화',
+    '진안',
+    '무주',
   ]
   return smallRegions.includes(regionName)
 }
@@ -231,8 +250,20 @@ const isSmallRegion = (regionName) => {
  */
 const isMajorCity = (regionName) => {
   const majorCities = [
-    '서울', '부산', '대구', '인천', '광주', '대전', '울산',
-    '수원', '고양', '용인', '성남', '창원', '전주', '천안'
+    '서울',
+    '부산',
+    '대구',
+    '인천',
+    '광주',
+    '대전',
+    '울산',
+    '수원',
+    '고양',
+    '용인',
+    '성남',
+    '창원',
+    '전주',
+    '천안',
   ]
   return majorCities.includes(regionName)
 }
@@ -254,12 +285,12 @@ const enrichCourseWithRegionInfo = (course, regionInfo, apiUsed) => {
       exactMatch: regionInfo.exact,
       apiUsed,
       generatedAt: new Date().toISOString(),
-      supportLevel: apiUsed ? 'full' : 'basic'
+      supportLevel: apiUsed ? 'full' : 'basic',
     },
     // 지역 정확도 표시
     regionAccuracy: regionInfo.exact ? 'exact' : 'similar',
     // 추천 사유 추가
-    recommendationReason: generateRecommendationReason(regionInfo, apiUsed)
+    recommendationReason: generateRecommendationReason(regionInfo, apiUsed),
   }
 }
 
@@ -271,7 +302,7 @@ const enrichCourseWithRegionInfo = (course, regionInfo, apiUsed) => {
  */
 const generateRecommendationReason = (regionInfo, apiUsed) => {
   const { regionName, exact } = regionInfo
-  
+
   if (exact && apiUsed) {
     return `${regionName} 지역의 실제 관광지 정보를 바탕으로 생성된 맞춤형 여행 코스입니다.`
   } else if (exact && !apiUsed) {
@@ -288,13 +319,14 @@ const generateRecommendationReason = (regionInfo, apiUsed) => {
 export const getGenerationStats = () => {
   const totalRegions = getAllRegionsFlat().length
   const cachedCourses = GENERATED_COURSE_CACHE.size
-  const cacheHitRate = cachedCourses > 0 ? (cachedCourses / totalRegions * 100).toFixed(1) : 0
-  
+  const cacheHitRate =
+    cachedCourses > 0 ? ((cachedCourses / totalRegions) * 100).toFixed(1) : 0
+
   return {
     totalSupportedRegions: totalRegions,
     cachedCourses,
     cacheHitRate: `${cacheHitRate}%`,
-    cacheStatus: GENERATED_COURSE_CACHE.size > 0 ? 'active' : 'empty'
+    cacheStatus: GENERATED_COURSE_CACHE.size > 0 ? 'active' : 'empty',
   }
 }
 
@@ -304,18 +336,18 @@ export const getGenerationStats = () => {
 export const clearExpiredCache = () => {
   const now = Date.now()
   let removedCount = 0
-  
+
   for (const [key, value] of GENERATED_COURSE_CACHE.entries()) {
     if (now - value.timestamp > CACHE_EXPIRY_TIME) {
       GENERATED_COURSE_CACHE.delete(key)
       removedCount++
     }
   }
-  
+
   if (import.meta.env.DEV && removedCount > 0) {
     console.log(`만료된 캐시 ${removedCount}개 제거`)
   }
-  
+
   return removedCount
 }
 
@@ -325,11 +357,11 @@ export const clearExpiredCache = () => {
 export const clearAllCache = () => {
   const count = GENERATED_COURSE_CACHE.size
   GENERATED_COURSE_CACHE.clear()
-  
+
   if (import.meta.env.DEV) {
     console.log(`전체 캐시 ${count}개 초기화`)
   }
-  
+
   return count
 }
 
@@ -343,5 +375,5 @@ export default {
   generateRegionCourse,
   getGenerationStats,
   clearExpiredCache,
-  clearAllCache
+  clearAllCache,
 }

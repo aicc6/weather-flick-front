@@ -14,33 +14,33 @@ export const normalizeRegionName = (regionName) => {
 
   // 지역명 매핑 테이블
   const regionMappings = {
-    '서울특별시': '서울',
-    '서울시': '서울',
-    '부산광역시': '부산',
-    '부산시': '부산',
-    '대구광역시': '대구',
-    '대구시': '대구',
-    '인천광역시': '인천',
-    '인천시': '인천',
-    '광주광역시': '광주',
-    '광주시': '광주',
-    '대전광역시': '대전',
-    '대전시': '대전',
-    '울산광역시': '울산',
-    '울산시': '울산',
-    '세종특별자치시': '세종',
-    '세종시': '세종',
-    '경기도': '경기',
-    '강원특별자치도': '강원',
-    '강원도': '강원',
-    '충청북도': '충북',
-    '충청남도': '충남',
-    '전라북도': '전북',
-    '전라남도': '전남',
-    '경상북도': '경북',
-    '경상남도': '경남',
-    '제주특별자치도': '제주',
-    '제주도': '제주'
+    서울특별시: '서울',
+    서울시: '서울',
+    부산광역시: '부산',
+    부산시: '부산',
+    대구광역시: '대구',
+    대구시: '대구',
+    인천광역시: '인천',
+    인천시: '인천',
+    광주광역시: '광주',
+    광주시: '광주',
+    대전광역시: '대전',
+    대전시: '대전',
+    울산광역시: '울산',
+    울산시: '울산',
+    세종특별자치시: '세종',
+    세종시: '세종',
+    경기도: '경기',
+    강원특별자치도: '강원',
+    강원도: '강원',
+    충청북도: '충북',
+    충청남도: '충남',
+    전라북도: '전북',
+    전라남도: '전남',
+    경상북도: '경북',
+    경상남도: '경남',
+    제주특별자치도: '제주',
+    제주도: '제주',
   }
 
   return regionMappings[normalized] || normalized
@@ -53,33 +53,63 @@ export const normalizeRegionName = (regionName) => {
  */
 export const generateRegionKeywords = (regionName) => {
   const normalized = normalizeRegionName(regionName)
-  
+
   const keywordMap = {
-    '서울': ['seoul', 'korea', 'city', 'skyline', 'namsan', 'hangang', '한강', '남산'],
-    '부산': ['busan', 'korea', 'beach', 'gwangalli', 'haeundae', '해운대', '광안리'],
-    '제주': ['jeju', 'korea', 'island', 'nature', 'hallasan', '한라산', '성산일출봉'],
-    '인천': ['incheon', 'korea', 'port', 'songdo', '송도', '차이나타운'],
-    '대구': ['daegu', 'korea', 'city', 'traditional', '팔공산'],
-    '대전': ['daejeon', 'korea', 'science', 'technology', '유성온천'],
-    '광주': ['gwangju', 'korea', 'art', 'culture', '무등산'],
-    '울산': ['ulsan', 'korea', 'industrial', 'coast', '태화강'],
-    '세종': ['sejong', 'korea', 'administrative', 'new city', '행정도시'],
-    '경기': ['gyeonggi', 'korea', 'seoul suburb', 'suwon', '수원', '화성'],
-    '강원': ['gangwon', 'korea', 'mountain', 'ski', 'nature', '설악산', '강릉'],
-    '충북': ['chungbuk', 'korea', 'mountain', 'traditional', '단양', '청주'],
-    '충남': ['chungnam', 'korea', 'coast', 'traditional', '태안', '공주'],
-    '전북': ['jeonbuk', 'korea', 'traditional', 'hanok', '전주', '한옥마을'],
-    '전남': ['jeonnam', 'korea', 'coast', 'island', '순천', '여수'],
-    '경북': ['gyeongbuk', 'korea', 'historical', 'temple', '경주', '안동'],
-    '경남': ['gyeongnam', 'korea', 'coast', 'historical', '통영', '거제'],
-    '경주': ['gyeongju', 'korea', 'historical', 'temple', 'bulguksa', '불국사'],
-    '강릉': ['gangneung', 'korea', 'beach', 'coffee', 'ojukheon', '오죽헌'],
-    '전주': ['jeonju', 'korea', 'hanok', 'traditional', 'bibimbap', '한옥마을'],
-    '여수': ['yeosu', 'korea', 'port', 'night view', 'ocean', '밤바다']
+    서울: [
+      'seoul',
+      'korea',
+      'city',
+      'skyline',
+      'namsan',
+      'hangang',
+      '한강',
+      '남산',
+    ],
+    부산: [
+      'busan',
+      'korea',
+      'beach',
+      'gwangalli',
+      'haeundae',
+      '해운대',
+      '광안리',
+    ],
+    제주: [
+      'jeju',
+      'korea',
+      'island',
+      'nature',
+      'hallasan',
+      '한라산',
+      '성산일출봉',
+    ],
+    인천: ['incheon', 'korea', 'port', 'songdo', '송도', '차이나타운'],
+    대구: ['daegu', 'korea', 'city', 'traditional', '팔공산'],
+    대전: ['daejeon', 'korea', 'science', 'technology', '유성온천'],
+    광주: ['gwangju', 'korea', 'art', 'culture', '무등산'],
+    울산: ['ulsan', 'korea', 'industrial', 'coast', '태화강'],
+    세종: ['sejong', 'korea', 'administrative', 'new city', '행정도시'],
+    경기: ['gyeonggi', 'korea', 'seoul suburb', 'suwon', '수원', '화성'],
+    강원: ['gangwon', 'korea', 'mountain', 'ski', 'nature', '설악산', '강릉'],
+    충북: ['chungbuk', 'korea', 'mountain', 'traditional', '단양', '청주'],
+    충남: ['chungnam', 'korea', 'coast', 'traditional', '태안', '공주'],
+    전북: ['jeonbuk', 'korea', 'traditional', 'hanok', '전주', '한옥마을'],
+    전남: ['jeonnam', 'korea', 'coast', 'island', '순천', '여수'],
+    경북: ['gyeongbuk', 'korea', 'historical', 'temple', '경주', '안동'],
+    경남: ['gyeongnam', 'korea', 'coast', 'historical', '통영', '거제'],
+    경주: ['gyeongju', 'korea', 'historical', 'temple', 'bulguksa', '불국사'],
+    강릉: ['gangneung', 'korea', 'beach', 'coffee', 'ojukheon', '오죽헌'],
+    전주: ['jeonju', 'korea', 'hanok', 'traditional', 'bibimbap', '한옥마을'],
+    여수: ['yeosu', 'korea', 'port', 'night view', 'ocean', '밤바다'],
   }
 
-  const baseKeywords = keywordMap[normalized] || [normalized, 'korea', 'travel', 'beautiful']
-  
+  const baseKeywords = keywordMap[normalized] || [
+    normalized,
+    'korea',
+    'travel',
+    'beautiful',
+  ]
+
   // 중복 제거 및 추가 키워드
   return [...new Set([...baseKeywords, 'landscape', 'tourism', 'destination'])]
 }
@@ -96,7 +126,9 @@ export const validateImageUrl = async (imageUrl) => {
 
   try {
     const response = await fetch(imageUrl, { method: 'HEAD' })
-    return response.ok && response.headers.get('content-type')?.startsWith('image/')
+    return (
+      response.ok && response.headers.get('content-type')?.startsWith('image/')
+    )
   } catch (error) {
     return false
   }
@@ -109,15 +141,17 @@ export const validateImageUrl = async (imageUrl) => {
  */
 export const filterValidImages = async (imageMap) => {
   const validImageMap = {}
-  
-  const validationPromises = Object.entries(imageMap).map(async ([region, imageUrl]) => {
-    const isValid = await validateImageUrl(imageUrl)
-    return { region, imageUrl, isValid }
-  })
+
+  const validationPromises = Object.entries(imageMap).map(
+    async ([region, imageUrl]) => {
+      const isValid = await validateImageUrl(imageUrl)
+      return { region, imageUrl, isValid }
+    },
+  )
 
   try {
     const results = await Promise.allSettled(validationPromises)
-    
+
     results.forEach((result) => {
       if (result.status === 'fulfilled' && result.value.isValid) {
         validImageMap[result.value.region] = result.value.imageUrl
@@ -156,12 +190,16 @@ export const logImageLoadingPerformance = (regionName, source, startTime) => {
 
   const endTime = performance.now()
   const loadTime = endTime - startTime
-  
-  console.log(`📊 이미지 로딩 성능 - ${regionName} (${source}): ${loadTime.toFixed(2)}ms`)
-  
+
+  console.log(
+    `📊 이미지 로딩 성능 - ${regionName} (${source}): ${loadTime.toFixed(2)}ms`,
+  )
+
   // 성능 임계값 경고
   if (loadTime > 2000) {
-    console.warn(`⚠️ 느린 이미지 로딩: ${regionName} - ${loadTime.toFixed(2)}ms`)
+    console.warn(
+      `⚠️ 느린 이미지 로딩: ${regionName} - ${loadTime.toFixed(2)}ms`,
+    )
   }
 }
 
@@ -172,7 +210,11 @@ export const logImageLoadingPerformance = (regionName, source, startTime) => {
  * @param {number} height - 미리보기 높이 (기본: 300)
  * @returns {string} 미리보기 이미지 URL
  */
-export const generatePreviewImageUrl = (imageUrl, width = 400, height = 300) => {
+export const generatePreviewImageUrl = (
+  imageUrl,
+  width = 400,
+  height = 300,
+) => {
   if (!imageUrl) return ''
 
   // Unsplash URL인 경우 크기 조정
@@ -195,5 +237,5 @@ export default {
   filterValidImages,
   generateCacheKey,
   logImageLoadingPerformance,
-  generatePreviewImageUrl
+  generatePreviewImageUrl,
 }

@@ -1,6 +1,4 @@
-import {
-  useGetContactsQuery,
-} from '@/store/api/contactApi'
+import { useGetContactsQuery } from '@/store/api/contactApi'
 import { useCallback, useEffect } from 'react'
 
 const ContactList = ({ onOpenDetail }) => {

@@ -236,8 +236,8 @@ const RecommendCourseCard = React.memo(function RecommendCourseCard({
                     style={{ color: 'var(--accent-yellow)' }}
                   />
                   <span className="text-foreground text-sm font-medium">
-                    {typeof (rating ?? course.rating) === 'number' 
-                      ? (rating ?? course.rating).toFixed(1) 
+                    {typeof (rating ?? course.rating) === 'number'
+                      ? (rating ?? course.rating).toFixed(1)
                       : '4.5'}
                   </span>
                 </div>
@@ -341,8 +341,8 @@ const RecommendCourseCard = React.memo(function RecommendCourseCard({
                 style={{ color: 'var(--accent-yellow)' }}
               />
               <span className="text-foreground text-sm font-medium">
-                {typeof (rating ?? course.rating) === 'number' 
-                  ? (rating ?? course.rating).toFixed(1) 
+                {typeof (rating ?? course.rating) === 'number'
+                  ? (rating ?? course.rating).toFixed(1)
                   : '4.5'}
               </span>
             </div>

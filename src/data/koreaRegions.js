@@ -21,7 +21,7 @@ export const PROVINCES = [
   { code: 'jeonnam', name: '전라남도', shortName: '전남' },
   { code: 'gyeongbuk', name: '경상북도', shortName: '경북' },
   { code: 'gyeongnam', name: '경상남도', shortName: '경남' },
-  { code: 'jeju', name: '제주특별자치도', shortName: '제주' }
+  { code: 'jeju', name: '제주특별자치도', shortName: '제주' },
 ]
 
 /**
@@ -54,7 +54,7 @@ export const ALL_REGIONS = {
     { code: 'seoul_gangnam', name: '강남구', province: 'seoul' },
     { code: 'seoul_songpa', name: '송파구', province: 'seoul' },
     { code: 'seoul_gangdong', name: '강동구', province: 'seoul' },
-    { code: 'seoul_jongno', name: '종로구', province: 'seoul' }
+    { code: 'seoul_jongno', name: '종로구', province: 'seoul' },
   ],
 
   // 부산광역시 (16개 구·군)
@@ -74,7 +74,7 @@ export const ALL_REGIONS = {
     { code: 'busan_yeonje', name: '연제구', province: 'busan' },
     { code: 'busan_suyeong', name: '수영구', province: 'busan' },
     { code: 'busan_sasang', name: '사상구', province: 'busan' },
-    { code: 'busan_gijang', name: '기장군', province: 'busan' }
+    { code: 'busan_gijang', name: '기장군', province: 'busan' },
   ],
 
   // 경기도 (31개 시·군)
@@ -109,7 +109,7 @@ export const ALL_REGIONS = {
     { code: 'gyeonggi_gapyeong', name: '가평군', province: 'gyeonggi' },
     { code: 'gyeonggi_yeoncheon', name: '연천군', province: 'gyeonggi' },
     { code: 'gyeonggi_hanam', name: '하남시', province: 'gyeonggi' },
-    { code: 'gyeonggi_uiwang', name: '의왕시', province: 'gyeonggi' }
+    { code: 'gyeonggi_uiwang', name: '의왕시', province: 'gyeonggi' },
   ],
 
   // 강원특별자치도 (18개 시·군)
@@ -131,7 +131,7 @@ export const ALL_REGIONS = {
     { code: 'gangwon_yanggu', name: '양구군', province: 'gangwon' },
     { code: 'gangwon_inje', name: '인제군', province: 'gangwon' },
     { code: 'gangwon_goseong', name: '고성군', province: 'gangwon' },
-    { code: 'gangwon_yangyang', name: '양양군', province: 'gangwon' }
+    { code: 'gangwon_yangyang', name: '양양군', province: 'gangwon' },
   ],
 
   // 충청북도 (11개 시·군)
@@ -146,7 +146,7 @@ export const ALL_REGIONS = {
     { code: 'chungbuk_goesan', name: '괴산군', province: 'chungbuk' },
     { code: 'chungbuk_eumseong', name: '음성군', province: 'chungbuk' },
     { code: 'chungbuk_danyang', name: '단양군', province: 'chungbuk' },
-    { code: 'chungbuk_jeungpyeong', name: '증평군', province: 'chungbuk' }
+    { code: 'chungbuk_jeungpyeong', name: '증평군', province: 'chungbuk' },
   ],
 
   // 충청남도 (15개 시·군)
@@ -165,7 +165,7 @@ export const ALL_REGIONS = {
     { code: 'chungnam_cheongyang', name: '청양군', province: 'chungnam' },
     { code: 'chungnam_hongseong', name: '홍성군', province: 'chungnam' },
     { code: 'chungnam_yesan', name: '예산군', province: 'chungnam' },
-    { code: 'chungnam_taean', name: '태안군', province: 'chungnam' }
+    { code: 'chungnam_taean', name: '태안군', province: 'chungnam' },
   ],
 
   // 전라북도 (14개 시·군)
@@ -183,7 +183,7 @@ export const ALL_REGIONS = {
     { code: 'jeonbuk_imsil', name: '임실군', province: 'jeonbuk' },
     { code: 'jeonbuk_sunchang', name: '순창군', province: 'jeonbuk' },
     { code: 'jeonbuk_gochang', name: '고창군', province: 'jeonbuk' },
-    { code: 'jeonbuk_buan', name: '부안군', province: 'jeonbuk' }
+    { code: 'jeonbuk_buan', name: '부안군', province: 'jeonbuk' },
   ],
 
   // 전라남도 (22개 시·군)
@@ -209,7 +209,7 @@ export const ALL_REGIONS = {
     { code: 'jeonnam_jangseong', name: '장성군', province: 'jeonnam' },
     { code: 'jeonnam_wando', name: '완도군', province: 'jeonnam' },
     { code: 'jeonnam_jindo', name: '진도군', province: 'jeonnam' },
-    { code: 'jeonnam_sinan', name: '신안군', province: 'jeonnam' }
+    { code: 'jeonnam_sinan', name: '신안군', province: 'jeonnam' },
   ],
 
   // 경상북도 (23개 시·군)
@@ -236,7 +236,7 @@ export const ALL_REGIONS = {
     { code: 'gyeongbuk_yecheon', name: '예천군', province: 'gyeongbuk' },
     { code: 'gyeongbuk_bonghwa', name: '봉화군', province: 'gyeongbuk' },
     { code: 'gyeongbuk_uljin', name: '울진군', province: 'gyeongbuk' },
-    { code: 'gyeongbuk_ulleung', name: '울릉군', province: 'gyeongbuk' }
+    { code: 'gyeongbuk_ulleung', name: '울릉군', province: 'gyeongbuk' },
   ],
 
   // 경상남도 (18개 시·군)
@@ -258,13 +258,13 @@ export const ALL_REGIONS = {
     { code: 'gyeongnam_sancheong', name: '산청군', province: 'gyeongnam' },
     { code: 'gyeongnam_hamyang', name: '함양군', province: 'gyeongnam' },
     { code: 'gyeongnam_geochang', name: '거창군', province: 'gyeongnam' },
-    { code: 'gyeongnam_hapcheon', name: '합천군', province: 'gyeongnam' }
+    { code: 'gyeongnam_hapcheon', name: '합천군', province: 'gyeongnam' },
   ],
 
   // 제주특별자치도 (2개 시)
   jeju: [
     { code: 'jeju_jeju', name: '제주시', province: 'jeju' },
-    { code: 'jeju_seogwipo', name: '서귀포시', province: 'jeju' }
+    { code: 'jeju_seogwipo', name: '서귀포시', province: 'jeju' },
   ],
 
   // 대구광역시 (8개 구·군)
@@ -276,7 +276,7 @@ export const ALL_REGIONS = {
     { code: 'daegu_buk', name: '북구', province: 'daegu' },
     { code: 'daegu_suseong', name: '수성구', province: 'daegu' },
     { code: 'daegu_dalseo', name: '달서구', province: 'daegu' },
-    { code: 'daegu_dalseong', name: '달성군', province: 'daegu' }
+    { code: 'daegu_dalseong', name: '달성군', province: 'daegu' },
   ],
 
   // 인천광역시 (10개 구·군)
@@ -290,7 +290,7 @@ export const ALL_REGIONS = {
     { code: 'incheon_gyeyang', name: '계양구', province: 'incheon' },
     { code: 'incheon_seo', name: '서구', province: 'incheon' },
     { code: 'incheon_ganghwa', name: '강화군', province: 'incheon' },
-    { code: 'incheon_ongjin', name: '옹진군', province: 'incheon' }
+    { code: 'incheon_ongjin', name: '옹진군', province: 'incheon' },
   ],
 
   // 광주광역시 (5개 구)
@@ -299,7 +299,7 @@ export const ALL_REGIONS = {
     { code: 'gwangju_seo', name: '서구', province: 'gwangju' },
     { code: 'gwangju_nam', name: '남구', province: 'gwangju' },
     { code: 'gwangju_buk', name: '북구', province: 'gwangju' },
-    { code: 'gwangju_gwangsan', name: '광산구', province: 'gwangju' }
+    { code: 'gwangju_gwangsan', name: '광산구', province: 'gwangju' },
   ],
 
   // 대전광역시 (5개 구)
@@ -308,7 +308,7 @@ export const ALL_REGIONS = {
     { code: 'daejeon_jung', name: '중구', province: 'daejeon' },
     { code: 'daejeon_seo', name: '서구', province: 'daejeon' },
     { code: 'daejeon_yuseong', name: '유성구', province: 'daejeon' },
-    { code: 'daejeon_daedeok', name: '대덕구', province: 'daejeon' }
+    { code: 'daejeon_daedeok', name: '대덕구', province: 'daejeon' },
   ],
 
   // 울산광역시 (5개 구·군)
@@ -317,13 +317,11 @@ export const ALL_REGIONS = {
     { code: 'ulsan_nam', name: '남구', province: 'ulsan' },
     { code: 'ulsan_dong', name: '동구', province: 'ulsan' },
     { code: 'ulsan_buk', name: '북구', province: 'ulsan' },
-    { code: 'ulsan_ulju', name: '울주군', province: 'ulsan' }
+    { code: 'ulsan_ulju', name: '울주군', province: 'ulsan' },
   ],
 
   // 세종특별자치시 (1개시 - 하위구역 없음)
-  sejong: [
-    { code: 'sejong_sejong', name: '세종시', province: 'sejong' }
-  ]
+  sejong: [{ code: 'sejong_sejong', name: '세종시', province: 'sejong' }],
 }
 
 /**
@@ -332,30 +330,30 @@ export const ALL_REGIONS = {
  */
 export const getAllRegionsFlat = () => {
   const allRegions = []
-  
+
   // 광역시도 추가
-  PROVINCES.forEach(province => {
+  PROVINCES.forEach((province) => {
     allRegions.push({
       code: province.code,
       name: province.name,
       shortName: province.shortName,
       type: 'province',
-      level: 1
+      level: 1,
     })
   })
-  
+
   // 시·군·구 추가
-  Object.values(ALL_REGIONS).forEach(regions => {
-    regions.forEach(region => {
+  Object.values(ALL_REGIONS).forEach((regions) => {
+    regions.forEach((region) => {
       allRegions.push({
         ...region,
         type: 'city',
         level: 2,
-        fullName: `${PROVINCES.find(p => p.code === region.province)?.shortName} ${region.name}`
+        fullName: `${PROVINCES.find((p) => p.code === region.province)?.shortName} ${region.name}`,
       })
     })
   })
-  
+
   return allRegions
 }
 
@@ -366,19 +364,19 @@ export const getAllRegionsFlat = () => {
  */
 export const getRegionNameByCode = (regionCode) => {
   // 광역시도 검색
-  const province = PROVINCES.find(p => p.code === regionCode)
+  const province = PROVINCES.find((p) => p.code === regionCode)
   if (province) {
     return province.shortName
   }
-  
+
   // 시·군·구 검색
   for (const regions of Object.values(ALL_REGIONS)) {
-    const region = regions.find(r => r.code === regionCode)
+    const region = regions.find((r) => r.code === regionCode)
     if (region) {
       return region.name
     }
   }
-  
+
   return regionCode // 못 찾으면 원본 반환
 }
 
@@ -389,22 +387,21 @@ export const getRegionNameByCode = (regionCode) => {
  */
 export const getRegionCodeByName = (regionName) => {
   // 광역시도 검색
-  const province = PROVINCES.find(p => 
-    p.name === regionName || 
-    p.shortName === regionName
+  const province = PROVINCES.find(
+    (p) => p.name === regionName || p.shortName === regionName,
   )
   if (province) {
     return province.code
   }
-  
+
   // 시·군·구 검색
   for (const regions of Object.values(ALL_REGIONS)) {
-    const region = regions.find(r => r.name === regionName)
+    const region = regions.find((r) => r.name === regionName)
     if (region) {
       return region.code
     }
   }
-  
+
   return regionName // 못 찾으면 원본 반환
 }
 
@@ -413,15 +410,42 @@ export const getRegionCodeByName = (regionName) => {
  */
 export const REGION_TOURISM_INFO = {
   // 주요 관광지 특색
-  seoul: { themes: ['문화', '쇼핑', '역사'], keywords: ['궁궐', '한강', '명동', '강남'] },
-  busan: { themes: ['바다', '온천', '문화'], keywords: ['해운대', '광안리', '감천문화마을'] },
-  jeju: { themes: ['자연', '휴양', '체험'], keywords: ['한라산', '성산일출봉', '협재해수욕장'] },
-  gyeongju: { themes: ['역사', '문화', '유적'], keywords: ['불국사', '석굴암', '첨성대'] },
-  jeonju: { themes: ['전통', '음식', '문화'], keywords: ['한옥마을', '비빔밥', '전통문화'] },
-  gangneung: { themes: ['바다', '커피', '자연'], keywords: ['경포대', '안목해변', '커피거리'] },
-  yeosu: { themes: ['바다', '야경', '섬'], keywords: ['밤바다', '엑스포', '오동도'] },
-  sokcho: { themes: ['바다', '산', '자연'], keywords: ['설악산', '속초해수욕장', '청초호'] },
-  tongyeong: { themes: ['바다', '섬', '문화'], keywords: ['한산도', '미륵산', '동피랑마을'] }
+  seoul: {
+    themes: ['문화', '쇼핑', '역사'],
+    keywords: ['궁궐', '한강', '명동', '강남'],
+  },
+  busan: {
+    themes: ['바다', '온천', '문화'],
+    keywords: ['해운대', '광안리', '감천문화마을'],
+  },
+  jeju: {
+    themes: ['자연', '휴양', '체험'],
+    keywords: ['한라산', '성산일출봉', '협재해수욕장'],
+  },
+  gyeongju: {
+    themes: ['역사', '문화', '유적'],
+    keywords: ['불국사', '석굴암', '첨성대'],
+  },
+  jeonju: {
+    themes: ['전통', '음식', '문화'],
+    keywords: ['한옥마을', '비빔밥', '전통문화'],
+  },
+  gangneung: {
+    themes: ['바다', '커피', '자연'],
+    keywords: ['경포대', '안목해변', '커피거리'],
+  },
+  yeosu: {
+    themes: ['바다', '야경', '섬'],
+    keywords: ['밤바다', '엑스포', '오동도'],
+  },
+  sokcho: {
+    themes: ['바다', '산', '자연'],
+    keywords: ['설악산', '속초해수욕장', '청초호'],
+  },
+  tongyeong: {
+    themes: ['바다', '섬', '문화'],
+    keywords: ['한산도', '미륵산', '동피랑마을'],
+  },
 }
 
 export default {
@@ -430,5 +454,5 @@ export default {
   getAllRegionsFlat,
   getRegionNameByCode,
   getRegionCodeByName,
-  REGION_TOURISM_INFO
+  REGION_TOURISM_INFO,
 }

@@ -148,7 +148,10 @@ function AppContent() {
           />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/edit" element={<ProfileEditPage />} />
-          <Route path="/profile/change-password" element={<ChangePasswordPage />} />
+          <Route
+            path="/profile/change-password"
+            element={<ChangePasswordPage />}
+          />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/contact" element={<ContactPage />} />

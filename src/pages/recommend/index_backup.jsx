@@ -26,8 +26,8 @@ import SmartSorting from '@/components/recommend/SmartSorting'
 import RecommendCourseCard from './RecommendCourseCard'
 
 // 244개 전체 지역 지원으로 확장
-import { getMajorCitiesFlat, getCitiesByGroup, getPopularCities, getCityStats } from '@/data/majorCities'
-import { getAllRegionsFlat, getRegionNameByCode } from '@/data/koreaRegions'
+import { getMajorCitiesFlat, getPopularCities } from '@/data/majorCities'
+import { getAllRegionsFlat } from '@/data/koreaRegions'
 
 // 안전한 key 생성 유틸리티 함수
 const generateSafeKey = (item, prefix = '', index = 0) => {
@@ -86,7 +86,7 @@ export default function TravelCoursePage() {
       console.log('Regions API 상태:', {
         loading: regionsLoading,
         error: regionsIsError,
-        dataLength: regionsData?.length
+        dataLength: regionsData?.length,
       })
 
       if (regionsError) {
@@ -98,7 +98,7 @@ export default function TravelCoursePage() {
   // 244개 전체 지역 데이터 처리 - 완전한 전국 커버리지 제공
   const regions = useMemo(() => {
     const isDev = import.meta.env.DEV
-    
+
     if (isDev) {
       console.log('전체 지역 데이터 처리 시작')
     }
@@ -107,26 +107,29 @@ export default function TravelCoursePage() {
     const allKoreaRegions = getAllRegionsFlat()
     const majorCities = getMajorCitiesFlat()
     const popularCities = getPopularCities()
-    
+
     if (isDev) {
       console.log('전체 지역 통계:', {
         전체지역: allKoreaRegions.length,
         주요도시: majorCities.length,
-        인기지역: popularCities.length
+        인기지역: popularCities.length,
       })
     }
 
     // 2. 주요 도시를 우선으로 하되 모든 지역 지원
     let finalRegions = []
-    
+
     // 2-1. 먼저 주요 여행 도시들 추가 (우선순위 높음)
-    const majorCityCodeSet = new Set(majorCities.map(c => c.code))
+    const majorCityCodeSet = new Set(majorCities.map((c) => c.code))
     finalRegions = [...majorCities]
-    
+
     // 2-2. 나머지 244개 지역 중 주요 도시에 포함되지 않은 지역들 추가
     const additionalRegions = allKoreaRegions
-      .filter(region => !majorCityCodeSet.has(region.code) && region.type === 'city')
-      .map(region => ({
+      .filter(
+        (region) =>
+          !majorCityCodeSet.has(region.code) && region.type === 'city',
+      )
+      .map((region) => ({
         code: region.code,
         name: region.name,
         province: region.province,
@@ -134,47 +137,51 @@ export default function TravelCoursePage() {
         groupName: region.fullName ? region.fullName.split(' ')[0] : '기타',
         displayName: region.fullName || region.name,
         level: region.level,
-        isAdditional: true // 추가 지역 표시
+        isAdditional: true, // 추가 지역 표시
       }))
-    
+
     finalRegions = [...finalRegions, ...additionalRegions]
-    
+
     // 3. API 데이터와 병합 (API 데이터가 있으면 우선 사용하되 전체 지역 유지)
     if (Array.isArray(regionsData) && regionsData.length > 0) {
       // API 데이터에서 유효한 지역만 필터링
       const validApiRegions = regionsData.filter((r) => {
         if (!r || !r.code || !r.name) return false
-        
+
         const isAllOption =
           r.code === 'all' ||
           r.name === '전체' ||
           r.name === '전체 지역' ||
           r.name.startsWith('전체')
-        
+
         return !isAllOption
       })
-      
+
       if (validApiRegions.length > 0) {
         // API 데이터로 기존 지역 정보 업데이트 (전체 목록은 유지)
-        const apiCodes = new Set(validApiRegions.map(r => r.code))
-        
+        const apiCodes = new Set(validApiRegions.map((r) => r.code))
+
         // API 데이터가 있는 지역은 API 정보로 업데이트
-        finalRegions = finalRegions.map(region => {
-          const apiRegion = validApiRegions.find(ar => ar.code === region.code)
+        finalRegions = finalRegions.map((region) => {
+          const apiRegion = validApiRegions.find(
+            (ar) => ar.code === region.code,
+          )
           return apiRegion ? { ...region, ...apiRegion } : region
         })
-        
+
         // API에만 있고 기존 목록에 없는 지역 추가
-        const existingCodes = new Set(finalRegions.map(r => r.code))
-        const newApiRegions = validApiRegions.filter(ar => !existingCodes.has(ar.code))
+        const existingCodes = new Set(finalRegions.map((r) => r.code))
+        const newApiRegions = validApiRegions.filter(
+          (ar) => !existingCodes.has(ar.code),
+        )
         finalRegions = [...finalRegions, ...newApiRegions]
-        
+
         if (isDev) {
           console.log('API 데이터 병합 완료:', {
             API데이터: validApiRegions.length,
             기존지역: finalRegions.length - newApiRegions.length,
             신규추가: newApiRegions.length,
-            최종지역수: finalRegions.length
+            최종지역수: finalRegions.length,
           })
         }
       }
@@ -185,18 +192,18 @@ export default function TravelCoursePage() {
       // 1순위: 인기도
       if (a.popular && !b.popular) return -1
       if (!a.popular && b.popular) return 1
-      
+
       // 2순위: 주요 도시 여부 (추가 지역보다 우선)
       if (!a.isAdditional && b.isAdditional) return -1
       if (a.isAdditional && !b.isAdditional) return 1
-      
+
       // 3순위: 그룹명으로 정렬
       const aGroup = a.groupName || ''
       const bGroup = b.groupName || ''
       if (aGroup !== bGroup) {
         return aGroup.localeCompare(bGroup, 'ko')
       }
-      
+
       // 4순위: 도시명으로 정렬
       const aName = a.name || ''
       const bName = b.name || ''
@@ -206,10 +213,12 @@ export default function TravelCoursePage() {
     if (isDev) {
       console.log('244개 전체 지역 목록 완성:', {
         총지역수: sortedRegions.length,
-        인기지역: sortedRegions.filter(r => r.popular).length,
-        주요도시: sortedRegions.filter(r => !r.isAdditional).length,
-        추가지역: sortedRegions.filter(r => r.isAdditional).length,
-        샘플: sortedRegions.slice(0, 5).map(r => `${r.name} (${r.groupName})`)
+        인기지역: sortedRegions.filter((r) => r.popular).length,
+        주요도시: sortedRegions.filter((r) => !r.isAdditional).length,
+        추가지역: sortedRegions.filter((r) => r.isAdditional).length,
+        샘플: sortedRegions
+          .slice(0, 5)
+          .map((r) => `${r.name} (${r.groupName})`),
       })
     }
 
@@ -225,7 +234,7 @@ export default function TravelCoursePage() {
   // 동적 테마 데이터 처리 - 기본 테마 + API 데이터 병합
   const themes = useMemo(() => {
     const isDev = import.meta.env.DEV
-    
+
     if (isDev) {
       console.log('Themes 데이터 처리:', themesData?.length || 0, '개')
     }
@@ -246,7 +255,7 @@ export default function TravelCoursePage() {
       { code: 'mountain', name: '산' },
       { code: 'festival', name: '축제' },
       { code: 'traditional', name: '전통' },
-      { code: 'modern', name: '도시' }
+      { code: 'modern', name: '도시' },
     ]
 
     let finalThemes = defaultThemes
@@ -267,15 +276,17 @@ export default function TravelCoursePage() {
 
       if (validApiThemes.length > 0) {
         // API 데이터와 기본 데이터 병합 (중복 제거)
-        const apiCodes = new Set(validApiThemes.map(t => t.code))
-        const uniqueDefaultThemes = defaultThemes.filter(t => !apiCodes.has(t.code))
+        const apiCodes = new Set(validApiThemes.map((t) => t.code))
+        const uniqueDefaultThemes = defaultThemes.filter(
+          (t) => !apiCodes.has(t.code),
+        )
         finalThemes = [...validApiThemes, ...uniqueDefaultThemes]
-        
+
         if (isDev) {
           console.log('테마 데이터 병합:', {
             API데이터: validApiThemes.length,
             기본데이터: uniqueDefaultThemes.length,
-            최종: finalThemes.length
+            최종: finalThemes.length,
           })
         }
       }
@@ -392,7 +403,7 @@ export default function TravelCoursePage() {
   const travelCourses = useMemo(() => {
     // 개발 환경에서만 디버깅 로그 출력
     const isDev = import.meta.env.DEV
-    
+
     if (isDev) {
       console.log('API 응답 처리 시작:', {
         selectedRegion,
@@ -400,7 +411,7 @@ export default function TravelCoursePage() {
         responseType: typeof activeResponse,
         isArray: Array.isArray(activeResponse),
         loading: isActiveLoading,
-        response: activeResponse
+        response: activeResponse,
       })
     }
 
@@ -414,7 +425,10 @@ export default function TravelCoursePage() {
     // API 응답 구조에 따른 데이터 추출
     if (Array.isArray(activeResponse)) {
       rawCourses = activeResponse.filter(Boolean)
-    } else if (activeResponse.courses && Array.isArray(activeResponse.courses)) {
+    } else if (
+      activeResponse.courses &&
+      Array.isArray(activeResponse.courses)
+    ) {
       rawCourses = activeResponse.courses.filter(Boolean)
     } else if (typeof activeResponse === 'object') {
       if (isDev) {
@@ -423,20 +437,25 @@ export default function TravelCoursePage() {
           coursesType: typeof activeResponse.courses,
           totalCount: activeResponse.total,
           keys: Object.keys(activeResponse),
-          fullResponse: activeResponse
+          fullResponse: activeResponse,
         })
       }
-      
+
       // 다양한 가능한 응답 구조 시도
       if (activeResponse.data && Array.isArray(activeResponse.data)) {
         rawCourses = activeResponse.data.filter(Boolean)
-      } else if (activeResponse.results && Array.isArray(activeResponse.results)) {
+      } else if (
+        activeResponse.results &&
+        Array.isArray(activeResponse.results)
+      ) {
         rawCourses = activeResponse.results.filter(Boolean)
       } else {
         // 빈 배열로 대체하는 대신 동적 생성 시도
         if (selectedRegion !== 'all' && !shouldUseSearch) {
           if (isDev) {
-            console.log('API 응답이 없어서 빈 배열 반환, 동적 생성은 API에서 처리됨')
+            console.log(
+              'API 응답이 없어서 빈 배열 반환, 동적 생성은 API에서 처리됨',
+            )
           }
         }
         return []
@@ -447,21 +466,21 @@ export default function TravelCoursePage() {
 
     // 중복 제거 로직 (성능 최적화)
     if (rawCourses.length === 0) return []
-    
+
     const uniqueCourses = []
     const seenIds = new Set()
     const seenTitles = new Set()
-    
+
     for (const course of rawCourses) {
       if (!course) continue
-      
+
       // ID 기반 중복 체크
       const courseId = course.id || course.course_id || course.content_id
       if (courseId && seenIds.has(courseId)) {
         if (isDev) console.log(`중복 제거 (ID): ${courseId}`)
         continue
       }
-      
+
       // 제목 기반 중복 체크
       const courseTitle = course.title || course.course_name || course.name
       const trimmedTitle = courseTitle?.trim()
@@ -469,17 +488,19 @@ export default function TravelCoursePage() {
         if (isDev) console.log(`중복 제거 (제목): ${trimmedTitle}`)
         continue
       }
-      
+
       // 고유 코스 추가
       if (courseId) seenIds.add(courseId)
       if (trimmedTitle) seenTitles.add(trimmedTitle)
       uniqueCourses.push(course)
     }
-    
+
     if (isDev) {
-      console.log(`데이터 처리 완료: ${rawCourses.length} → ${uniqueCourses.length} (${rawCourses.length - uniqueCourses.length}개 중복 제거)`)
+      console.log(
+        `데이터 처리 완료: ${rawCourses.length} → ${uniqueCourses.length} (${rawCourses.length - uniqueCourses.length}개 중복 제거)`,
+      )
     }
-    
+
     return uniqueCourses
   }, [activeResponse, shouldUseSearch, isActiveLoading, selectedRegion])
 
@@ -487,17 +508,17 @@ export default function TravelCoursePage() {
   const error = useMemo(() => {
     if (isActiveError && activeError) {
       const baseMessage = '여행 코스를 불러오는데 문제가 발생했습니다.'
-      
+
       // 네트워크 에러인 경우
       if (activeError.status === 'FETCH_ERROR' || !navigator.onLine) {
         return '인터넷 연결을 확인해주세요.'
       }
-      
+
       // 서버 에러인 경우
       if (activeError.status >= 500) {
         return '서버에 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.'
       }
-      
+
       // 기타 에러
       return baseMessage
     }
@@ -546,11 +567,11 @@ export default function TravelCoursePage() {
                 return regionData.name
               }
             }
-            
+
             if (import.meta.env.DEV) {
               console.warn(`알 수 없는 지역 코드: ${code}`)
             }
-            
+
             // 주요 도시 전체 목록에서 찾기
             const allMajorCities = getMajorCitiesFlat()
             const fallbackData = allMajorCities.find((r) => r?.code === code)
@@ -570,7 +591,7 @@ export default function TravelCoursePage() {
 
         const startTime = performance.now()
         const images = await getMultipleRegionImages(regionNamesForImages)
-        
+
         if (import.meta.env.DEV) {
           const endTime = performance.now()
           console.log('이미지 로딩 완료:', Object.keys(images).length, '개')
@@ -582,14 +603,18 @@ export default function TravelCoursePage() {
 
         // 개발 환경에서만 이미지 매핑 상태 확인
         if (import.meta.env.DEV) {
-          const mappedCount = travelCourses.filter(course => {
+          const mappedCount = travelCourses.filter((course) => {
             const courseRegion = course?.region
             if (!Array.isArray(regions) || !courseRegion) return false
-            const regionData = regions.find(region => region?.code === courseRegion)
+            const regionData = regions.find(
+              (region) => region?.code === courseRegion,
+            )
             const regionDisplayName = regionData?.name || courseRegion
             return images[regionDisplayName]
           }).length
-          console.log(`이미지 매핑 완료: ${mappedCount}/${travelCourses.length}개 코스`)
+          console.log(
+            `이미지 매핑 완료: ${mappedCount}/${travelCourses.length}개 코스`,
+          )
         }
       } catch (error) {
         console.error('지역 로드 실패:', error)
@@ -660,19 +685,21 @@ export default function TravelCoursePage() {
   // ===============================
   const filteredCourses = useMemo(() => {
     const isDev = import.meta.env.DEV
-    
+
     if (isDev) {
       console.log('필터링 시작:', {
         원본: travelCourses.length,
         필터: { selectedMonth, selectedTheme, selectedRegion },
-        샘플코스: travelCourses.slice(0, 2).map(c => ({ title: c?.title, region: c?.region }))
+        샘플코스: travelCourses
+          .slice(0, 2)
+          .map((c) => ({ title: c?.title, region: c?.region })),
       })
     }
 
     if (!Array.isArray(travelCourses)) {
       return []
     }
-    
+
     // API 필터링이 제대로 작동하지 않는 경우를 대비한 로직
     if (selectedRegion !== 'all' && travelCourses.length === 0) {
       if (isDev) {
@@ -685,15 +712,16 @@ export default function TravelCoursePage() {
 
       // 지역 필터링 개선 - 정확한 매칭과 로깅
       const courseRegion = course?.region || course?.region_code
-      const matchesRegion = selectedRegion === 'all' || courseRegion === selectedRegion
-      
+      const matchesRegion =
+        selectedRegion === 'all' || courseRegion === selectedRegion
+
       // 디버깅: 지역 필터링 상세 로그
       if (isDev && selectedRegion !== 'all') {
         console.log('지역 필터링 체크:', {
           courseTitle: course.title,
           courseRegion,
           selectedRegion,
-          matches: matchesRegion
+          matches: matchesRegion,
         })
       }
 
@@ -758,7 +786,9 @@ export default function TravelCoursePage() {
     })
 
     if (isDev) {
-      console.log(`필터링 완료: ${filtered.length}개 (원본: ${travelCourses.length}개)`)
+      console.log(
+        `필터링 완료: ${filtered.length}개 (원본: ${travelCourses.length}개)`,
+      )
     }
     return filtered
   }, [
@@ -833,10 +863,13 @@ export default function TravelCoursePage() {
 
   // 현재 표시할 코스들 계산 - 지역별 대표 코스 표시 로직 개선
   const currentDisplayedCourses = useMemo(() => {
-    if (displayedCourses === INITIAL_DISPLAY_COUNT && selectedRegion === 'all') {
+    if (
+      displayedCourses === INITIAL_DISPLAY_COUNT &&
+      selectedRegion === 'all'
+    ) {
       // 전체 지역 보기 + 초기 5개 표시 시: 지역별 대표 코스 1개씩 선택
       const regionCoursesMap = new Map()
-      
+
       // 모든 코스를 순회하면서 각 지역별로 첫 번째 코스만 선택
       for (const course of sortedCourses) {
         const courseRegion = course?.region
@@ -844,19 +877,22 @@ export default function TravelCoursePage() {
           regionCoursesMap.set(courseRegion, course)
         }
       }
-      
+
       // 지역별 대표 코스들을 배열로 변환하고 최대 5개만 선택
-      const representativeCourses = Array.from(regionCoursesMap.values()).slice(0, INITIAL_DISPLAY_COUNT)
-      
+      const representativeCourses = Array.from(regionCoursesMap.values()).slice(
+        0,
+        INITIAL_DISPLAY_COUNT,
+      )
+
       if (import.meta.env.DEV) {
         console.log('지역별 대표 코스 표시:', {
           전체코스수: sortedCourses.length,
           지역수: regionCoursesMap.size,
           표시코스수: representativeCourses.length,
-          지역목록: Array.from(regionCoursesMap.keys())
+          지역목록: Array.from(regionCoursesMap.keys()),
         })
       }
-      
+
       return representativeCourses
     } else if (selectedRegion !== 'all') {
       // 특정 지역 선택 시: 해당 지역의 모든 코스 표시
@@ -871,13 +907,16 @@ export default function TravelCoursePage() {
   const hasMoreToShow = useMemo(() => {
     if (selectedRegion === 'all') {
       // 전체 지역 보기: 초기 5개 표시 상태이고 더 많은 코스가 있는 경우
-      return displayedCourses === INITIAL_DISPLAY_COUNT && sortedCourses.length > INITIAL_DISPLAY_COUNT
+      return (
+        displayedCourses === INITIAL_DISPLAY_COUNT &&
+        sortedCourses.length > INITIAL_DISPLAY_COUNT
+      )
     } else {
       // 특정 지역 선택: 현재 표시된 것보다 더 많은 코스가 있는 경우
       return displayedCourses < sortedCourses.length
     }
   }, [displayedCourses, sortedCourses.length, selectedRegion])
-  
+
   const hasMoreFromAPI =
     activeResponse && activeResponse.total > sortedCourses.length
 
@@ -1021,34 +1060,42 @@ export default function TravelCoursePage() {
                     <>
                       {/* 항상 "전체" 옵션을 맨 위에 추가 */}
                       <SelectItem value="all">전체</SelectItem>
-                      
+
                       {/* 244개 전체 지역을 체계적으로 표시 */}
                       {(() => {
-                        const popularCities = regions.filter(r => r.popular)
-                        const majorCities = regions.filter(r => !r.popular && !r.isAdditional)
-                        const additionalRegions = regions.filter(r => r.isAdditional)
-                        
+                        const popularCities = regions.filter((r) => r.popular)
+                        const majorCities = regions.filter(
+                          (r) => !r.popular && !r.isAdditional,
+                        )
+                        const additionalRegions = regions.filter(
+                          (r) => r.isAdditional,
+                        )
+
                         // 광역시도별로 그룹화
                         const groupedRegions = {}
-                        additionalRegions.forEach(region => {
+                        additionalRegions.forEach((region) => {
                           const groupName = region.groupName || '기타'
                           if (!groupedRegions[groupName]) {
                             groupedRegions[groupName] = []
                           }
                           groupedRegions[groupName].push(region)
                         })
-                        
+
                         return (
                           <>
                             {/* 1. 인기 여행지 섹션 */}
                             {popularCities.length > 0 && (
                               <>
-                                <div className="px-2 py-1 text-xs font-semibold text-orange-600 bg-orange-50 border-b">
+                                <div className="border-b bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-600">
                                   ⭐ 인기 여행지 ({popularCities.length}개)
                                 </div>
                                 {popularCities.map((region) => (
                                   <SelectItem
-                                    key={generateSafeKeyWithValue('popular', region.code, region.name)}
+                                    key={generateSafeKeyWithValue(
+                                      'popular',
+                                      region.code,
+                                      region.name,
+                                    )}
                                     value={region.code}
                                     className="font-medium text-orange-700"
                                   >
@@ -1057,16 +1104,20 @@ export default function TravelCoursePage() {
                                 ))}
                               </>
                             )}
-                            
+
                             {/* 2. 주요 여행 도시 섹션 */}
                             {majorCities.length > 0 && (
                               <>
-                                <div className="px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-50 border-t border-b">
+                                <div className="border-t border-b bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-600">
                                   🏛️ 주요 여행 도시 ({majorCities.length}개)
                                 </div>
                                 {majorCities.map((region) => (
                                   <SelectItem
-                                    key={generateSafeKeyWithValue('major', region.code, region.name)}
+                                    key={generateSafeKeyWithValue(
+                                      'major',
+                                      region.code,
+                                      region.name,
+                                    )}
                                     value={region.code}
                                     className="text-blue-700"
                                   >
@@ -1075,36 +1126,43 @@ export default function TravelCoursePage() {
                                 ))}
                               </>
                             )}
-                            
+
                             {/* 3. 전국 시군구 섹션 */}
                             {Object.keys(groupedRegions).length > 0 && (
                               <>
-                                <div className="px-2 py-1 text-xs font-semibold text-green-600 bg-green-50 border-t border-b">
-                                  🗺️ 전국 시·군·구 ({additionalRegions.length}개)
+                                <div className="border-t border-b bg-green-50 px-2 py-1 text-xs font-semibold text-green-600">
+                                  🗺️ 전국 시·군·구 ({additionalRegions.length}
+                                  개)
                                 </div>
                                 {Object.entries(groupedRegions)
                                   .sort(([a], [b]) => a.localeCompare(b, 'ko'))
                                   .map(([groupName, groupRegions]) => (
-                                  <div key={groupName}>
-                                    {/* 광역시도 헤더 */}
-                                    <div className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100">
-                                      📍 {groupName} ({groupRegions.length}개)
+                                    <div key={groupName}>
+                                      {/* 광역시도 헤더 */}
+                                      <div className="bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
+                                        📍 {groupName} ({groupRegions.length}개)
+                                      </div>
+
+                                      {/* 해당 광역시도의 시군구들 */}
+                                      {groupRegions
+                                        .sort((a, b) =>
+                                          a.name.localeCompare(b.name, 'ko'),
+                                        )
+                                        .map((region) => (
+                                          <SelectItem
+                                            key={generateSafeKeyWithValue(
+                                              'region',
+                                              region.code,
+                                              region.name,
+                                            )}
+                                            value={region.code}
+                                            className="pl-4 text-xs text-gray-600"
+                                          >
+                                            🏘️ {region.name}
+                                          </SelectItem>
+                                        ))}
                                     </div>
-                                    
-                                    {/* 해당 광역시도의 시군구들 */}
-                                    {groupRegions
-                                      .sort((a, b) => a.name.localeCompare(b.name, 'ko'))
-                                      .map((region) => (
-                                        <SelectItem
-                                          key={generateSafeKeyWithValue('region', region.code, region.name)}
-                                          value={region.code}
-                                          className="pl-4 text-xs text-gray-600"
-                                        >
-                                          🏘️ {region.name}
-                                        </SelectItem>
-                                      ))}
-                                  </div>
-                                ))}
+                                  ))}
                               </>
                             )}
                           </>
@@ -1346,9 +1404,11 @@ export default function TravelCoursePage() {
             <p className="text-muted-foreground mb-6">
               {travelCourses.length === 0
                 ? '잠시만 기다려주세요. 곧 멋진 여행 코스를 보여드릴게요!'
-                : selectedRegion !== 'all' || selectedMonth !== 'all' || selectedTheme !== 'all'
-                ? '선택하신 조건에 맞는 여행 코스가 없습니다. 다른 조건을 선택해보세요.'
-                : '다른 검색어를 입력해보세요.'}
+                : selectedRegion !== 'all' ||
+                    selectedMonth !== 'all' ||
+                    selectedTheme !== 'all'
+                  ? '선택하신 조건에 맞는 여행 코스가 없습니다. 다른 조건을 선택해보세요.'
+                  : '다른 검색어를 입력해보세요.'}
             </p>
             <div className="space-y-2">
               <Button
@@ -1364,41 +1424,46 @@ export default function TravelCoursePage() {
                 전체 코스 보기
               </Button>
               {/* 필터링된 상태에서 결과가 없을 때 인기 지역 추천 */}
-              {sortedCourses.length === 0 && (selectedRegion !== 'all' || selectedMonth !== 'all' || selectedTheme !== 'all') && (
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-600">인기 여행지를 추천드려요:</p>
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      onClick={() => setSelectedRegion('jeju')}
-                      variant="outline"
-                      size="sm"
-                    >
-                      제주도
-                    </Button>
-                    <Button
-                      onClick={() => setSelectedRegion('busan')}
-                      variant="outline"
-                      size="sm"
-                    >
-                      부산
-                    </Button>
-                    <Button
-                      onClick={() => setSelectedRegion('gangneung')}
-                      variant="outline"
-                      size="sm"
-                    >
-                      강릉
-                    </Button>
-                    <Button
-                      onClick={() => setSelectedRegion('jeonju')}
-                      variant="outline"
-                      size="sm"
-                    >
-                      전주
-                    </Button>
+              {sortedCourses.length === 0 &&
+                (selectedRegion !== 'all' ||
+                  selectedMonth !== 'all' ||
+                  selectedTheme !== 'all') && (
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-600">
+                      인기 여행지를 추천드려요:
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        onClick={() => setSelectedRegion('jeju')}
+                        variant="outline"
+                        size="sm"
+                      >
+                        제주도
+                      </Button>
+                      <Button
+                        onClick={() => setSelectedRegion('busan')}
+                        variant="outline"
+                        size="sm"
+                      >
+                        부산
+                      </Button>
+                      <Button
+                        onClick={() => setSelectedRegion('gangneung')}
+                        variant="outline"
+                        size="sm"
+                      >
+                        강릉
+                      </Button>
+                      <Button
+                        onClick={() => setSelectedRegion('jeonju')}
+                        variant="outline"
+                        size="sm"
+                      >
+                        전주
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
               {travelCourses.length === 0 && (
                 <Button
                   onClick={() => activeRefetch()}
@@ -1427,12 +1492,14 @@ export default function TravelCoursePage() {
                     검색 결과: {sortedCourses.length}개 중 {displayedCourses}개
                     표시
                   </>
+                ) : selectedRegion === 'all' ? (
+                  displayedCourses === INITIAL_DISPLAY_COUNT ? (
+                    `${sortedCourses.length}개 코스 중 지역별 대표 ${currentDisplayedCourses.length}개 표시`
+                  ) : (
+                    `총 ${sortedCourses.length}개 모든 코스 표시`
+                  )
                 ) : (
-                  selectedRegion === 'all' 
-                    ? (displayedCourses === INITIAL_DISPLAY_COUNT 
-                        ? `${sortedCourses.length}개 코스 중 지역별 대표 ${currentDisplayedCourses.length}개 표시`
-                        : `총 ${sortedCourses.length}개 모든 코스 표시`)
-                    : `${sortedCourses.length}개 코스 중 ${currentDisplayedCourses.length}개 표시`
+                  `${sortedCourses.length}개 코스 중 ${currentDisplayedCourses.length}개 표시`
                 )}
               </p>
             </div>
@@ -1452,10 +1519,9 @@ export default function TravelCoursePage() {
                   size="lg"
                   className="px-8 py-3"
                 >
-                  {selectedRegion === 'all' 
+                  {selectedRegion === 'all'
                     ? `모든 코스 보기 (${sortedCourses.length}개)`
-                    : `더 많은 코스 보기 (${sortedCourses.length - displayedCourses}개 더)`
-                  }
+                    : `더 많은 코스 보기 (${sortedCourses.length - displayedCourses}개 더)`}
                 </Button>
               )}
 

@@ -1,8 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
 import { baseQueryWithReauth } from './baseQuery'
-import { generateMultipleCourses, generateTravelCourse } from '@/services/tmapCourseService'
 import { getMajorCitiesFlat, getPopularCities } from '@/data/majorCities'
-import { generateRegionCourse } from '@/services/dynamicRegionService'
 
 // 데이터 검증 및 정제 유틸리티
 const validateAndSanitizeResponse = (response, expectedStructure = {}) => {
@@ -258,29 +256,29 @@ const TRAVEL_COURSES_LIST_DEFAULTS = {
 // 간단한 지역명 매핑 (더미 데이터용)
 const getRegionNameFromCode = (regionCode) => {
   const regionMapping = {
-    'jeju': '제주',
-    'busan': '부산',
-    'seoul': '서울',
-    'gangneung': '강릉',
-    'jeonju': '전주',
-    'gyeongju': '경주',
-    'yeosu': '여수',
-    'sokcho': '속초',
-    'tongyeong': '통영',
-    'andong': '안동',
-    'gapyeong': '가평',
-    'damyang': '담양',
-    'boseong': '보성',
-    'samcheok': '삼척',
-    'pyeongchang': '평창',
-    'chuncheon': '춘천',
-    'pohang': '포항',
-    'mokpo': '목포',
-    'suncheon': '순천',
-    'jinju': '진주',
-    'geoje': '거제'
+    jeju: '제주',
+    busan: '부산',
+    seoul: '서울',
+    gangneung: '강릉',
+    jeonju: '전주',
+    gyeongju: '경주',
+    yeosu: '여수',
+    sokcho: '속초',
+    tongyeong: '통영',
+    andong: '안동',
+    gapyeong: '가평',
+    damyang: '담양',
+    boseong: '보성',
+    samcheok: '삼척',
+    pyeongchang: '평창',
+    chuncheon: '춘천',
+    pohang: '포항',
+    mokpo: '목포',
+    suncheon: '순천',
+    jinju: '진주',
+    geoje: '거제',
   }
-  
+
   return regionMapping[regionCode] || regionCode
 }
 
@@ -288,31 +286,53 @@ const getRegionNameFromCode = (regionCode) => {
 const generateDummyCourses = (count) => {
   // 인기 여행지 우선으로 다양한 지역 선택
   const diverseRegions = [
-    'jeju', 'busan', 'gangneung', 'jeonju', 'gyeongju', 
-    'yeosu', 'sokcho', 'tongyeong', 'andong', 'gapyeong',
-    'damyang', 'boseong', 'samcheok', 'pyeongchang', 'chuncheon',
-    'pohang', 'mokpo', 'suncheon', 'jinju', 'geoje'
+    'jeju',
+    'busan',
+    'gangneung',
+    'jeonju',
+    'gyeongju',
+    'yeosu',
+    'sokcho',
+    'tongyeong',
+    'andong',
+    'gapyeong',
+    'damyang',
+    'boseong',
+    'samcheok',
+    'pyeongchang',
+    'chuncheon',
+    'pohang',
+    'mokpo',
+    'suncheon',
+    'jinju',
+    'geoje',
   ]
-  
+
   const themes = [
-    ['자연', '힐링'], ['문화', '역사'], ['바다', '휴양'], 
-    ['전통', '음식'], ['액티비티', '체험'], ['산악', '트레킹'],
-    ['해안', '드라이브'], ['온천', '휴식'], ['축제', '이벤트']
+    ['자연', '힐링'],
+    ['문화', '역사'],
+    ['바다', '휴양'],
+    ['전통', '음식'],
+    ['액티비티', '체험'],
+    ['산악', '트레킹'],
+    ['해안', '드라이브'],
+    ['온천', '휴식'],
+    ['축제', '이벤트'],
   ]
-  
+
   const durations = ['1박 2일', '2박 3일', '3박 4일', '4박 5일']
-  
+
   // 더 다양한 가격대 생성 함수
   const generateRandomPrice = () => {
     const basePrice = 80000 + Math.floor(Math.random() * 400000) // 80,000 ~ 480,000
     const roundedPrice = Math.round(basePrice / 10000) * 10000 // 만원 단위로 반올림
     return `${roundedPrice.toLocaleString()}원`
   }
-  
+
   // 먼저 모든 지역이 적어도 한 번씩은 나오도록 보장
   const courses = []
   const baseTimestamp = Date.now()
-  
+
   for (let i = 0; i < count; i++) {
     // 처음 20개는 각각 다른 지역으로, 그 이후는 랜덤
     let region, regionIndex
@@ -323,20 +343,20 @@ const generateDummyCourses = (count) => {
       regionIndex = Math.floor(Math.random() * diverseRegions.length)
       region = diverseRegions[regionIndex]
     }
-    
+
     const themeSet = themes[i % themes.length]
     const duration = durations[i % durations.length]
     const price = generateRandomPrice()
     const regionName = getRegionNameFromCode(region)
-    
+
     // 디버깅용 로그
     if (import.meta.env.DEV && i < 5) {
       console.log(`코스 ${i}: region=${region}, regionName=${regionName}`)
     }
-    
+
     // 완전히 고유한 ID 생성
     const uniqueId = `dummy_${baseTimestamp}_${i}_${region}_${Math.random().toString(36).substr(2, 5)}`
-    
+
     courses.push({
       id: uniqueId,
       title: `${regionName} ${themeSet[0]} 여행`,
@@ -346,7 +366,7 @@ const generateDummyCourses = (count) => {
       region: region,
       duration: duration,
       price: price,
-      rating: parseFloat((4.0 + (Math.random() * 1.0)).toFixed(1)), // 4.0-5.0 랜덤, 소수점 1자리
+      rating: parseFloat((4.0 + Math.random() * 1.0).toFixed(1)), // 4.0-5.0 랜덤, 소수점 1자리
       reviewCount: 30 + Math.floor(Math.random() * 100),
       likeCount: 15 + Math.floor(Math.random() * 50),
       viewCount: 80 + Math.floor(Math.random() * 200),
@@ -354,55 +374,98 @@ const generateDummyCourses = (count) => {
       bestMonths: [3, 4, 5, 9, 10, 11],
       mainImage: `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
       images: [
-        `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`
+        `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
       ],
-      highlights: [`${regionName} 대표 명소`, `${themeSet[0]} 체험`, '현지 특산품 투어'],
+      highlights: [
+        `${regionName} 대표 명소`,
+        `${themeSet[0]} 체험`,
+        '현지 특산품 투어',
+      ],
       itinerary: [
         {
           day: 1,
           title: `${regionName} ${themeSet[0]} 투어`,
           activities: [
-            { time: '09:00', type: 'transport', place: `${regionName} 역/터미널`, description: '도착 및 이동' },
-            { time: '11:00', type: 'attraction', place: `${regionName} 명소`, description: `${themeSet[0]} 관광지 방문` },
-            { time: '12:30', type: 'restaurant', place: '현지 맛집', description: '점심 및 현지 음식 체험' },
-            { time: '14:30', type: 'attraction', place: `${regionName} ${themeSet[1]} 명소`, description: `${themeSet[1]} 체험` },
-            { time: '18:00', type: 'restaurant', place: '저녁 맛집', description: '저녁 식사' }
-          ]
-        }
+            {
+              time: '09:00',
+              type: 'transport',
+              place: `${regionName} 역/터미널`,
+              description: '도착 및 이동',
+            },
+            {
+              time: '11:00',
+              type: 'attraction',
+              place: `${regionName} 명소`,
+              description: `${themeSet[0]} 관광지 방문`,
+            },
+            {
+              time: '12:30',
+              type: 'restaurant',
+              place: '현지 맛집',
+              description: '점심 및 현지 음식 체험',
+            },
+            {
+              time: '14:30',
+              type: 'attraction',
+              place: `${regionName} ${themeSet[1]} 명소`,
+              description: `${themeSet[1]} 체험`,
+            },
+            {
+              time: '18:00',
+              type: 'restaurant',
+              place: '저녁 맛집',
+              description: '저녁 식사',
+            },
+          ],
+        },
       ],
-      tips: ['편안한 신발 착용', '카메라 준비', '현지 날씨 확인', '대중교통 정보 사전 확인'],
+      tips: [
+        '편안한 신발 착용',
+        '카메라 준비',
+        '현지 날씨 확인',
+        '대중교통 정보 사전 확인',
+      ],
       includes: ['가이드 투어', '입장료', '중식'],
       excludes: ['숙박비', '개인 경비', '교통비', '저녁 식사'],
-      tags: themeSet
+      tags: themeSet,
     })
   }
-  
+
   if (import.meta.env.DEV) {
-    console.log('📋 생성된 전체 더미 코스:', courses.map(c => ({
-      id: c.id,
-      title: c.title,
-      region: c.region
-    })))
+    console.log(
+      '📋 생성된 전체 더미 코스:',
+      courses.map((c) => ({
+        id: c.id,
+        title: c.title,
+        region: c.region,
+      })),
+    )
   }
-  
+
   return courses
 }
 
 // 특정 지역의 더미 데이터 생성 함수
 const generateRegionSpecificDummyCourses = (regionCode, count) => {
   const regionName = getRegionNameFromCode(regionCode)
-  const themes = [['자연', '힐링'], ['문화', '역사'], ['바다', '휴양'], ['전통', '음식'], ['액티비티', '체험']]
-  
+  const themes = [
+    ['자연', '힐링'],
+    ['문화', '역사'],
+    ['바다', '휴양'],
+    ['전통', '음식'],
+    ['액티비티', '체험'],
+  ]
+
   // 가격 생성 함수
   const generateRandomPrice = () => {
     const basePrice = 80000 + Math.floor(Math.random() * 400000) // 80,000 ~ 480,000
     const roundedPrice = Math.round(basePrice / 10000) * 10000 // 만원 단위로 반올림
     return `${roundedPrice.toLocaleString()}원`
   }
-  
+
   return Array.from({ length: count }, (_, index) => {
     const themeSet = themes[index % themes.length]
-    
+
     return {
       id: `region_${regionCode}_${Date.now()}_${index}`,
       title: `${regionName} ${themeSet[0]} 코스`,
@@ -412,34 +475,63 @@ const generateRegionSpecificDummyCourses = (regionCode, count) => {
       region: regionCode,
       duration: index === 0 ? '1박 2일' : index === 1 ? '2박 3일' : '3박 4일',
       price: generateRandomPrice(),
-      rating: parseFloat((4.0 + (Math.random() * 1.0)).toFixed(1)),
-      reviewCount: 30 + (index * 15),
-      likeCount: 15 + (index * 8),
-      viewCount: 80 + (index * 20),
+      rating: parseFloat((4.0 + Math.random() * 1.0).toFixed(1)),
+      reviewCount: 30 + index * 15,
+      likeCount: 15 + index * 8,
+      viewCount: 80 + index * 20,
       theme: themeSet,
       bestMonths: [3, 4, 5, 9, 10, 11],
       mainImage: `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
       images: [
-        `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`
+        `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
       ],
-      highlights: [`${regionName} ${themeSet[0]} 명소`, `${themeSet[1]} 체험`, '현지 특산품'],
+      highlights: [
+        `${regionName} ${themeSet[0]} 명소`,
+        `${themeSet[1]} 체험`,
+        '현지 특산품',
+      ],
       itinerary: [
         {
           day: 1,
           title: `${regionName} ${themeSet[0]} 투어`,
           activities: [
-            { time: '09:00', type: 'transport', place: `${regionName} 역`, description: '도착' },
-            { time: '10:30', type: 'attraction', place: `${regionName} ${themeSet[0]} 명소`, description: `${themeSet[0]} 체험` },
-            { time: '12:00', type: 'restaurant', place: '현지 맛집', description: '점심 식사' },
-            { time: '14:00', type: 'attraction', place: `${regionName} 관광지`, description: '관광지 방문' },
-            { time: '18:00', type: 'restaurant', place: '저녁 맛집', description: '저녁 식사' }
-          ]
-        }
+            {
+              time: '09:00',
+              type: 'transport',
+              place: `${regionName} 역`,
+              description: '도착',
+            },
+            {
+              time: '10:30',
+              type: 'attraction',
+              place: `${regionName} ${themeSet[0]} 명소`,
+              description: `${themeSet[0]} 체험`,
+            },
+            {
+              time: '12:00',
+              type: 'restaurant',
+              place: '현지 맛집',
+              description: '점심 식사',
+            },
+            {
+              time: '14:00',
+              type: 'attraction',
+              place: `${regionName} 관광지`,
+              description: '관광지 방문',
+            },
+            {
+              time: '18:00',
+              type: 'restaurant',
+              place: '저녁 맛집',
+              description: '저녁 식사',
+            },
+          ],
+        },
       ],
       tips: ['현지 교통 정보 확인', '계절별 준비물', '추천 포토존'],
       includes: ['가이드', '입장료', '중식'],
       excludes: ['숙박비', '개인 경비', '교통비'],
-      tags: themeSet
+      tags: themeSet,
     }
   })
 }
@@ -454,68 +546,68 @@ const selectRegionsForGeneration = (existingRegions, maxCount = 3) => {
   // 주요 도시 데이터 활용
   const majorCities = getMajorCitiesFlat()
   const popularCities = getPopularCities()
-  
+
   // 코드를 지역명으로 매핑하는 함수 (복잡한 코드 → 실제 지역명)
   const getRegionNameFromCode = (code) => {
-    const city = majorCities.find(c => c.code === code)
+    const city = majorCities.find((c) => c.code === code)
     if (city) return city.name
-    
+
     // 기존 코드가 단순한 경우 그대로 사용
     const simpleMapping = {
-      'seoul': '서울',
-      'busan': '부산', 
-      'jeju': '제주',
-      'daegu': '대구',
-      'incheon': '인천',
-      'gwangju': '광주',
-      'daejeon': '대전',
-      'ulsan': '울산',
-      'sejong': '세종'
+      seoul: '서울',
+      busan: '부산',
+      jeju: '제주',
+      daegu: '대구',
+      incheon: '인천',
+      gwangju: '광주',
+      daejeon: '대전',
+      ulsan: '울산',
+      sejong: '세종',
     }
-    
+
     return simpleMapping[code] || code
   }
-  
+
   // 기존 지역들을 지역명으로 변환
   const existingRegionNames = new Set()
   for (const regionCode of existingRegions) {
     existingRegionNames.add(getRegionNameFromCode(regionCode))
   }
-  
+
   // 1순위: 인기 여행지 중 아직 없는 지역
   const availablePopular = popularCities.filter(
-    city => !existingRegionNames.has(city.name)
+    (city) => !existingRegionNames.has(city.name),
   )
-  
-  // 2순위: 나머지 주요 도시 중 아직 없는 지역  
+
+  // 2순위: 나머지 주요 도시 중 아직 없는 지역
   const availableOther = majorCities.filter(
-    city => !city.popular && !existingRegionNames.has(city.name)
+    (city) => !city.popular && !existingRegionNames.has(city.name),
   )
-  
+
   const selectedRegions = []
-  
+
   // 먼저 인기 여행지부터 선택 (실제 지역명 사용)
   for (const city of availablePopular) {
     if (selectedRegions.length >= maxCount) break
     selectedRegions.push(city.name)
   }
-  
+
   // 부족하면 다른 주요 도시에서 선택 (실제 지역명 사용)
   for (const city of availableOther) {
     if (selectedRegions.length >= maxCount) break
     selectedRegions.push(city.name)
   }
-  
+
   if (import.meta.env.DEV) {
     console.log('주요 도시 기반 지역 선택:', {
       existingCodes: Array.from(existingRegions),
       existingNames: Array.from(existingRegionNames),
       selected: selectedRegions,
       availablePopular: availablePopular.length,
-      availableOther: availableOther.length
+      availableOther: availableOther.length,
     })
   }
-  
+
   return selectedRegions
 }
 
@@ -546,7 +638,7 @@ export const travelCoursesApi = createApi({
         if (import.meta.env.DEV) {
           console.log('원본 API 응답:', response)
         }
-        
+
         const validatedResponse = validateAndSanitizeResponse(
           response,
           TRAVEL_COURSES_LIST_DEFAULTS,
@@ -558,7 +650,7 @@ export const travelCoursesApi = createApi({
 
         // 안정성을 위해 동적 생성 비활성화 - 기본 데이터만 사용
         // TODO: TMAP API 안정화 후 동적 생성 재활성화 예정
-        
+
         // 개발 환경에서는 항상 더미 데이터만 사용 (실제 API 무시)
         if (import.meta.env.DEV) {
           console.log('🔧 개발 모드: 더미 데이터만 사용')
@@ -571,21 +663,31 @@ export const travelCoursesApi = createApi({
           if (validatedResponse.courses.length < 20) {
             const needCount = 20 - validatedResponse.courses.length
             console.log(`더미 데이터 ${needCount}개 생성 시작...`)
-            
+
             const dummyCourses = generateDummyCourses(needCount)
             console.log('생성된 더미 데이터:', dummyCourses.length, '개')
-            
-            validatedResponse.courses = [...validatedResponse.courses, ...dummyCourses]
+
+            validatedResponse.courses = [
+              ...validatedResponse.courses,
+              ...dummyCourses,
+            ]
             validatedResponse.total = validatedResponse.courses.length
           }
         }
-        
+
         if (import.meta.env.DEV) {
-          console.log('최종 여행 코스 데이터 로드 완료:', validatedResponse.courses.length, '개')
-          console.log('최종 지역별 분포:', validatedResponse.courses.reduce((acc, course) => {
-            acc[course.region] = (acc[course.region] || 0) + 1
-            return acc
-          }, {}))
+          console.log(
+            '최종 여행 코스 데이터 로드 완료:',
+            validatedResponse.courses.length,
+            '개',
+          )
+          console.log(
+            '최종 지역별 분포:',
+            validatedResponse.courses.reduce((acc, course) => {
+              acc[course.region] = (acc[course.region] || 0) + 1
+              return acc
+            }, {}),
+          )
           console.log('최종 응답 구조:', validatedResponse)
         }
 
@@ -625,23 +727,23 @@ export const travelCoursesApi = createApi({
           // courseId에서 지역 정보 추출 (더미 데이터 ID 형식: dummy_timestamp_index_region_random)
           const courseId = arg
           let regionCode = 'seoul' // 기본값
-          
+
           if (typeof courseId === 'string' && courseId.includes('_')) {
             const parts = courseId.split('_')
             if (parts.length >= 4) {
               regionCode = parts[3] // 지역 코드 추출
             }
           }
-          
+
           const regionName = getRegionNameFromCode(regionCode)
-          
+
           // 가격 생성 함수 (로컬)
           const generatePrice = () => {
             const basePrice = 80000 + Math.floor(Math.random() * 400000)
             const roundedPrice = Math.round(basePrice / 10000) * 10000
             return `${roundedPrice.toLocaleString()}원`
           }
-          
+
           // 더미 상세 데이터 생성
           const dummyDetailData = {
             id: courseId,
@@ -652,7 +754,7 @@ export const travelCoursesApi = createApi({
             region: regionCode,
             duration: '2박 3일',
             price: generatePrice(),
-            rating: parseFloat((4.0 + (Math.random() * 1.0)).toFixed(1)),
+            rating: parseFloat((4.0 + Math.random() * 1.0).toFixed(1)),
             reviewCount: 30 + Math.floor(Math.random() * 100),
             likeCount: 15 + Math.floor(Math.random() * 50),
             viewCount: 80 + Math.floor(Math.random() * 200),
@@ -660,28 +762,62 @@ export const travelCoursesApi = createApi({
             bestMonths: [3, 4, 5, 9, 10, 11],
             mainImage: `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
             images: [
-              `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`
+              `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
             ],
-            highlights: [`${regionName} 대표 명소`, '자연 체험', '현지 특산품 투어'],
+            highlights: [
+              `${regionName} 대표 명소`,
+              '자연 체험',
+              '현지 특산품 투어',
+            ],
             itinerary: [
               {
                 day: 1,
                 title: `${regionName} 자연 투어`,
                 activities: [
-                  { time: '09:00', type: 'transport', place: `${regionName} 역/터미널`, description: '도착 및 이동' },
-                  { time: '11:00', type: 'attraction', place: `${regionName} 명소`, description: '자연 관광지 방문' },
-                  { time: '12:30', type: 'restaurant', place: '현지 맛집', description: '점심 및 현지 음식 체험' },
-                  { time: '14:30', type: 'attraction', place: `${regionName} 힐링 명소`, description: '힐링 체험' },
-                  { time: '18:00', type: 'restaurant', place: '저녁 맛집', description: '저녁 식사' }
-                ]
-              }
+                  {
+                    time: '09:00',
+                    type: 'transport',
+                    place: `${regionName} 역/터미널`,
+                    description: '도착 및 이동',
+                  },
+                  {
+                    time: '11:00',
+                    type: 'attraction',
+                    place: `${regionName} 명소`,
+                    description: '자연 관광지 방문',
+                  },
+                  {
+                    time: '12:30',
+                    type: 'restaurant',
+                    place: '현지 맛집',
+                    description: '점심 및 현지 음식 체험',
+                  },
+                  {
+                    time: '14:30',
+                    type: 'attraction',
+                    place: `${regionName} 힐링 명소`,
+                    description: '힐링 체험',
+                  },
+                  {
+                    time: '18:00',
+                    type: 'restaurant',
+                    place: '저녁 맛집',
+                    description: '저녁 식사',
+                  },
+                ],
+              },
             ],
-            tips: ['편안한 신발 착용', '카메라 준비', '현지 날씨 확인', '대중교통 정보 사전 확인'],
+            tips: [
+              '편안한 신발 착용',
+              '카메라 준비',
+              '현지 날씨 확인',
+              '대중교통 정보 사전 확인',
+            ],
             includes: ['가이드 투어', '입장료', '중식'],
             excludes: ['숙박비', '개인 경비', '교통비', '저녁 식사'],
-            tags: ['자연', '힐링']
+            tags: ['자연', '힐링'],
           }
-          
+
           console.log('🎯 상세페이지 더미 데이터 생성:', dummyDetailData)
           return dummyDetailData
         }
@@ -755,10 +891,17 @@ export const travelCoursesApi = createApi({
         // 개발 환경에서는 항상 더미 데이터만 사용
         if (import.meta.env.DEV) {
           if (arg.region_code && arg.region_code !== 'all') {
-            const regionDummyCourses = generateRegionSpecificDummyCourses(arg.region_code, 5)
+            const regionDummyCourses = generateRegionSpecificDummyCourses(
+              arg.region_code,
+              5,
+            )
             validatedResponse.courses = regionDummyCourses
             validatedResponse.total = regionDummyCourses.length
-            console.log(`🔧 ${arg.region_code} 지역 더미 데이터:`, regionDummyCourses.length, '개')
+            console.log(
+              `🔧 ${arg.region_code} 지역 더미 데이터:`,
+              regionDummyCourses.length,
+              '개',
+            )
           } else {
             const dummyCourses = generateDummyCourses(20)
             validatedResponse.courses = dummyCourses
@@ -767,28 +910,51 @@ export const travelCoursesApi = createApi({
           }
         } else {
           // 프로덕션 로직
-          if (arg.region_code && arg.region_code !== 'all' && validatedResponse.courses.length < 3) {
-            const regionDummyCourses = generateRegionSpecificDummyCourses(arg.region_code, 3)
-            validatedResponse.courses = [...validatedResponse.courses, ...regionDummyCourses]
+          if (
+            arg.region_code &&
+            arg.region_code !== 'all' &&
+            validatedResponse.courses.length < 3
+          ) {
+            const regionDummyCourses = generateRegionSpecificDummyCourses(
+              arg.region_code,
+              3,
+            )
+            validatedResponse.courses = [
+              ...validatedResponse.courses,
+              ...regionDummyCourses,
+            ]
             validatedResponse.total = validatedResponse.courses.length
-          }
-          else if (validatedResponse.courses.length < 10) {
+          } else if (validatedResponse.courses.length < 10) {
             const needCount = 10 - validatedResponse.courses.length
             const dummyCourses = generateDummyCourses(needCount)
-            validatedResponse.courses = [...validatedResponse.courses, ...dummyCourses]
+            validatedResponse.courses = [
+              ...validatedResponse.courses,
+              ...dummyCourses,
+            ]
             validatedResponse.total = validatedResponse.courses.length
           }
         }
-        
+
         if (import.meta.env.DEV) {
           if (arg.region_code && arg.region_code !== 'all') {
-            console.log(`${arg.region_code} 지역 검색 결과:`, validatedResponse.courses.length, '개')
+            console.log(
+              `${arg.region_code} 지역 검색 결과:`,
+              validatedResponse.courses.length,
+              '개',
+            )
           } else {
-            console.log('전체 검색 결과:', validatedResponse.courses.length, '개')
-            console.log('지역별 분포:', validatedResponse.courses.reduce((acc, course) => {
-              acc[course.region] = (acc[course.region] || 0) + 1
-              return acc
-            }, {}))
+            console.log(
+              '전체 검색 결과:',
+              validatedResponse.courses.length,
+              '개',
+            )
+            console.log(
+              '지역별 분포:',
+              validatedResponse.courses.reduce((acc, course) => {
+                acc[course.region] = (acc[course.region] || 0) + 1
+                return acc
+              }, {}),
+            )
           }
         }
 

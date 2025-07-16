@@ -6,12 +6,12 @@ import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { getAllRegionsFlat, PROVINCES } from '@/data/koreaRegions'
-import { 
-  checkRegionSupport, 
-  generateRegionCourse, 
+import {
+  checkRegionSupport,
+  generateRegionCourse,
   getGenerationStats,
   clearExpiredCache,
-  clearAllCache 
+  clearAllCache,
 } from '@/services/dynamicRegionService'
 
 /**
@@ -22,9 +22,9 @@ export default function NationalCoverageStatus() {
     totalSupportedRegions: 0,
     cachedCourses: 0,
     cacheHitRate: '0%',
-    cacheStatus: 'empty'
+    cacheStatus: 'empty',
   })
-  
+
   const [testResults, setTestResults] = useState([])
   const [testRegion, setTestRegion] = useState('')
   const [isTestingAll, setIsTestingAll] = useState(false)
@@ -49,18 +49,21 @@ export default function NationalCoverageStatus() {
 
     try {
       const startTime = performance.now()
-      
+
       // 지역 지원 여부 확인
       const supportInfo = checkRegionSupport(testRegion)
-      
+
       if (!supportInfo.isSupported) {
-        setTestResults(prev => [{
-          region: testRegion,
-          status: 'unsupported',
-          message: '지원하지 않는 지역입니다',
-          suggestions: supportInfo.suggestions,
-          timestamp: new Date().toLocaleTimeString()
-        }, ...prev.slice(0, 9)])
+        setTestResults((prev) => [
+          {
+            region: testRegion,
+            status: 'unsupported',
+            message: '지원하지 않는 지역입니다',
+            suggestions: supportInfo.suggestions,
+            timestamp: new Date().toLocaleTimeString(),
+          },
+          ...prev.slice(0, 9),
+        ])
         return
       }
 
@@ -70,35 +73,43 @@ export default function NationalCoverageStatus() {
       const duration = Math.round(endTime - startTime)
 
       if (result.success) {
-        setTestResults(prev => [{
-          region: testRegion,
-          status: 'success',
-          course: result.course,
-          fromCache: result.fromCache,
-          exact: result.regionInfo?.exact,
-          apiUsed: result.apiUsed,
-          duration: `${duration}ms`,
-          timestamp: new Date().toLocaleTimeString()
-        }, ...prev.slice(0, 9)])
+        setTestResults((prev) => [
+          {
+            region: testRegion,
+            status: 'success',
+            course: result.course,
+            fromCache: result.fromCache,
+            exact: result.regionInfo?.exact,
+            apiUsed: result.apiUsed,
+            duration: `${duration}ms`,
+            timestamp: new Date().toLocaleTimeString(),
+          },
+          ...prev.slice(0, 9),
+        ])
       } else {
-        setTestResults(prev => [{
-          region: testRegion,
-          status: 'failed',
-          error: result.error,
-          message: result.message,
-          timestamp: new Date().toLocaleTimeString()
-        }, ...prev.slice(0, 9)])
+        setTestResults((prev) => [
+          {
+            region: testRegion,
+            status: 'failed',
+            error: result.error,
+            message: result.message,
+            timestamp: new Date().toLocaleTimeString(),
+          },
+          ...prev.slice(0, 9),
+        ])
       }
 
       updateStats()
-      
     } catch (error) {
-      setTestResults(prev => [{
-        region: testRegion,
-        status: 'error',
-        error: error.message,
-        timestamp: new Date().toLocaleTimeString()
-      }, ...prev.slice(0, 9)])
+      setTestResults((prev) => [
+        {
+          region: testRegion,
+          status: 'error',
+          error: error.message,
+          timestamp: new Date().toLocaleTimeString(),
+        },
+        ...prev.slice(0, 9),
+      ])
     }
   }
 
@@ -106,9 +117,9 @@ export default function NationalCoverageStatus() {
   const testRandomRegions = async () => {
     setIsTestingAll(true)
     setTestProgress(0)
-    
+
     try {
-      const allRegions = getAllRegionsFlat().filter(r => r.type === 'city')
+      const allRegions = getAllRegionsFlat().filter((r) => r.type === 'city')
       const testCount = 10 // 랜덤 10개 지역 테스트
       const randomRegions = [...allRegions]
         .sort(() => Math.random() - 0.5)
@@ -134,25 +145,23 @@ export default function NationalCoverageStatus() {
             exact: result.regionInfo?.exact,
             apiUsed: result.apiUsed,
             duration: `${duration}ms`,
-            timestamp: new Date().toLocaleTimeString()
+            timestamp: new Date().toLocaleTimeString(),
           })
-
         } catch (error) {
           newResults.push({
             region: region.name,
             status: 'error',
             error: error.message,
-            timestamp: new Date().toLocaleTimeString()
+            timestamp: new Date().toLocaleTimeString(),
           })
         }
 
         // 너무 빠른 요청 방지
-        await new Promise(resolve => setTimeout(resolve, 500))
+        await new Promise((resolve) => setTimeout(resolve, 500))
       }
 
-      setTestResults(prev => [...newResults, ...prev.slice(0, 10)])
+      setTestResults((prev) => [...newResults, ...prev.slice(0, 10)])
       updateStats()
-
     } finally {
       setIsTestingAll(false)
       setTestProgress(0)
@@ -163,18 +172,21 @@ export default function NationalCoverageStatus() {
     return null
   }
 
-  const successRate = testResults.length > 0 
-    ? Math.round((testResults.filter(r => r.status === 'success').length / testResults.length) * 100)
-    : 0
+  const successRate =
+    testResults.length > 0
+      ? Math.round(
+          (testResults.filter((r) => r.status === 'success').length /
+            testResults.length) *
+            100,
+        )
+      : 0
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           전국 지역 커버리지 상태
-          <Badge variant="outline">
-            244개 지역 지원
-          </Badge>
+          <Badge variant="outline">244개 지역 지원</Badge>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -190,15 +202,19 @@ export default function NationalCoverageStatus() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <div className="text-sm font-medium">지원 지역</div>
-                <div className="text-2xl font-bold">{stats.totalSupportedRegions}개</div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-2xl font-bold">
+                  {stats.totalSupportedRegions}개
+                </div>
+                <div className="text-muted-foreground text-xs">
                   17개 광역시도 + 227개 시군구
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium">캐시 현황</div>
-                <div className="text-2xl font-bold">{stats.cachedCourses}개</div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-2xl font-bold">
+                  {stats.cachedCourses}개
+                </div>
+                <div className="text-muted-foreground text-xs">
                   적중률: {stats.cacheHitRate}
                 </div>
               </div>
@@ -242,7 +258,10 @@ export default function NationalCoverageStatus() {
                   onChange={(e) => setTestRegion(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && testSpecificRegion()}
                 />
-                <Button onClick={testSpecificRegion} disabled={!testRegion.trim()}>
+                <Button
+                  onClick={testSpecificRegion}
+                  disabled={!testRegion.trim()}
+                >
                   테스트
                 </Button>
               </div>
@@ -270,40 +289,52 @@ export default function NationalCoverageStatus() {
               {testResults.length > 0 && (
                 <div className="space-y-2">
                   <div className="text-sm font-medium">테스트 결과</div>
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                  <div className="max-h-60 space-y-2 overflow-y-auto">
                     {testResults.map((result, index) => (
-                      <div key={index} className="p-3 border rounded-lg text-sm">
-                        <div className="flex items-center justify-between mb-1">
+                      <div
+                        key={index}
+                        className="rounded-lg border p-3 text-sm"
+                      >
+                        <div className="mb-1 flex items-center justify-between">
                           <span className="font-medium">{result.region}</span>
                           <div className="flex items-center space-x-2">
-                            <Badge 
+                            <Badge
                               variant={
-                                result.status === 'success' ? 'default' :
-                                result.status === 'failed' ? 'destructive' : 'secondary'
+                                result.status === 'success'
+                                  ? 'default'
+                                  : result.status === 'failed'
+                                    ? 'destructive'
+                                    : 'secondary'
                               }
                             >
                               {result.status}
                             </Badge>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-muted-foreground text-xs">
                               {result.timestamp}
                             </span>
                           </div>
                         </div>
-                        
+
                         {result.status === 'success' && result.course && (
-                          <div className="space-y-1 text-xs text-muted-foreground">
+                          <div className="text-muted-foreground space-y-1 text-xs">
                             <div>제목: {result.course.title}</div>
                             <div className="flex space-x-4">
                               <span>소요: {result.duration}</span>
-                              <span>캐시: {result.fromCache ? 'HIT' : 'MISS'}</span>
-                              <span>정확도: {result.exact ? '정확' : '유사'}</span>
-                              <span>API: {result.apiUsed ? '사용' : '미사용'}</span>
+                              <span>
+                                캐시: {result.fromCache ? 'HIT' : 'MISS'}
+                              </span>
+                              <span>
+                                정확도: {result.exact ? '정확' : '유사'}
+                              </span>
+                              <span>
+                                API: {result.apiUsed ? '사용' : '미사용'}
+                              </span>
                             </div>
                           </div>
                         )}
-                        
+
                         {result.status !== 'success' && (
-                          <div className="text-xs text-muted-foreground">
+                          <div className="text-muted-foreground text-xs">
                             {result.message || result.error}
                           </div>
                         )}
@@ -318,10 +349,10 @@ export default function NationalCoverageStatus() {
           {/* 지역 목록 탭 */}
           <TabsContent value="regions" className="space-y-4">
             <div className="space-y-4">
-              {PROVINCES.map(province => (
+              {PROVINCES.map((province) => (
                 <div key={province.code} className="space-y-2">
                   <div className="font-medium">{province.name}</div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-muted-foreground text-sm">
                     광역시도 레벨 지원 + 하위 시군구 모두 지원
                   </div>
                 </div>

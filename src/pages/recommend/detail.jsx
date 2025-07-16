@@ -13,7 +13,6 @@ import {
   Calendar,
   Clock,
   MapPin,
-  Camera,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -36,43 +35,43 @@ import {
 // 지역 코드를 한글 지역명으로 변환하는 함수
 const getRegionDisplayName = (regionCode) => {
   const regionMapping = {
-    'jeju': '제주',
-    'busan': '부산',
-    'seoul': '서울',
-    'gangneung': '강릉',
-    'jeonju': '전주',
-    'gyeongju': '경주',
-    'yeosu': '여수',
-    'sokcho': '속초',
-    'tongyeong': '통영',
-    'andong': '안동',
-    'gapyeong': '가평',
-    'damyang': '담양',
-    'boseong': '보성',
-    'samcheok': '삼척',
-    'pyeongchang': '평창',
-    'chuncheon': '춘천',
-    'pohang': '포항',
-    'mokpo': '목포',
-    'suncheon': '순천',
-    'jinju': '진주',
-    'geoje': '거제',
-    'incheon': '인천',
-    'daegu': '대구',
-    'daejeon': '대전',
-    'gwangju': '광주',
-    'ulsan': '울산',
-    'sejong': '세종',
-    'gyeonggi': '경기',
-    'gangwon': '강원',
-    'chungbuk': '충북',
-    'chungnam': '충남',
-    'jeonbuk': '전북',
-    'jeonnam': '전남',
-    'gyeongbuk': '경북',
-    'gyeongnam': '경남'
+    jeju: '제주',
+    busan: '부산',
+    seoul: '서울',
+    gangneung: '강릉',
+    jeonju: '전주',
+    gyeongju: '경주',
+    yeosu: '여수',
+    sokcho: '속초',
+    tongyeong: '통영',
+    andong: '안동',
+    gapyeong: '가평',
+    damyang: '담양',
+    boseong: '보성',
+    samcheok: '삼척',
+    pyeongchang: '평창',
+    chuncheon: '춘천',
+    pohang: '포항',
+    mokpo: '목포',
+    suncheon: '순천',
+    jinju: '진주',
+    geoje: '거제',
+    incheon: '인천',
+    daegu: '대구',
+    daejeon: '대전',
+    gwangju: '광주',
+    ulsan: '울산',
+    sejong: '세종',
+    gyeonggi: '경기',
+    gangwon: '강원',
+    chungbuk: '충북',
+    chungnam: '충남',
+    jeonbuk: '전북',
+    jeonnam: '전남',
+    gyeongbuk: '경북',
+    gyeongnam: '경남',
   }
-  
+
   return regionMapping[regionCode] || regionCode
 }
 
@@ -116,10 +115,10 @@ export default function TravelCourseDetailPage() {
       console.log('🖼️ 이미지 처리:', {
         courseImages: course?.images,
         mainImage: course?.mainImage,
-        courseId: course?.id
+        courseId: course?.id,
       })
     }
-    
+
     if (course?.images && course.images.length > 0) {
       const filteredImages = course.images.filter(Boolean)
       if (import.meta.env.DEV) {
@@ -135,10 +134,10 @@ export default function TravelCourseDetailPage() {
       return mainImageArray
     }
     // 기본 이미지 제공
-    const fallbackImages = course?.id 
+    const fallbackImages = course?.id
       ? [`https://picsum.photos/800/600?random=${course.id}`]
       : [`https://picsum.photos/800/600?random=default`]
-    
+
     if (import.meta.env.DEV) {
       console.log('🔄 기본 이미지 사용:', fallbackImages)
     }
@@ -366,7 +365,7 @@ export default function TravelCourseDetailPage() {
       id: course?.id,
       title: course?.title,
       region: course?.region,
-      fullCourse: course
+      fullCourse: course,
     })
   }
 
@@ -418,7 +417,9 @@ export default function TravelCourseDetailPage() {
             <span className="text-lg font-semibold">
               {typeof avgRating === 'number' ? avgRating.toFixed(1) : '4.5'}
             </span>
-            <span className="text-gray-500">({typeof peopleCount === 'number' ? peopleCount : 0}명 평가)</span>
+            <span className="text-gray-500">
+              ({typeof peopleCount === 'number' ? peopleCount : 0}명 평가)
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <Heart
@@ -464,14 +465,16 @@ export default function TravelCourseDetailPage() {
           {/* 이미지 갤러리 */}
           <Card className="mb-8 overflow-hidden dark:border-gray-700 dark:bg-gray-800">
             <div className="relative">
-              <div className="h-96 w-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+              <div className="flex h-96 w-full items-center justify-center bg-gradient-to-br from-blue-400 to-blue-600">
                 <div className="text-center text-white">
-                  <h3 className="text-2xl font-bold mb-2">{course.title}</h3>
-                  <p className="text-lg opacity-90">{getRegionDisplayName(course.region)}</p>
+                  <h3 className="mb-2 text-2xl font-bold">{course.title}</h3>
+                  <p className="text-lg opacity-90">
+                    {getRegionDisplayName(course.region)}
+                  </p>
                 </div>
               </div>
-              </div>
-            </Card>
+            </div>
+          </Card>
 
           {/* 이미지 모달 */}
           {isImageModalOpen && (
