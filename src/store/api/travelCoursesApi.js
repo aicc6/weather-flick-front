@@ -635,6 +635,10 @@ export const travelCoursesApi = createApi({
       providesTags: ['TravelCourseList'],
       keepUnusedDataFor: 0, // 캐싱 비활성화 (개발 중 테스트용)
       transformResponse: async (response) => {
+        if (response.totalCount !== undefined) {
+          response.total = response.totalCount
+          delete response.totalCount
+        }
         if (import.meta.env.DEV) {
           console.log('원본 API 응답:', response)
         }
@@ -648,49 +652,8 @@ export const travelCoursesApi = createApi({
           console.log('검증된 응답:', validatedResponse)
         }
 
-        // 안정성을 위해 동적 생성 비활성화 - 기본 데이터만 사용
-        // TODO: TMAP API 안정화 후 동적 생성 재활성화 예정
-
-        // 개발 환경에서는 항상 더미 데이터만 사용 (실제 API 무시)
-        if (import.meta.env.DEV) {
-          console.log('🔧 개발 모드: 더미 데이터만 사용')
-          const dummyCourses = generateDummyCourses(20)
-          validatedResponse.courses = dummyCourses
-          validatedResponse.total = dummyCourses.length
-          console.log('🎯 더미 데이터 강제 사용:', dummyCourses.length, '개')
-        } else {
-          // 프로덕션에서만 기본 데이터 + 더미 데이터 조합 사용
-          if (validatedResponse.courses.length < 20) {
-            const needCount = 20 - validatedResponse.courses.length
-            console.log(`더미 데이터 ${needCount}개 생성 시작...`)
-
-            const dummyCourses = generateDummyCourses(needCount)
-            console.log('생성된 더미 데이터:', dummyCourses.length, '개')
-
-            validatedResponse.courses = [
-              ...validatedResponse.courses,
-              ...dummyCourses,
-            ]
-            validatedResponse.total = validatedResponse.courses.length
-          }
-        }
-
-        if (import.meta.env.DEV) {
-          console.log(
-            '최종 여행 코스 데이터 로드 완료:',
-            validatedResponse.courses.length,
-            '개',
-          )
-          console.log(
-            '최종 지역별 분포:',
-            validatedResponse.courses.reduce((acc, course) => {
-              acc[course.region] = (acc[course.region] || 0) + 1
-              return acc
-            }, {}),
-          )
-          console.log('최종 응답 구조:', validatedResponse)
-        }
-
+        // 더미 데이터 강제 사용 코드 완전히 삭제!
+        // 실제 API 데이터만 반환
         return validatedResponse
       },
       transformErrorResponse: (response) => {
@@ -708,14 +671,15 @@ export const travelCoursesApi = createApi({
     getTravelCourseDetail: builder.query({
       queryFn: async (courseId, { dispatch, getState }) => {
         // 더미 데이터 ID인지 확인
-        const isDummyData = typeof courseId === 'string' && courseId.includes('dummy_')
-        
+        const isDummyData =
+          typeof courseId === 'string' && courseId.includes('dummy_')
+
         // 더미 데이터인 경우 직접 생성해서 반환
         if (isDummyData) {
           if (import.meta.env.DEV) {
             console.log('🎯 더미 데이터 ID 감지:', courseId)
           }
-          
+
           // courseId에서 지역 정보 추출 (더미 데이터 ID 형식: dummy_timestamp_index_region_random)
           let regionCode = 'seoul' // 기본값
 
@@ -815,8 +779,11 @@ export const travelCoursesApi = createApi({
 
         // 실제 API 호출
         try {
-          const result = await baseQuery(`travel-courses/${courseId}`, { dispatch, getState })
-          
+          const result = await baseQuery(`travel-courses/${courseId}`, {
+            dispatch,
+            getState,
+          })
+
           if (result.error) {
             return { error: result.error }
           }
