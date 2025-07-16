@@ -40,7 +40,7 @@ const generateSafeKey = (item, prefix = '', index = 0) => {
 }
 
 const formatDate = (dateString) => {
-  if (!dateString) return 'N/A'
+  if (!dateString) return '날짜 정보 없음'
   return new Date(dateString).toLocaleDateString('ko-KR', {
     year: 'numeric',
     month: 'long',
@@ -1524,7 +1524,7 @@ export function TravelPlanDetailPage() {
                                 </div>
                               ) : (
                                 <div className="text-sm text-gray-500 dark:text-gray-500">
-                                  일정 없음
+                                  일정이 없습니다
                                 </div>
                               )}
                             </div>
@@ -1546,7 +1546,7 @@ export function TravelPlanDetailPage() {
                                 </div>
                               ) : (
                                 <div className="text-sm text-gray-500 dark:text-gray-500">
-                                  경로 정보 없음
+                                  경로 정보가 없습니다
                                 </div>
                               )}
                             </div>
@@ -1571,7 +1571,7 @@ export function TravelPlanDetailPage() {
                                 </div>
                               ) : (
                                 <div className="text-sm text-gray-500 dark:text-gray-500">
-                                  날씨 정보 없음
+                                  날씨 정보가 없습니다
                                 </div>
                               )}
                             </div>
@@ -1814,14 +1814,14 @@ export function TravelPlanDetailPage() {
                     {import.meta.env.DEV && (
                       <div className="mb-4 rounded bg-gray-100 p-3 text-left text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400">
                         <div>디버그 정보:</div>
-                        <div>Routes Loading: {routesLoading.toString()}</div>
-                        <div>Routes Length: {routes?.length || 0}</div>
+                        <div>경로 로딩 중: {routesLoading.toString()}</div>
+                        <div>경로 개수: {routes?.length || 0}</div>
                         <div>
-                          Routes Error:{' '}
-                          {routesError ? JSON.stringify(routesError) : 'None'}
+                          경로 에러:{' '}
+                          {routesError ? JSON.stringify(routesError) : '없음'}
                         </div>
-                        <div>Plan ID: {planId}</div>
-                        <div>Itinerary Days: {itineraryDays.length}</div>
+                        <div>플랜 ID: {planId}</div>
+                        <div>일정 일수: {itineraryDays.length}</div>
                       </div>
                     )}
                     {itineraryDays.length > 0 && (

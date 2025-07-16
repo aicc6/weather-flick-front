@@ -19,7 +19,6 @@ import { NavigationButton } from '@/components/navigation'
  */
 export function PlaceCard({
   place,
-  _dayNumber,
   placeIndex,
   weather = null,
   showWeather = true,
@@ -96,7 +95,7 @@ export function PlaceCard({
                 {placeIndex + 1}
               </div>
               <h4 className="truncate font-medium text-gray-900">
-                {place.description || place.name || '이름 없음'}
+                {place.description || place.name || '장소명 정보 없음'}
               </h4>
             </div>
 
