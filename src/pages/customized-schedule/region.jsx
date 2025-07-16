@@ -59,7 +59,7 @@ export default function CustomizedScheduleRegionPage() {
 
   // RTK Query를 사용한 지역 데이터 조회
   const {
-    data: cities = [],
+    data: regions = [],
     isLoading: loading,
     error: regionsError,
   } = useGetActiveRegionsQuery()
@@ -77,11 +77,11 @@ export default function CustomizedScheduleRegionPage() {
 
   // Pixabay API를 사용해 지역별 이미지 로드
   useEffect(() => {
-    if (!cities.length) return
+    if (!regions.length) return
     const loadRegionImages = async () => {
       setImagesLoading(true)
       try {
-        const regionIds = cities.map((city) => city.region_code)
+        const regionIds = regions.map((city) => city.region_code)
         const images = await getMultipleRegionImages(regionIds, 3)
         const completeImages = {}
         regionIds.forEach((regionId) => {
@@ -95,7 +95,7 @@ export default function CustomizedScheduleRegionPage() {
       } catch (error) {
         console.error('이미지 로드 실패:', error)
         const fallbackImages = {}
-        cities.forEach((city) => {
+        regions.forEach((city) => {
           fallbackImages[city.region_code] = getFallbackImages(
             city.region_code,
             3,
@@ -107,11 +107,11 @@ export default function CustomizedScheduleRegionPage() {
       }
     }
     loadRegionImages()
-  }, [cities])
+  }, [regions])
 
   const _getSelectedCityData = () => {
     if (!regionCode) return null
-    const cityData = cities.find((city) => city.region_code === regionCode)
+    const cityData = regions.find((city) => city.region_code === regionCode)
     if (cityData) {
       return {
         ...cityData,
@@ -231,7 +231,7 @@ export default function CustomizedScheduleRegionPage() {
       {viewMode === 'google-map' ? (
         <>
           <GoogleKoreaMap
-            cities={cities
+            cities={regions
               .map((city) => ({
                 id: city.region_code,
                 name: city.region_name,
@@ -272,7 +272,7 @@ export default function CustomizedScheduleRegionPage() {
                 대한민국
               </h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {cities.map((city) => (
+                {regions.map((city) => (
                   <Card
                     key={city.region_code}
                     className={`cursor-pointer overflow-hidden transition-all hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 ${

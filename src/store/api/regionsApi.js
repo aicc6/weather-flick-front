@@ -35,18 +35,14 @@ export const regionsApi = createApi({
       keepUnusedDataFor: 600, // 10분간 캐싱
     }),
 
-    // 활성화된 도시 목록 조회
+    // 활성화된 도시 목록 조회 (광역시/도, 중복좌표 처리)
     getActiveRegions: builder.query({
-      query: () => ({
-        url: 'local/cities',
-        params: { is_active: true },
-      }),
+      query: () => 'local/regions/top_level_dedup',
       providesTags: [{ type: 'Region', id: 'active' }],
       keepUnusedDataFor: 1800, // 30분간 캐싱
       transformResponse: (response) => {
-        // API 응답 구조: { cities: [...] }
-        const cities = response.cities || []
-        return cities.filter((city) => city.is_active !== false)
+        // API 응답 구조: { regions: [...] }
+        return response.regions || []
       },
     }),
 
