@@ -181,7 +181,7 @@ export default function ContactPage() {
     try {
       // 목록에서 이미 가진 정보로 비공개 여부 체크
       const isPrivate = inquiry.isPrivate || inquiry.is_private
-      
+
       // 공개글: 바로 상세 정보 조회
       if (!isPrivate) {
         const result = await trigger(inquiry.id).unwrap()
@@ -191,7 +191,7 @@ export default function ContactPage() {
         setModalOpen(true)
         return
       }
-      
+
       // 비공개글: 본인 확인 필요 (이메일은 목록에 있음)
       if (user && user.email === inquiry.email) {
         // 비공개글은 비밀번호 확인 전까지 상세 정보를 조회하지 않음
@@ -202,7 +202,7 @@ export default function ContactPage() {
         setShakeError(false)
         return
       }
-      
+
       // 비공개글: 타인은 열람 불가
       alert('비공개 문의입니다. 작성자만 열람할 수 있습니다.')
     } catch (e) {
@@ -347,9 +347,7 @@ export default function ContactPage() {
                     key={inquiry.id}
                     className="border-b border-gray-100 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50"
                   >
-                    <td className="px-2 py-3">
-                      {filteredInquiries.length - index}
-                    </td>
+                    <td className="px-2 py-3">{inquiry.id}</td>
                     <td className="px-2 py-3">{inquiry.category}</td>
                     <td className="px-2 py-3">
                       <div className="flex items-center gap-2">
@@ -512,10 +510,10 @@ export default function ContactPage() {
                       contactId: selectedInquiry.id,
                       password, // email은 필요 없음, password만 전달
                     }).unwrap()
-                    
+
                     // 비밀번호 확인 성공 후 상세 정보 조회
                     const result = await trigger(selectedInquiry.id).unwrap()
-                    
+
                     // 비밀번호 확인 성공 후 조회수가 증가했으므로 목록을 다시 불러옴
                     refetch()
                     setDetailInquiry(result)
