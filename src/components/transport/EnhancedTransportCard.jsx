@@ -90,8 +90,8 @@ const TimeSelector = ({ value, onChange, _options }) => {
     <div className="flex items-center justify-between">
       {/* 현재 선택된 시간 표시 */}
       <div className="flex items-center space-x-3">
-        <span className="text-sm text-gray-600">출발시간:</span>
-        <span className="inline-block rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600">
+        <span className="text-sm text-gray-600 dark:text-gray-400">출발시간:</span>
+        <span className="inline-block rounded-full bg-blue-50 dark:bg-blue-900/20 px-3 py-1 text-sm font-medium text-blue-600 dark:text-blue-400">
           🕒 {getSelectedTimeDisplay()}
         </span>
       </div>
@@ -104,7 +104,7 @@ const TimeSelector = ({ value, onChange, _options }) => {
               size="sm"
               variant="outline"
               onClick={() => onChange('now')}
-              className={`text-xs ${value === 'now' ? 'bg-blue-100' : ''}`}
+              className={`text-xs ${value === 'now' ? 'bg-blue-100 dark:bg-blue-900/30' : ''}`}
             >
               지금
             </Button>
@@ -112,7 +112,7 @@ const TimeSelector = ({ value, onChange, _options }) => {
               size="sm"
               variant="outline"
               onClick={() => onChange('hour1')}
-              className={`text-xs ${value === 'hour1' ? 'bg-blue-100' : ''}`}
+              className={`text-xs ${value === 'hour1' ? 'bg-blue-100 dark:bg-blue-900/30' : ''}`}
             >
               1시간후
             </Button>
@@ -120,7 +120,7 @@ const TimeSelector = ({ value, onChange, _options }) => {
               size="sm"
               variant="outline"
               onClick={() => onChange('hour2')}
-              className={`text-xs ${value === 'hour2' ? 'bg-blue-100' : ''}`}
+              className={`text-xs ${value === 'hour2' ? 'bg-blue-100 dark:bg-blue-900/30' : ''}`}
             >
               2시간후
             </Button>
@@ -131,7 +131,7 @@ const TimeSelector = ({ value, onChange, _options }) => {
                 setShowCustomTime(true)
                 setCustomTime(getCurrentTimeForInput())
               }}
-              className={`text-xs ${value.startsWith('custom:') ? 'bg-blue-100' : ''}`}
+              className={`text-xs ${value.startsWith('custom:') ? 'bg-blue-100 dark:bg-blue-900/30' : ''}`}
             >
               직접입력
             </Button>
@@ -142,7 +142,7 @@ const TimeSelector = ({ value, onChange, _options }) => {
               type="time"
               value={customTime}
               onChange={(e) => setCustomTime(e.target.value)}
-              className="rounded border px-2 py-1 text-xs"
+              className="rounded border px-2 py-1 text-xs dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
             />
             <Button size="sm" onClick={handleCustomTimeSubmit}>
               ✓
@@ -203,21 +203,21 @@ const RouteComparison = ({ routes }) => {
         return (
           <div
             key={index}
-            className="rounded-lg border p-3 transition-colors hover:bg-gray-50"
+            className="rounded-lg border p-3 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <IconComponent className="h-5 w-5 text-blue-600" />
+                <IconComponent className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 <div>
                   <div className="flex items-center space-x-2">
-                    <span className="font-medium">{route.name}</span>
+                    <span className="font-medium dark:text-gray-200">{route.name}</span>
                     {route.recommendation && (
                       <Badge variant="secondary" className="text-xs">
                         {route.recommendation}
                       </Badge>
                     )}
                   </div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
                     {route.duration}분 • {route.distance} • {route.cost}
                   </div>
                 </div>
@@ -235,17 +235,17 @@ const RouteComparison = ({ routes }) => {
                     />
                   ))}
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-gray-500 dark:text-gray-400">
                   추천도 {route.rating * 20}%
                 </div>
               </div>
             </div>
 
             {route.details && (
-              <div className="mt-2 text-xs text-gray-600">
+              <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
                 <div className="flex flex-wrap gap-2">
                   {route.details.map((detail, idx) => (
-                    <span key={idx} className="rounded bg-gray-100 px-2 py-1">
+                    <span key={idx} className="rounded bg-gray-100 dark:bg-gray-700 px-2 py-1 dark:text-gray-200">
                       {detail}
                     </span>
                   ))}
@@ -255,15 +255,15 @@ const RouteComparison = ({ routes }) => {
 
             {/* 대중교통 전용 상세 정보 */}
             {route.mode === 'transit' && route.transitInfo && (
-              <div className="mt-3 rounded-lg bg-blue-50 p-3">
+              <div className="mt-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 p-3">
                 <div className="mb-2 flex items-center space-x-1">
-                  <Bus className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm font-medium text-blue-800">
+                  <Bus className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
                     상세 경로 정보
                   </span>
                 </div>
 
-                <div className="space-y-2 text-xs text-blue-700">
+                <div className="space-y-2 text-xs text-blue-700 dark:text-blue-300">
                   {/* 환승 요약 */}
                   <div className="flex items-center justify-between">
                     <span>총 환승 횟수</span>
@@ -302,8 +302,8 @@ const RouteComparison = ({ routes }) => {
 
                   {/* 노선 정보 상세 */}
                   {route.transitInfo.routeInfo.length > 0 && (
-                    <div className="mt-3 border-t border-blue-200 pt-2">
-                      <div className="mb-2 text-xs font-medium text-blue-800">
+                    <div className="mt-3 border-t border-blue-200 dark:border-blue-800 pt-2">
+                      <div className="mb-2 text-xs font-medium text-blue-800 dark:text-blue-200">
                         이용 노선
                       </div>
                       <div className="space-y-1">
@@ -334,8 +334,8 @@ const RouteComparison = ({ routes }) => {
                   {/* 실시간 정보 및 지연 상황 */}
                   {route.transitInfo.realTimeDelays &&
                     route.transitInfo.realTimeDelays.length > 0 && (
-                      <div className="mt-3 border-t border-orange-200 pt-2">
-                        <div className="mb-2 text-xs font-medium text-orange-800">
+                      <div className="mt-3 border-t border-orange-200 dark:border-orange-800 pt-2">
+                        <div className="mb-2 text-xs font-medium text-orange-800 dark:text-orange-200">
                           🚨 실시간 지연 정보
                         </div>
                         <div className="space-y-1">
@@ -345,7 +345,7 @@ const RouteComparison = ({ routes }) => {
                                 key={idx}
                                 className="flex items-center justify-between text-xs"
                               >
-                                <span className="text-orange-700">
+                                <span className="text-orange-700 dark:text-orange-300">
                                   {delay.routeName}{' '}
                                   {delay.type === 'bus' ? '🚌' : '🚇'}
                                 </span>
@@ -364,8 +364,8 @@ const RouteComparison = ({ routes }) => {
                   {/* 실시간 도착정보 */}
                   {route.transitInfo.nextArrivals &&
                     route.transitInfo.nextArrivals.length > 0 && (
-                      <div className="mt-3 border-t border-green-200 pt-2">
-                        <div className="mb-2 text-xs font-medium text-green-800">
+                      <div className="mt-3 border-t border-green-200 dark:border-green-800 pt-2">
+                        <div className="mb-2 text-xs font-medium text-green-800 dark:text-green-200">
                           🚌 다음 차량 도착예정
                         </div>
                         <div className="space-y-1">
@@ -376,11 +376,11 @@ const RouteComparison = ({ routes }) => {
                                 key={idx}
                                 className="flex items-center justify-between text-xs"
                               >
-                                <span className="text-green-700">
+                                <span className="text-green-700 dark:text-green-300">
                                   {arrival.routeName}{' '}
                                   {arrival.type === 'bus' ? '🚌' : '🚇'}
                                 </span>
-                                <span className="font-medium text-green-600">
+                                <span className="font-medium text-green-600 dark:text-green-400">
                                   {arrival.arrivalMinutes}분 후 도착
                                   {arrival.crowdLevel && (
                                     <span
@@ -409,8 +409,8 @@ const RouteComparison = ({ routes }) => {
                     )}
 
                   {/* 추가 팁 */}
-                  <div className="mt-3 border-t border-blue-200 pt-2">
-                    <div className="space-y-1 text-xs text-blue-600">
+                  <div className="mt-3 border-t border-blue-200 dark:border-blue-800 pt-2">
+                    <div className="space-y-1 text-xs text-blue-600 dark:text-blue-400">
                       {route.transitInfo.peakTimeMultiplier > 1 && (
                         <div>
                           ⚠️ 출퇴근 시간대 예상 지연: +
@@ -421,7 +421,7 @@ const RouteComparison = ({ routes }) => {
                         </div>
                       )}
                       {route.transitInfo.serviceDisruption && (
-                        <div className="text-red-600">
+                        <div className="text-red-600 dark:text-red-400">
                           🚨 {route.transitInfo.serviceDisruption}
                         </div>
                       )}
@@ -441,15 +441,15 @@ const RouteComparison = ({ routes }) => {
 
             {/* 자동차 전용 상세 정보 */}
             {route.mode === 'car' && route.carInfo && (
-              <div className="mt-3 rounded-lg bg-green-50 p-3">
+              <div className="mt-3 rounded-lg bg-green-50 dark:bg-green-900/20 p-3">
                 <div className="mb-2 flex items-center space-x-1">
-                  <Car className="h-4 w-4 text-green-600" />
-                  <span className="text-sm font-medium text-green-800">
+                  <Car className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <span className="text-sm font-medium text-green-800 dark:text-green-200">
                     자동차 경로 정보
                   </span>
                 </div>
 
-                <div className="space-y-2 text-xs text-green-700">
+                <div className="space-y-2 text-xs text-green-700 dark:text-green-300">
                   {/* 경로 요약 */}
                   <div className="flex items-center justify-between">
                     <span>총 거리</span>
@@ -1431,7 +1431,7 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
         <CardContent className="flex items-center justify-center py-8">
           <div className="text-center">
             <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
-            <p className="text-sm text-gray-600">교통정보를 불러오는 중...</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">교통정보를 불러오는 중...</p>
           </div>
         </CardContent>
       </Card>
@@ -1456,20 +1456,20 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
 
             {/* 오류 메시지 */}
             <div>
-              <h3 className="mb-1 text-sm font-medium text-red-800">
+              <h3 className="mb-1 text-sm font-medium text-red-800 dark:text-red-200">
                 교통정보 불러오기 실패
               </h3>
-              <p className="mb-2 text-sm text-red-600">{errorMessage}</p>
+              <p className="mb-2 text-sm text-red-600 dark:text-red-400">{errorMessage}</p>
 
               {/* 기술적 세부사항 (개발 모드에서만) */}
               {import.meta.env.DEV &&
                 typeof error === 'object' &&
                 error.technical && (
                   <details className="mt-2 text-left">
-                    <summary className="cursor-pointer text-xs text-gray-500">
+                    <summary className="cursor-pointer text-xs text-gray-500 dark:text-gray-400">
                       기술적 세부사항
                     </summary>
-                    <pre className="mt-1 overflow-auto rounded bg-gray-50 p-2 text-xs text-gray-400">
+                    <pre className="mt-1 overflow-auto rounded bg-gray-50 dark:bg-gray-800 p-2 text-xs text-gray-400">
                       {error.technical}
                     </pre>
                   </details>
@@ -1498,7 +1498,7 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
                         setLoading(true)
                         // 재시도 로직은 useEffect에서 처리됨
                       }}
-                      className="border-red-300 text-red-600 hover:bg-red-50"
+                      className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
                     >
                       🔄 다시 시도
                     </Button>
@@ -1515,7 +1515,7 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
                         routes: {},
                       })
                     }}
-                    className="text-gray-600 hover:bg-gray-100"
+                    className="text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
                   >
                     기본정보 보기
                   </Button>
@@ -1524,7 +1524,7 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
             </div>
 
             {/* 도움말 */}
-            <div className="rounded-lg bg-gray-50 p-3 text-xs text-gray-500">
+            <div className="rounded-lg bg-gray-50 dark:bg-gray-800 p-3 text-xs text-gray-500 dark:text-gray-400">
               <strong>문제 해결 팁:</strong>
               <br />
               • 네트워크 연결 상태를 확인해주세요
@@ -1555,7 +1555,7 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
               <h3 className="text-lg font-semibold">
                 {route.from} → {route.to}
               </h3>
-              <p className="text-sm text-gray-600">기본 교통정보</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">기본 교통정보</p>
             </div>
           </div>
         </CardHeader>
@@ -1648,7 +1648,7 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
             ].filter((r) => selectedMode === 'all' || r.mode === selectedMode)}
           />
 
-          <div className="rounded-lg bg-blue-50 p-3 text-sm text-blue-700">
+          <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-3 text-sm text-blue-700 dark:text-blue-300">
             💡 <strong>참고:</strong> 정확한 교통정보를 위해서는 출발지와 목적지
             좌표가 필요합니다. 현재는 예상 정보를 제공하고 있습니다.
           </div>
@@ -1683,7 +1683,7 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
             <h3 className="text-lg font-semibold">
               {route.from} → {route.to}
             </h3>
-            <p className="text-sm text-gray-600">교통정보 및 경로 안내</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">교통정보 및 경로 안내</p>
           </div>
         </div>
       </CardHeader>
@@ -1691,8 +1691,8 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
       <CardContent className="space-y-4">
         {/* 여행 날짜 상태 표시 */}
         {isPastTravel && (
-          <div className="rounded-lg bg-gray-100 p-3 text-center">
-            <span className="text-sm text-gray-600">
+          <div className="rounded-lg bg-gray-100 dark:bg-gray-800 p-3 text-center">
+            <span className="text-sm text-gray-600 dark:text-gray-400">
               📅 과거 여행 기록 - 실시간 교통정보는 현재/미래 여행에서만
               제공됩니다
             </span>
@@ -1703,7 +1703,7 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
         {!isPastTravel && (
           <div className="space-y-4">
             {isToday && (
-              <div className="mb-2 inline-block rounded bg-blue-50 px-2 py-1 text-xs text-blue-600">
+              <div className="mb-2 inline-block rounded bg-blue-50 dark:bg-blue-900/20 px-2 py-1 text-xs text-blue-600 dark:text-blue-400">
                 🔴 실시간 교통정보 - 스마트 예측 지원
               </div>
             )}
@@ -1761,58 +1761,58 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b">
-                      <th className="p-2 text-left">교통수단</th>
-                      <th className="p-2 text-left">소요시간</th>
-                      <th className="p-2 text-left">비용</th>
-                      <th className="p-2 text-left">편의성</th>
-                      <th className="p-2 text-left">추천도</th>
+                    <tr className="border-b dark:border-gray-700">
+                      <th className="p-2 text-left dark:text-gray-200">교통수단</th>
+                      <th className="p-2 text-left dark:text-gray-200">소요시간</th>
+                      <th className="p-2 text-left dark:text-gray-200">비용</th>
+                      <th className="p-2 text-left dark:text-gray-200">편의성</th>
+                      <th className="p-2 text-left dark:text-gray-200">추천도</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b">
+                    <tr className="border-b dark:border-gray-700">
                       <td className="flex items-center space-x-2 p-2">
-                        <Bus className="h-4 w-4" />
-                        <span>버스</span>
+                        <Bus className="h-4 w-4 dark:text-gray-300" />
+                        <span className="dark:text-gray-300">버스</span>
                       </td>
-                      <td className="p-2">27분</td>
-                      <td className="p-2">1,500원</td>
-                      <td className="p-2">⭐⭐⭐</td>
-                      <td className="p-2">95%</td>
+                      <td className="p-2 dark:text-gray-300">27분</td>
+                      <td className="p-2 dark:text-gray-300">1,500원</td>
+                      <td className="p-2 dark:text-gray-300">⭐⭐⭐</td>
+                      <td className="p-2 dark:text-gray-300">95%</td>
                     </tr>
-                    <tr className="border-b">
+                    <tr className="border-b dark:border-gray-700">
                       <td className="flex items-center space-x-2 p-2">
-                        <Train className="h-4 w-4" />
-                        <span>지하철</span>
+                        <Train className="h-4 w-4 dark:text-gray-300" />
+                        <span className="dark:text-gray-300">지하철</span>
                       </td>
-                      <td className="p-2">35분</td>
-                      <td className="p-2">1,370원</td>
-                      <td className="p-2">⭐⭐⭐⭐</td>
-                      <td className="p-2">80%</td>
+                      <td className="p-2 dark:text-gray-300">35분</td>
+                      <td className="p-2 dark:text-gray-300">1,370원</td>
+                      <td className="p-2 dark:text-gray-300">⭐⭐⭐⭐</td>
+                      <td className="p-2 dark:text-gray-300">80%</td>
                     </tr>
                     <tr>
                       <td className="flex items-center space-x-2 p-2">
-                        <Car className="h-4 w-4" />
-                        <span>자동차</span>
+                        <Car className="h-4 w-4 dark:text-gray-300" />
+                        <span className="dark:text-gray-300">자동차</span>
                       </td>
-                      <td className="p-2">29분</td>
-                      <td className="p-2">2,995원</td>
-                      <td className="p-2">⭐⭐⭐⭐⭐</td>
-                      <td className="p-2">70%</td>
+                      <td className="p-2 dark:text-gray-300">29분</td>
+                      <td className="p-2 dark:text-gray-300">2,995원</td>
+                      <td className="p-2 dark:text-gray-300">⭐⭐⭐⭐⭐</td>
+                      <td className="p-2 dark:text-gray-300">70%</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
               {/* 실시간 정보 */}
-              <div className="rounded-lg bg-green-50 p-3">
+              <div className="rounded-lg bg-green-50 dark:bg-green-900/20 p-3">
                 <div className="mb-2 flex items-center space-x-2">
-                  <Info className="h-4 w-4 text-green-600" />
-                  <span className="font-medium text-green-800">
+                  <Info className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <span className="font-medium text-green-800 dark:text-green-200">
                     실시간 정보
                   </span>
                 </div>
-                <div className="space-y-1 text-sm text-green-700">
+                <div className="space-y-1 text-sm text-green-700 dark:text-green-300">
                   <div>🚌 505번 버스: 3분 후 도착 예정</div>
                   <div>🚇 1호선: 정상 운행 중 (여유)</div>
                   <div>🚗 교통상황: 원활 (평소보다 빠름)</div>

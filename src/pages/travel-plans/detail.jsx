@@ -491,10 +491,10 @@ export function TravelPlanDetailPage() {
   if (isError) {
     return (
       <div className="container mx-auto max-w-4xl p-4 md:p-6">
-        <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
-          <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-red-100 p-3">
+        <div className="rounded-lg border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20 p-6 text-center">
+          <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 p-3">
             <svg
-              className="h-6 w-6 text-red-600"
+              className="h-6 w-6 text-red-600 dark:text-red-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -507,22 +507,22 @@ export function TravelPlanDetailPage() {
               />
             </svg>
           </div>
-          <h3 className="mb-2 text-lg font-semibold text-red-800">
+          <h3 className="mb-2 text-lg font-semibold text-red-800 dark:text-red-200">
             여행 계획을 불러올 수 없습니다
           </h3>
-          <p className="mb-4 text-red-700">
+          <p className="mb-4 text-red-700 dark:text-red-300">
             일시적인 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.
           </p>
           <div className="space-x-4">
             <button
               onClick={() => window.location.reload()}
-              className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+              className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600"
             >
               새로고침
             </button>
             <button
               onClick={() => window.history.back()}
-              className="rounded-md bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
+              className="rounded-md bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
             >
               뒤로가기
             </button>
@@ -546,7 +546,7 @@ export function TravelPlanDetailPage() {
   if (!plan) {
     return (
       <div className="container mx-auto max-w-4xl p-4 md:p-6">
-        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-6 text-center">
+        <div className="rounded-lg border border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20 p-6 text-center">
           <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-yellow-100 p-3">
             <svg
               className="h-6 w-6 text-yellow-600"
@@ -562,10 +562,10 @@ export function TravelPlanDetailPage() {
               />
             </svg>
           </div>
-          <h3 className="mb-2 text-lg font-semibold text-yellow-800">
+          <h3 className="mb-2 text-lg font-semibold text-yellow-800 dark:text-yellow-200">
             여행 계획을 찾을 수 없습니다
           </h3>
-          <p className="mb-4 text-yellow-700">
+          <p className="mb-4 text-yellow-700 dark:text-yellow-300">
             요청하신 여행 계획이 존재하지 않거나 삭제되었을 수 있습니다.
           </p>
           <Link
@@ -839,7 +839,7 @@ export function TravelPlanDetailPage() {
 
           {/* 경로 요약 정보 */}
           {routeData.route_summary && (
-            <div className="mt-3 rounded-lg bg-gray-50 p-2">
+            <div className="mt-3 rounded-lg bg-gray-50 dark:bg-gray-800 p-2">
               <div className="mb-1 text-xs font-medium text-gray-800">
                 경로 요약
               </div>
@@ -930,7 +930,7 @@ export function TravelPlanDetailPage() {
     return (
       <div className="space-y-4">
         {/* 기본 정보 */}
-        <div className="grid grid-cols-2 gap-4 rounded-lg bg-gray-50 p-4">
+        <div className="grid grid-cols-2 gap-4 rounded-lg bg-gray-50 dark:bg-gray-800 p-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-blue-600">
               {formatDuration(route.duration)}
@@ -1040,7 +1040,7 @@ export function TravelPlanDetailPage() {
 
         {/* 추가 정보 */}
         {routeData.route_summary && (
-          <div className="rounded-lg bg-blue-50 p-4">
+          <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-4">
             <h4 className="mb-2 font-semibold text-gray-800">경로 요약</h4>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div>총 안내점: {routeData.route_summary.total_steps}개</div>
@@ -1105,7 +1105,7 @@ export function TravelPlanDetailPage() {
           <Button
             variant="outline"
             asChild
-            className="rounded-xl border-gray-200 hover:bg-gray-50"
+            className="rounded-xl border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
           >
             <Link to="/travel-plans">
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -2293,7 +2293,7 @@ export function TravelPlanDetailPage() {
 
             {selectedRoute && (
               <div className="px-6 pb-2">
-                <div className="rounded-lg bg-blue-50 p-3 text-sm text-blue-800">
+                <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-3 text-sm text-blue-800 dark:text-blue-200">
                   ⏰ 여행 계획 일정 기준으로 교통상황 예측
                 </div>
               </div>
@@ -2333,8 +2333,8 @@ export function TravelPlanDetailPage() {
                     '일시적인 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.'}
                 </p>
                 <div className="space-y-4">
-                  <div className="rounded border border-yellow-200 bg-yellow-50 p-4">
-                    <h4 className="mb-2 font-medium text-yellow-800">
+                  <div className="rounded border border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20 p-4">
+                    <h4 className="mb-2 font-medium text-yellow-800 dark:text-yellow-200">
                       기본 경로 정보
                     </h4>
                     {selectedRoute && renderDetailedRouteInfo(selectedRoute)}
@@ -2344,14 +2344,14 @@ export function TravelPlanDetailPage() {
             ) : timemachineRouteInfo ? (
               <div className="space-y-6">
                 {/* 타임머신 상태 표시 */}
-                <div className="flex items-center justify-between rounded border border-blue-200 bg-blue-50 p-3">
+                <div className="flex items-center justify-between rounded border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20 p-3">
                   <div className="flex items-center space-x-2">
                     <span className="h-2 w-2 animate-pulse rounded-full bg-blue-500"></span>
-                    <span className="text-sm font-medium text-blue-800">
+                    <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
                       🕐 TMAP 타임머신 예측
                     </span>
                   </div>
-                  <div className="text-xs text-blue-800">
+                  <div className="text-xs text-blue-800 dark:text-blue-200">
                     {timemachineRouteInfo.prediction_info?.departure_time
                       ? new Date(
                           timemachineRouteInfo.prediction_info.departure_time,
@@ -2363,37 +2363,37 @@ export function TravelPlanDetailPage() {
                 {/* 자동차가 아닌 경우 */}
                 {selectedRoute?.transport_type !== 'car' &&
                   timemachineRouteInfo.timemachine_info?.message && (
-                    <div className="rounded border border-yellow-200 bg-yellow-50 p-4">
-                      <div className="text-sm text-yellow-800">
+                    <div className="rounded border border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20 p-4">
+                      <div className="text-sm text-yellow-800 dark:text-yellow-200">
                         ℹ️ {timemachineRouteInfo.timemachine_info.message}
                       </div>
                       <div className="mt-3 grid grid-cols-3 gap-4">
                         <div className="text-center">
-                          <div className="text-lg font-bold text-blue-600">
+                          <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
                             {formatDuration(
                               timemachineRouteInfo.timemachine_info.fallback
                                 ?.duration,
                             )}
                           </div>
-                          <div className="text-xs text-gray-600">소요시간</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">소요시간</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-lg font-bold text-green-600">
+                          <div className="text-lg font-bold text-green-600 dark:text-green-400">
                             {formatDistance(
                               timemachineRouteInfo.timemachine_info.fallback
                                 ?.distance,
                             )}
                           </div>
-                          <div className="text-xs text-gray-600">이동거리</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">이동거리</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-lg font-bold text-purple-600">
+                          <div className="text-lg font-bold text-purple-600 dark:text-purple-400">
                             {formatCost(
                               timemachineRouteInfo.timemachine_info.fallback
                                 ?.cost,
                             )}
                           </div>
-                          <div className="text-xs text-gray-600">예상 비용</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">예상 비용</div>
                         </div>
                       </div>
 
@@ -2418,8 +2418,8 @@ export function TravelPlanDetailPage() {
                             key={generateSafeKey(route, 'comparison', index)}
                             className={`rounded-lg border p-4 ${
                               route.is_recommended
-                                ? 'border-green-200 bg-green-50'
-                                : 'border-gray-200 bg-white'
+                                ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20'
+                                : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800'
                             }`}
                           >
                             <div className="mb-3 flex items-center justify-between">
@@ -2464,13 +2464,13 @@ export function TravelPlanDetailPage() {
 
                             {/* 교통 예측 정보 */}
                             {route.route_data?.route_summary && (
-                              <div className="mt-3 rounded border bg-blue-50 p-3">
-                                <div className="mb-2 text-sm font-medium text-gray-800">
+                              <div className="mt-3 rounded border bg-blue-50 dark:bg-blue-900/20 p-3">
+                                <div className="mb-2 text-sm font-medium text-gray-800 dark:text-gray-200">
                                   🚦 실시간 교통 예측
                                 </div>
                                 {route.route_data.route_summary
                                   .traffic_prediction && (
-                                  <div className="mb-2 text-sm text-blue-800">
+                                  <div className="mb-2 text-sm text-blue-800 dark:text-blue-200">
                                     전체 교통량:{' '}
                                     <span className="font-medium">
                                       {
@@ -2512,8 +2512,8 @@ export function TravelPlanDetailPage() {
                             {/* 상세 안내 (추천 경로의 경우) */}
                             {route.is_recommended &&
                               route.route_data?.detailed_guides && (
-                                <div className="mt-3 rounded border bg-gray-50 p-3">
-                                  <div className="mb-2 text-sm font-medium text-gray-700">
+                                <div className="mt-3 rounded border bg-gray-50 dark:bg-gray-800 p-3">
+                                  <div className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     🗺️ 상세 경로 안내
                                   </div>
                                   <div className="space-y-2">
@@ -2553,7 +2553,7 @@ export function TravelPlanDetailPage() {
                     {/* 비교 요약 */}
                     {timemachineRouteInfo.timemachine_info.comparison
                       .comparison_summary && (
-                      <div className="mt-4 rounded bg-gray-50 p-3 text-sm text-gray-800">
+                      <div className="mt-4 rounded bg-gray-50 dark:bg-gray-800 p-3 text-sm text-gray-800 dark:text-gray-200">
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             소요시간 범위:{' '}
@@ -2589,14 +2589,14 @@ export function TravelPlanDetailPage() {
                 {timemachineRouteInfo.timemachine_info?.predicted_route &&
                   !timemachineRouteInfo.timemachine_info?.comparison && (
                     <div>
-                      <h4 className="mb-3 flex items-center font-semibold text-gray-800">
+                      <h4 className="mb-3 flex items-center font-semibold text-gray-800 dark:text-gray-200">
                         <Navigation className="mr-2 h-4 w-4" />
                         🕐 타임머신 경로 예측
                       </h4>
-                      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                      <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20 p-4">
                         <div className="mb-4 grid grid-cols-3 gap-4">
                           <div className="text-center">
-                            <div className="text-lg font-bold text-blue-600">
+                            <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
                               {formatDuration(
                                 timemachineRouteInfo.timemachine_info
                                   .predicted_route.duration,
@@ -2762,8 +2762,8 @@ export function TravelPlanDetailPage() {
                 )}
 
                 {/* 예측 정확도 정보 */}
-                <div className="rounded border border-yellow-200 bg-yellow-50 p-3">
-                  <div className="text-sm text-yellow-800">
+                <div className="rounded border border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20 p-3">
+                  <div className="text-sm text-yellow-800 dark:text-yellow-200">
                     ⚠️{' '}
                     {timemachineRouteInfo.prediction_info?.accuracy_note ||
                       'TMAP 타임머신 API 기반 예측으로 실제 교통상황과 다를 수 있습니다.'}
@@ -2771,24 +2771,24 @@ export function TravelPlanDetailPage() {
                 </div>
 
                 {/* 데이터 소스 */}
-                <div className="flex items-center justify-between rounded bg-blue-100 p-3">
-                  <div className="text-sm text-blue-800">
+                <div className="flex items-center justify-between rounded bg-blue-100 dark:bg-blue-900/30 p-3">
+                  <div className="text-sm text-blue-800 dark:text-blue-200">
                     📡 예측 데이터:{' '}
                     {timemachineRouteInfo.data_sources?.timemachine_data ||
                       'TMAP API'}
                   </div>
-                  <Badge variant="outline" className="text-blue-600">
+                  <Badge variant="outline" className="text-blue-600 dark:text-blue-400">
                     🕐 타임머신 예측
                   </Badge>
                 </div>
               </div>
             ) : selectedRoute ? (
               <div className="space-y-4">
-                <div className="rounded border border-yellow-200 bg-yellow-50 p-4">
-                  <h4 className="mb-2 font-medium text-yellow-800">
+                <div className="rounded border border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20 p-4">
+                  <h4 className="mb-2 font-medium text-yellow-800 dark:text-yellow-200">
                     기본 경로 정보
                   </h4>
-                  <p className="text-sm text-yellow-700">
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300">
                     타임머신 데이터를 불러올 수 없어 기본 정보를 표시합니다.
                   </p>
                 </div>
