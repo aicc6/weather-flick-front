@@ -99,12 +99,15 @@ function formatDate(dateString) {
 
 export default function ContactPage() {
   // RTK Query로 DB에서 문의 목록 가져오기
-  const {
-    data: existingInquiries = [],
-    isLoading,
-    isError,
-    refetch, // 추가
-  } = useGetContactsQuery()
+  const [page, setPage] = useState(1)
+  const limit = 10
+  const { data, isLoading, isError, refetch } = useGetContactsQuery({
+    page,
+    limit,
+  })
+  const existingInquiries = data?.items || []
+  const total = data?.total || 0
+  const totalPages = Math.ceil(total / limit)
 
   const [_activeTab, _setActiveTab] = useState('write')
   const [searchTerm, setSearchTerm] = useState('')
@@ -406,6 +409,45 @@ export default function ContactPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* 문의 목록 테이블 아래에 페이지네이션 UI 추가 */}
+          <div className="mt-6 flex items-center justify-center gap-2">
+            <button
+              className="rounded border bg-white px-2 py-1 text-lg text-gray-800 hover:bg-gray-100 hover:text-blue-600 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 dark:hover:text-blue-400"
+              onClick={() => setPage(1)}
+              disabled={page === 1}
+              aria-label="첫 페이지"
+            >
+              {'<<'}
+            </button>
+            <button
+              className="rounded border bg-white px-2 py-1 text-lg text-gray-800 hover:bg-gray-100 hover:text-blue-600 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 dark:hover:text-blue-400"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              aria-label="이전 페이지"
+            >
+              {'<'}
+            </button>
+            <span className="mx-2 text-sm">
+              {page} / {totalPages}
+            </span>
+            <button
+              className="rounded border bg-white px-2 py-1 text-lg text-gray-800 hover:bg-gray-100 hover:text-blue-600 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 dark:hover:text-blue-400"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              aria-label="다음 페이지"
+            >
+              {'>'}
+            </button>
+            <button
+              className="rounded border bg-white px-2 py-1 text-lg text-gray-800 hover:bg-gray-100 hover:text-blue-600 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 dark:hover:text-blue-400"
+              onClick={() => setPage(totalPages)}
+              disabled={page === totalPages}
+              aria-label="마지막 페이지"
+            >
+              {'>>'}
+            </button>
           </div>
 
           {filteredInquiries.length === 0 && (

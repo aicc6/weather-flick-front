@@ -15,7 +15,14 @@ export const contactApi = createApi({
       invalidatesTags: ['Contact'],
     }),
     getContacts: builder.query({
-      query: () => 'contact/',
+      query: ({ page = 1, limit = 10 } = {}) => ({
+        url: 'contact/',
+        params: { page, limit },
+      }),
+      transformResponse: (response) => ({
+        items: response.items || [],
+        total: response.total || 0,
+      }),
       providesTags: ['Contact'],
     }),
     verifyContactPassword: builder.mutation({
