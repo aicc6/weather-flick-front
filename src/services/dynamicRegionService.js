@@ -1,7 +1,7 @@
 // 동적 지역 감지 및 코스 생성 서비스
 // 전국 244개 지역 중 어떤 지역이든 요청 시 자동 생성
 
-import { getAllRegionsFlat, REGION_TOURISM_INFO } from './regionApiService'
+import { getAllRegionsFlat, REGION_TOURISM_INFO } from '@/data/koreaRegions'
 import { generateTravelCourse } from './tmapCourseService'
 import { checkTmapApiStatus } from './tmapService'
 
@@ -16,8 +16,8 @@ const CACHE_EXPIRY_TIME = 30 * 60 * 1000 // 30분
  * @param {string} regionIdentifier - 지역 코드 또는 지역명
  * @returns {Object} { isSupported, regionCode, regionName, suggestions }
  */
-export const checkRegionSupport = async (regionIdentifier) => {
-  const allRegions = await getAllRegionsFlat()
+export const checkRegionSupport = (regionIdentifier) => {
+  const allRegions = getAllRegionsFlat()
 
   // 정확한 매칭 시도
   let matchedRegion = allRegions.find(
@@ -96,7 +96,7 @@ const getPopularRegionSuggestions = () => {
 export const generateRegionCourse = async (regionIdentifier, options = {}) => {
   try {
     // 1. 지역 지원 여부 확인
-    const regionInfo = await checkRegionSupport(regionIdentifier)
+    const regionInfo = checkRegionSupport(regionIdentifier)
 
     if (!regionInfo.isSupported) {
       return {

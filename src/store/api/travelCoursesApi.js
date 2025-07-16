@@ -1,8 +1,5 @@
-// src/store/api/travelCoursesApi.js
 import { createApi } from '@reduxjs/toolkit/query/react'
 import { baseQueryWithReauth } from './baseQuery'
-<<<<<<< HEAD
-=======
 import { getMajorCitiesFlat, getPopularCities } from '@/data/majorCities'
 
 // 데이터 검증 및 정제 유틸리티
@@ -375,9 +372,9 @@ const generateDummyCourses = (count) => {
       viewCount: 80 + Math.floor(Math.random() * 200),
       theme: themeSet,
       bestMonths: [3, 4, 5, 9, 10, 11],
-      mainImage: `https://picsum.photos/800/600?random=${uniqueId}`,
+      mainImage: `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
       images: [
-        `https://picsum.photos/800/600?random=${uniqueId}`,
+        `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
       ],
       highlights: [
         `${regionName} 대표 명소`,
@@ -484,9 +481,9 @@ const generateRegionSpecificDummyCourses = (regionCode, count) => {
       viewCount: 80 + index * 20,
       theme: themeSet,
       bestMonths: [3, 4, 5, 9, 10, 11],
-      mainImage: `https://picsum.photos/800/600?random=${uniqueId}`,
+      mainImage: `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
       images: [
-        `https://picsum.photos/800/600?random=${uniqueId}`,
+        `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
       ],
       highlights: [
         `${regionName} ${themeSet[0]} 명소`,
@@ -613,19 +610,14 @@ const selectRegionsForGeneration = (existingRegions, maxCount = 3) => {
 
   return selectedRegions
 }
->>>>>>> bbc4887f8a7191325de98e00fbe1b86758c2bdfb
 
 export const travelCoursesApi = createApi({
   reducerPath: 'travelCoursesApi',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['TravelCourse'],
+  tagTypes: ['TravelCourse', 'TravelCourseList', 'Regions', 'Themes'],
   endpoints: (builder) => ({
+    // 여행 코스 목록 조회
     getTravelCourses: builder.query({
-<<<<<<< HEAD
-      query: ({ page = 1, limit = 10, regionCode } = {}) => {
-        const params = { page, limit }
-        if (regionCode) params.regionCode = regionCode
-=======
       query: ({
         page = 1,
         page_size = 20,
@@ -702,19 +694,18 @@ export const travelCoursesApi = createApi({
         return validatedResponse
       },
       transformErrorResponse: (response) => {
->>>>>>> bbc4887f8a7191325de98e00fbe1b86758c2bdfb
         return {
-          url: '/travel-courses/',
-          params,
+          status: response.status,
+          data: response.data,
+          message:
+            response.data?.message ||
+            '여행 코스 목록을 불러오는 중 오류가 발생했습니다',
         }
       },
-      providesTags: ['TravelCourse'],
     }),
+
+    // 여행 코스 상세 조회
     getTravelCourseDetail: builder.query({
-<<<<<<< HEAD
-      query: (contentId) => `/travel-courses/${contentId}`,
-      providesTags: (result, error, id) => [{ type: 'TravelCourse', id }],
-=======
       query: (courseId) => `travel-courses/${courseId}`,
       providesTags: (result, error, courseId) => [
         { type: 'TravelCourse', id: courseId },
@@ -769,9 +760,9 @@ export const travelCoursesApi = createApi({
             viewCount: 80 + Math.floor(Math.random() * 200),
             theme: ['자연', '힐링'],
             bestMonths: [3, 4, 5, 9, 10, 11],
-            mainImage: `https://picsum.photos/800/600?random=${courseId}`,
+            mainImage: `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
             images: [
-              `https://picsum.photos/800/600?random=${courseId}`,
+              `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
             ],
             highlights: [
               `${regionName} 대표 명소`,
@@ -842,22 +833,53 @@ export const travelCoursesApi = createApi({
             '여행 코스를 불러오는 중 오류가 발생했습니다',
         }
       },
->>>>>>> bbc4887f8a7191325de98e00fbe1b86758c2bdfb
     }),
+
+    // 지역별 여행 코스 조회
     getCoursesByRegion: builder.query({
-      query: (regionCode) => `/travel-courses/region/${regionCode}`,
-      providesTags: (result, error, regionCode) => [
-        { type: 'TravelCourse', id: regionCode },
-      ],
-    }),
-    searchTravelCourses: builder.query({
-      query: (searchParams) => ({
-        url: '/travel-courses/search',
-        params: searchParams, // { keyword, regionCode, ... }
+      query: ({ region_code, limit = 10 }) => ({
+        url: `travel-courses/regions/${region_code}/courses`,
+        params: { limit },
       }),
-<<<<<<< HEAD
-      providesTags: ['TravelCourse'],
-=======
+      providesTags: (result, error, { region_code }) => [
+        { type: 'TravelCourseList', id: `region-${region_code}` },
+      ],
+      keepUnusedDataFor: 300, // 5분간 캐싱
+      transformResponse: (response) => {
+        return validateAndSanitizeResponse(response, {
+          region_code: '',
+          courses: [],
+          total: 0,
+        })
+      },
+      transformErrorResponse: (response) => {
+        return {
+          status: response.status,
+          data: response.data,
+          message:
+            response.data?.message ||
+            '지역별 여행 코스를 불러오는 중 오류가 발생했습니다',
+        }
+      },
+    }),
+
+    // 여행 코스 검색
+    searchTravelCourses: builder.query({
+      query: ({
+        searchQuery,
+        region_code,
+        theme,
+        page = 1,
+        page_size = 20,
+      }) => ({
+        url: 'travel-courses/',
+        params: {
+          page,
+          page_size,
+          ...(region_code && { region_code }),
+          ...(theme && { course_theme: theme }),
+        },
+      }),
       providesTags: ['TravelCourseList'],
       keepUnusedDataFor: 0, // 캐싱 비활성화 (개발 중 테스트용)
       transformResponse: async (response, meta, arg) => {
@@ -964,14 +986,16 @@ export const travelCoursesApi = createApi({
         }
         return response?.themes || []
       },
->>>>>>> bbc4887f8a7191325de98e00fbe1b86758c2bdfb
     }),
   }),
 })
 
+// Hook 내보내기
 export const {
   useGetTravelCoursesQuery,
   useGetTravelCourseDetailQuery,
   useGetCoursesByRegionQuery,
   useSearchTravelCoursesQuery,
+  useGetRegionsQuery,
+  useGetThemesQuery,
 } = travelCoursesApi
