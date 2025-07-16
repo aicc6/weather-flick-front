@@ -51,14 +51,7 @@ export default function NationalCoverageStatus() {
       const startTime = performance.now()
 
       // 지역 지원 여부 확인
-<<<<<<< Updated upstream
-      const supportInfo = await checkRegionSupport(testRegion)
-||||||| Stash base
       const supportInfo = checkRegionSupport(testRegion)
-      
-=======
-      const supportInfo = checkRegionSupport(testRegion)
->>>>>>> Stashed changes
 
       if (!supportInfo.isSupported) {
         setTestResults((prev) => [
@@ -126,13 +119,7 @@ export default function NationalCoverageStatus() {
     setTestProgress(0)
 
     try {
-<<<<<<< Updated upstream
-      const allRegions = regions.filter((r) => r.region_level === 2) // 시군구 레벨
-||||||| Stash base
-      const allRegions = getAllRegionsFlat().filter(r => r.type === 'city')
-=======
       const allRegions = getAllRegionsFlat().filter((r) => r.type === 'city')
->>>>>>> Stashed changes
       const testCount = 10 // 랜덤 10개 지역 테스트
       const randomRegions = [...allRegions]
         .sort(() => Math.random() - 0.5)
@@ -216,21 +203,10 @@ export default function NationalCoverageStatus() {
               <div className="space-y-2">
                 <div className="text-sm font-medium">지원 지역</div>
                 <div className="text-2xl font-bold">
-<<<<<<< Updated upstream
-                  {regionsLoading ? '로딩...' : `${regions.length}개`}
-                </div>
-                <div className="text-muted-foreground text-xs">
-                  {provincesLoading ? '로딩...' : `${provinces.length}개 광역시도 + ${regions.filter(r => r.region_level === 2).length}개 시군구`}
-||||||| Stash base
-                <div className="text-2xl font-bold">{stats.totalSupportedRegions}개</div>
-                <div className="text-xs text-muted-foreground">
-                  17개 광역시도 + 227개 시군구
-=======
                   {stats.totalSupportedRegions}개
                 </div>
                 <div className="text-muted-foreground text-xs">
                   17개 광역시도 + 227개 시군구
->>>>>>> Stashed changes
                 </div>
               </div>
               <div className="space-y-2">
@@ -373,32 +349,14 @@ export default function NationalCoverageStatus() {
           {/* 지역 목록 탭 */}
           <TabsContent value="regions" className="space-y-4">
             <div className="space-y-4">
-<<<<<<< Updated upstream
-              {provincesLoading ? (
-                <div>지역 정보 로딩 중...</div>
-              ) : (
-                provinces.map((province) => (
-                  <div key={province.region_code} className="space-y-2">
-                    <div className="font-medium">{province.region_name}</div>
-                    <div className="text-muted-foreground text-sm">
-                      광역시도 레벨 지원 + 하위 시군구 모두 지원
-                    </div>
-||||||| Stash base
-              {PROVINCES.map(province => (
-                <div key={province.code} className="space-y-2">
-                  <div className="font-medium">{province.name}</div>
-                  <div className="text-sm text-muted-foreground">
-                    광역시도 레벨 지원 + 하위 시군구 모두 지원
-=======
               {PROVINCES.map((province) => (
                 <div key={province.code} className="space-y-2">
                   <div className="font-medium">{province.name}</div>
                   <div className="text-muted-foreground text-sm">
                     광역시도 레벨 지원 + 하위 시군구 모두 지원
->>>>>>> Stashed changes
                   </div>
-                ))
-              )}
+                </div>
+              ))}
             </div>
           </TabsContent>
         </Tabs>

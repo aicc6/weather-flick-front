@@ -12,10 +12,12 @@ import { regionsApi } from '@/store/api/regionsApi'
  */
 export const getAllRegionsFlat = async () => {
   try {
-    const result = await store.dispatch(regionsApi.endpoints.getRegions.initiate())
+    const result = await store.dispatch(
+      regionsApi.endpoints.getRegions.initiate(),
+    )
     const regions = result.data || []
-    
-    return regions.map(region => ({
+
+    return regions.map((region) => ({
       code: region.region_code,
       name: region.region_name,
       shortName: region.region_name,
@@ -38,10 +40,12 @@ export const getAllRegionsFlat = async () => {
  */
 export const getProvinces = async () => {
   try {
-    const result = await store.dispatch(regionsApi.endpoints.getActiveRegions.initiate())
+    const result = await store.dispatch(
+      regionsApi.endpoints.getActiveRegions.initiate(),
+    )
     const provinces = result.data || []
-    
-    return provinces.map(province => ({
+
+    return provinces.map((province) => ({
       code: province.region_code,
       name: province.region_name,
       shortName: province.region_name,
@@ -62,7 +66,7 @@ export const getProvinces = async () => {
 export const getRegionNameByCode = async (regionCode) => {
   try {
     const regions = await getAllRegionsFlat()
-    const region = regions.find(r => r.code === regionCode)
+    const region = regions.find((r) => r.code === regionCode)
     return region ? region.shortName : regionCode
   } catch (error) {
     console.error('지역명 찾기 실패:', error)
@@ -78,10 +82,11 @@ export const getRegionNameByCode = async (regionCode) => {
 export const getRegionCodeByName = async (regionName) => {
   try {
     const regions = await getAllRegionsFlat()
-    const region = regions.find(r => 
-      r.name === regionName || 
-      r.shortName === regionName ||
-      r.fullName === regionName
+    const region = regions.find(
+      (r) =>
+        r.name === regionName ||
+        r.shortName === regionName ||
+        r.fullName === regionName,
     )
     return region ? region.code : regionName
   } catch (error) {
@@ -95,15 +100,18 @@ export const getRegionCodeByName = async (regionName) => {
  */
 export const REGION_TOURISM_INFO = {
   // 주요 관광지 특색
-  1: { // 서울
+  1: {
+    // 서울
     themes: ['문화', '쇼핑', '역사'],
     keywords: ['궁궐', '한강', '명동', '강남'],
   },
-  6: { // 부산
+  6: {
+    // 부산
     themes: ['바다', '온천', '문화'],
     keywords: ['해운대', '광안리', '감천문화마을'],
   },
-  39: { // 제주
+  39: {
+    // 제주
     themes: ['자연', '휴양', '체험'],
     keywords: ['한라산', '성산일출봉', '협재해수욕장'],
   },
@@ -119,12 +127,13 @@ export const searchRegions = async (searchTerm) => {
   try {
     const regions = await getAllRegionsFlat()
     if (!searchTerm) return regions
-    
+
     const term = searchTerm.toLowerCase()
-    return regions.filter(region => 
-      region.name.toLowerCase().includes(term) ||
-      region.shortName.toLowerCase().includes(term) ||
-      region.fullName.toLowerCase().includes(term)
+    return regions.filter(
+      (region) =>
+        region.name.toLowerCase().includes(term) ||
+        region.shortName.toLowerCase().includes(term) ||
+        region.fullName.toLowerCase().includes(term),
     )
   } catch (error) {
     console.error('지역 검색 실패:', error)
@@ -140,7 +149,7 @@ export const searchRegions = async (searchTerm) => {
 export const getSubRegions = async (parentCode) => {
   try {
     const regions = await getAllRegionsFlat()
-    return regions.filter(region => region.province === parentCode)
+    return regions.filter((region) => region.province === parentCode)
   } catch (error) {
     console.error('하위 지역 가져오기 실패:', error)
     return []
@@ -154,10 +163,10 @@ export const getSubRegions = async (parentCode) => {
  */
 export const toSelectOptions = (regions) => {
   if (!regions || !Array.isArray(regions)) return []
-  return regions.map(region => ({
+  return regions.map((region) => ({
     value: region.code,
     label: region.fullName || region.name,
-    data: region
+    data: region,
   }))
 }
 

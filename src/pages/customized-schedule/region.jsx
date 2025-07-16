@@ -186,7 +186,7 @@ export default function CustomizedScheduleRegionPage() {
     <div className="mx-auto max-w-7xl px-4 py-8">
       {/* 진행률 표시 */}
       <ProgressSteps currentStep={1} onBack={handleBack} />
-      
+
       {/* 페이지 헤더 */}
       <div className="mb-8">
         <div className="mb-4 flex items-center justify-between">

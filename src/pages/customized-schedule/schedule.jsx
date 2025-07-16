@@ -5,12 +5,20 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Clock } from '@/components/icons'
-import { COMPANIONS, TRAVEL_STYLES, SCHEDULE_TYPES } from '@/constants/travelOptions'
-import { setScheduleType, setCurrentStep, restoreFromParams } from '@/store/slices/customizedScheduleSlice'
+import {
+  COMPANIONS,
+  TRAVEL_STYLES,
+  SCHEDULE_TYPES,
+} from '@/constants/travelOptions'
+import {
+  setScheduleType,
+  setCurrentStep,
+  restoreFromParams,
+} from '@/store/slices/customizedScheduleSlice'
 import ProgressSteps from '@/components/common/ProgressSteps'
 
 // 공통 상수에서 데이터 가져옴
-const companions = COMPANIONS;
+const companions = COMPANIONS
 
 export default function CustomizedScheduleSchedulePage() {
   const navigate = useNavigate()
@@ -20,16 +28,16 @@ export default function CustomizedScheduleSchedulePage() {
   const nextButtonRef = useRef(null)
 
   // Redux 상태 가져오기
-  const { 
-    regionCode, 
-    regionName, 
-    periodLabel, 
+  const {
+    regionCode,
+    regionName,
+    periodLabel,
     days,
     companion,
     travelStyles,
     travelStylesData,
     scheduleType,
-    scheduleTypeData
+    scheduleTypeData,
   } = useSelector((state) => state.customizedSchedule)
 
   // URL 파라미터에서 상태 복원
@@ -40,24 +48,34 @@ export default function CustomizedScheduleSchedulePage() {
       days: searchParams.get('days'),
       who: searchParams.get('who'),
       styles: searchParams.get('styles'),
-      schedule: searchParams.get('schedule')
+      schedule: searchParams.get('schedule'),
     }
-    
+
     // URL 파라미터가 있고 Redux 상태가 비어있으면 복원
-    if ((urlParams.region && !regionCode) || 
-        (urlParams.period && !periodLabel) ||
-        (urlParams.who && !companion) ||
-        (urlParams.styles && travelStyles.length === 0) ||
-        (urlParams.schedule && !scheduleType)) {
+    if (
+      (urlParams.region && !regionCode) ||
+      (urlParams.period && !periodLabel) ||
+      (urlParams.who && !companion) ||
+      (urlParams.styles && travelStyles.length === 0) ||
+      (urlParams.schedule && !scheduleType)
+    ) {
       dispatch(restoreFromParams(urlParams))
     }
     dispatch(setCurrentStep(5))
-  }, [dispatch, searchParams, regionCode, periodLabel, companion, travelStyles.length, scheduleType])
+  }, [
+    dispatch,
+    searchParams,
+    regionCode,
+    periodLabel,
+    companion,
+    travelStyles.length,
+    scheduleType,
+  ])
 
   // 기존 선택된 일정 타입 복원
   useEffect(() => {
     if (scheduleType) {
-      const existingSchedule = SCHEDULE_TYPES.find(s => s.id === scheduleType)
+      const existingSchedule = SCHEDULE_TYPES.find((s) => s.id === scheduleType)
       if (existingSchedule) {
         setSelectedSchedule(existingSchedule)
       }
@@ -78,14 +96,15 @@ export default function CustomizedScheduleSchedulePage() {
   const currentPeriod = periodLabel || searchParams.get('period')
   const currentDays = days || searchParams.get('days')
   const currentWho = companion || searchParams.get('who')
-  const currentStyles = travelStyles.length > 0 
-    ? travelStyles.join(',') 
-    : searchParams.get('styles')
+  const currentStyles =
+    travelStyles.length > 0
+      ? travelStyles.join(',')
+      : searchParams.get('styles')
   const displayedRegionName = regionName || currentRegion
 
-  const scheduleTypes = SCHEDULE_TYPES;
+  const scheduleTypes = SCHEDULE_TYPES
 
-  const travelStyleOptions = TRAVEL_STYLES;
+  const travelStyleOptions = TRAVEL_STYLES
 
   const handleScheduleSelect = (schedule) => {
     setSelectedSchedule(schedule)
@@ -118,7 +137,7 @@ export default function CustomizedScheduleSchedulePage() {
     <div className="mx-auto max-w-4xl px-4 py-8">
       {/* 진행률 표시 */}
       <ProgressSteps currentStep={5} onBack={handleBack} />
-      
+
       {/* 페이지 헤더 */}
       <div className="mb-8">
         <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
@@ -171,7 +190,8 @@ export default function CustomizedScheduleSchedulePage() {
                 className="mt-1 flex items-center gap-1 dark:border-gray-600 dark:text-gray-300"
               >
                 {companions.find((c) => c.id === currentWho)?.icon}
-                {companions.find((c) => c.id === currentWho)?.label || currentWho}
+                {companions.find((c) => c.id === currentWho)?.label ||
+                  currentWho}
               </Badge>
             </div>
           )}

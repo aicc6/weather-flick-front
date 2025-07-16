@@ -6,7 +6,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Users } from '@/components/icons'
 import { COMPANIONS } from '@/constants/travelOptions'
-import { setCompanion, setCurrentStep, restoreFromParams } from '@/store/slices/customizedScheduleSlice'
+import {
+  setCompanion,
+  setCurrentStep,
+  restoreFromParams,
+} from '@/store/slices/customizedScheduleSlice'
 import ProgressSteps from '@/components/common/ProgressSteps'
 
 export default function CustomizedScheduleWhoPage() {
@@ -17,14 +21,14 @@ export default function CustomizedScheduleWhoPage() {
   const nextButtonRef = useRef(null)
 
   // Redux 상태 가져오기
-  const { 
-    regionCode, 
-    regionName, 
-    period, 
-    periodLabel, 
+  const {
+    regionCode,
+    regionName,
+    period,
+    periodLabel,
     days,
     companion,
-    companionData 
+    companionData,
   } = useSelector((state) => state.customizedSchedule)
 
   // URL 파라미터에서 상태 복원
@@ -33,13 +37,15 @@ export default function CustomizedScheduleWhoPage() {
       region: searchParams.get('region'),
       period: searchParams.get('period'),
       days: searchParams.get('days'),
-      who: searchParams.get('who')
+      who: searchParams.get('who'),
     }
-    
+
     // URL 파라미터가 있고 Redux 상태가 비어있으면 복원
-    if ((urlParams.region && !regionCode) || 
-        (urlParams.period && !periodLabel) ||
-        (urlParams.who && !companion)) {
+    if (
+      (urlParams.region && !regionCode) ||
+      (urlParams.period && !periodLabel) ||
+      (urlParams.who && !companion)
+    ) {
       dispatch(restoreFromParams(urlParams))
     }
     dispatch(setCurrentStep(3))
@@ -48,7 +54,7 @@ export default function CustomizedScheduleWhoPage() {
   // 기존 선택된 동행자 복원
   useEffect(() => {
     if (companion) {
-      const existingCompanion = COMPANIONS.find(c => c.id === companion)
+      const existingCompanion = COMPANIONS.find((c) => c.id === companion)
       if (existingCompanion) {
         setSelectedCompanion(existingCompanion)
       }
@@ -71,7 +77,7 @@ export default function CustomizedScheduleWhoPage() {
   const displayedRegionName = regionName || currentRegion
 
   // 공통 상수에서 동행자 데이터 가져옴
-  const companions = COMPANIONS;
+  const companions = COMPANIONS
 
   const handleCompanionSelect = (companion) => {
     setSelectedCompanion(companion)
@@ -97,7 +103,7 @@ export default function CustomizedScheduleWhoPage() {
     <div className="mx-auto max-w-4xl px-4 py-8">
       {/* 진행률 표시 */}
       <ProgressSteps currentStep={3} onBack={handleBack} />
-      
+
       {/* 페이지 헤더 */}
       <div className="mb-8">
         <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">

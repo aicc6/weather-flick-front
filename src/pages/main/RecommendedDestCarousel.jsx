@@ -112,7 +112,7 @@ export function RecommendedDestCarousel({ destinations = [] }) {
             return (
               <div
                 key={`${destination.name}-${currentIndex + index}`}
-                className="weather-card group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="weather-card group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
                 onClick={() => {
                   // 여행지 추천 페이지로 이동
                   navigate('/recommend')
@@ -188,7 +188,7 @@ export function RecommendedDestCarousel({ destinations = [] }) {
                 {/* Content */}
                 <div className="p-4">
                   <div className="mb-2 flex items-center justify-between">
-                    <h4 className="text-foreground group-hover:text-blue-600 text-lg font-bold transition-colors">
+                    <h4 className="text-foreground text-lg font-bold transition-colors group-hover:text-blue-600">
                       {destination.name}
                     </h4>
                     <div className="flex items-center gap-1">
@@ -242,7 +242,7 @@ export function RecommendedDestCarousel({ destinations = [] }) {
                 onClick={() => setCurrentIndex(index)}
                 className={`h-3 w-3 rounded-full transition-all duration-300 ${
                   index === currentIndex
-                    ? 'bg-blue-600 scale-125'
+                    ? 'scale-125 bg-blue-600'
                     : 'bg-gray-300 hover:bg-blue-400'
                 }`}
                 aria-label={`${index + 1}번째 슬라이드로 이동`}

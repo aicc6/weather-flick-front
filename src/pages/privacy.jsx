@@ -65,8 +65,8 @@ const PrivacyPolicyPage = () => {
                 제1조 (개인정보의 처리목적)
               </h2>
               <p className="mb-6 text-gray-700">
-                Weather Flick(이하 &apos;회사&apos;)은 다음의 목적을 위하여 개인정보를
-                처리합니다:
+                Weather Flick(이하 &apos;회사&apos;)은 다음의 목적을 위하여
+                개인정보를 처리합니다:
               </p>
               <ul className="mb-8 list-inside list-disc space-y-2 text-gray-700">
                 <li>회원 가입, 로그인 및 회원 관리</li>

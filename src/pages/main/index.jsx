@@ -37,12 +37,15 @@ export function MainPage() {
     let courses = []
     if (Array.isArray(recommendationsResponse)) {
       courses = recommendationsResponse
-    } else if (recommendationsResponse.courses && Array.isArray(recommendationsResponse.courses)) {
+    } else if (
+      recommendationsResponse.courses &&
+      Array.isArray(recommendationsResponse.courses)
+    ) {
       courses = recommendationsResponse.courses
     }
 
     // 여행 코스 데이터를 추천 여행지 형태로 변환
-    return courses.slice(0, 6).map(course => ({
+    return courses.slice(0, 6).map((course) => ({
       id: course.id,
       name: course.title || course.name,
       description: course.summary || course.description,
@@ -52,7 +55,7 @@ export function MainPage() {
       distance: course.duration || '2박 3일',
       budget: course.price || '문의',
       icon: '🏞️',
-      region: course.region
+      region: course.region,
     }))
   }, [recommendationsResponse])
 
@@ -218,7 +221,9 @@ export function MainPage() {
                 ) : error ? (
                   <div className="weather-card p-8 text-center">
                     <div className="mb-4 text-2xl">❌</div>
-                    <p className="mb-4 text-red-500">추천 여행지 데이터를 불러오는데 실패했습니다.</p>
+                    <p className="mb-4 text-red-500">
+                      추천 여행지 데이터를 불러오는데 실패했습니다.
+                    </p>
                     <div className="space-y-4">
                       <div className="space-x-3">
                         <button

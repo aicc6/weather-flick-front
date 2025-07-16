@@ -2,7 +2,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 // API 베이스 URL 설정
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
 export const regionsApi = createApi({
   reducerPath: 'regionsApi',
@@ -65,7 +66,7 @@ export const regionUtils = {
    */
   groupByProvince: (regions) => {
     if (!regions || !Array.isArray(regions)) return {}
-    
+
     return regions.reduce((acc, region) => {
       const provinceCode = region.parent_region_code || region.region_code
       if (!acc[provinceCode]) {
@@ -84,7 +85,7 @@ export const regionUtils = {
    */
   findByCode: (regions, regionCode) => {
     if (!regions || !Array.isArray(regions)) return null
-    return regions.find(region => region.region_code === regionCode) || null
+    return regions.find((region) => region.region_code === regionCode) || null
   },
 
   /**
@@ -95,10 +96,13 @@ export const regionUtils = {
    */
   findByName: (regions, regionName) => {
     if (!regions || !Array.isArray(regions)) return null
-    return regions.find(region => 
-      region.region_name === regionName || 
-      region.region_name_full === regionName
-    ) || null
+    return (
+      regions.find(
+        (region) =>
+          region.region_name === regionName ||
+          region.region_name_full === regionName,
+      ) || null
+    )
   },
 
   /**
@@ -108,7 +112,7 @@ export const regionUtils = {
    */
   getTopLevelOnly: (regions) => {
     if (!regions || !Array.isArray(regions)) return []
-    return regions.filter(region => region.region_level === 1)
+    return regions.filter((region) => region.region_level === 1)
   },
 
   /**
@@ -119,8 +123,9 @@ export const regionUtils = {
    */
   getSubRegions: (regions, parentCode) => {
     if (!regions || !Array.isArray(regions)) return []
-    return regions.filter(region => 
-      region.parent_region_code === parentCode && region.region_level === 2
+    return regions.filter(
+      (region) =>
+        region.parent_region_code === parentCode && region.region_level === 2,
     )
   },
 
@@ -131,10 +136,10 @@ export const regionUtils = {
    */
   toSelectOptions: (regions) => {
     if (!regions || !Array.isArray(regions)) return []
-    return regions.map(region => ({
+    return regions.map((region) => ({
       value: region.region_code,
       label: region.region_name_full || region.region_name,
-      data: region
+      data: region,
     }))
   },
 
@@ -146,13 +151,15 @@ export const regionUtils = {
    */
   search: (regions, searchTerm) => {
     if (!regions || !Array.isArray(regions) || !searchTerm) return []
-    
+
     const term = searchTerm.toLowerCase()
-    return regions.filter(region => 
-      region.region_name.toLowerCase().includes(term) ||
-      (region.region_name_full && region.region_name_full.toLowerCase().includes(term))
+    return regions.filter(
+      (region) =>
+        region.region_name.toLowerCase().includes(term) ||
+        (region.region_name_full &&
+          region.region_name_full.toLowerCase().includes(term)),
     )
-  }
+  },
 }
 
 export default regionsApi

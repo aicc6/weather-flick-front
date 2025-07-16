@@ -53,7 +53,7 @@ export const COMPANIONS = [
     characteristics: ['단체 할인', '버스 이용', '단체 식사'],
     recommendations: '관광지, 단체 체험, 대형 식당',
   },
-];
+]
 
 // 여행 기간 옵션 정의
 export const TRAVEL_PERIODS = [
@@ -106,7 +106,7 @@ export const TRAVEL_PERIODS = [
     description: '장기 여행과 특별한 경험',
     icon: '🌍',
   },
-];
+]
 
 // 여행 스타일 정의
 export const TRAVEL_STYLES = [
@@ -180,7 +180,7 @@ export const TRAVEL_STYLES = [
     icon: '🐾',
     examples: '애견동반 숙소, 펫카페, 반려견 놀이터, 펫프렌들리 여행지',
   },
-];
+]
 
 // 일정 스타일 정의
 export const SCHEDULE_TYPES = [
@@ -217,37 +217,33 @@ export const SCHEDULE_TYPES = [
       '현지에서의 자유로운 시간',
       '예상치 못한 발견을 위한 여백',
     ],
-    pros: [
-      '스트레스 없는 여행',
-      '깊이 있는 경험 가능',
-      '유연한 일정 조정',
-    ],
+    pros: ['스트레스 없는 여행', '깊이 있는 경험 가능', '유연한 일정 조정'],
     cons: [
       '상대적으로 적은 장소 방문',
       '계획성이 부족할 수 있음',
       '시간이 남을 수 있음',
     ],
   },
-];
+]
 
 // 헬퍼 함수들
 export const getCompanionById = (id) => {
-  return COMPANIONS.find(companion => companion.id === id);
-};
+  return COMPANIONS.find((companion) => companion.id === id)
+}
 
 export const getTravelPeriodById = (id) => {
-  return TRAVEL_PERIODS.find(period => period.id === id);
-};
+  return TRAVEL_PERIODS.find((period) => period.id === id)
+}
 
 export const getTravelStyleById = (id) => {
-  return TRAVEL_STYLES.find(style => style.id === id);
-};
+  return TRAVEL_STYLES.find((style) => style.id === id)
+}
 
 export const getScheduleTypeById = (id) => {
-  return SCHEDULE_TYPES.find(type => type.id === id);
-};
+  return SCHEDULE_TYPES.find((type) => type.id === id)
+}
 
 export const getTravelStylesByIds = (ids) => {
-  if (!ids || !Array.isArray(ids)) return [];
-  return ids.map(id => getTravelStyleById(id)).filter(Boolean);
-};
+  if (!ids || !Array.isArray(ids)) return []
+  return ids.map((id) => getTravelStyleById(id)).filter(Boolean)
+}

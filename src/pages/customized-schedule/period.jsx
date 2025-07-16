@@ -6,7 +6,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Calendar } from '@/components/icons'
 import { TRAVEL_PERIODS } from '@/constants/travelOptions'
-import { setPeriod, setCurrentStep, restoreFromParams } from '@/store/slices/customizedScheduleSlice'
+import {
+  setPeriod,
+  setCurrentStep,
+  restoreFromParams,
+} from '@/store/slices/customizedScheduleSlice'
 import ProgressSteps from '@/components/common/ProgressSteps'
 
 export default function CustomizedSchedulePeriodPage() {
@@ -33,7 +37,7 @@ export default function CustomizedSchedulePeriodPage() {
   // 기존 선택된 기간 복원
   useEffect(() => {
     if (period && periodLabel) {
-      const existingPeriod = TRAVEL_PERIODS.find(p => p.id === period)
+      const existingPeriod = TRAVEL_PERIODS.find((p) => p.id === period)
       if (existingPeriod) {
         setSelectedPeriod(existingPeriod)
       }
@@ -54,16 +58,18 @@ export default function CustomizedSchedulePeriodPage() {
   const displayRegionName = regionName || currentRegionCode
 
   // 공통 상수에서 여행 기간 데이터 가져옴
-  const periods = TRAVEL_PERIODS;
+  const periods = TRAVEL_PERIODS
 
   const handlePeriodSelect = (period) => {
     setSelectedPeriod(period)
     // Redux 상태에도 저장
-    dispatch(setPeriod({
-      id: period.id,
-      label: period.label,
-      days: period.days
-    }))
+    dispatch(
+      setPeriod({
+        id: period.id,
+        label: period.label,
+        days: period.days,
+      }),
+    )
   }
 
   const handleNext = () => {
@@ -84,7 +90,7 @@ export default function CustomizedSchedulePeriodPage() {
     <div className="mx-auto max-w-4xl px-4 py-8">
       {/* 진행률 표시 */}
       <ProgressSteps currentStep={2} onBack={handleBack} />
-      
+
       {/* 페이지 헤더 */}
       <div className="mb-8">
         <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">

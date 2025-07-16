@@ -10,13 +10,22 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ArrowLeft, User, Save, X } from '@/components/icons'
 import { toast } from 'sonner'
 
 const profileSchema = z.object({
-  nickname: z.string().min(2, '닉네임은 최소 2자 이상이어야 합니다').max(20, '닉네임은 최대 20자까지 가능합니다'),
+  nickname: z
+    .string()
+    .min(2, '닉네임은 최소 2자 이상이어야 합니다')
+    .max(20, '닉네임은 최대 20자까지 가능합니다'),
   bio: z.string().max(200, '소개는 최대 200자까지 가능합니다').optional(),
   preferred_region: z.string().optional(),
   preferred_theme: z.string().optional(),
@@ -59,7 +68,8 @@ const themes = [
 export default function ProfileEditPage() {
   const navigate = useNavigate()
   const { user, isAuthenticated, loading: authLoading } = useAuth()
-  const [updateProfile, { isLoading: updateLoading }] = useUpdateProfileMutation()
+  const [updateProfile, { isLoading: updateLoading }] =
+    useUpdateProfileMutation()
   const [error, setError] = useState('')
 
   const {
@@ -99,15 +109,20 @@ export default function ProfileEditPage() {
       await updateProfile({
         nickname: data.nickname,
         bio: data.bio || null,
-        preferred_region: data.preferred_region === 'none' ? null : data.preferred_region,
-        preferred_theme: data.preferred_theme === 'none' ? null : data.preferred_theme,
+        preferred_region:
+          data.preferred_region === 'none' ? null : data.preferred_region,
+        preferred_theme:
+          data.preferred_theme === 'none' ? null : data.preferred_theme,
       }).unwrap()
-      
+
       toast.success('프로필이 성공적으로 수정되었습니다')
       navigate('/profile')
     } catch (error) {
       console.error('Profile update error:', error)
-      const errorMessage = error?.data?.detail || error?.message || '프로필 수정 중 오류가 발생했습니다'
+      const errorMessage =
+        error?.data?.detail ||
+        error?.message ||
+        '프로필 수정 중 오류가 발생했습니다'
       setError(errorMessage)
       toast.error(errorMessage)
     }
@@ -115,7 +130,9 @@ export default function ProfileEditPage() {
 
   const handleCancel = () => {
     if (isDirty) {
-      const confirmed = window.confirm('변경사항이 저장되지 않았습니다. 정말로 취소하시겠습니까?')
+      const confirmed = window.confirm(
+        '변경사항이 저장되지 않았습니다. 정말로 취소하시겠습니까?',
+      )
       if (!confirmed) return
     }
     navigate('/profile')
@@ -149,8 +166,12 @@ export default function ProfileEditPage() {
           <div className="mx-auto max-w-2xl">
             <div className="weather-card alert-error p-8 text-center">
               <h2 className="mb-2 text-xl font-bold">로그인이 필요합니다</h2>
-              <p className="mb-4 text-red-600">프로필을 편집하려면 로그인해주세요.</p>
-              <Button onClick={() => navigate('/login')}>로그인하러 가기</Button>
+              <p className="mb-4 text-red-600">
+                프로필을 편집하려면 로그인해주세요.
+              </p>
+              <Button onClick={() => navigate('/login')}>
+                로그인하러 가기
+              </Button>
             </div>
           </div>
         </div>
@@ -185,7 +206,9 @@ export default function ProfileEditPage() {
             <CardContent>
               {error && (
                 <Alert className="mb-6 border-red-200 bg-red-50">
-                  <AlertDescription className="text-red-700">{error}</AlertDescription>
+                  <AlertDescription className="text-red-700">
+                    {error}
+                  </AlertDescription>
                 </Alert>
               )}
 
@@ -201,7 +224,9 @@ export default function ProfileEditPage() {
                     className={errors.nickname ? 'border-red-500' : ''}
                   />
                   {errors.nickname && (
-                    <p className="text-sm text-red-500">{errors.nickname.message}</p>
+                    <p className="text-sm text-red-500">
+                      {errors.nickname.message}
+                    </p>
                   )}
                 </div>
 
@@ -228,7 +253,9 @@ export default function ProfileEditPage() {
                   <Label htmlFor="preferred_region">선호 지역</Label>
                   <Select
                     value={watch('preferred_region')}
-                    onValueChange={(value) => setValue('preferred_region', value)}
+                    onValueChange={(value) =>
+                      setValue('preferred_region', value)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="선호하는 지역을 선택하세요" />
@@ -248,7 +275,9 @@ export default function ProfileEditPage() {
                   <Label htmlFor="preferred_theme">선호 테마</Label>
                   <Select
                     value={watch('preferred_theme')}
-                    onValueChange={(value) => setValue('preferred_theme', value)}
+                    onValueChange={(value) =>
+                      setValue('preferred_theme', value)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="선호하는 테마를 선택하세요" />

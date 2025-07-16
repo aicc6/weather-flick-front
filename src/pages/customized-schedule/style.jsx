@@ -6,11 +6,16 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Heart } from '@/components/icons'
 import { COMPANIONS, TRAVEL_STYLES } from '@/constants/travelOptions'
-import { addTravelStyle, removeTravelStyle, setCurrentStep, restoreFromParams } from '@/store/slices/customizedScheduleSlice'
+import {
+  addTravelStyle,
+  removeTravelStyle,
+  setCurrentStep,
+  restoreFromParams,
+} from '@/store/slices/customizedScheduleSlice'
 import ProgressSteps from '@/components/common/ProgressSteps'
 
 // 공통 상수에서 동행자 데이터 가져옴
-const companions = COMPANIONS;
+const companions = COMPANIONS
 
 export default function CustomizedScheduleStylePage() {
   const navigate = useNavigate()
@@ -19,15 +24,15 @@ export default function CustomizedScheduleStylePage() {
   const [selectedStyles, setSelectedStyles] = useState([])
 
   // Redux 상태 가져오기
-  const { 
-    regionCode, 
-    regionName, 
-    periodLabel, 
+  const {
+    regionCode,
+    regionName,
+    periodLabel,
     days,
     companion,
     companionData,
     travelStyles,
-    travelStylesData
+    travelStylesData,
   } = useSelector((state) => state.customizedSchedule)
 
   // URL 파라미터에서 상태 복원
@@ -37,18 +42,27 @@ export default function CustomizedScheduleStylePage() {
       period: searchParams.get('period'),
       days: searchParams.get('days'),
       who: searchParams.get('who'),
-      styles: searchParams.get('styles')
+      styles: searchParams.get('styles'),
     }
-    
+
     // URL 파라미터가 있고 Redux 상태가 비어있으면 복원
-    if ((urlParams.region && !regionCode) || 
-        (urlParams.period && !periodLabel) ||
-        (urlParams.who && !companion) ||
-        (urlParams.styles && travelStyles.length === 0)) {
+    if (
+      (urlParams.region && !regionCode) ||
+      (urlParams.period && !periodLabel) ||
+      (urlParams.who && !companion) ||
+      (urlParams.styles && travelStyles.length === 0)
+    ) {
       dispatch(restoreFromParams(urlParams))
     }
     dispatch(setCurrentStep(4))
-  }, [dispatch, searchParams, regionCode, periodLabel, companion, travelStyles.length])
+  }, [
+    dispatch,
+    searchParams,
+    regionCode,
+    periodLabel,
+    companion,
+    travelStyles.length,
+  ])
 
   // 기존 선택된 스타일들 복원
   useEffect(() => {
@@ -65,12 +79,12 @@ export default function CustomizedScheduleStylePage() {
   const displayedRegionName = regionName || currentRegion
 
   // 공통 상수에서 여행 스타일 데이터 가져옴
-  const travelStyleOptions = TRAVEL_STYLES;
+  const travelStyleOptions = TRAVEL_STYLES
 
   const handleStyleToggle = (styleId) => {
     const isSelected = selectedStyles.includes(styleId)
-    const styleData = travelStyleOptions.find(s => s.id === styleId)
-    
+    const styleData = travelStyleOptions.find((s) => s.id === styleId)
+
     if (isSelected) {
       // 제거
       setSelectedStyles((prev) => prev.filter((id) => id !== styleId))
@@ -102,7 +116,7 @@ export default function CustomizedScheduleStylePage() {
     <div className="mx-auto max-w-4xl px-4 py-8">
       {/* 진행률 표시 */}
       <ProgressSteps currentStep={4} onBack={handleBack} />
-      
+
       {/* 페이지 헤더 */}
       <div className="mb-8">
         <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
@@ -152,7 +166,8 @@ export default function CustomizedScheduleStylePage() {
                 className="ml-2 dark:border-gray-600 dark:text-gray-300"
               >
                 {companions.find((c) => c.id === currentWho)?.icon}{' '}
-                {companions.find((c) => c.id === currentWho)?.label || currentWho}
+                {companions.find((c) => c.id === currentWho)?.label ||
+                  currentWho}
               </Badge>
             </div>
           )}
