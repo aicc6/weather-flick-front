@@ -301,7 +301,13 @@ const generateDummyCourses = (count) => {
   ]
   
   const durations = ['1박 2일', '2박 3일', '3박 4일', '4박 5일']
-  const prices = ['120,000원', '180,000원', '250,000원', '320,000원', '450,000원']
+  
+  // 더 다양한 가격대 생성 함수
+  const generateRandomPrice = () => {
+    const basePrice = 80000 + Math.floor(Math.random() * 400000) // 80,000 ~ 480,000
+    const roundedPrice = Math.round(basePrice / 10000) * 10000 // 만원 단위로 반올림
+    return `${roundedPrice.toLocaleString()}원`
+  }
   
   // 먼저 모든 지역이 적어도 한 번씩은 나오도록 보장
   const courses = []
@@ -320,7 +326,7 @@ const generateDummyCourses = (count) => {
     
     const themeSet = themes[i % themes.length]
     const duration = durations[i % durations.length]
-    const price = prices[i % prices.length]
+    const price = generateRandomPrice()
     const regionName = getRegionNameFromCode(region)
     
     // 디버깅용 로그
@@ -385,6 +391,13 @@ const generateRegionSpecificDummyCourses = (regionCode, count) => {
   const regionName = getRegionNameFromCode(regionCode)
   const themes = [['자연', '힐링'], ['문화', '역사'], ['바다', '휴양'], ['전통', '음식'], ['액티비티', '체험']]
   
+  // 가격 생성 함수
+  const generateRandomPrice = () => {
+    const basePrice = 80000 + Math.floor(Math.random() * 400000) // 80,000 ~ 480,000
+    const roundedPrice = Math.round(basePrice / 10000) * 10000 // 만원 단위로 반올림
+    return `${roundedPrice.toLocaleString()}원`
+  }
+  
   return Array.from({ length: count }, (_, index) => {
     const themeSet = themes[index % themes.length]
     
@@ -396,7 +409,7 @@ const generateRegionSpecificDummyCourses = (regionCode, count) => {
       description: `${regionName} 지역의 ${themeSet[0]} 관광지들을 체험할 수 있는 추천 코스입니다.`,
       region: regionCode,
       duration: index === 0 ? '1박 2일' : index === 1 ? '2박 3일' : '3박 4일',
-      price: `${120 + (index * 30)},000원`,
+      price: generateRandomPrice(),
       rating: parseFloat((4.0 + (Math.random() * 1.0)).toFixed(1)),
       reviewCount: 30 + (index * 15),
       likeCount: 15 + (index * 8),
