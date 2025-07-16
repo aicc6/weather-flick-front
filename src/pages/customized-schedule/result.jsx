@@ -278,20 +278,29 @@ const PlaceItem = memo(({ place, placeIndex }) => (
           </span>
         </div>
       </div>
-      <p className="mb-2 text-sm text-gray-700 dark:text-gray-300">
-        {place.description}
-      </p>
-      <div className="flex flex-wrap gap-1">
-        {place.tags.map((tag, tagIndex) => (
-          <Badge
-            key={tagIndex}
-            variant="secondary"
-            className="text-xs dark:bg-gray-700 dark:text-gray-300"
-          >
-            {tag}
-          </Badge>
-        ))}
-      </div>
+      {place.description && place.description.trim() && (
+        <p className="mb-2 text-sm text-gray-700 dark:text-gray-300">
+          {place.description}
+        </p>
+      )}
+      {place.address && (
+        <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
+          📍 {place.address}
+        </p>
+      )}
+      {place.tags && place.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {place.tags.map((tag, tagIndex) => (
+            <Badge
+              key={tagIndex}
+              variant="secondary"
+              className="text-xs dark:bg-gray-700 dark:text-gray-300"
+            >
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      )}
     </div>
   </div>
 ))
@@ -446,10 +455,10 @@ const validateUrlParams = (params) => {
       field: 'schedule',
       message: '일정 스타일 정보가 누락되었습니다.',
     })
-  } else if (!['relaxed', 'busy'].includes(schedule)) {
+  } else if (!['relaxed', 'packed'].includes(schedule)) {
     errors.push({
       field: 'schedule',
-      message: '일정 스타일은 relaxed 또는 busy여야 합니다.',
+      message: '일정 스타일은 relaxed 또는 packed여야 합니다.',
     })
   }
 
@@ -692,7 +701,6 @@ export default function CustomizedScheduleResultPage() {
         if (isCancelled) return // 취소된 경우 중단
 
         // API 응답 데이터 형식 변환
-        console.log('API Response:', apiResult) // 디버깅용
         const formattedData = {
           summary: {
             region: finalRegionCode,
@@ -860,7 +868,9 @@ export default function CustomizedScheduleResultPage() {
         }
 
         // API 호출하여 여행 플랜 저장
-        await createTravelPlan(planData).unwrap()
+        console.log('저장할 플랜 데이터:', planData) // 디버깅용
+        const result = await createTravelPlan(planData).unwrap()
+        console.log('저장 결과:', result) // 디버깅용
 
         // Redux 상태 초기화
         dispatch(clearRegion())
@@ -874,7 +884,16 @@ export default function CustomizedScheduleResultPage() {
         navigateCallback('/travel-plans')
       } catch (error) {
         console.error('저장 중 오류:', error)
-        toast.error('저장 중 오류가 발생했습니다.')
+        
+        // 상세한 에러 메시지 제공
+        if (error?.data?.error?.code === 'UNAUTHORIZED') {
+          toast.error('로그인이 만료되었습니다. 다시 로그인해주세요.')
+          navigateCallback('/login')
+        } else if (error?.data?.error?.message) {
+          toast.error(`저장 실패: ${error.data.error.message}`)
+        } else {
+          toast.error('저장 중 오류가 발생했습니다. 다시 시도해주세요.')
+        }
       } finally {
         setIsSaving(false)
         setIsModalOpen(false)
@@ -1041,9 +1060,15 @@ export default function CustomizedScheduleResultPage() {
           상세 일정
         </h2>
 
-        {recommendations.itinerary.map((dayPlan) => (
-          <ItineraryDayCard key={dayPlan.day} dayPlan={dayPlan} />
-        ))}
+        {recommendations.itinerary && recommendations.itinerary.length > 0 ? (
+          recommendations.itinerary.map((dayPlan) => (
+            <ItineraryDayCard key={dayPlan.day} dayPlan={dayPlan} />
+          ))
+        ) : (
+          <div className="text-center text-gray-500 p-8">
+            일정 데이터가 없습니다.
+          </div>
+        )}
       </div>
 
       {/* 여행 팁 */}

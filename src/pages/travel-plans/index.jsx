@@ -3,7 +3,7 @@ import {
   useDeleteTravelPlanMutation,
 } from '@/store/api/travelPlansApi'
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -43,6 +43,55 @@ const formatDate = (dateString) => {
 }
 
 export function TravelPlansPage() {
+  // 디버깅을 위한 로그인 상태 확인
+  React.useEffect(() => {
+    const token = localStorage.getItem('access_token')
+    const userInfo = localStorage.getItem('user_info')
+    console.log('🔍 로그인 상태 디버깅:')
+    console.log('- Access Token:', token ? '존재함' : '없음')
+    console.log('- User Info:', userInfo ? '존재함' : '없음')
+    if (token) {
+      console.log('- Token preview:', token.substring(0, 20) + '...')
+      
+      // 토큰 유효성 간단 체크
+      try {
+        console.log('토큰 파싱 시작...')
+        const tokenParts = token.split('.')
+        console.log('토큰 파츠 개수:', tokenParts.length)
+        
+        if (tokenParts.length === 3) {
+          const payloadBase64 = tokenParts[1]
+          console.log('페이로드 Base64:', payloadBase64.substring(0, 20) + '...')
+          
+          // Base64 디코딩
+          const payload = JSON.parse(atob(payloadBase64))
+          console.log('토큰 페이로드:', payload)
+          
+          const now = Math.floor(Date.now() / 1000)
+          const exp = payload.exp
+          console.log('현재 시간 (Unix):', now)
+          console.log('토큰 만료 시간 (Unix):', exp)
+          
+          const isExpired = exp && exp < now
+          console.log('- Token 만료 여부:', isExpired ? '만료됨' : '유효함')
+          
+          if (isExpired) {
+            console.log('⚠️ 토큰이 만료되었습니다. 재로그인이 필요합니다.')
+            // 만료된 토큰 정리
+            localStorage.removeItem('access_token')
+            localStorage.removeItem('user_info')
+            localStorage.removeItem('refresh_token')
+          }
+        } else {
+          console.log('⚠️ 잘못된 JWT 토큰 형식입니다.')
+        }
+      } catch (e) {
+        console.log('- Token 파싱 실패:', e.message)
+        console.log('- 에러 상세:', e)
+      }
+    }
+  }, [])
+
   const {
     data: plans,
     isLoading,
@@ -124,6 +173,66 @@ export function TravelPlansPage() {
   }
 
   if (isError) {
+    // 401 인증 에러 또는 403 권한 에러인 경우 로그인 페이지로 안내
+    if (error?.status === 401 || error?.status === 403 || error?.data?.error?.code === 'UNAUTHORIZED') {
+      return (
+        <div className="container mx-auto p-4 md:p-6">
+          <div className="weather-card alert-error p-6 text-center">
+            <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-yellow-100 p-3 dark:bg-yellow-900/20">
+              <svg
+                className="h-6 w-6 text-yellow-600 dark:text-yellow-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                />
+              </svg>
+            </div>
+            <h3 className="mb-2 text-lg font-semibold">
+              🔐 다시 로그인해주세요
+            </h3>
+            <p className="mb-2">
+              로그인 세션이 만료되었거나 권한이 없습니다.
+            </p>
+            <p className="mb-4 text-sm text-gray-600">
+              계속하려면 다시 로그인해주세요.
+            </p>
+            <div className="space-x-4">
+              <Link
+                to="/login"
+                className="sunset-button rounded-md px-4 py-2 text-sm font-medium"
+              >
+                로그인하기
+              </Link>
+              <button
+                onClick={() => {
+                  localStorage.removeItem('access_token')
+                  localStorage.removeItem('user_info')
+                  localStorage.removeItem('refresh_token')
+                  window.location.reload()
+                }}
+                className="rounded-md px-4 py-2 text-sm font-medium bg-gray-500 text-white hover:bg-gray-600"
+              >
+                캐시 정리 후 새로고침
+              </button>
+              <Link
+                to="/"
+                className="sunny-button inline-flex items-center rounded-md px-4 py-2 text-sm font-medium"
+              >
+                홈으로 가기
+              </Link>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // 일반적인 에러인 경우
     return (
       <div className="container mx-auto p-4 md:p-6">
         <div className="weather-card alert-error p-6 text-center">

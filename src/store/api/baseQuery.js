@@ -12,8 +12,9 @@ const getBaseUrl = () => {
   return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/'
 }
 
-// 401 에러 처리 함수 (기존 로직 재사용)
+// 401/403 에러 처리 함수 (기존 로직 재사용)
 const handle401Error = () => {
+  console.log('🔓 인증 실패 - 토큰 정리 및 로그인 페이지 이동')
   localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
   localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
   localStorage.removeItem(STORAGE_KEYS.USER_INFO)
@@ -79,8 +80,11 @@ const refreshAccessToken = async () => {
 export const baseQueryWithReauth = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions)
 
-  // 401 에러 처리
-  if (result.error && result.error.status === 401) {
+  // 401 에러 또는 403 에러 처리 (둘 다 인증/권한 문제)
+  if (result.error && (result.error.status === 401 || result.error.status === 403)) {
+    console.log(`🚨 ${result.error.status} 에러 발생:`, args.url)
+    console.log('에러 상세:', result.error)
+    
     // refresh 엔드포인트 자체에 대한 요청이면 바로 로그아웃
     if (args.url === 'auth/refresh') {
       handle401Error()
