@@ -884,7 +884,7 @@ export default function CustomizedScheduleResultPage() {
         navigateCallback('/travel-plans')
       } catch (error) {
         console.error('저장 중 오류:', error)
-        
+
         // 상세한 에러 메시지 제공
         if (error?.data?.error?.code === 'UNAUTHORIZED') {
           toast.error('로그인이 만료되었습니다. 다시 로그인해주세요.')
@@ -1065,7 +1065,7 @@ export default function CustomizedScheduleResultPage() {
             <ItineraryDayCard key={dayPlan.day} dayPlan={dayPlan} />
           ))
         ) : (
-          <div className="text-center text-gray-500 p-8">
+          <div className="p-8 text-center text-gray-500">
             일정 데이터가 없습니다.
           </div>
         )}

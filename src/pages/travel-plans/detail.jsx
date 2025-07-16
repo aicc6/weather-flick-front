@@ -1,11 +1,17 @@
 import { useParams, Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   useGetTravelPlanQuery,
   useGetTravelPlanRoutesQuery,
   useAutoGenerateRoutesMutation,
   useGetTimemachineRouteInfoQuery,
 } from '@/store/api/travelPlansApi'
+
+import {
+  WEATHER_ICONS,
+  CITY_WEATHER_DEFAULTS,
+  weatherCacheUtils,
+} from '@/constants/weather'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -179,24 +185,14 @@ export function TravelPlanDetailPage() {
     }
   }
 
-  // 일차별 위치 기반 날씨 예보 생성
-  const generateLocationBasedWeatherForecast = (startDate, itinerary) => {
+  // 실제 API를 사용한 날씨 데이터 생성
+  const generateApiBasedWeatherForecast = (startDate, itinerary) => {
     if (!startDate || !itinerary) return []
 
     try {
       const start = new Date(startDate)
       const days = Object.keys(itinerary)
       const forecast = []
-
-      const conditions = ['맑음', '구름조금', '구름많음', '흐림', '비']
-      const cityWeatherVariation = {
-        서울: { tempOffset: 0, conditionMod: 0 },
-        부산: { tempOffset: 3, conditionMod: 1 },
-        제주: { tempOffset: 5, conditionMod: 2 },
-        대구: { tempOffset: 1, conditionMod: 0 },
-        광주: { tempOffset: 2, conditionMod: 1 },
-        강원: { tempOffset: -3, conditionMod: 0 },
-      }
 
       days.forEach((day, index) => {
         const date = new Date(start.getTime() + index * 86400000)
@@ -208,30 +204,63 @@ export function TravelPlanDetailPage() {
           city = extractCityFromLocation(dayItinerary[0].description)
         }
 
-        const variation =
-          cityWeatherVariation[city] || cityWeatherVariation['서울']
-        const conditionIndex =
-          (index + variation.conditionMod) % conditions.length
-        const condition = conditions[conditionIndex]
+        forecast.push({
+          date: date.toISOString(),
+          city,
+          day: index + 1,
+          // 실제 API 호출 결과는 useGetWeatherForecastByCityQuery에서 받아옴
+        })
+      })
+
+      return forecast
+    } catch (error) {
+      console.error('Failed to generate weather forecast:', error)
+      return []
+    }
+  }
+
+  // 백업용 날씨 데이터 생성 (API 실패 시 사용)
+  const _generateFallbackWeatherForecast = (startDate, itinerary) => {
+    if (!startDate || !itinerary) return []
+
+    try {
+      const start = new Date(startDate)
+      const days = Object.keys(itinerary)
+      const forecast = []
+
+      // 상수에서 가져온 기본 데이터
+      const defaultWeatherData = CITY_WEATHER_DEFAULTS
+
+      days.forEach((day, index) => {
+        const date = new Date(start.getTime() + index * 86400000)
+        const dayItinerary = itinerary[day]
+
+        // 해당 일차의 첫 번째 위치를 기준으로 도시 결정
+        let city = '서울'
+        if (dayItinerary && dayItinerary.length > 0) {
+          city = extractCityFromLocation(dayItinerary[0].description)
+        }
+
+        const weatherData =
+          defaultWeatherData[city] || defaultWeatherData['서울']
+        const tempVariation = Math.sin(index * 0.5) * 3 // 온도 변화 패턴
+        const minTemp = Math.round(
+          weatherData.baseTemp + weatherData.offset + tempVariation - 8,
+        )
+        const maxTemp = Math.round(
+          weatherData.baseTemp + weatherData.offset + tempVariation,
+        )
 
         forecast.push({
           date: date.toISOString(),
-          condition,
+          condition: weatherData.condition,
           city,
           temperature: {
-            min: Math.max(
-              5,
-              Math.floor(Math.random() * 10) + 10 + variation.tempOffset,
-            ),
-            max: Math.min(
-              35,
-              Math.floor(Math.random() * 10) + 20 + variation.tempOffset,
-            ),
+            min: minTemp,
+            max: maxTemp,
           },
           precipitation:
-            condition === '비'
-              ? Math.floor(Math.random() * 30) + 60
-              : Math.floor(Math.random() * 30),
+            weatherData.precipitation + Math.floor(Math.random() * 10) - 5,
         })
       })
 
@@ -242,37 +271,206 @@ export function TravelPlanDetailPage() {
     }
   }
 
-  const weatherData = plan
-    ? (() => {
-        try {
-          const forecast = generateLocationBasedWeatherForecast(
-            plan.start_date,
-            plan.itinerary,
-          )
+  // 실제 API 기반 날씨 데이터 생성
+  const generateWeatherDataWithAPI = async (startDate, itinerary) => {
+    if (!startDate || !itinerary)
+      return { forecast: [], recommendation: '', isMultiCity: false }
 
-          // 여러 도시를 방문하는지 확인
-          const cities = [...new Set(forecast.map((f) => f.city))]
-          const isMultiCity = cities.length > 1
+    try {
+      const baseForecast = generateApiBasedWeatherForecast(startDate, itinerary)
 
-          return {
-            forecast,
-            recommendation: isMultiCity
-              ? `${cities.join(', ')} 지역을 여행하시네요. 각 지역의 날씨를 확인하고 적절한 옷차림을 준비하세요.`
-              : `${cities[0]} 지역 여행입니다. 전반적으로 여행하기 좋은 날씨입니다.`,
-            isMultiCity,
+      // 여러 도시를 방문하는지 확인
+      const cities = [...new Set(baseForecast.map((f) => f.city))]
+      const isMultiCity = cities.length > 1
+
+      // 실제 API 호출로 날씨 데이터 가져오기 (캐시 활용)
+      const forecast = await Promise.all(
+        baseForecast.map(async (dayForecast) => {
+          try {
+            // 캐시 키 생성
+            const cacheKey = weatherCacheUtils.generateCacheKey(
+              dayForecast.city,
+              dayForecast.date,
+            )
+
+            // 캐시에서 데이터 확인
+            const cachedData = weatherCacheUtils.get(cacheKey)
+            if (cachedData) {
+              return {
+                ...dayForecast,
+                ...cachedData,
+                isFromAPI: true,
+                isCached: true,
+              }
+            }
+
+            // 캐시에 없으면 실제 API 호출
+            const weatherResponse = await fetch(
+              `/api/weather/current/${dayForecast.city}?country=KR`,
+            )
+
+            if (weatherResponse.ok) {
+              const weatherData = await weatherResponse.json()
+
+              // API 응답 데이터 구조화
+              const apiData = {
+                condition: weatherData.description || dayForecast.condition,
+                icon:
+                  getWeatherIconFromDescription(weatherData.description) ||
+                  dayForecast.icon,
+                temperature: weatherData.temperature
+                  ? {
+                      min: Math.round(weatherData.temperature - 5),
+                      max: Math.round(weatherData.temperature + 5),
+                    }
+                  : dayForecast.temperature,
+                humidity: weatherData.humidity || dayForecast.humidity,
+              }
+
+              // 캐시에 저장
+              weatherCacheUtils.set(cacheKey, apiData)
+
+              return {
+                ...dayForecast,
+                ...apiData,
+                isFromAPI: true,
+                isCached: false,
+              }
+            } else {
+              // API 호출 실패 시 fallback 데이터 사용
+              return {
+                ...dayForecast,
+                isFromAPI: false,
+                isCached: false,
+              }
+            }
+          } catch (error) {
+            console.warn(`날씨 API 호출 실패 (${dayForecast.city}):`, error)
+            // 에러 시 fallback 데이터 사용
+            return {
+              ...dayForecast,
+              isFromAPI: false,
+              isCached: false,
+            }
           }
-        } catch (error) {
-          console.warn('날씨 데이터 생성 중 오류:', error)
-          // 오류 발생 시 기본 날씨 데이터 반환
-          return {
-            forecast: [],
-            recommendation:
-              '날씨 정보를 불러올 수 없습니다. 여행 전 날씨를 확인해 주세요.',
-            isMultiCity: false,
-          }
-        }
-      })()
-    : null
+        }),
+      )
+
+      return {
+        forecast,
+        recommendation: isMultiCity
+          ? `${cities.join(', ')} 지역을 여행하시네요. 각 지역의 날씨를 확인하고 적절한 옷차림을 준비하세요.`
+          : `${cities[0]} 지역 여행입니다. 전반적으로 여행하기 좋은 날씨입니다.`,
+        isMultiCity,
+      }
+    } catch (error) {
+      console.warn('날씨 데이터 생성 중 오류:', error)
+      // 오류 발생 시 기본 날씨 데이터 반환
+      return {
+        forecast: [],
+        recommendation:
+          '날씨 정보를 불러올 수 없습니다. 여행 전 날씨를 확인해 주세요.',
+        isMultiCity: false,
+      }
+    }
+  }
+
+  // 날씨 설명으로부터 아이콘 가져오기
+  const getWeatherIconFromDescription = (description) => {
+    if (!description) return null
+
+    const iconMap = {
+      맑음: '☀️',
+      구름조금: '🌤️',
+      구름많음: '☁️',
+      흐림: '☁️',
+      비: '🌧️',
+      소나기: '🌦️',
+      눈: '🌨️',
+      천둥번개: '⛈️',
+      안개: '🌫️',
+      바람: '💨',
+    }
+
+    // 한국어 설명에서 키워드 찾기
+    for (const [key, icon] of Object.entries(iconMap)) {
+      if (description.includes(key)) {
+        return icon
+      }
+    }
+
+    return '🌤️' // 기본 아이콘
+  }
+
+  // 날씨 데이터 상태 관리
+  const [weatherData, setWeatherData] = useState({
+    forecast: [],
+    recommendation: '여행 계획을 불러오는 중입니다...',
+    isMultiCity: false,
+    lastUpdated: null,
+  })
+  const [isWeatherLoading, setIsWeatherLoading] = useState(false)
+
+  // 날씨 데이터 로드 함수
+  const loadWeatherData = async () => {
+    if (!plan?.start_date || !plan?.itinerary) return
+
+    setIsWeatherLoading(true)
+    try {
+      const data = await generateWeatherDataWithAPI(
+        plan.start_date,
+        plan.itinerary,
+      )
+      setWeatherData({
+        ...data,
+        lastUpdated: new Date(),
+      })
+    } catch (error) {
+      console.error('날씨 데이터 로드 실패:', error)
+      setWeatherData({
+        forecast: [],
+        recommendation:
+          '날씨 정보를 불러올 수 없습니다. 여행 전 날씨를 확인해 주세요.',
+        isMultiCity: false,
+        lastUpdated: new Date(),
+      })
+    } finally {
+      setIsWeatherLoading(false)
+    }
+  }
+
+  // 날씨 데이터 로드
+  useEffect(() => {
+    loadWeatherData()
+  }, [plan?.start_date, plan?.itinerary])
+
+  // 자동 새로고침 기능 (10분마다)
+  useEffect(() => {
+    if (!plan?.start_date || !plan?.itinerary) return
+
+    const interval = setInterval(
+      () => {
+        console.log('자동 날씨 데이터 새로고침')
+        loadWeatherData()
+      },
+      10 * 60 * 1000,
+    ) // 10분마다 새로고침
+
+    return () => clearInterval(interval)
+  }, [plan?.start_date, plan?.itinerary])
+
+  // 페이지 포커스 시 데이터 새로고침
+  useEffect(() => {
+    const handleFocus = () => {
+      if (plan?.start_date && plan?.itinerary) {
+        console.log('페이지 포커스 시 날씨 데이터 새로고침')
+        loadWeatherData()
+      }
+    }
+
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
+  }, [plan?.start_date, plan?.itinerary])
 
   if (isLoading) {
     return (
@@ -1319,8 +1517,8 @@ export function TravelPlanDetailPage() {
                           weatherForPlaces[place.description] = {
                             condition: adjustedCondition,
                             temperature: Math.round(
-                              (dayWeather.temperature.min +
-                                dayWeather.temperature.max) /
+                              ((dayWeather.temperature?.min || 15) +
+                                (dayWeather.temperature?.max || 25)) /
                                 2 +
                                 variation.tempOffset,
                             ),
@@ -1497,8 +1695,8 @@ export function TravelPlanDetailPage() {
                                             : '☀️'}
                                 </span>
                                 <span className="text-gray-600 dark:text-gray-300">
-                                  {dayWeather.temperature.min}°~
-                                  {dayWeather.temperature.max}°
+                                  {dayWeather.temperature?.min || '--'}°~
+                                  {dayWeather.temperature?.max || '--'}°
                                 </span>
                               </div>
                             )}
@@ -1567,8 +1765,8 @@ export function TravelPlanDetailPage() {
                                 <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
                                   <div>🌤️ {dayWeather.condition}</div>
                                   <div>
-                                    🌡️ {dayWeather.temperature.min}°~
-                                    {dayWeather.temperature.max}°
+                                    🌡️ {dayWeather.temperature?.min || '--'}°~
+                                    {dayWeather.temperature?.max || '--'}°
                                   </div>
                                   {dayWeather.precipitation > 0 && (
                                     <div>
@@ -1675,16 +1873,17 @@ export function TravelPlanDetailPage() {
                 <Button
                   onClick={handleAutoGenerateRoutes}
                   disabled={isGeneratingRoutes}
-                  className="bg-gradient-to-r from-green-500 to-blue-600 text-white hover:from-green-600 hover:to-blue-700"
+                  className="bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg transition-all duration-300 hover:from-green-600 hover:to-blue-700"
+                  size="lg"
                 >
                   {isGeneratingRoutes ? (
                     <>
-                      <Zap className="mr-2 h-4 w-4 animate-spin" />
+                      <Zap className="mr-2 h-5 w-5 animate-spin" />
                       생성 중...
                     </>
                   ) : (
                     <>
-                      <Zap className="mr-2 h-4 w-4" />
+                      <Zap className="mr-2 h-5 w-5" />
                       {routes && routes.length > 0
                         ? '경로 재생성'
                         : '자동 경로 생성'}
@@ -1696,12 +1895,21 @@ export function TravelPlanDetailPage() {
 
             <div className="space-y-6">
               {routesLoading ? (
-                <Card className="rounded-xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                  <CardContent className="flex items-center justify-center py-8">
-                    <LoadingSpinner />
-                    <span className="ml-2 text-gray-600 dark:text-gray-300">
-                      경로 정보를 불러오는 중...
-                    </span>
+                <Card className="rounded-xl border border-blue-200/50 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-sm dark:border-blue-700 dark:bg-gradient-to-r dark:from-blue-900/20 dark:to-indigo-900/20">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <div className="mb-4 flex items-center justify-center">
+                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600 dark:border-blue-800 dark:border-t-blue-400"></div>
+                    </div>
+                    <h4 className="mb-2 text-lg font-semibold text-blue-800 dark:text-blue-300">
+                      교통 정보 로딩 중
+                    </h4>
+                    <p className="text-center text-gray-600 dark:text-gray-300">
+                      최적의 경로를 찾고 있습니다...
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                      <div className="h-2 w-2 animate-pulse rounded-full bg-blue-500"></div>
+                      <span>실시간 교통 정보 분석</span>
+                    </div>
                   </CardContent>
                 </Card>
               ) : routes && routes.length > 0 ? (
@@ -1807,17 +2015,21 @@ export function TravelPlanDetailPage() {
                     ))
                 })()
               ) : (
-                <Card className="rounded-xl border border-gray-200/50 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                  <CardContent className="py-8 text-center">
-                    <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-gray-100 p-3 dark:bg-gray-700">
-                      <Navigation className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                <Card className="rounded-xl border-2 border-blue-400 bg-gradient-to-br from-blue-50 via-white to-indigo-50 shadow-lg dark:border-blue-500 dark:bg-gradient-to-br dark:from-blue-900/40 dark:via-gray-800 dark:to-indigo-900/40">
+                  <CardContent className="py-16 text-center">
+                    <div className="mx-auto mb-6 h-20 w-20 rounded-full bg-gradient-to-br from-blue-200 to-indigo-300 p-4 shadow-lg dark:from-blue-700 dark:to-indigo-700">
+                      <Navigation className="h-12 w-12 text-blue-700 dark:text-blue-200" />
                     </div>
-                    <h4 className="mb-2 font-medium text-gray-800 dark:text-gray-100">
+                    <h4 className="mb-4 text-2xl font-bold text-blue-900 dark:text-blue-100">
                       경로 정보가 없습니다
                     </h4>
-                    <p className="mb-4 text-gray-600 dark:text-gray-300">
+                    <p className="mb-6 text-lg text-gray-700 dark:text-gray-200">
                       여행 일정이 있는 경우 자동으로 경로를 생성할 수 있습니다
                     </p>
+                    <div className="mb-6 inline-flex items-center gap-3 rounded-full bg-blue-100 px-6 py-3 text-base font-medium text-blue-800 dark:bg-blue-900/60 dark:text-blue-200">
+                      <div className="h-3 w-3 animate-pulse rounded-full bg-blue-500"></div>
+                      <span>일정 추가 후 경로 생성 가능</span>
+                    </div>
                     {import.meta.env.DEV && (
                       <div className="mb-4 rounded bg-gray-100 p-3 text-left text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400">
                         <div>디버그 정보:</div>
@@ -1835,16 +2047,17 @@ export function TravelPlanDetailPage() {
                       <Button
                         onClick={handleAutoGenerateRoutes}
                         disabled={isGeneratingRoutes}
-                        className="bg-gradient-to-r from-green-500 to-blue-600 text-white hover:from-green-600 hover:to-blue-700"
+                        className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3 font-semibold text-white shadow-xl transition-all duration-300 hover:scale-105 hover:from-blue-700 hover:to-indigo-700 hover:shadow-2xl"
+                        size="lg"
                       >
                         {isGeneratingRoutes ? (
                           <>
-                            <Zap className="mr-2 h-4 w-4 animate-spin" />
+                            <Zap className="mr-2 h-5 w-5 animate-spin" />
                             생성 중...
                           </>
                         ) : (
                           <>
-                            <Zap className="mr-2 h-4 w-4" />
+                            <Zap className="mr-2 h-5 w-5" />
                             자동 경로 생성
                           </>
                         )}
@@ -1866,27 +2079,58 @@ export function TravelPlanDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {weatherData && weatherData.forecast ? (
+                {isWeatherLoading ? (
+                  <div className="py-8 text-center">
+                    <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-blue-100 p-3 dark:bg-blue-900/30">
+                      <svg
+                        className="h-6 w-6 animate-spin text-blue-600 dark:text-blue-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          className="opacity-25"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v8z"
+                          className="opacity-75"
+                        />
+                      </svg>
+                    </div>
+                    <h4 className="mb-2 font-medium text-gray-800 dark:text-gray-100">
+                      날씨 정보 로딩 중...
+                    </h4>
+                    <p className="text-gray-600 dark:text-gray-300">
+                      실시간 날씨 데이터를 가져오고 있습니다
+                    </p>
+                  </div>
+                ) : weatherData &&
+                  weatherData.forecast &&
+                  weatherData.forecast.length > 0 ? (
                   <div className="space-y-3">
                     <div className="mb-4 rounded-md border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20">
                       <p className="text-sm text-blue-800 dark:text-blue-300">
                         🌤️ 날씨 정보는 예측 데이터이며, 여행 전 최신 날씨를
                         확인해 주세요
                       </p>
+                      {weatherData.lastUpdated && (
+                        <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
+                          마지막 업데이트:{' '}
+                          {weatherData.lastUpdated.toLocaleString('ko-KR')}
+                        </p>
+                      )}
                     </div>
                     <div className="grid gap-4 md:grid-cols-2">
                       {weatherData.forecast.map((forecast, index) => {
                         const getWeatherIcon = (condition) => {
-                          const iconMap = {
-                            맑음: '☀️',
-                            구름조금: '🌤️',
-                            구름많음: '☁️',
-                            흐림: '☁️',
-                            비: '🌧️',
-                            눈: '🌨️',
-                            바람: '💨',
-                          }
-                          return iconMap[condition] || '☀️'
+                          return (
+                            WEATHER_ICONS[condition] || WEATHER_ICONS.default
+                          )
                         }
 
                         const formatWeatherDate = (dateString) => {
@@ -1920,13 +2164,21 @@ export function TravelPlanDetailPage() {
                                         </span>
                                       )}
                                     {forecast.condition}
+                                    {forecast.isFromAPI && (
+                                      <span className="ml-2 text-xs text-green-500 dark:text-green-400">
+                                        •{' '}
+                                        {forecast.isCached
+                                          ? '캐시됨'
+                                          : '실시간'}
+                                      </span>
+                                    )}
                                   </div>
                                 </div>
                               </div>
                               <div className="text-right">
                                 <div className="text-lg font-bold text-gray-800 dark:text-gray-100">
-                                  {forecast.temperature.min}°~
-                                  {forecast.temperature.max}°
+                                  {forecast.temperature?.min || '--'}°~
+                                  {forecast.temperature?.max || '--'}°
                                 </div>
                                 {forecast.precipitation > 0 && (
                                   <div className="text-sm text-blue-500 dark:text-blue-400">
@@ -1955,6 +2207,32 @@ export function TravelPlanDetailPage() {
                         </div>
                       </Card>
                     )}
+
+                    {/* 데이터 새로고침 버튼 */}
+                    <div className="flex justify-center pt-2">
+                      <button
+                        onClick={() => {
+                          setIsWeatherLoading(true)
+                          loadWeatherData()
+                        }}
+                        className="flex items-center gap-2 rounded-lg bg-blue-100 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
+                      >
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                          />
+                        </svg>
+                        날씨 정보 새로고침
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div className="py-8 text-center">

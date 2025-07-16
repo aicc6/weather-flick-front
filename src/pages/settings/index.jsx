@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContextRTK'
 import { Button } from '@/components/ui/button'
@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { WithdrawModal } from '@/components/WithdrawModal'
 import { Switch } from '@/components/ui/switch'
+import { toast } from 'sonner'
+import { getNotificationSettings, updateNotificationSettings } from '@/services/notificationService'
 import {
   Settings,
   LogOut,
@@ -23,11 +25,74 @@ export function SettingsPage() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [showWithdrawModal, setShowWithdrawModal] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   // 알림 설정 상태 관리
   const [weatherAlert, setWeatherAlert] = useState(true)
   const [emailAlert, setEmailAlert] = useState(false)
   const [marketingAlert, setMarketingAlert] = useState(false)
+
+  // 알림 설정 로드
+  const loadNotificationSettings = async () => {
+    try {
+      setLoading(true)
+      const settings = await getNotificationSettings()
+      
+      // 백엔드 API 응답에 맞게 매핑
+      setWeatherAlert(settings.weather_alerts || false)
+      setEmailAlert(settings.email_enabled || false)
+      setMarketingAlert(settings.marketing_messages || false)
+    } catch (error) {
+      console.error('알림 설정 로드 실패:', error)
+      toast.error("알림 설정을 불러오는데 실패했습니다.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 알림 설정 업데이트
+  const updateNotificationSetting = async (settingKey, value) => {
+    try {
+      const settings = {
+        [settingKey]: value
+      }
+      
+      await updateNotificationSettings(settings)
+      
+      toast.success("알림 설정이 성공적으로 저장되었습니다.")
+    } catch (error) {
+      console.error('알림 설정 업데이트 실패:', error)
+      toast.error("설정 저장에 실패했습니다.")
+      
+      // 실패 시 이전 상태로 되돌리기
+      if (settingKey === 'weather_alerts') setWeatherAlert(!value)
+      if (settingKey === 'email_enabled') setEmailAlert(!value)
+      if (settingKey === 'marketing_messages') setMarketingAlert(!value)
+    }
+  }
+
+  // 알림 설정 핸들러들
+  const handleWeatherAlertChange = (checked) => {
+    setWeatherAlert(checked)
+    updateNotificationSetting('weather_alerts', checked)
+  }
+
+  const handleEmailAlertChange = (checked) => {
+    setEmailAlert(checked)
+    updateNotificationSetting('email_enabled', checked)
+  }
+
+  const handleMarketingAlertChange = (checked) => {
+    setMarketingAlert(checked)
+    updateNotificationSetting('marketing_messages', checked)
+  }
+
+  // 컴포넌트 마운트 시 설정 로드
+  useEffect(() => {
+    if (user) {
+      loadNotificationSettings()
+    }
+  }, [user])
 
   const handleLogout = async () => {
     await logout()
@@ -160,7 +225,8 @@ export function SettingsPage() {
                 </div>
                 <Switch
                   checked={weatherAlert}
-                  onCheckedChange={setWeatherAlert}
+                  onCheckedChange={handleWeatherAlertChange}
+                  disabled={loading}
                   aria-label="날씨 변화 알림 토글"
                 />
               </div>
@@ -174,7 +240,8 @@ export function SettingsPage() {
                 </div>
                 <Switch
                   checked={emailAlert}
-                  onCheckedChange={setEmailAlert}
+                  onCheckedChange={handleEmailAlertChange}
+                  disabled={loading}
                   aria-label="이메일 알림 토글"
                 />
               </div>
@@ -188,7 +255,8 @@ export function SettingsPage() {
                 </div>
                 <Switch
                   checked={marketingAlert}
-                  onCheckedChange={setMarketingAlert}
+                  onCheckedChange={handleMarketingAlertChange}
+                  disabled={loading}
                   aria-label="마케팅 알림 토글"
                 />
               </div>
@@ -243,6 +311,20 @@ export function SettingsPage() {
               <p>버전: 1.0.0</p>
               <p>© 2025 Weather Flick. All rights reserved.</p>
             </div>
+            {/* 개발자 전용 FCM 테스트 링크 */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => navigate('/test-fcm')}
+                >
+                  <Bell className="h-4 w-4 mr-2" />
+                  FCM 푸시 알림 테스트
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

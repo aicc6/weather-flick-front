@@ -52,29 +52,32 @@ export function TravelPlansPage() {
     console.log('- User Info:', userInfo ? '존재함' : '없음')
     if (token) {
       console.log('- Token preview:', token.substring(0, 20) + '...')
-      
+
       // 토큰 유효성 간단 체크
       try {
         console.log('토큰 파싱 시작...')
         const tokenParts = token.split('.')
         console.log('토큰 파츠 개수:', tokenParts.length)
-        
+
         if (tokenParts.length === 3) {
           const payloadBase64 = tokenParts[1]
-          console.log('페이로드 Base64:', payloadBase64.substring(0, 20) + '...')
-          
+          console.log(
+            '페이로드 Base64:',
+            payloadBase64.substring(0, 20) + '...',
+          )
+
           // Base64 디코딩
           const payload = JSON.parse(atob(payloadBase64))
           console.log('토큰 페이로드:', payload)
-          
+
           const now = Math.floor(Date.now() / 1000)
           const exp = payload.exp
           console.log('현재 시간 (Unix):', now)
           console.log('토큰 만료 시간 (Unix):', exp)
-          
+
           const isExpired = exp && exp < now
           console.log('- Token 만료 여부:', isExpired ? '만료됨' : '유효함')
-          
+
           if (isExpired) {
             console.log('⚠️ 토큰이 만료되었습니다. 재로그인이 필요합니다.')
             // 만료된 토큰 정리
@@ -174,7 +177,11 @@ export function TravelPlansPage() {
 
   if (isError) {
     // 401 인증 에러 또는 403 권한 에러인 경우 로그인 페이지로 안내
-    if (error?.status === 401 || error?.status === 403 || error?.data?.error?.code === 'UNAUTHORIZED') {
+    if (
+      error?.status === 401 ||
+      error?.status === 403 ||
+      error?.data?.error?.code === 'UNAUTHORIZED'
+    ) {
       return (
         <div className="container mx-auto p-4 md:p-6">
           <div className="weather-card alert-error p-6 text-center">
@@ -196,9 +203,7 @@ export function TravelPlansPage() {
             <h3 className="mb-2 text-lg font-semibold">
               🔐 다시 로그인해주세요
             </h3>
-            <p className="mb-2">
-              로그인 세션이 만료되었거나 권한이 없습니다.
-            </p>
+            <p className="mb-2">로그인 세션이 만료되었거나 권한이 없습니다.</p>
             <p className="mb-4 text-sm text-gray-600">
               계속하려면 다시 로그인해주세요.
             </p>
@@ -216,7 +221,7 @@ export function TravelPlansPage() {
                   localStorage.removeItem('refresh_token')
                   window.location.reload()
                 }}
-                className="rounded-md px-4 py-2 text-sm font-medium bg-gray-500 text-white hover:bg-gray-600"
+                className="rounded-md bg-gray-500 px-4 py-2 text-sm font-medium text-white hover:bg-gray-600"
               >
                 캐시 정리 후 새로고침
               </button>

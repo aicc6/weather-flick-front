@@ -1,13 +1,15 @@
 import { getFCMToken } from '@/lib/firebase'
-import { http } from '@/lib/http'
+import { authHttp } from '@/lib/http'
 
 // FCM 토큰을 백엔드에 저장
 export const saveFCMToken = async (token) => {
   try {
-    const response = await http.post('/api/notifications/fcm-token', {
-      token,
-      device_type: 'web',
-      device_info: navigator.userAgent,
+    const response = await authHttp.POST('/api/notifications/fcm-token', {
+      body: {
+        token,
+        device_type: 'web',
+        device_info: navigator.userAgent,
+      }
     })
     return response.data
   } catch (error) {
@@ -19,8 +21,8 @@ export const saveFCMToken = async (token) => {
 // FCM 토큰 삭제 (로그아웃 시)
 export const deleteFCMToken = async (token) => {
   try {
-    const response = await http.delete('/api/notifications/fcm-token', {
-      data: { token },
+    const response = await authHttp.DELETE('/api/notifications/fcm-token', {
+      body: { token }
     })
     return response.data
   } catch (error) {
@@ -32,8 +34,9 @@ export const deleteFCMToken = async (token) => {
 // 알림 설정 조회
 export const getNotificationSettings = async () => {
   try {
-    const response = await http.get('/api/notifications/settings')
-    return response.data
+    const response = await authHttp.GET('/api/notifications/settings')
+    const data = await response.json()
+    return data
   } catch (error) {
     console.error('알림 설정 조회 오류:', error)
     throw error
@@ -43,8 +46,11 @@ export const getNotificationSettings = async () => {
 // 알림 설정 업데이트
 export const updateNotificationSettings = async (settings) => {
   try {
-    const response = await http.put('/api/notifications/settings', settings)
-    return response.data
+    const response = await authHttp.PUT('/api/notifications/settings', {
+      body: settings
+    })
+    const data = await response.json()
+    return data
   } catch (error) {
     console.error('알림 설정 업데이트 오류:', error)
     throw error
@@ -54,8 +60,9 @@ export const updateNotificationSettings = async (settings) => {
 // 알림 히스토리 조회
 export const getNotificationHistory = async (params = {}) => {
   try {
-    const response = await http.get('/api/notifications/history', { params })
-    return response.data
+    const response = await authHttp.GET('/api/notifications/history', { params })
+    const data = await response.json()
+    return data
   } catch (error) {
     console.error('알림 히스토리 조회 오류:', error)
     throw error
@@ -65,8 +72,9 @@ export const getNotificationHistory = async (params = {}) => {
 // 알림 읽음 처리
 export const markNotificationAsRead = async (notificationId) => {
   try {
-    const response = await http.put(`/api/notifications/${notificationId}/read`)
-    return response.data
+    const response = await authHttp.PUT(`/api/notifications/${notificationId}/read`)
+    const data = await response.json()
+    return data
   } catch (error) {
     console.error('알림 읽음 처리 오류:', error)
     throw error
@@ -76,8 +84,9 @@ export const markNotificationAsRead = async (notificationId) => {
 // 전체 알림 읽음 처리
 export const markAllNotificationsAsRead = async () => {
   try {
-    const response = await http.put('/api/notifications/read-all')
-    return response.data
+    const response = await authHttp.PUT('/api/notifications/read-all')
+    const data = await response.json()
+    return data
   } catch (error) {
     console.error('전체 알림 읽음 처리 오류:', error)
     throw error

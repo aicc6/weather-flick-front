@@ -1,23 +1,29 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContextRTK'
+import LoadingSpinner from '@/components/LoadingSpinner'
 
-export const ProtectedRoute = ({ children }) => {
-  const { isLoggedIn, loading } = useAuth()
+/**
+ * 보호된 라우트 컴포넌트
+ * 로그인이 필요한 페이지에 접근할 때 인증 상태를 확인하고
+ * 미인증 사용자는 로그인 페이지로 리다이렉트합니다.
+ */
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth()
   const location = useLocation()
 
+  // 로딩 중일 때는 로딩 스피너 표시
   if (loading) {
-    // 로딩 중일 때는 스피너나 로딩 화면을 보여줄 수 있습니다
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-blue-600"></div>
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
-  if (!isLoggedIn) {
-    // 로그인되지 않은 경우 로그인 페이지로 리다이렉트
+  // 인증되지 않은 사용자는 로그인 페이지로 리다이렉트
+  // 현재 경로를 state로 전달하여 로그인 후 원래 페이지로 돌아갈 수 있도록 함
+  if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
+  // 인증된 사용자는 자식 컴포넌트 렌더링
   return children
 }
+
+export default ProtectedRoute

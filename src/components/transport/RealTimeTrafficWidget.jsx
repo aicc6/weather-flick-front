@@ -406,10 +406,10 @@ const generateRealTimeTrafficData = (_route) => {
 
   return {
     summary: {
-      routeName: '가산디지털단지 → 구로디지털단지',
+      routeName: _route?.from && _route?.to ? `${_route.from} → ${_route.to}` : '경로 정보 없음',
       totalTime: 15 + baseDelay,
       delayFromNormal: baseDelay,
-      distance: '2.1',
+      distance: _route?.distance || '2.1',
     },
     roads,
     alerts,

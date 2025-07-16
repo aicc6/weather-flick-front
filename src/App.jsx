@@ -5,6 +5,7 @@ import LoadingSpinner from './components/LoadingSpinner'
 import ErrorBoundary from './components/common/ErrorBoundary'
 import PWAInstallPrompt from './components/common/PWAInstallPrompt'
 import NotificationPermission from './components/common/NotificationPermission'
+import ProtectedRoute from './components/common/ProtectedRoute'
 import { initializeApiMonitoring } from '@/utils/apiKeyMonitoring'
 import { useNotification } from '@/hooks/useNotification'
 import '@/App.css'
@@ -73,6 +74,7 @@ const SettingsPage = lazy(() =>
 const PlannerPage = lazy(() => import('./pages/planner'))
 const TravelCoursePage = lazy(() => import('@/pages/recommend'))
 const TravelCourseDetailPage = lazy(() => import('@/pages/recommend/detail'))
+const TestFCMPage = lazy(() => import('./pages/test-fcm'))
 const TravelPlansPage = lazy(() =>
   import('./pages/travel-plans').then((module) => ({
     default: module.TravelPlansPage,
@@ -105,55 +107,127 @@ function AppContent() {
           />
           <Route
             path="/customized-schedule"
-            element={<CustomizedSchedulePage />}
+            element={
+              <ProtectedRoute>
+                <CustomizedSchedulePage />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/customized-schedule/region"
-            element={<CustomizedScheduleRegionPage />}
+            element={
+              <ProtectedRoute>
+                <CustomizedScheduleRegionPage />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/customized-schedule/period"
-            element={<CustomizedSchedulePeriodPage />}
+            element={
+              <ProtectedRoute>
+                <CustomizedSchedulePeriodPage />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/customized-schedule/who"
-            element={<CustomizedScheduleWhoPage />}
+            element={
+              <ProtectedRoute>
+                <CustomizedScheduleWhoPage />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/customized-schedule/style"
-            element={<CustomizedScheduleStylePage />}
+            element={
+              <ProtectedRoute>
+                <CustomizedScheduleStylePage />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/customized-schedule/schedule"
-            element={<CustomizedScheduleSchedulePage />}
+            element={
+              <ProtectedRoute>
+                <CustomizedScheduleSchedulePage />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/customized-schedule/result"
-            element={<CustomizedScheduleResultPage />}
+            element={
+              <ProtectedRoute>
+                <CustomizedScheduleResultPage />
+              </ProtectedRoute>
+            }
           />
-          <Route path="/planner" element={<PlannerPage />} />
-          <Route path="/travel-plans" element={<TravelPlansPage />} />
+          <Route
+            path="/planner"
+            element={
+              <ProtectedRoute>
+                <PlannerPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/travel-plans"
+            element={
+              <ProtectedRoute>
+                <TravelPlansPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/travel-plans/:planId"
-            element={<TravelPlanDetailPage />}
+            element={
+              <ProtectedRoute>
+                <TravelPlanDetailPage />
+              </ProtectedRoute>
+            }
           />
           <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
           <Route
             path="/auth/google/callback"
             element={<GoogleCallbackPage />}
           />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/profile/edit" element={<ProfileEditPage />} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile/edit"
+            element={
+              <ProtectedRoute>
+                <ProfileEditPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/profile/change-password"
-            element={<ChangePasswordPage />}
+            element={
+              <ProtectedRoute>
+                <ChangePasswordPage />
+              </ProtectedRoute>
+            }
           />
-          <Route path="/settings" element={<SettingsPage />} />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
           <Route path="/offline" element={<OfflinePage />} />
+          <Route path="/test-fcm" element={<TestFCMPage />} />
           {/* 404 페이지 - 모든 라우트의 마지막에 위치 */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

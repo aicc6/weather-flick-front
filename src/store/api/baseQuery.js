@@ -81,10 +81,13 @@ export const baseQueryWithReauth = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions)
 
   // 401 에러 또는 403 에러 처리 (둘 다 인증/권한 문제)
-  if (result.error && (result.error.status === 401 || result.error.status === 403)) {
+  if (
+    result.error &&
+    (result.error.status === 401 || result.error.status === 403)
+  ) {
     console.log(`🚨 ${result.error.status} 에러 발생:`, args.url)
     console.log('에러 상세:', result.error)
-    
+
     // refresh 엔드포인트 자체에 대한 요청이면 바로 로그아웃
     if (args.url === 'auth/refresh') {
       handle401Error()
