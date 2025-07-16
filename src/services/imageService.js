@@ -1,4 +1,5 @@
 // 한국 여행지 고화질 이미지 서비스
+import { getUnmappedRegionImages, checkTmapApiStatus } from './tmapService.js'
 
 /**
  * 지역별 실제 한국 여행지 이미지 가져오기
@@ -7,40 +8,118 @@
  */
 export const getRegionFirstImage = async (region) => {
   try {
-    const imageUrl = KOREA_TRAVEL_IMAGES[region]
-    console.log(`${region} 여행지 이미지:`, imageUrl)
+    // 1순위: 정적 이미지 데이터
+    let imageUrl = KOREA_TRAVEL_IMAGES[region]
+    
+    if (imageUrl) {
+      if (import.meta.env.DEV) {
+        console.log(`${region} 정적 이미지:`, imageUrl)
+      }
+      return imageUrl
+    }
+
+    // 2순위: Tmap API 활용
+    if (await checkTmapApiStatus()) {
+      const tmapImages = await getUnmappedRegionImages([region])
+      imageUrl = tmapImages[region]
+      
+      if (imageUrl) {
+        if (import.meta.env.DEV) {
+          console.log(`${region} Tmap 이미지:`, imageUrl)
+        }
+        return imageUrl
+      }
+    }
+
+    // 3순위: fallback 이미지
+    imageUrl = FALLBACK_IMAGES[region] || getDefaultImage(region)
+    if (import.meta.env.DEV) {
+      console.log(`${region} fallback 이미지:`, imageUrl)
+    }
     return imageUrl
+
   } catch (error) {
-    console.error(`${region} 이미지 로드 실패:`, error)
-    return FALLBACK_IMAGES[region] || null
+    if (import.meta.env.DEV) {
+      console.error(`${region} 이미지 로드 실패:`, error)
+    }
+    return FALLBACK_IMAGES[region] || getDefaultImage(region)
   }
 }
 
 /**
- * 여러 지역의 이미지를 한 번에 가져오기
+ * 여러 지역의 이미지를 한 번에 가져오기 (Tmap 통합)
  * @param {Array<string>} regions - 지역명 배열
  * @returns {Promise<Object>} 지역별 이미지 URL 객체
  */
 export const getMultipleRegionImages = async (regions) => {
   const imageMap = {}
+  const unmappedRegions = []
 
-  console.log('요청된 지역들:', regions)
+  if (import.meta.env.DEV) {
+    console.log('요청된 지역들:', regions)
+  }
 
-  // 각 지역에 대해 이미지 URL 제공 - 안전한 처리
+  // 1단계: 정적 이미지로 매핑 가능한 지역들 처리
   regions.forEach((region) => {
     if (region && typeof region === 'string') {
-      const imageUrl =
-        KOREA_TRAVEL_IMAGES[region] ||
-        FALLBACK_IMAGES[region] ||
-        getDefaultImage(region)
-      imageMap[region] = imageUrl
-      console.log(`${region} -> ${imageUrl}`)
+      const staticImageUrl = KOREA_TRAVEL_IMAGES[region]
+      
+      if (staticImageUrl) {
+        imageMap[region] = staticImageUrl
+        if (import.meta.env.DEV) {
+          console.log(`${region} -> 정적 이미지`)
+        }
+      } else {
+        unmappedRegions.push(region)
+      }
     } else {
-      console.warn('잘못된 지역명:', region)
+      if (import.meta.env.DEV) {
+        console.warn('잘못된 지역명:', region)
+      }
     }
   })
 
-  console.log('한국 여행지 이미지 맵:', imageMap)
+  // 2단계: 매핑되지 않은 지역들을 Tmap API로 처리
+  if (unmappedRegions.length > 0) {
+    try {
+      if (import.meta.env.DEV) {
+        console.log('Tmap API로 처리할 지역들:', unmappedRegions)
+      }
+
+      const tmapImages = await getUnmappedRegionImages(unmappedRegions)
+      
+      // Tmap 결과를 imageMap에 병합
+      Object.entries(tmapImages).forEach(([region, imageUrl]) => {
+        if (imageUrl) {
+          imageMap[region] = imageUrl
+          if (import.meta.env.DEV) {
+            console.log(`${region} -> Tmap 이미지`)
+          }
+        } else {
+          // Tmap도 실패한 경우 fallback 사용
+          imageMap[region] = FALLBACK_IMAGES[region] || getDefaultImage(region)
+          if (import.meta.env.DEV) {
+            console.log(`${region} -> fallback 이미지`)
+          }
+        }
+      })
+
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('Tmap 이미지 로딩 실패:', error)
+      }
+      
+      // Tmap 실패 시 모든 unmapped 지역에 fallback 적용
+      unmappedRegions.forEach(region => {
+        imageMap[region] = FALLBACK_IMAGES[region] || getDefaultImage(region)
+      })
+    }
+  }
+
+  if (import.meta.env.DEV) {
+    console.log('이미지 매핑 완료:', Object.keys(imageMap).length, '개')
+  }
+  
   return imageMap
 }
 
