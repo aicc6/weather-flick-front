@@ -480,7 +480,7 @@ export default function TravelCourseDetailPage() {
       {/* 코스 제목 및 액션 */}
       <div className="mb-8">
         <div className="mb-4 flex flex-wrap items-center gap-2">
-          <Badge className="bg-blue-600 text-white">Easy코스</Badge>
+          <Badge className="bg-blue-600 text-white">쉬운코스</Badge>
           <Badge variant="outline">인기</Badge>
           {course.theme &&
             course.theme.map((theme, index) => (
@@ -508,9 +508,9 @@ export default function TravelCourseDetailPage() {
               />
             ))}
             <span className="text-lg font-semibold">
-              {avgRating.toFixed(1)}
+              {typeof avgRating === 'number' ? avgRating.toFixed(1) : '4.5'}
             </span>
-            <span className="text-gray-500">({peopleCount}명 평가)</span>
+            <span className="text-gray-500">({typeof peopleCount === 'number' ? peopleCount : 0}명 평가)</span>
           </div>
           <div className="flex items-center gap-2">
             <Heart
@@ -841,7 +841,7 @@ export default function TravelCourseDetailPage() {
                       />
                     ))}
                     <span className="ml-2 text-sm text-gray-600">
-                      {_rating}점
+                      {_rating > 0 ? `${_rating}점` : '별점을 선택하세요'}
                     </span>
                     <div className="flex flex-1 justify-end">
                       <Button

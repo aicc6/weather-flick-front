@@ -255,142 +255,18 @@ const TRAVEL_COURSES_LIST_DEFAULTS = {
   page_size: 20,
 }
 
-// 확장된 지역명 매핑 (주요 도시 + 추가 매핑)
+// 간단한 지역명 매핑 (더미 데이터용)
 const getRegionNameFromCode = (regionCode) => {
-  // 1. 주요 도시 데이터에서 먼저 찾기
-  const majorCities = getMajorCitiesFlat()
-  const city = majorCities.find(c => c.code === regionCode)
-  if (city) return city.name
-  
-  // 2. 추가 지역 매핑 (244개 지역 커버)
-  const additionalMapping = {
-    // 경기도
-    'gyeonggi_suwon': '수원',
-    'gyeonggi_goyang': '고양',
-    'gyeonggi_yongin': '용인',
-    'gyeonggi_seongnam': '성남',
-    'gyeonggi_bucheon': '부천',
-    'gyeonggi_ansan': '안산',
-    'gyeonggi_anyang': '안양',
-    'gyeonggi_namyangju': '남양주',
-    'gyeonggi_hwaseong': '화성',
-    'gyeonggi_pyeongtaek': '평택',
-    'gyeonggi_uijeongbu': '의정부',
-    'gyeonggi_siheung': '시흥',
-    'gyeonggi_paju': '파주',
-    'gyeonggi_gimpo': '김포',
-    'gyeonggi_gapyeong': '가평',
-    'gyeonggi_yangpyeong': '양평',
-    'gyeonggi_icheon': '이천',
-    'gyeonggi_yeoju': '여주',
-    
-    // 강원도
-    'gangwon_chuncheon': '춘천',
-    'gangwon_wonju': '원주',
-    'gangwon_gangneung': '강릉',
-    'gangwon_donghae': '동해',
-    'gangwon_taebaek': '태백',
-    'gangwon_sokcho': '속초',
-    'gangwon_samcheok': '삼척',
-    'gangwon_pyeongchang': '평창',
-    'gangwon_hongcheon': '홍천',
-    'gangwon_hoengseong': '횡성',
-    'gangwon_yeongwol': '영월',
-    'gangwon_jeongseon': '정선',
-    'gangwon_cheorwon': '철원',
-    'gangwon_hwacheon': '화천',
-    'gangwon_yanggu': '양구',
-    'gangwon_inje': '인제',
-    'gangwon_goseong': '고성',
-    'gangwon_yangyang': '양양',
-    
-    // 충청도
-    'chungbuk_cheongju': '청주',
-    'chungbuk_chungju': '충주',
-    'chungbuk_jecheon': '제천',
-    'chungbuk_danyang': '단양',
-    'chungnam_cheonan': '천안',
-    'chungnam_gongju': '공주',
-    'chungnam_boryeong': '보령',
-    'chungnam_asan': '아산',
-    'chungnam_seosan': '서산',
-    'chungnam_nonsan': '논산',
-    'chungnam_buyeo': '부여',
-    'chungnam_taean': '태안',
-    
-    // 전라도
-    'jeonbuk_jeonju': '전주',
-    'jeonbuk_gunsan': '군산',
-    'jeonbuk_iksan': '익산',
-    'jeonbuk_jeongeup': '정읍',
-    'jeonbuk_namwon': '남원',
-    'jeonbuk_gimje': '김제',
-    'jeonbuk_gochang': '고창',
-    'jeonnam_mokpo': '목포',
-    'jeonnam_yeosu': '여수',
-    'jeonnam_suncheon': '순천',
-    'jeonnam_naju': '나주',
-    'jeonnam_gwangyang': '광양',
-    'jeonnam_damyang': '담양',
-    'jeonnam_gokseong': '곡성',
-    'jeonnam_gurye': '구례',
-    'jeonnam_goheung': '고흥',
-    'jeonnam_boseong': '보성',
-    'jeonnam_hwasun': '화순',
-    'jeonnam_jangheung': '장흥',
-    'jeonnam_gangjin': '강진',
-    'jeonnam_haenam': '해남',
-    'jeonnam_yeongam': '영암',
-    'jeonnam_muan': '무안',
-    'jeonnam_hampyeong': '함평',
-    'jeonnam_yeonggwang': '영광',
-    'jeonnam_jangseong': '장성',
-    'jeonnam_wando': '완도',
-    'jeonnam_jindo': '진도',
-    'jeonnam_sinan': '신안',
-    
-    // 경상도
-    'gyeongbuk_pohang': '포항',
-    'gyeongbuk_gyeongju': '경주',
-    'gyeongbuk_kimcheon': '김천',
-    'gyeongbuk_andong': '안동',
-    'gyeongbuk_gumi': '구미',
-    'gyeongbuk_yeongju': '영주',
-    'gyeongbuk_yeongcheon': '영천',
-    'gyeongbuk_sangju': '상주',
-    'gyeongbuk_mungyeong': '문경',
-    'gyeongbuk_gyeongsan': '경산',
-    'gyeongbuk_yeongdeok': '영덕',
-    'gyeongbuk_ulleung': '울릉',
-    'gyeongnam_changwon': '창원',
-    'gyeongnam_jinju': '진주',
-    'gyeongnam_tongyeong': '통영',
-    'gyeongnam_sacheon': '사천',
-    'gyeongnam_kimhae': '김해',
-    'gyeongnam_miryang': '밀양',
-    'gyeongnam_geoje': '거제',
-    'gyeongnam_yangsan': '양산',
-    'gyeongnam_namhae': '남해',
-    'gyeongnam_hadong': '하동',
-    'gyeongnam_sancheong': '산청',
-    'gyeongnam_hamyang': '함양',
-    'gyeongnam_geochang': '거창',
-    'gyeongnam_hapcheon': '합천',
-    
-    // 제주도
-    'jeju_jeju': '제주시',
-    'jeju_seogwipo': '서귀포',
-    
-    // 시 구분 없는 기본 매핑
+  const regionMapping = {
     'jeju': '제주',
-    'busan': '부산', 
+    'busan': '부산',
     'seoul': '서울',
-    'daegu': '대구',
-    'incheon': '인천',
-    'gwangju': '광주',
-    'daejeon': '대전',
-    'ulsan': '울산',
-    'sejong': '세종',
+    'gangneung': '강릉',
+    'jeonju': '전주',
+    'gyeongju': '경주',
+    'yeosu': '여수',
+    'sokcho': '속초',
+    'tongyeong': '통영',
     'andong': '안동',
     'gapyeong': '가평',
     'damyang': '담양',
@@ -405,7 +281,7 @@ const getRegionNameFromCode = (regionCode) => {
     'geoje': '거제'
   }
   
-  return additionalMapping[regionCode] || regionCode
+  return regionMapping[regionCode] || regionCode
 }
 
 // 더미 데이터 생성 함수 - 다양한 지역 코스 생성
@@ -457,14 +333,14 @@ const generateDummyCourses = (count) => {
     
     courses.push({
       id: uniqueId,
-      title: `${regionName} ${themeSet[0]} 여행 ${i + 1}`,
+      title: `${regionName} ${themeSet[0]} 여행`,
       subtitle: `${regionName}에서 즐기는 ${themeSet[1]} 여행`,
       summary: `${regionName}의 아름다운 ${themeSet[0]}과 문화를 만끽할 수 있는 여행 코스입니다.`,
       description: `${regionName} 지역의 대표적인 관광지들을 둘러보는 ${themeSet[1]} 코스입니다.`,
       region: region,
       duration: duration,
       price: price,
-      rating: 4.0 + (Math.random() * 1.0), // 4.0-5.0 랜덤
+      rating: parseFloat((4.0 + (Math.random() * 1.0)).toFixed(1)), // 4.0-5.0 랜덤, 소수점 1자리
       reviewCount: 30 + Math.floor(Math.random() * 100),
       likeCount: 15 + Math.floor(Math.random() * 50),
       viewCount: 80 + Math.floor(Math.random() * 200),
@@ -521,7 +397,7 @@ const generateRegionSpecificDummyCourses = (regionCode, count) => {
       region: regionCode,
       duration: index === 0 ? '1박 2일' : index === 1 ? '2박 3일' : '3박 4일',
       price: `${120 + (index * 30)},000원`,
-      rating: 4.0 + (index * 0.3),
+      rating: parseFloat((4.0 + (Math.random() * 1.0)).toFixed(1)),
       reviewCount: 30 + (index * 15),
       likeCount: 15 + (index * 8),
       viewCount: 80 + (index * 20),

@@ -265,49 +265,14 @@ export default function TravelCoursePage() {
     return filteredCourses
   }, [filteredCourses])
 
-  // 현재 표시할 코스들 계산
+  // 현재 표시할 코스들 계산 (단순하게 순서대로 표시)
   const currentDisplayedCourses = useMemo(() => {
-    if (displayedCourses === INITIAL_DISPLAY_COUNT) {
-      // 초기 5개 표시 시: 지역별 대표 코스 1개씩 선택
-      const regionCoursesMap = new Map()
-
-      for (const course of sortedCourses) {
-        const courseRegion = course?.region
-        if (courseRegion && !regionCoursesMap.has(courseRegion)) {
-          regionCoursesMap.set(courseRegion, course)
-        }
-      }
-
-      const result = Array.from(regionCoursesMap.values()).slice(0, INITIAL_DISPLAY_COUNT)
-      
-      if (import.meta.env.DEV) {
-        console.log('지역별 대표 코스 선택:', {
-          sortedCourses: sortedCourses.length,
-          uniqueRegions: regionCoursesMap.size,
-          resultCount: result.length,
-          regions: result.map(c => c.region)
-        })
-      }
-      
-      return result
-    } else {
-      // 모든 코스 보기
-      const result = sortedCourses.slice(0, displayedCourses)
-      
-      if (import.meta.env.DEV) {
-        console.log('모든 코스 보기:', {
-          available: sortedCourses.length,
-          displayed: result.length
-        })
-      }
-      
-      return result
-    }
+    return sortedCourses.slice(0, displayedCourses)
   }, [sortedCourses, displayedCourses])
 
   // 더보기 버튼 표시 여부
   const hasMoreToShow = useMemo(() => {
-    return displayedCourses === INITIAL_DISPLAY_COUNT && sortedCourses.length > INITIAL_DISPLAY_COUNT
+    return displayedCourses < sortedCourses.length
   }, [displayedCourses, sortedCourses.length])
 
   // 모든 코스 보기 핸들러
@@ -426,131 +391,6 @@ export default function TravelCoursePage() {
           </div>
 
 
-          {/* Search and Filter Section */}
-          <div className="weather-card glass-effect mx-auto max-w-4xl p-6">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              {/* Search Input */}
-              <div className="relative">
-                <Search
-                  className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
-                  style={{ color: 'var(--primary-blue)' }}
-                />
-                <Input
-                  placeholder="여행지 이름을 검색하세요"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="form-input pl-10"
-                />
-              </div>
-
-
-              {/* Month Filter */}
-              <Select
-                value={selectedMonth}
-                onValueChange={(value) => setSelectedMonth(value)}
-              >
-                <SelectTrigger className="form-input">
-                  <SelectValue placeholder="해당 월" />
-                </SelectTrigger>
-                <SelectContent className="weather-card">
-                  {monthNames.map((month, index) => (
-                    <SelectItem
-                      key={generateSafeKeyWithValue('month', index, month)}
-                      value={index === 0 ? 'all' : index.toString()}
-                    >
-                      {month}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {/* Theme Filter */}
-              <Select
-                value={selectedTheme}
-                onValueChange={(value) => setSelectedTheme(value)}
-              >
-                <SelectTrigger className="form-input">
-                  <SelectValue placeholder="테마" />
-                </SelectTrigger>
-                <SelectContent className="weather-card">
-                  {themesLoading ? (
-                    <SelectItem value="loading" disabled>
-                      로딩 중...
-                    </SelectItem>
-                  ) : themesError ? (
-                    <SelectItem value="error" disabled>
-                      오류 발생
-                    </SelectItem>
-                  ) : (
-                    <>
-                      <SelectItem value="all">전체</SelectItem>
-                      {themes.map((theme) => (
-                        <SelectItem
-                          key={generateSafeKeyWithValue('theme', theme.code, theme.name)}
-                          value={theme.code}
-                        >
-                          {theme.name}
-                        </SelectItem>
-                      ))}
-                    </>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Filter Summary */}
-            <div className="mt-4 flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">
-                  {shouldUseSearch ? (
-                    <>
-                      <span className="inline-flex items-center gap-1">
-                        <strong>&quot;{debouncedSearchQuery}&quot;</strong> 검색 결과:
-                      </span>
-                      {` ${sortedCourses.length}개`}
-                    </>
-                  ) : (
-                    displayedCourses === INITIAL_DISPLAY_COUNT 
-                      ? `${sortedCourses.length}개 코스 중 지역별 대표 ${currentDisplayedCourses.length}개 표시`
-                      : `총 ${sortedCourses.length}개 모든 코스 표시`
-                  )}
-                </span>
-                {isLoading && (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                {shouldUseSearch && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSearchQuery('')}
-                    className="text-xs"
-                  >
-                    검색 취소
-                  </Button>
-                )}
-                {(selectedMonth !== 'all' ||
-                  selectedTheme !== 'all' ||
-                  searchQuery) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSearchQuery('')
-                      setSelectedMonth('all')
-                      setSelectedTheme('all')
-                      setCurrentPage(1)
-                    }}
-                    className="border-border hover:bg-muted"
-                  >
-                    <Filter className="mr-2 h-4 w-4" />
-                    필터 초기화
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -620,9 +460,7 @@ export default function TravelCoursePage() {
                     검색 결과: {sortedCourses.length}개 중 {displayedCourses}개 표시
                   </>
                 ) : (
-                  displayedCourses === INITIAL_DISPLAY_COUNT 
-                    ? `${sortedCourses.length}개 코스 중 지역별 대표 ${currentDisplayedCourses.length}개 표시`
-                    : `총 ${sortedCourses.length}개 모든 코스 표시`
+                  `총 ${sortedCourses.length}개 코스`
                 )}
               </p>
             </div>
