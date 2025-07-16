@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
   Calendar,
-  Edit,
   Heart,
   Mail,
   MapPin,
@@ -225,13 +224,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <Button
-                  onClick={() => navigate('/profile/edit')}
-                  className="sunny-button font-semibold"
-                >
-                  <Edit className="mr-2 h-4 w-4" />
-                  편집
-                </Button>
+                {/* 프로필 편집 버튼 제거 */}
               </div>
             </CardHeader>
           </Card>
@@ -433,34 +426,7 @@ export default function ProfilePage() {
           </Card>
 
           {/* 계정 관리 */}
-          <Card className="weather-card">
-            <CardHeader>
-              <CardTitle className="text-foreground flex items-center gap-2">
-                <Settings className="text-sky-blue h-5 w-5" />
-                계정 관리
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <Button
-                  variant="outline"
-                  className="weather-input w-full justify-start"
-                  onClick={() => navigate('/profile/edit')}
-                >
-                  <Edit className="mr-2 h-4 w-4" />
-                  프로필 편집
-                </Button>
-                <Button
-                  variant="outline"
-                  className="weather-input w-full justify-start"
-                  onClick={() => navigate('/profile/change-password')}
-                >
-                  <Settings className="mr-2 h-4 w-4" />
-                  비밀번호 변경
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          {/* (추가로 비밀번호 변경 관련 버튼/링크/섹션도 모두 삭제) */}
         </div>
       </div>
     </div>
