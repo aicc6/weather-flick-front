@@ -52,6 +52,12 @@ export const getFCMToken = async () => {
     return null
   }
 
+  // 알림 권한이 이미 허용된 경우에만 토큰을 가져옴
+  if (Notification.permission !== 'granted') {
+    console.log('알림 권한이 없습니다. 토큰을 가져올 수 없습니다.')
+    return null
+  }
+
   try {
     const currentToken = await getToken(messaging, { vapidKey })
     if (currentToken) {

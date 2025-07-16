@@ -1,3 +1,6 @@
+// 알림 권한 보호 장치를 가장 먼저 로드
+import './lib/notificationGuard'
+
 import ReactDOM from 'react-dom/client'
 import { Provider } from 'react-redux'
 import { store } from './store'

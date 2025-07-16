@@ -7,7 +7,7 @@
 const TMAP_CONFIG = {
   appKey: import.meta.env.VITE_TMAP_APP_KEY, // 환경변수에서 가져오기
   baseUrl: 'https://apis.openapi.sk.com/tmap',
-  fallbackToStatic: true // Tmap 실패 시 정적 이미지 사용 여부
+  fallbackToStatic: true, // Tmap 실패 시 정적 이미지 사용 여부
 }
 
 /**
@@ -23,7 +23,7 @@ export const getRegionCoordinates = async (regionName) => {
 
   try {
     const response = await fetch(
-      `${TMAP_CONFIG.baseUrl}/geo/fullAddrGeo?version=1&format=json&addressFlag=F00&appKey=${TMAP_CONFIG.appKey}&addr=${encodeURIComponent(regionName)}`
+      `${TMAP_CONFIG.baseUrl}/geo/fullAddrGeo?version=1&format=json&addressFlag=F00&appKey=${TMAP_CONFIG.appKey}&addr=${encodeURIComponent(regionName)}`,
     )
 
     if (!response.ok) {
@@ -31,12 +31,12 @@ export const getRegionCoordinates = async (regionName) => {
     }
 
     const data = await response.json()
-    
+
     if (data.coordinateInfo?.coordinate?.length > 0) {
       const coordinate = data.coordinateInfo.coordinate[0]
       return {
         lat: parseFloat(coordinate.lat),
-        lng: parseFloat(coordinate.lon)
+        lng: parseFloat(coordinate.lon),
       }
     }
 
@@ -63,7 +63,7 @@ export const getTouristAttractions = async (lat, lng, radius = 10000) => {
 
   try {
     const response = await fetch(
-      `${TMAP_CONFIG.baseUrl}/pois/search/around?version=1&format=json&callback=&appKey=${TMAP_CONFIG.appKey}&centerLat=${lat}&centerLon=${lng}&radius=${radius}&searchtypCd=A&reqCoordType=WGS84GEO&resCoordType=WGS84GEO&count=20`
+      `${TMAP_CONFIG.baseUrl}/pois/search/around?version=1&format=json&callback=&appKey=${TMAP_CONFIG.appKey}&centerLat=${lat}&centerLon=${lng}&radius=${radius}&searchtypCd=A&reqCoordType=WGS84GEO&resCoordType=WGS84GEO&count=20`,
     )
 
     if (!response.ok) {
@@ -71,14 +71,15 @@ export const getTouristAttractions = async (lat, lng, radius = 10000) => {
     }
 
     const data = await response.json()
-    
+
     if (data.searchPoiInfo?.pois?.poi) {
-      return data.searchPoiInfo.pois.poi.filter(poi => 
-        poi.bizCatTcode === '관광' || 
-        poi.bizCatTcode === '명소' ||
-        poi.name.includes('관광') ||
-        poi.name.includes('명소') ||
-        poi.name.includes('여행')
+      return data.searchPoiInfo.pois.poi.filter(
+        (poi) =>
+          poi.bizCatTcode === '관광' ||
+          poi.bizCatTcode === '명소' ||
+          poi.name.includes('관광') ||
+          poi.name.includes('명소') ||
+          poi.name.includes('여행'),
       )
     }
 
@@ -105,12 +106,15 @@ export const getRegionImageFromTmap = async (regionName) => {
     }
 
     // 2. 주변 관광지 검색
-    const attractions = await getTouristAttractions(coordinates.lat, coordinates.lng)
-    
+    const attractions = await getTouristAttractions(
+      coordinates.lat,
+      coordinates.lng,
+    )
+
     if (attractions.length > 0) {
       // 가장 인기있는 관광지 선택 (첫 번째)
       const mainAttraction = attractions[0]
-      
+
       // Tmap 이미지 서비스 활용 (실제 서비스에서는 더 복잡한 로직 필요)
       // 여기서는 좌표 기반으로 Street View 스타일 이미지 URL 생성
       return generateRegionImageUrl(coordinates, mainAttraction.name)
@@ -118,7 +122,6 @@ export const getRegionImageFromTmap = async (regionName) => {
 
     // 관광지가 없으면 좌표만으로 이미지 생성
     return generateRegionImageUrl(coordinates, regionName)
-
   } catch (error) {
     if (import.meta.env.DEV) {
       console.error(`${regionName} Tmap 이미지 생성 실패:`, error)
@@ -137,10 +140,10 @@ const generateRegionImageUrl = (coordinates, placeName) => {
   // Google Street View API나 유사한 서비스 활용
   // 실제 운영에서는 적절한 이미지 서비스 API 사용
   const encodedPlace = encodeURIComponent(placeName)
-  
+
   // 예시: Google Street View Static API (실제 API 키 필요)
   // return `https://maps.googleapis.com/maps/api/streetview?size=800x600&location=${coordinates.lat},${coordinates.lng}&key=${GOOGLE_API_KEY}`
-  
+
   // 대안: Unsplash API with 지역명 검색
   return `https://source.unsplash.com/800x600/?${encodedPlace},korea,travel`
 }
@@ -152,7 +155,7 @@ const generateRegionImageUrl = (coordinates, placeName) => {
  */
 export const getUnmappedRegionImages = async (unmappedRegions) => {
   const imageMap = {}
-  
+
   if (!TMAP_CONFIG.appKey) {
     if (import.meta.env.DEV) {
       console.warn('Tmap API Key 없음 - fallback 이미지 사용')
@@ -168,10 +171,10 @@ export const getUnmappedRegionImages = async (unmappedRegions) => {
 
   try {
     const results = await Promise.allSettled(promises)
-    
+
     results.forEach((result, index) => {
       const regionName = unmappedRegions[index]
-      
+
       if (result.status === 'fulfilled' && result.value.imageUrl) {
         imageMap[regionName] = result.value.imageUrl
       } else {
@@ -181,9 +184,12 @@ export const getUnmappedRegionImages = async (unmappedRegions) => {
     })
 
     if (import.meta.env.DEV) {
-      console.log('Tmap 기반 이미지 매핑 완료:', Object.keys(imageMap).length, '개')
+      console.log(
+        'Tmap 기반 이미지 매핑 완료:',
+        Object.keys(imageMap).length,
+        '개',
+      )
     }
-
   } catch (error) {
     if (import.meta.env.DEV) {
       console.error('Tmap 이미지 서비스 오류:', error)
@@ -201,7 +207,7 @@ export const getUnmappedRegionImages = async (unmappedRegions) => {
  */
 const getFallbackImages = (regions) => {
   const fallbackMap = {}
-  regions.forEach(region => {
+  regions.forEach((region) => {
     fallbackMap[region] = getFallbackImageForRegion(region)
   })
   return fallbackMap
@@ -219,9 +225,9 @@ const getFallbackImageForRegion = (regionName) => {
     'korea',
     'travel',
     'beautiful',
-    'landscape'
+    'landscape',
   ].join(',')
-  
+
   return `https://source.unsplash.com/800x600/?${encodeURIComponent(searchTerms)}`
 }
 
@@ -248,5 +254,5 @@ export default {
   getTouristAttractions,
   getRegionImageFromTmap,
   getUnmappedRegionImages,
-  checkTmapApiStatus
+  checkTmapApiStatus,
 }

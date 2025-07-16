@@ -5,22 +5,33 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Eye, EyeOff, Lock } from 'lucide-react'
 import { toast } from 'sonner'
 
-const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1, '현재 비밀번호를 입력해주세요'),
-  newPassword: z.string()
-    .min(8, '새 비밀번호는 최소 8자 이상이어야 합니다')
-    .regex(/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      '새 비밀번호는 영문, 숫자, 특수문자를 포함해야 합니다'),
-  confirmPassword: z.string().min(1, '비밀번호 확인을 입력해주세요')
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: '새 비밀번호와 확인 비밀번호가 일치하지 않습니다',
-  path: ['confirmPassword']
-})
+const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, '현재 비밀번호를 입력해주세요'),
+    newPassword: z
+      .string()
+      .min(8, '새 비밀번호는 최소 8자 이상이어야 합니다')
+      .regex(
+        /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+        '새 비밀번호는 영문, 숫자, 특수문자를 포함해야 합니다',
+      ),
+    confirmPassword: z.string().min(1, '비밀번호 확인을 입력해주세요'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: '새 비밀번호와 확인 비밀번호가 일치하지 않습니다',
+    path: ['confirmPassword'],
+  })
 
 export function ChangePasswordPage() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
@@ -32,9 +43,9 @@ export function ChangePasswordPage() {
     register,
     handleSubmit,
     formState: { errors },
-    reset
+    reset,
   } = useForm({
-    resolver: zodResolver(changePasswordSchema)
+    resolver: zodResolver(changePasswordSchema),
   })
 
   const onSubmit = async (data) => {
@@ -47,7 +58,7 @@ export function ChangePasswordPage() {
       // })
 
       // 임시로 성공 처리
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000))
 
       toast.success('비밀번호가 성공적으로 변경되었습니다')
       reset()
@@ -88,7 +99,7 @@ export function ChangePasswordPage() {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                 >
                   {showCurrentPassword ? (
@@ -99,7 +110,9 @@ export function ChangePasswordPage() {
                 </Button>
               </div>
               {errors.currentPassword && (
-                <p className="text-sm text-red-500">{errors.currentPassword.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.currentPassword.message}
+                </p>
               )}
             </div>
 
@@ -118,7 +131,7 @@ export function ChangePasswordPage() {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowNewPassword(!showNewPassword)}
                 >
                   {showNewPassword ? (
@@ -129,7 +142,9 @@ export function ChangePasswordPage() {
                 </Button>
               </div>
               {errors.newPassword && (
-                <p className="text-sm text-red-500">{errors.newPassword.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.newPassword.message}
+                </p>
               )}
             </div>
 
@@ -148,7 +163,7 @@ export function ChangePasswordPage() {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? (
@@ -159,21 +174,20 @@ export function ChangePasswordPage() {
                 </Button>
               </div>
               {errors.confirmPassword && (
-                <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.confirmPassword.message}
+                </p>
               )}
             </div>
 
             <Alert>
               <AlertDescription>
-                새 비밀번호는 최소 8자 이상이며, 영문, 숫자, 특수문자를 포함해야 합니다.
+                새 비밀번호는 최소 8자 이상이며, 영문, 숫자, 특수문자를 포함해야
+                합니다.
               </AlertDescription>
             </Alert>
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? '변경 중...' : '비밀번호 변경'}
             </Button>
           </form>

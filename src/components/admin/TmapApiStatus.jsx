@@ -12,25 +12,25 @@ export default function TmapApiStatus() {
     isAvailable: false,
     isChecking: false,
     lastChecked: null,
-    error: null
+    error: null,
   })
 
   const checkStatus = async () => {
-    setApiStatus(prev => ({ ...prev, isChecking: true, error: null }))
-    
+    setApiStatus((prev) => ({ ...prev, isChecking: true, error: null }))
+
     try {
       const isAvailable = await checkTmapApiStatus()
       setApiStatus({
         isAvailable,
         isChecking: false,
         lastChecked: new Date(),
-        error: null
+        error: null,
       })
     } catch (error) {
-      setApiStatus(prev => ({
+      setApiStatus((prev) => ({
         ...prev,
         isChecking: false,
-        error: error.message
+        error: error.message,
       }))
     }
   }
@@ -54,9 +54,7 @@ export default function TmapApiStatus() {
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           Tmap API 상태
-          <Badge 
-            variant={apiStatus.isAvailable ? 'default' : 'destructive'}
-          >
+          <Badge variant={apiStatus.isAvailable ? 'default' : 'destructive'}>
             {apiStatus.isAvailable ? '사용 가능' : '사용 불가'}
           </Badge>
         </CardTitle>
@@ -78,28 +76,26 @@ export default function TmapApiStatus() {
         </div>
 
         {apiStatus.error && (
-          <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-            <p className="text-sm text-destructive">
-              오류: {apiStatus.error}
-            </p>
+          <div className="bg-destructive/10 border-destructive/20 rounded-md border p-3">
+            <p className="text-destructive text-sm">오류: {apiStatus.error}</p>
           </div>
         )}
 
         <div className="space-y-2">
-          <Button 
-            onClick={checkStatus} 
+          <Button
+            onClick={checkStatus}
             disabled={apiStatus.isChecking}
             className="w-full"
             size="sm"
           >
             {apiStatus.isChecking ? '확인 중...' : '상태 재확인'}
           </Button>
-          
+
           {!import.meta.env.VITE_TMAP_APP_KEY && (
-            <div className="p-3 bg-warning/10 border border-warning/20 rounded-md">
-              <p className="text-sm text-warning-foreground">
-                Tmap API 키가 설정되지 않았습니다. 
-                <code className="mx-1 p-1 bg-muted rounded text-xs">
+            <div className="bg-warning/10 border-warning/20 rounded-md border p-3">
+              <p className="text-warning-foreground text-sm">
+                Tmap API 키가 설정되지 않았습니다.
+                <code className="bg-muted mx-1 rounded p-1 text-xs">
                   VITE_TMAP_APP_KEY
                 </code>
                 환경변수를 설정하세요.
@@ -108,7 +104,7 @@ export default function TmapApiStatus() {
           )}
         </div>
 
-        <div className="text-xs text-muted-foreground">
+        <div className="text-muted-foreground text-xs">
           <p>• API 사용 가능 시: 매핑되지 않은 지역에 Tmap 기반 이미지 제공</p>
           <p>• API 사용 불가 시: 정적 fallback 이미지 사용</p>
         </div>

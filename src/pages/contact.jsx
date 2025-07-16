@@ -577,6 +577,25 @@ export default function ContactPage() {
                   </span>
                 </div>
               </div>
+              {/* 답변 섹션 추가 */}
+              {(detailInquiry || selectedInquiry).answer && (
+                <div className="mt-6 border-t pt-4">
+                  <h3 className="mb-3 text-lg font-bold text-gray-800 dark:text-gray-200">
+                    관리자 답변
+                  </h3>
+                  <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+                    <p className="whitespace-pre-wrap text-gray-700 dark:text-gray-300">
+                      {(detailInquiry || selectedInquiry).answer.content}
+                    </p>
+                    <div className="mt-3 text-right text-sm text-gray-500 dark:text-gray-400">
+                      답변일:{' '}
+                      {formatDate(
+                        (detailInquiry || selectedInquiry).answer.created_at,
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="pt-4 text-right">
                 <button
                   type="button"

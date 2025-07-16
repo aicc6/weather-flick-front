@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useSelector } from 'react-redux'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { MessageSquare, Send, X, Bot, Sparkles } from '@/components/icons'
@@ -26,6 +27,9 @@ export function Chatbot() {
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef(null)
 
+  // Redux에서 사용자 정보 가져오기
+  const user = useSelector((state) => state.auth?.user || null)
+
   // RTK Query hooks
   const [sendMessage, { isLoading: isSending }] = useSendChatMessageMutation()
   const { data: initialMessage } = useGetInitialMessageQuery(undefined, {
@@ -42,10 +46,14 @@ export function Chatbot() {
       setIsTyping(true)
       setTimeout(() => {
         const welcomeMessage = initialMessage || initialBotMessage
+
+        // 백엔드에서 받은 개인화된 메시지 사용
+        const messageText = welcomeMessage.message || welcomeMessage.text
+
         setMessages([
           {
             id: Date.now(),
-            text: welcomeMessage.message || welcomeMessage.text,
+            text: messageText,
             sender: 'bot',
             suggestions: welcomeMessage.suggestions || [],
           },
@@ -53,7 +61,7 @@ export function Chatbot() {
         setIsTyping(false)
       }, CHATBOT_CONFIG.welcomeDelay / 2)
     }
-  }, [isOpen, messages.length, initialMessage])
+  }, [isOpen, messages.length, initialMessage, user])
 
   // Scroll to bottom when new messages are added
   useEffect(() => {
@@ -81,6 +89,14 @@ export function Chatbot() {
         context: {
           // 필요에 따라 컨텍스트 추가
           timestamp: new Date().toISOString(),
+          use_personalized: true, // 개인화 기능 활성화
+          user_info: user
+            ? {
+                nickname: user.nickname,
+                preferred_region: user.preferred_region,
+                preferred_theme: user.preferred_theme,
+              }
+            : null,
         },
       }).unwrap()
 

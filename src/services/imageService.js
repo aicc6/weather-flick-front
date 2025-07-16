@@ -10,7 +10,7 @@ export const getRegionFirstImage = async (region) => {
   try {
     // 1순위: 정적 이미지 데이터
     let imageUrl = KOREA_TRAVEL_IMAGES[region]
-    
+
     if (imageUrl) {
       if (import.meta.env.DEV) {
         console.log(`${region} 정적 이미지:`, imageUrl)
@@ -22,7 +22,7 @@ export const getRegionFirstImage = async (region) => {
     if (await checkTmapApiStatus()) {
       const tmapImages = await getUnmappedRegionImages([region])
       imageUrl = tmapImages[region]
-      
+
       if (imageUrl) {
         if (import.meta.env.DEV) {
           console.log(`${region} Tmap 이미지:`, imageUrl)
@@ -37,7 +37,6 @@ export const getRegionFirstImage = async (region) => {
       console.log(`${region} fallback 이미지:`, imageUrl)
     }
     return imageUrl
-
   } catch (error) {
     if (import.meta.env.DEV) {
       console.error(`${region} 이미지 로드 실패:`, error)
@@ -63,7 +62,7 @@ export const getMultipleRegionImages = async (regions) => {
   regions.forEach((region) => {
     if (region && typeof region === 'string') {
       const staticImageUrl = KOREA_TRAVEL_IMAGES[region]
-      
+
       if (staticImageUrl) {
         imageMap[region] = staticImageUrl
         if (import.meta.env.DEV) {
@@ -87,7 +86,7 @@ export const getMultipleRegionImages = async (regions) => {
       }
 
       const tmapImages = await getUnmappedRegionImages(unmappedRegions)
-      
+
       // Tmap 결과를 imageMap에 병합
       Object.entries(tmapImages).forEach(([region, imageUrl]) => {
         if (imageUrl) {
@@ -103,14 +102,13 @@ export const getMultipleRegionImages = async (regions) => {
           }
         }
       })
-
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error('Tmap 이미지 로딩 실패:', error)
       }
-      
+
       // Tmap 실패 시 모든 unmapped 지역에 fallback 적용
-      unmappedRegions.forEach(region => {
+      unmappedRegions.forEach((region) => {
         imageMap[region] = FALLBACK_IMAGES[region] || getDefaultImage(region)
       })
     }
@@ -119,7 +117,7 @@ export const getMultipleRegionImages = async (regions) => {
   if (import.meta.env.DEV) {
     console.log('이미지 매핑 완료:', Object.keys(imageMap).length, '개')
   }
-  
+
   return imageMap
 }
 

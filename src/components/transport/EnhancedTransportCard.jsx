@@ -32,7 +32,7 @@ const transportIcons = {
 }
 
 // 시간대별 선택 컴포넌트
-const _TimeSelector = ({ value, onChange, _options }) => {
+const TimeSelector = ({ value, onChange, _options }) => {
   const [showCustomTime, setShowCustomTime] = useState(false)
   const [customTime, setCustomTime] = useState('')
 
@@ -160,7 +160,6 @@ const _TimeSelector = ({ value, onChange, _options }) => {
     </div>
   )
 }
-
 // 교통수단 선택 컴포넌트
 const TransportModeSelector = ({ modes, selected, onChange }) => {
   const modeLabels = {

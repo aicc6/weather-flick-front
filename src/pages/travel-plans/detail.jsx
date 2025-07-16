@@ -78,14 +78,21 @@ export function TravelPlanDetailPage() {
       departure_lat: routes[0].departure_lat,
       departure_lng: routes[0].departure_lng,
       destination_lat: routes[0].destination_lat,
-      destination_lng: routes[0].destination_lng
+      destination_lng: routes[0].destination_lng,
     })
     console.log('Day Info:', {
       day: routes[0].day,
       sequence: routes[0].sequence,
-      route_order: routes[0].route_order
+      route_order: routes[0].route_order,
     })
-    console.log('All Routes Day Info:', routes.map(r => ({ route_order: r.route_order, day: r.day, sequence: r.sequence })))
+    console.log(
+      'All Routes Day Info:',
+      routes.map((r) => ({
+        route_order: r.route_order,
+        day: r.day,
+        sequence: r.sequence,
+      })),
+    )
   }
 
   // 자동 경로 생성

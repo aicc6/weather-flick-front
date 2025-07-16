@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card'
 import { requestNotificationPermission, getFCMToken } from '@/lib/firebase'
 import { saveFCMToken } from '@/services/notificationService'
 import { toast } from 'sonner'
+import { isAuthenticated } from '@/utils/authCheck'
 
 export default function NotificationPermission() {
   const [permission, setPermission] = useState(Notification.permission)
@@ -13,12 +14,12 @@ export default function NotificationPermission() {
 
   useEffect(() => {
     // 알림 권한이 기본값이고 로그인한 상태일 때만 프롬프트 표시
-    const token = localStorage.getItem('access_token')
     const promptDismissed = localStorage.getItem(
       'notification-prompt-dismissed',
     )
 
-    if (token && permission === 'default' && !promptDismissed) {
+    // 로그인 상태 확인을 유틸리티 함수로 처리
+    if (isAuthenticated() && permission === 'default' && !promptDismissed) {
       const timer = setTimeout(() => {
         setShowPrompt(true)
       }, 5000) // 5초 후 표시
