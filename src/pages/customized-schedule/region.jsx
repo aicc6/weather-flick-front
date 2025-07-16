@@ -239,9 +239,11 @@ export default function CustomizedScheduleRegionPage() {
                 name_en: city.region_name_en,
                 latitude:
                   Number(city.center_latitude) ||
+                  Number(city.latitude) ||
                   CITY_COORDINATES[city.region_code]?.latitude,
                 longitude:
                   Number(city.center_longitude) ||
+                  Number(city.longitude) ||
                   CITY_COORDINATES[city.region_code]?.longitude,
                 administrative_code: city.administrative_code,
                 is_active: city.is_active,
