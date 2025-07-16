@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -224,6 +224,18 @@ export default function ContactPage() {
   const handleOpenDetail = (contact) => {
     // 상세 모달 오픈 로직
   }
+
+  // ESC 키로 상세 모달 닫기
+  useEffect(() => {
+    if (!modalOpen) return
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') {
+        handleCloseModal()
+      }
+    }
+    window.addEventListener('keydown', handleEsc)
+    return () => window.removeEventListener('keydown', handleEsc)
+  }, [modalOpen])
 
   if (isLoading) return <div>문의 목록을 불러오는 중입니다...</div>
   if (isError) return <div>문의 목록을 불러오지 못했습니다.</div>
