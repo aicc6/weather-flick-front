@@ -1,5 +1,5 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
-import { baseQueryWithReauth } from './baseQuery'
+import { baseQueryWithReauth, baseQuery } from './baseQuery'
 import { getMajorCitiesFlat, getPopularCities } from '@/data/majorCities'
 
 // 데이터 검증 및 정제 유틸리티
@@ -706,26 +706,17 @@ export const travelCoursesApi = createApi({
 
     // 여행 코스 상세 조회
     getTravelCourseDetail: builder.query({
-      query: (courseId) => `travel-courses/${courseId}`,
-      providesTags: (result, error, courseId) => [
-        { type: 'TravelCourse', id: courseId },
-      ],
-      keepUnusedDataFor: 600, // 10분간 캐싱
-      transformResponse: (response, meta, arg) => {
-        if (import.meta.env.DEV) {
-          console.log('🔍 상세페이지 API 응답:', response)
-          console.log('🆔 요청된 courseId:', arg)
-        }
-
-        const validatedResponse = validateAndSanitizeResponse(
-          response,
-          TRAVEL_COURSE_DEFAULTS,
-        )
-
-        // 개발 환경에서는 더미 데이터 생성
-        if (import.meta.env.DEV) {
+      queryFn: async (courseId, { dispatch, getState }) => {
+        // 더미 데이터 ID인지 확인
+        const isDummyData = typeof courseId === 'string' && courseId.includes('dummy_')
+        
+        // 더미 데이터인 경우 직접 생성해서 반환
+        if (isDummyData) {
+          if (import.meta.env.DEV) {
+            console.log('🎯 더미 데이터 ID 감지:', courseId)
+          }
+          
           // courseId에서 지역 정보 추출 (더미 데이터 ID 형식: dummy_timestamp_index_region_random)
-          const courseId = arg
           let regionCode = 'seoul' // 기본값
 
           if (typeof courseId === 'string' && courseId.includes('_')) {
@@ -819,20 +810,31 @@ export const travelCoursesApi = createApi({
           }
 
           console.log('🎯 상세페이지 더미 데이터 생성:', dummyDetailData)
-          return dummyDetailData
+          return { data: dummyDetailData }
         }
 
-        return validatedResponse
-      },
-      transformErrorResponse: (response) => {
-        return {
-          status: response.status,
-          data: response.data,
-          message:
-            response.data?.message ||
-            '여행 코스를 불러오는 중 오류가 발생했습니다',
+        // 실제 API 호출
+        try {
+          const result = await baseQuery(`travel-courses/${courseId}`, { dispatch, getState })
+          
+          if (result.error) {
+            return { error: result.error }
+          }
+
+          const validatedResponse = validateAndSanitizeResponse(
+            result.data,
+            TRAVEL_COURSE_DEFAULTS,
+          )
+
+          return { data: validatedResponse }
+        } catch (error) {
+          return { error: { status: 'FETCH_ERROR', message: error.message } }
         }
       },
+      providesTags: (result, error, courseId) => [
+        { type: 'TravelCourse', id: courseId },
+      ],
+      keepUnusedDataFor: 600, // 10분간 캐싱
     }),
 
     // 지역별 여행 코스 조회
