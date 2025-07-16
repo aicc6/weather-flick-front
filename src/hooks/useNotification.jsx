@@ -3,12 +3,19 @@ import { messaging } from '@/lib/firebase'
 import { onMessage } from 'firebase/messaging'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
+import { isAuthenticated } from '@/utils/authCheck'
 
 export function useNotification() {
   const [notification, setNotification] = useState(null)
   const navigate = useNavigate()
 
   useEffect(() => {
+    // 로그인하지 않은 상태면 리스너 설정하지 않음
+    if (!isAuthenticated()) {
+      console.log('로그인하지 않은 상태에서는 알림 리스너를 설정하지 않습니다.')
+      return
+    }
+
     // 포그라운드 메시지 리스너 설정
     let unsubscribe
 

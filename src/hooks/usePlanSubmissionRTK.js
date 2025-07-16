@@ -59,6 +59,10 @@ export default function usePlanSubmissionRTK() {
             acc[dayKey] = destinations.map((dest) => ({
               description: dest.description,
               place_id: dest.place_id,
+              latitude: dest.latitude,
+              longitude: dest.longitude,
+              address: dest.address,
+              category: dest.category,
             }))
           }
           return acc
@@ -73,7 +77,7 @@ export default function usePlanSubmissionRTK() {
           budget: formData.budget || 0,
           itinerary: sanitizedItinerary, // 정제된 itinerary 전달
           participants: formData.participants || 1,
-          transportation: formData.transportation || '대중교용',
+          transportation: formData.transportation || '대중교통',
           start_location: origin,
         }
 

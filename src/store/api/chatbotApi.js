@@ -8,12 +8,12 @@ export const chatbotApi = createApi({
   endpoints: (builder) => ({
     // 챗봇 메시지 전송
     sendChatMessage: builder.mutation({
-      query: (message) => ({
+      query: (data) => ({
         url: 'chatbot/message',
         method: 'POST',
         body: {
-          message: message.text,
-          context: message.context || {},
+          message: data.text,
+          context: data.context || {},
         },
       }),
       invalidatesTags: ['ChatMessage'],

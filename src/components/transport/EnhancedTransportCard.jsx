@@ -31,6 +31,135 @@ const transportIcons = {
   walk: MapPin,
 }
 
+// 시간대별 선택 컴포넌트
+const TimeSelector = ({ value, onChange, _options }) => {
+  const [showCustomTime, setShowCustomTime] = useState(false)
+  const [customTime, setCustomTime] = useState('')
+
+  const handleCustomTimeSubmit = () => {
+    if (customTime) {
+      onChange(`custom:${customTime}`)
+      setShowCustomTime(false)
+    }
+  }
+
+  const getCurrentTimeForInput = () => {
+    const now = new Date()
+    const hours = String(now.getHours()).padStart(2, '0')
+    const minutes = String(now.getMinutes()).padStart(2, '0')
+    return `${hours}:${minutes}`
+  }
+
+  // 시간을 오전/오후 형식으로 변환하는 함수
+  const formatTimeToAmPm = (timeString) => {
+    const [hours, minutes] = timeString.split(':').map(Number)
+    const ampm = hours >= 12 ? '오후' : '오전'
+    const displayHours = hours > 12 ? hours - 12 : hours === 0 ? 12 : hours
+    return `${ampm} ${displayHours}:${minutes.toString().padStart(2, '0')}`
+  }
+
+  // 현재 선택된 시간을 표시하는 함수
+  const getSelectedTimeDisplay = () => {
+    if (value.startsWith('custom:')) {
+      const timeString = value.split(':')[1] + ':' + value.split(':')[2]
+      return formatTimeToAmPm(timeString)
+    }
+
+    if (value === 'now') return '지금 출발'
+    if (value === 'optimal') return '최적 시간'
+
+    // 1시간 후, 2시간 후 등의 경우 실제 시간 표시
+    const now = new Date()
+    if (value === 'hour1') {
+      const future = new Date(now.getTime() + 60 * 60 * 1000)
+      return formatTimeToAmPm(`${future.getHours()}:${future.getMinutes()}`)
+    }
+    if (value === 'hour2') {
+      const future = new Date(now.getTime() + 2 * 60 * 60 * 1000)
+      return formatTimeToAmPm(`${future.getHours()}:${future.getMinutes()}`)
+    }
+    if (value === 'hour4') {
+      const future = new Date(now.getTime() + 4 * 60 * 60 * 1000)
+      return formatTimeToAmPm(`${future.getHours()}:${future.getMinutes()}`)
+    }
+
+    return '시간 선택'
+  }
+
+  return (
+    <div className="flex items-center justify-between">
+      {/* 현재 선택된 시간 표시 */}
+      <div className="flex items-center space-x-3">
+        <span className="text-sm text-gray-600">출발시간:</span>
+        <span className="inline-block rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600">
+          🕒 {getSelectedTimeDisplay()}
+        </span>
+      </div>
+
+      {/* 시간 선택 드롭다운 */}
+      <div className="flex items-center space-x-1">
+        {!showCustomTime ? (
+          <>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onChange('now')}
+              className={`text-xs ${value === 'now' ? 'bg-blue-100' : ''}`}
+            >
+              지금
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onChange('hour1')}
+              className={`text-xs ${value === 'hour1' ? 'bg-blue-100' : ''}`}
+            >
+              1시간후
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onChange('hour2')}
+              className={`text-xs ${value === 'hour2' ? 'bg-blue-100' : ''}`}
+            >
+              2시간후
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setShowCustomTime(true)
+                setCustomTime(getCurrentTimeForInput())
+              }}
+              className={`text-xs ${value.startsWith('custom:') ? 'bg-blue-100' : ''}`}
+            >
+              직접입력
+            </Button>
+          </>
+        ) : (
+          <div className="flex items-center space-x-2">
+            <input
+              type="time"
+              value={customTime}
+              onChange={(e) => setCustomTime(e.target.value)}
+              className="rounded border px-2 py-1 text-xs"
+            />
+            <Button size="sm" onClick={handleCustomTimeSubmit}>
+              ✓
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowCustomTime(false)}
+            >
+              ✕
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 // 교통수단 선택 컴포넌트
 const TransportModeSelector = ({ modes, selected, onChange }) => {
   const modeLabels = {

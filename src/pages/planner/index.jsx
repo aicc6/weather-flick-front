@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Tabs, TabsContent } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Sparkles, Brain } from '@/components/icons'
@@ -274,6 +274,13 @@ export default function PlannerPage() {
 
       {/* 메인 탭 인터페이스 */}
       <Tabs defaultValue="planner" className="w-full">
+        <TabsList className="mb-6 grid w-full grid-cols-4">
+          <TabsTrigger value="planner">기본 계획</TabsTrigger>
+          <TabsTrigger value="ai-recommendations">AI 추천</TabsTrigger>
+          <TabsTrigger value="weather">날씨 분석</TabsTrigger>
+          <TabsTrigger value="collaboration">협업</TabsTrigger>
+        </TabsList>
+
         {/* 기본 계획 탭 */}
         <TabsContent value="planner" className="space-y-6">
           {/* 상단 - 여행 요약 및 날씨 미리보기 */}
