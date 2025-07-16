@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { WithdrawModal } from '@/components/WithdrawModal'
+import { Switch } from '@/components/ui/switch'
 import {
   Settings,
   LogOut,
@@ -22,6 +23,11 @@ export function SettingsPage() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [showWithdrawModal, setShowWithdrawModal] = useState(false)
+
+  // 알림 설정 상태 관리
+  const [weatherAlert, setWeatherAlert] = useState(true)
+  const [emailAlert, setEmailAlert] = useState(false)
+  const [marketingAlert, setMarketingAlert] = useState(false)
 
   const handleLogout = async () => {
     await logout()
@@ -152,7 +158,11 @@ export function SettingsPage() {
                     비 예보 시 대체 플랜 자동 알림
                   </p>
                 </div>
-                <Badge variant="default">ON</Badge>
+                <Switch
+                  checked={weatherAlert}
+                  onCheckedChange={setWeatherAlert}
+                  aria-label="날씨 변화 알림 토글"
+                />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
@@ -162,7 +172,11 @@ export function SettingsPage() {
                     여행 관련 업데이트 및 추천
                   </p>
                 </div>
-                <Badge variant="secondary">OFF</Badge>
+                <Switch
+                  checked={emailAlert}
+                  onCheckedChange={setEmailAlert}
+                  aria-label="이메일 알림 토글"
+                />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
@@ -172,7 +186,11 @@ export function SettingsPage() {
                     새로운 기능 및 이벤트 안내
                   </p>
                 </div>
-                <Badge variant="secondary">OFF</Badge>
+                <Switch
+                  checked={marketingAlert}
+                  onCheckedChange={setMarketingAlert}
+                  aria-label="마케팅 알림 토글"
+                />
               </div>
             </div>
           </CardContent>
