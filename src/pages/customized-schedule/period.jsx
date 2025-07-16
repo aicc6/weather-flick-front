@@ -4,9 +4,10 @@ import { useSelector, useDispatch } from 'react-redux'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ChevronLeft, Calendar } from '@/components/icons'
+import { Calendar } from '@/components/icons'
 import { TRAVEL_PERIODS } from '@/constants/travelOptions'
 import { setPeriod, setCurrentStep, restoreFromParams } from '@/store/slices/customizedScheduleSlice'
+import ProgressSteps from '@/components/common/ProgressSteps'
 
 export default function CustomizedSchedulePeriodPage() {
   const navigate = useNavigate()
@@ -81,21 +82,11 @@ export default function CustomizedSchedulePeriodPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      {/* 헤더 */}
+      {/* 진행률 표시 */}
+      <ProgressSteps currentStep={2} onBack={handleBack} />
+      
+      {/* 페이지 헤더 */}
       <div className="mb-8">
-        <div className="mb-4 flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBack}
-            className="p-2"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-            2/5
-          </span>
-        </div>
         <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
           여행 기간은?
         </h1>

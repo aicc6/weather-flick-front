@@ -4,9 +4,10 @@ import { useSelector, useDispatch } from 'react-redux'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ChevronLeft, Users } from '@/components/icons'
+import { Users } from '@/components/icons'
 import { COMPANIONS } from '@/constants/travelOptions'
 import { setCompanion, setCurrentStep, restoreFromParams } from '@/store/slices/customizedScheduleSlice'
+import ProgressSteps from '@/components/common/ProgressSteps'
 
 export default function CustomizedScheduleWhoPage() {
   const navigate = useNavigate()
@@ -94,21 +95,11 @@ export default function CustomizedScheduleWhoPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      {/* 헤더 */}
+      {/* 진행률 표시 */}
+      <ProgressSteps currentStep={3} onBack={handleBack} />
+      
+      {/* 페이지 헤더 */}
       <div className="mb-8">
-        <div className="mb-4 flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBack}
-            className="p-2"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-            3/5
-          </span>
-        </div>
         <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
           누구와 함께 가시나요?
         </h1>

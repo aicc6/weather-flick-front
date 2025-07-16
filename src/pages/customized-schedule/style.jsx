@@ -4,9 +4,10 @@ import { useSelector, useDispatch } from 'react-redux'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ChevronLeft, Heart } from '@/components/icons'
+import { Heart } from '@/components/icons'
 import { COMPANIONS, TRAVEL_STYLES } from '@/constants/travelOptions'
 import { addTravelStyle, removeTravelStyle, setCurrentStep, restoreFromParams } from '@/store/slices/customizedScheduleSlice'
+import ProgressSteps from '@/components/common/ProgressSteps'
 
 // 공통 상수에서 동행자 데이터 가져옴
 const companions = COMPANIONS;
@@ -99,21 +100,11 @@ export default function CustomizedScheduleStylePage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      {/* 헤더 */}
+      {/* 진행률 표시 */}
+      <ProgressSteps currentStep={4} onBack={handleBack} />
+      
+      {/* 페이지 헤더 */}
       <div className="mb-8">
-        <div className="mb-4 flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBack}
-            className="p-2"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-            4/5
-          </span>
-        </div>
         <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
           내가 선호하는 여행 스타일은?
         </h1>

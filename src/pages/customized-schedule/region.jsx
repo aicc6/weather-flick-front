@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ChevronLeft, MapPin, List } from '@/components/icons'
+import { MapPin, List } from '@/components/icons'
 import GoogleKoreaMap from '@/components/GoogleKoreaMap'
 import {
   getMultipleRegionImages,
@@ -12,6 +12,7 @@ import {
 } from '@/services/pixabayApi'
 import { useGetActiveRegionsQuery } from '@/store/api'
 import { setRegion } from '@/store/slices/customizedScheduleSlice'
+import ProgressSteps from '@/components/common/ProgressSteps'
 
 // 지역별 설명 데이터
 const REGION_DESCRIPTIONS = {
@@ -183,21 +184,19 @@ export default function CustomizedScheduleRegionPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      {/* 헤더 */}
+      {/* 진행률 표시 */}
+      <ProgressSteps currentStep={1} onBack={handleBack} />
+      
+      {/* 페이지 헤더 */}
       <div className="mb-8">
         <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleBack}
-              className="p-2"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              1/5
-            </span>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              떠나고 싶은 도시는?
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300">
+              도시 1곳을 선택해주세요.
+            </p>
           </div>
           {/* 보기 모드 전환 버튼 */}
           <div className="flex items-center gap-2">
@@ -216,12 +215,6 @@ export default function CustomizedScheduleRegionPage() {
             </Button>
           </div>
         </div>
-        <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
-          떠나고 싶은 도시는?
-        </h1>
-        <p className="mb-4 text-gray-600 dark:text-gray-300">
-          도시 1곳을 선택해주세요.
-        </p>
 
         {/* regionCode가 있을 때만 상단 중앙에 '다음' 버튼 노출 */}
         {regionCode && <div className="mt-6 flex justify-center"></div>}

@@ -59,11 +59,7 @@ const GoogleCallbackPage = lazy(() =>
   })),
 )
 const ProfilePage = lazy(() => import('./pages/profile/index.jsx'))
-const ProfileEditPage = lazy(() =>
-  import('./pages/profile/edit').then((module) => ({
-    default: module.ProfileEditPage,
-  })),
-)
+const ProfileEditPage = lazy(() => import('./pages/profile/edit.jsx'))
 const ChangePasswordPage = lazy(() =>
   import('./pages/profile/change-password').then((module) => ({
     default: module.ChangePasswordPage,
