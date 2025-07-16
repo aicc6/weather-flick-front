@@ -1,7 +1,9 @@
 import { useState, useCallback, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from '@/components/icons'
 
 export function RecommendedDestCarousel({ destinations = [] }) {
+  const navigate = useNavigate()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
   const [imageLoadStates, setImageLoadStates] = useState({})
@@ -80,7 +82,7 @@ export function RecommendedDestCarousel({ destinations = [] }) {
             <button
               onClick={goToPrevious}
               disabled={currentIndex === 0}
-              className="dark:bg-card/90 dark:hover:bg-card weather-button absolute top-1/2 left-2 z-10 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-lg transition-all duration-300 hover:bg-white hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
+              className="dark:bg-card/90 dark:hover:bg-card absolute top-1/2 left-2 z-10 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-lg transition-all duration-300 hover:bg-white hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="이전 여행지"
             >
               <ChevronLeft className="h-6 w-6 text-gray-700 dark:text-gray-200" />
@@ -89,7 +91,7 @@ export function RecommendedDestCarousel({ destinations = [] }) {
             <button
               onClick={goToNext}
               disabled={currentIndex >= maxIndex}
-              className="dark:bg-card/90 dark:hover:bg-card weather-button absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-lg transition-all duration-300 hover:bg-white hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
+              className="dark:bg-card/90 dark:hover:bg-card absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-lg transition-all duration-300 hover:bg-white hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="다음 여행지"
             >
               <ChevronRight className="h-6 w-6 text-gray-700 dark:text-gray-200" />
@@ -110,11 +112,20 @@ export function RecommendedDestCarousel({ destinations = [] }) {
             return (
               <div
                 key={`${destination.name}-${currentIndex + index}`}
-                className="weather-card group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                className="weather-card group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 onClick={() => {
-                  // Navigate to destination detail page
-                  window.location.href = `/recommend/detail/${destination.id}`
+                  // 여행지 추천 페이지로 이동
+                  navigate('/recommend')
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    navigate('/recommend')
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`${destination.name} 여행지 추천 보기`}
               >
                 {/* Image or Icon Display */}
                 <div className="relative h-48 w-full overflow-hidden rounded-t-xl">
@@ -177,11 +188,11 @@ export function RecommendedDestCarousel({ destinations = [] }) {
                 {/* Content */}
                 <div className="p-4">
                   <div className="mb-2 flex items-center justify-between">
-                    <h4 className="text-foreground group-hover:text-sky-blue-dark text-lg font-bold transition-colors">
+                    <h4 className="text-foreground group-hover:text-blue-600 text-lg font-bold transition-colors">
                       {destination.name}
                     </h4>
                     <div className="flex items-center gap-1">
-                      <span className="text-sunshine-yellow">⭐</span>
+                      <span className="text-yellow-500">⭐</span>
                       <span className="text-muted-foreground text-sm font-medium">
                         {destination.rating || '4.5'}
                       </span>
@@ -200,7 +211,7 @@ export function RecommendedDestCarousel({ destinations = [] }) {
                       .map((tag, tagIndex) => (
                         <span
                           key={tagIndex}
-                          className="weather-cloudy rounded-full px-2 py-1 text-xs font-medium"
+                          className="status-primary rounded-full px-2 py-1 text-xs font-medium"
                         >
                           #{tag}
                         </span>
@@ -231,8 +242,8 @@ export function RecommendedDestCarousel({ destinations = [] }) {
                 onClick={() => setCurrentIndex(index)}
                 className={`h-3 w-3 rounded-full transition-all duration-300 ${
                   index === currentIndex
-                    ? 'bg-sky-blue-dark scale-125'
-                    : 'bg-cloud-gray hover:bg-sky-blue'
+                    ? 'bg-blue-600 scale-125'
+                    : 'bg-gray-300 hover:bg-blue-400'
                 }`}
                 aria-label={`${index + 1}번째 슬라이드로 이동`}
               />

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { Chatbot } from '@/components/common/chatbot'
 import { RecommendedDestCarousel } from './RecommendedDestCarousel'
 import { useScrollFadeIn } from '@/hooks/useScrollFadeIn'
-import { useGetDestinationRecommendationsQuery } from '@/store/api/destinationsApi'
+import { useGetTravelCoursesQuery } from '@/store/api/travelCoursesApi'
 
 /**
  * URL: '/'
@@ -24,29 +24,36 @@ export function MainPage() {
     isLoading,
     isError,
     refetch,
-  } = useGetDestinationRecommendationsQuery({
-    theme: 'popular', // 인기 여행지 추천
-    weatherConditions: [], // 전체 날씨 조건
+  } = useGetTravelCoursesQuery({
+    page: 1,
+    page_size: 6, // 홈 화면에는 6개만 표시
   })
 
   // 추천 여행지 데이터 변환
   const recommendedDestinations = useMemo(() => {
     if (!recommendationsResponse) return []
 
-    // API 응답 구조에 따라 조정
+    // API 응답에서 courses 배열 추출
+    let courses = []
     if (Array.isArray(recommendationsResponse)) {
-      return recommendationsResponse
+      courses = recommendationsResponse
+    } else if (recommendationsResponse.courses && Array.isArray(recommendationsResponse.courses)) {
+      courses = recommendationsResponse.courses
     }
 
-    if (recommendationsResponse.destinations) {
-      return recommendationsResponse.destinations
-    }
-
-    if (recommendationsResponse.recommendations) {
-      return recommendationsResponse.recommendations
-    }
-
-    return []
+    // 여행 코스 데이터를 추천 여행지 형태로 변환
+    return courses.slice(0, 6).map(course => ({
+      id: course.id,
+      name: course.title || course.name,
+      description: course.summary || course.description,
+      image: course.mainImage || course.image,
+      rating: course.rating || 4.5,
+      tags: course.theme || course.tags || ['여행'],
+      distance: course.duration || '2박 3일',
+      budget: course.price || '문의',
+      icon: '🏞️',
+      region: course.region
+    }))
   }, [recommendationsResponse])
 
   // 에러 메시지 처리
@@ -191,9 +198,14 @@ export function MainPage() {
       <div className="bg-background">
         <section className="from-sky-blue-light/20 dark:from-sky-blue/10 bg-gradient-to-b to-transparent py-12">
           <div className="container mx-auto px-4">
-            <h2 className="text-foreground mb-8 text-center text-3xl font-bold">
-              ☀️ 오늘의 추천 여행지
-            </h2>
+            <div className="mb-8 text-center">
+              <h2 className="text-foreground mb-3 text-3xl font-bold">
+                ☀️ 오늘의 추천 여행지
+              </h2>
+              <p className="text-muted-foreground text-lg">
+                날씨와 계절을 고려한 맞춤형 여행지를 만나보세요
+              </p>
+            </div>
             <div className="flex justify-center">
               <div className="w-full max-w-5xl">
                 {isLoading ? (
@@ -206,14 +218,22 @@ export function MainPage() {
                 ) : error ? (
                   <div className="weather-card p-8 text-center">
                     <div className="mb-4 text-2xl">❌</div>
-                    <p className="mb-4 text-red-500">{error}</p>
-                    <div className="space-y-2">
-                      <button
-                        onClick={() => refetch()}
-                        className="weather-button rounded-full px-6 py-2 text-sm font-medium text-white"
-                      >
-                        🔄 다시 시도
-                      </button>
+                    <p className="mb-4 text-red-500">추천 여행지 데이터를 불러오는데 실패했습니다.</p>
+                    <div className="space-y-4">
+                      <div className="space-x-3">
+                        <button
+                          onClick={() => refetch()}
+                          className="primary-button rounded-full px-6 py-2 text-sm font-medium text-white"
+                        >
+                          🔄 다시 시도
+                        </button>
+                        <Link
+                          to="/recommend"
+                          className="accent-button rounded-full px-6 py-2 text-sm font-medium text-white"
+                        >
+                          🌍 여행지 추천 보기
+                        </Link>
+                      </div>
                       <button
                         onClick={() => window.location.reload()}
                         className="mx-auto block text-sm text-blue-600 underline hover:text-blue-800"
@@ -223,9 +243,21 @@ export function MainPage() {
                     </div>
                   </div>
                 ) : (
-                  <RecommendedDestCarousel
-                    destinations={recommendedDestinations}
-                  />
+                  <>
+                    <RecommendedDestCarousel
+                      destinations={recommendedDestinations}
+                    />
+                    {/* 더 많은 여행지 보기 버튼 */}
+                    <div className="mt-8 text-center">
+                      <Link
+                        to="/recommend"
+                        className="primary-button inline-flex items-center gap-2 rounded-full px-8 py-3 text-lg font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                      >
+                        🌍 더 많은 여행지 보기
+                        <span className="text-xl">→</span>
+                      </Link>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
@@ -283,7 +315,7 @@ export function MainPage() {
                   </p>
 
                   <div className="mt-6">
-                    <span className="weather-button inline-flex items-center rounded-full px-6 py-2 text-sm font-medium text-white">
+                    <span className="primary-button inline-flex items-center rounded-full px-6 py-2 text-sm font-medium text-white">
                       자세히 보기 →
                     </span>
                   </div>

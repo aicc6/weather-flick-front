@@ -372,9 +372,9 @@ const generateDummyCourses = (count) => {
       viewCount: 80 + Math.floor(Math.random() * 200),
       theme: themeSet,
       bestMonths: [3, 4, 5, 9, 10, 11],
-      mainImage: `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
+      mainImage: `https://picsum.photos/800/600?random=${uniqueId}`,
       images: [
-        `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
+        `https://picsum.photos/800/600?random=${uniqueId}`,
       ],
       highlights: [
         `${regionName} 대표 명소`,
@@ -481,9 +481,9 @@ const generateRegionSpecificDummyCourses = (regionCode, count) => {
       viewCount: 80 + index * 20,
       theme: themeSet,
       bestMonths: [3, 4, 5, 9, 10, 11],
-      mainImage: `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
+      mainImage: `https://picsum.photos/800/600?random=${uniqueId}`,
       images: [
-        `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
+        `https://picsum.photos/800/600?random=${uniqueId}`,
       ],
       highlights: [
         `${regionName} ${themeSet[0]} 명소`,
@@ -760,9 +760,9 @@ export const travelCoursesApi = createApi({
             viewCount: 80 + Math.floor(Math.random() * 200),
             theme: ['자연', '힐링'],
             bestMonths: [3, 4, 5, 9, 10, 11],
-            mainImage: `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
+            mainImage: `https://picsum.photos/800/600?random=${courseId}`,
             images: [
-              `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
+              `https://picsum.photos/800/600?random=${courseId}`,
             ],
             highlights: [
               `${regionName} 대표 명소`,
