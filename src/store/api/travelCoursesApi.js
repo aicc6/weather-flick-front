@@ -99,22 +99,22 @@ const normalizeItem = (item) => {
     const regionMapping = {
       // 숫자 코드 → 문자열 코드
       1: 'seoul',
-      2: 'busan',
-      3: 'daegu',
-      4: 'incheon',
+      6: 'busan',
+      4: 'daegu',
+      2: 'incheon',
       5: 'gwangju',
-      6: 'daejeon',
+      3: 'daejeon',
       7: 'ulsan',
       8: 'sejong',
-      9: 'gyeonggi',
-      10: 'gangwon',
-      11: 'chungbuk',
-      12: 'chungnam',
-      13: 'jeonbuk',
-      14: 'jeonnam',
-      15: 'gyeongbuk',
-      16: 'gyeongnam',
-      17: 'jeju',
+      31: 'gyeonggi',
+      32: 'gangwon',
+      33: 'chungbuk',
+      34: 'chungnam',
+      37: 'jeonbuk',
+      38: 'jeonnam',
+      35: 'gyeongbuk',
+      36: 'gyeongnam',
+      39: 'jeju',
     }
 
     normalized.region = regionMapping[normalized.region] || normalized.region
@@ -628,7 +628,7 @@ export const travelCoursesApi = createApi({
         params: {
           page,
           page_size,
-          ...(region_code && { region_code }),
+          ...(region_code && { regionCode: region_code }), // region_code -> regionCode로 변경
           ...(course_theme && { course_theme }),
         },
       }),
