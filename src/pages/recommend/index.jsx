@@ -89,7 +89,7 @@ export default function RecommendListPage() {
     <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 md:grid-cols-3">
       {/* 왼쪽: 여행지 리스트 */}
       <div className="md:col-span-2">
-        <h1 className="mb-6 text-2xl font-bold">여행 코스 리스트</h1>
+        <h1 className="mb-6 text-2xl font-bold">여행지 리스트</h1>
         <ul className="mb-8 space-y-8">
           {isLoading ? (
             <li>로딩 중...</li>
@@ -146,10 +146,19 @@ export default function RecommendListPage() {
         <div className="flex items-center justify-center gap-2">
           <button
             className="rounded border bg-white px-3 py-1 text-gray-800 hover:bg-gray-100 disabled:opacity-50"
+            onClick={() => setPage(1)}
+            disabled={page === 1}
+            aria-label="맨 처음"
+          >
+            {'<<'}
+          </button>
+          <button
+            className="rounded border bg-white px-3 py-1 text-gray-800 hover:bg-gray-100 disabled:opacity-50"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
+            aria-label="이전"
           >
-            이전
+            {'<'}
           </button>
           <span className="mx-2 text-sm">
             {page} / {totalPages}
@@ -158,8 +167,17 @@ export default function RecommendListPage() {
             className="rounded border bg-white px-3 py-1 text-gray-800 hover:bg-gray-100 disabled:opacity-50"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
+            aria-label="다음"
           >
-            다음
+            {'>'}
+          </button>
+          <button
+            className="rounded border bg-white px-3 py-1 text-gray-800 hover:bg-gray-100 disabled:opacity-50"
+            onClick={() => setPage(totalPages)}
+            disabled={page === totalPages}
+            aria-label="맨 끝"
+          >
+            {'>>'}
           </button>
         </div>
       </div>
