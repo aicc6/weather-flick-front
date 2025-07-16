@@ -1,138 +1,84 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ChevronLeft, Heart } from '@/components/icons'
+import { COMPANIONS, TRAVEL_STYLES } from '@/constants/travelOptions'
+import { addTravelStyle, removeTravelStyle, setCurrentStep, restoreFromParams } from '@/store/slices/customizedScheduleSlice'
 
-// 동행자 정보 정의
-const companions = [
-  {
-    id: 'solo',
-    label: '혼자',
-    icon: '🧘‍♀️',
-  },
-  {
-    id: 'couple',
-    label: '연인',
-    icon: '💕',
-  },
-  {
-    id: 'family',
-    label: '가족',
-    icon: '👨‍👩‍👧‍👦',
-  },
-  {
-    id: 'friends',
-    label: '친구들',
-    icon: '👫',
-  },
-  {
-    id: 'colleagues',
-    label: '동료/회사',
-    icon: '👔',
-  },
-  {
-    id: 'group',
-    label: '단체',
-    icon: '👥',
-  },
-]
+// 공통 상수에서 동행자 데이터 가져옴
+const companions = COMPANIONS;
 
 export default function CustomizedScheduleStylePage() {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const [searchParams] = useSearchParams()
   const [selectedStyles, setSelectedStyles] = useState([])
 
-  const region = searchParams.get('region') // This is regionCode
-  const period = searchParams.get('period')
-  const days = searchParams.get('days')
-  const who = searchParams.get('who')
+  // Redux 상태 가져오기
+  const { 
+    regionCode, 
+    regionName, 
+    periodLabel, 
+    days,
+    companion,
+    companionData,
+    travelStyles,
+    travelStylesData
+  } = useSelector((state) => state.customizedSchedule)
 
-  const { regionName: displayedRegionName } = useSelector(
-    (state) => state.customizedSchedule,
-  )
+  // URL 파라미터에서 상태 복원
+  useEffect(() => {
+    const urlParams = {
+      region: searchParams.get('region'),
+      period: searchParams.get('period'),
+      days: searchParams.get('days'),
+      who: searchParams.get('who'),
+      styles: searchParams.get('styles')
+    }
+    
+    // URL 파라미터가 있고 Redux 상태가 비어있으면 복원
+    if ((urlParams.region && !regionCode) || 
+        (urlParams.period && !periodLabel) ||
+        (urlParams.who && !companion) ||
+        (urlParams.styles && travelStyles.length === 0)) {
+      dispatch(restoreFromParams(urlParams))
+    }
+    dispatch(setCurrentStep(4))
+  }, [dispatch, searchParams, regionCode, periodLabel, companion, travelStyles.length])
 
-  const travelStyles = [
-    {
-      id: 'activity',
-      label: '체험·액티비티',
-      description: '다양한 체험과 액티비티를 즐기고 싶어요',
-      icon: '🎯',
-      examples: '서핑, 패러글라이딩, 쿠킹클래스, 워터파크',
-    },
-    {
-      id: 'hotplace',
-      label: 'SNS 핫플레이스',
-      description: '인스타 감성과 사진 찍기 좋은 곳을 찾아요',
-      icon: '📸',
-      examples: '카페, 전망대, 포토존, 감성 스팟',
-    },
-    {
-      id: 'nature',
-      label: '자연과 함께',
-      description: '자연 속에서 힐링하고 여유를 만끽해요',
-      icon: '🌿',
-      examples: '산책로, 공원, 해변, 숲길',
-    },
-    {
-      id: 'landmark',
-      label: '유명 관광지는 필수',
-      description: '대표 명소와 관광지는 꼭 가보고 싶어요',
-      icon: '🏛️',
-      examples: '랜드마크, 박물관, 궁궐, 유명 관광지',
-    },
-    {
-      id: 'healing',
-      label: '여유롭게 힐링',
-      description: '바쁜 일상을 벗어나 편안하게 쉬고 싶어요',
-      icon: '🧘‍♀️',
-      examples: '스파, 온천, 조용한 카페, 휴양지',
-    },
-    {
-      id: 'culture',
-      label: '문화·예술·역사',
-      description: '지역의 문화와 역사를 깊이 알고 싶어요',
-      icon: '🎨',
-      examples: '박물관, 미술관, 전통 마을, 문화재',
-    },
-    {
-      id: 'local',
-      label: '여행지 느낌 물씬',
-      description: '현지인처럼 그 지역만의 매력을 느끼고 싶어요',
-      icon: '🏘️',
-      examples: '로컬 카페, 전통 시장, 골목길, 현지 맛집',
-    },
-    {
-      id: 'shopping',
-      label: '쇼핑은 열정적으로',
-      description: '쇼핑과 구매하는 재미를 만끽하고 싶어요',
-      icon: '🛍️',
-      examples: '백화점, 아울렛, 전통 시장, 쇼핑몰',
-    },
-    {
-      id: 'food',
-      label: '관광보다 먹방',
-      description: '맛집 탐방과 음식이 여행의 주목적이에요',
-      icon: '🍽️',
-      examples: '맛집, 로컬 푸드, 시장 음식, 특산물',
-    },
-    {
-      id: 'pet',
-      label: '애완동물과 함께',
-      description: '반려동물과 함께 여행하고 싶어요',
-      icon: '🐾',
-      examples: '애견동반 숙소, 펫카페, 반려견 놀이터, 펫프렌들리 여행지',
-    },
-  ]
+  // 기존 선택된 스타일들 복원
+  useEffect(() => {
+    if (travelStyles.length > 0) {
+      setSelectedStyles(travelStyles)
+    }
+  }, [travelStyles])
+
+  // 현재 정보 (Redux 우선, URL 파라미터 폴백)
+  const currentRegion = regionCode || searchParams.get('region')
+  const currentPeriod = periodLabel || searchParams.get('period')
+  const currentDays = days || searchParams.get('days')
+  const currentWho = companion || searchParams.get('who')
+  const displayedRegionName = regionName || currentRegion
+
+  // 공통 상수에서 여행 스타일 데이터 가져옴
+  const travelStyleOptions = TRAVEL_STYLES;
 
   const handleStyleToggle = (styleId) => {
-    setSelectedStyles((prev) =>
-      prev.includes(styleId)
-        ? prev.filter((label) => label !== styleId)
-        : [...prev, styleId],
-    )
+    const isSelected = selectedStyles.includes(styleId)
+    const styleData = travelStyleOptions.find(s => s.id === styleId)
+    
+    if (isSelected) {
+      // 제거
+      setSelectedStyles((prev) => prev.filter((id) => id !== styleId))
+      dispatch(removeTravelStyle(styleId))
+    } else {
+      // 추가
+      setSelectedStyles((prev) => [...prev, styleId])
+      dispatch(addTravelStyle(styleData))
+    }
   }
 
   const handleNext = () => {
@@ -140,14 +86,14 @@ export default function CustomizedScheduleStylePage() {
       window.scrollTo({ top: 0, behavior: 'auto' })
       const styleParams = selectedStyles.join(',')
       navigate(
-        `/customized-schedule/schedule?region=${region}&period=${period}&days=${days}&who=${who}&styles=${styleParams}`,
+        `/customized-schedule/schedule?region=${currentRegion}&period=${currentPeriod}&days=${currentDays}&who=${currentWho}&styles=${styleParams}`,
       )
     }
   }
 
   const handleBack = () => {
     navigate(
-      `/customized-schedule/who?region=${region}&period=${period}&days=${days}`,
+      `/customized-schedule/who?region=${currentRegion}&period=${currentPeriod}&days=${currentDays}`,
     )
   }
 
@@ -179,7 +125,7 @@ export default function CustomizedScheduleStylePage() {
       {/* 선택된 정보 표시 */}
       <div className="mb-6 rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
         <div className="flex flex-wrap gap-3 text-sm">
-          {region && (
+          {currentRegion && (
             <div>
               <span className="text-xs text-gray-500 dark:text-gray-400">
                 여행지
@@ -192,7 +138,7 @@ export default function CustomizedScheduleStylePage() {
               </Badge>
             </div>
           )}
-          {period && (
+          {currentPeriod && (
             <div>
               <span className="text-xs text-gray-500 dark:text-gray-400">
                 기간
@@ -201,11 +147,11 @@ export default function CustomizedScheduleStylePage() {
                 variant="outline"
                 className="ml-2 dark:border-gray-600 dark:text-gray-300"
               >
-                {period}
+                {currentPeriod}
               </Badge>
             </div>
           )}
-          {who && (
+          {currentWho && (
             <div>
               <span className="text-xs text-gray-500 dark:text-gray-400">
                 동행자
@@ -214,8 +160,8 @@ export default function CustomizedScheduleStylePage() {
                 variant="outline"
                 className="ml-2 dark:border-gray-600 dark:text-gray-300"
               >
-                {companions.find((c) => c.id === who)?.icon}{' '}
-                {companions.find((c) => c.id === who)?.label || who}
+                {companions.find((c) => c.id === currentWho)?.icon}{' '}
+                {companions.find((c) => c.id === currentWho)?.label || currentWho}
               </Badge>
             </div>
           )}
@@ -224,7 +170,7 @@ export default function CustomizedScheduleStylePage() {
 
       {/* 여행 스타일 선택 */}
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {travelStyles.map((style) => (
+        {travelStyleOptions.map((style) => (
           <Card
             key={style.id}
             className={`cursor-pointer transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800 ${
@@ -274,7 +220,7 @@ export default function CustomizedScheduleStylePage() {
           </p>
           <div className="flex flex-wrap gap-2">
             {selectedStyles.map((styleId) => {
-              const style = travelStyles.find((s) => s.id === styleId)
+              const style = travelStyleOptions.find((s) => s.id === styleId)
               return (
                 <Badge
                   key={styleId}

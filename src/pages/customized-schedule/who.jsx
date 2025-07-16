@@ -1,16 +1,58 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ChevronLeft, Users } from '@/components/icons'
+import { COMPANIONS } from '@/constants/travelOptions'
+import { setCompanion, setCurrentStep, restoreFromParams } from '@/store/slices/customizedScheduleSlice'
 
 export default function CustomizedScheduleWhoPage() {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const [searchParams] = useSearchParams()
   const [selectedCompanion, setSelectedCompanion] = useState(null)
   const nextButtonRef = useRef(null)
+
+  // Redux 상태 가져오기
+  const { 
+    regionCode, 
+    regionName, 
+    period, 
+    periodLabel, 
+    days,
+    companion,
+    companionData 
+  } = useSelector((state) => state.customizedSchedule)
+
+  // URL 파라미터에서 상태 복원
+  useEffect(() => {
+    const urlParams = {
+      region: searchParams.get('region'),
+      period: searchParams.get('period'),
+      days: searchParams.get('days'),
+      who: searchParams.get('who')
+    }
+    
+    // URL 파라미터가 있고 Redux 상태가 비어있으면 복원
+    if ((urlParams.region && !regionCode) || 
+        (urlParams.period && !periodLabel) ||
+        (urlParams.who && !companion)) {
+      dispatch(restoreFromParams(urlParams))
+    }
+    dispatch(setCurrentStep(3))
+  }, [dispatch, searchParams, regionCode, periodLabel, companion])
+
+  // 기존 선택된 동행자 복원
+  useEffect(() => {
+    if (companion) {
+      const existingCompanion = COMPANIONS.find(c => c.id === companion)
+      if (existingCompanion) {
+        setSelectedCompanion(existingCompanion)
+      }
+    }
+  }, [companion])
 
   useEffect(() => {
     if (selectedCompanion && nextButtonRef.current) {
@@ -21,80 +63,33 @@ export default function CustomizedScheduleWhoPage() {
     }
   }, [selectedCompanion])
 
-  const region = searchParams.get('region') // This is regionCode
-  const period = searchParams.get('period')
-  const days = searchParams.get('days')
+  // 현재 정보 (Redux 우선, URL 파라미터 폴백)
+  const currentRegion = regionCode || searchParams.get('region')
+  const currentPeriod = periodLabel || searchParams.get('period')
+  const currentDays = days || searchParams.get('days')
+  const displayedRegionName = regionName || currentRegion
 
-  const { regionName: displayedRegionName } = useSelector(
-    (state) => state.customizedSchedule,
-  )
-
-  const companions = [
-    {
-      id: 'solo',
-      label: '혼자',
-      description: '나만의 시간, 자유로운 여행',
-      icon: '🧘‍♀️',
-      characteristics: ['자유로운 일정', '개인적 휴식', '새로운 경험'],
-      recommendations: '카페, 박물관, 산책로, 관광명소',
-    },
-    {
-      id: 'couple',
-      label: '연인',
-      description: '둘만의 로맨틱한 시간',
-      icon: '💕',
-      characteristics: ['로맨틱한 분위기', '커플 액티비티', '추억 만들기'],
-      recommendations: '카페, 전망대, 해변, 야경 명소',
-    },
-    {
-      id: 'family',
-      label: '가족',
-      description: '온 가족이 함께하는 즐거운 여행',
-      icon: '👨‍👩‍👧‍👦',
-      characteristics: ['안전한 코스', '다양한 연령대', '교육적 요소'],
-      recommendations: '놀이공원, 공원, 체험관, 가족 레스토랑',
-    },
-    {
-      id: 'friends',
-      label: '친구들',
-      description: '친구들과의 신나는 모험',
-      icon: '👫',
-      characteristics: ['액티비티 중심', '사진 스팟', '맛집 탐방'],
-      recommendations: '액티비티, SNS 핫플, 맛집, 쇼핑몰',
-    },
-    {
-      id: 'colleagues',
-      label: '동료/회사',
-      description: '동료들과의 워크샵이나 회식',
-      icon: '👔',
-      characteristics: ['팀빌딩', '네트워킹', '편의시설'],
-      recommendations: '리조트, 컨벤션 센터, 단체 식당',
-    },
-    {
-      id: 'group',
-      label: '단체',
-      description: '대규모 그룹 여행',
-      icon: '👥',
-      characteristics: ['단체 할인', '버스 이용', '단체 식사'],
-      recommendations: '관광지, 단체 체험, 대형 식당',
-    },
-  ]
+  // 공통 상수에서 동행자 데이터 가져옴
+  const companions = COMPANIONS;
 
   const handleCompanionSelect = (companion) => {
     setSelectedCompanion(companion)
+    // Redux 상태에도 저장
+    dispatch(setCompanion(companion))
   }
 
   const handleNext = () => {
     if (selectedCompanion) {
       window.scrollTo({ top: 0, behavior: 'auto' })
+      // URL 파라미터와 함께 이동 (하위 호환성 유지)
       navigate(
-        `/customized-schedule/style?region=${region}&period=${period}&days=${days}&who=${selectedCompanion.id}`,
+        `/customized-schedule/style?region=${currentRegion}&period=${currentPeriod}&days=${currentDays}&who=${selectedCompanion.id}`,
       )
     }
   }
 
   const handleBack = () => {
-    navigate(`/customized-schedule/period?region=${region}`)
+    navigate(`/customized-schedule/period?region=${currentRegion}`)
   }
 
   return (
@@ -125,7 +120,7 @@ export default function CustomizedScheduleWhoPage() {
       {/* 선택된 정보 표시 */}
       <div className="mb-6 rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
         <div className="flex flex-wrap gap-3">
-          {region && (
+          {currentRegion && (
             <div>
               <span className="text-xs text-gray-500 dark:text-gray-400">
                 여행지
@@ -138,7 +133,7 @@ export default function CustomizedScheduleWhoPage() {
               </Badge>
             </div>
           )}
-          {period && (
+          {currentPeriod && (
             <div>
               <span className="text-xs text-gray-500 dark:text-gray-400">
                 기간
@@ -147,7 +142,7 @@ export default function CustomizedScheduleWhoPage() {
                 variant="outline"
                 className="ml-2 dark:border-gray-600 dark:text-gray-300"
               >
-                {period}
+                {currentPeriod}
               </Badge>
             </div>
           )}

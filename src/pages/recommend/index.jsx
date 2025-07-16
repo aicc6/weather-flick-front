@@ -341,15 +341,7 @@ export default function TravelCoursePage() {
   }, [travelCourses])
 
   // 월 배열
-<<<<<<< Updated upstream
-  const _monthNames = [
-||||||| Stash base
   const monthNames = [
-    '전체', '1월', '2월', '3월', '4월', '5월', '6월',
-    '7월', '8월', '9월', '10월', '11월', '12월',
-=======
-  const monthNames = [
->>>>>>> Stashed changes
     '전체',
     '1월',
     '2월',

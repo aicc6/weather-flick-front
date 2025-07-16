@@ -1,7 +1,7 @@
 // 동적 지역 감지 및 코스 생성 서비스
 // 전국 244개 지역 중 어떤 지역이든 요청 시 자동 생성
 
-import { getAllRegionsFlat, REGION_TOURISM_INFO } from '@/data/koreaRegions'
+import { getAllRegionsFlat, REGION_TOURISM_INFO } from './regionApiService'
 import { generateTravelCourse } from './tmapCourseService'
 import { checkTmapApiStatus } from './tmapService'
 
@@ -16,8 +16,8 @@ const CACHE_EXPIRY_TIME = 30 * 60 * 1000 // 30분
  * @param {string} regionIdentifier - 지역 코드 또는 지역명
  * @returns {Object} { isSupported, regionCode, regionName, suggestions }
  */
-export const checkRegionSupport = (regionIdentifier) => {
-  const allRegions = getAllRegionsFlat()
+export const checkRegionSupport = async (regionIdentifier) => {
+  const allRegions = await getAllRegionsFlat()
 
   // 정확한 매칭 시도
   let matchedRegion = allRegions.find(
@@ -96,7 +96,7 @@ const getPopularRegionSuggestions = () => {
 export const generateRegionCourse = async (regionIdentifier, options = {}) => {
   try {
     // 1. 지역 지원 여부 확인
-    const regionInfo = checkRegionSupport(regionIdentifier)
+    const regionInfo = await checkRegionSupport(regionIdentifier)
 
     if (!regionInfo.isSupported) {
       return {
@@ -316,8 +316,9 @@ const generateRecommendationReason = (regionInfo, apiUsed) => {
  * 전국 지역 코스 생성 통계
  * @returns {Object} 생성 통계
  */
-export const getGenerationStats = () => {
-  const totalRegions = getAllRegionsFlat().length
+export const getGenerationStats = async () => {
+  const allRegions = await getAllRegionsFlat()
+  const totalRegions = allRegions.length
   const cachedCourses = GENERATED_COURSE_CACHE.size
   const cacheHitRate =
     cachedCourses > 0 ? ((cachedCourses / totalRegions) * 100).toFixed(1) : 0

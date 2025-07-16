@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
-import { getAllRegionsFlat, PROVINCES } from '@/data/koreaRegions'
+import { useGetRegionsQuery, useGetActiveRegionsQuery } from '@/store/api/regionsApi'
 import {
   checkRegionSupport,
   generateRegionCourse,
@@ -18,6 +18,10 @@ import {
  * 전국 244개 지역 커버리지 상태 모니터링 컴포넌트
  */
 export default function NationalCoverageStatus() {
+  // API 데이터 가져오기
+  const { data: regions = [], isLoading: regionsLoading } = useGetRegionsQuery()
+  const { data: provinces = [], isLoading: provincesLoading } = useGetActiveRegionsQuery()
+
   const [stats, setStats] = useState({
     totalSupportedRegions: 0,
     cachedCourses: 0,
@@ -31,8 +35,8 @@ export default function NationalCoverageStatus() {
   const [testProgress, setTestProgress] = useState(0)
 
   // 통계 업데이트
-  const updateStats = () => {
-    const newStats = getGenerationStats()
+  const updateStats = async () => {
+    const newStats = await getGenerationStats()
     setStats(newStats)
   }
 
@@ -51,7 +55,7 @@ export default function NationalCoverageStatus() {
       const startTime = performance.now()
 
       // 지역 지원 여부 확인
-      const supportInfo = checkRegionSupport(testRegion)
+      const supportInfo = await checkRegionSupport(testRegion)
 
       if (!supportInfo.isSupported) {
         setTestResults((prev) => [
@@ -119,7 +123,7 @@ export default function NationalCoverageStatus() {
     setTestProgress(0)
 
     try {
-      const allRegions = getAllRegionsFlat().filter((r) => r.type === 'city')
+      const allRegions = regions.filter((r) => r.region_level === 2) // 시군구 레벨
       const testCount = 10 // 랜덤 10개 지역 테스트
       const randomRegions = [...allRegions]
         .sort(() => Math.random() - 0.5)
@@ -133,12 +137,12 @@ export default function NationalCoverageStatus() {
 
         try {
           const startTime = performance.now()
-          const result = await generateRegionCourse(region.code)
+          const result = await generateRegionCourse(region.region_code)
           const endTime = performance.now()
           const duration = Math.round(endTime - startTime)
 
           newResults.push({
-            region: region.name,
+            region: region.region_name,
             status: result.success ? 'success' : 'failed',
             course: result.course,
             fromCache: result.fromCache,
@@ -149,7 +153,7 @@ export default function NationalCoverageStatus() {
           })
         } catch (error) {
           newResults.push({
-            region: region.name,
+            region: region.region_name,
             status: 'error',
             error: error.message,
             timestamp: new Date().toLocaleTimeString(),
@@ -203,10 +207,10 @@ export default function NationalCoverageStatus() {
               <div className="space-y-2">
                 <div className="text-sm font-medium">지원 지역</div>
                 <div className="text-2xl font-bold">
-                  {stats.totalSupportedRegions}개
+                  {regionsLoading ? '로딩...' : `${regions.length}개`}
                 </div>
                 <div className="text-muted-foreground text-xs">
-                  17개 광역시도 + 227개 시군구
+                  {provincesLoading ? '로딩...' : `${provinces.length}개 광역시도 + ${regions.filter(r => r.region_level === 2).length}개 시군구`}
                 </div>
               </div>
               <div className="space-y-2">
@@ -349,14 +353,18 @@ export default function NationalCoverageStatus() {
           {/* 지역 목록 탭 */}
           <TabsContent value="regions" className="space-y-4">
             <div className="space-y-4">
-              {PROVINCES.map((province) => (
-                <div key={province.code} className="space-y-2">
-                  <div className="font-medium">{province.name}</div>
-                  <div className="text-muted-foreground text-sm">
-                    광역시도 레벨 지원 + 하위 시군구 모두 지원
+              {provincesLoading ? (
+                <div>지역 정보 로딩 중...</div>
+              ) : (
+                provinces.map((province) => (
+                  <div key={province.region_code} className="space-y-2">
+                    <div className="font-medium">{province.region_name}</div>
+                    <div className="text-muted-foreground text-sm">
+                      광역시도 레벨 지원 + 하위 시군구 모두 지원
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </TabsContent>
         </Tabs>

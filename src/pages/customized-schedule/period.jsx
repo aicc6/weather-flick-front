@@ -1,16 +1,43 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ChevronLeft, Calendar } from '@/components/icons'
+import { TRAVEL_PERIODS } from '@/constants/travelOptions'
+import { setPeriod, setCurrentStep, restoreFromParams } from '@/store/slices/customizedScheduleSlice'
 
 export default function CustomizedSchedulePeriodPage() {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const [searchParams] = useSearchParams()
   const [selectedPeriod, setSelectedPeriod] = useState(null)
   const nextButtonRef = useRef(null)
+
+  // Redux 상태 가져오기
+  const { regionCode, regionName, period, periodLabel } = useSelector(
+    (state) => state.customizedSchedule,
+  )
+
+  // URL 파라미터에서 상태 복원
+  useEffect(() => {
+    const urlRegion = searchParams.get('region')
+    if (urlRegion && !regionCode) {
+      dispatch(restoreFromParams({ region: urlRegion }))
+    }
+    dispatch(setCurrentStep(2))
+  }, [dispatch, searchParams, regionCode])
+
+  // 기존 선택된 기간 복원
+  useEffect(() => {
+    if (period && periodLabel) {
+      const existingPeriod = TRAVEL_PERIODS.find(p => p.id === period)
+      if (existingPeriod) {
+        setSelectedPeriod(existingPeriod)
+      }
+    }
+  }, [period, periodLabel])
 
   useEffect(() => {
     if (selectedPeriod && nextButtonRef.current) {
@@ -21,73 +48,29 @@ export default function CustomizedSchedulePeriodPage() {
     }
   }, [selectedPeriod])
 
-  const regionCode = searchParams.get('region')
-  const { regionName: storedRegionName } = useSelector(
-    (state) => state.customizedSchedule,
-  )
-  const regionName = storedRegionName || regionCode // Fallback to regionCode if name is not in store
+  // 현재 지역 정보 (URL 파라미터 폴백)
+  const currentRegionCode = regionCode || searchParams.get('region')
+  const displayRegionName = regionName || currentRegionCode
 
-  const periods = [
-    {
-      id: 'day',
-      label: '당일치기',
-      days: 1,
-      description: '하루 만에 즐기는 알찬 여행',
-      icon: '⚡',
-    },
-    {
-      id: 'short1',
-      label: '1박 2일',
-      days: 2,
-      description: '주말을 활용한 짧은 휴식',
-      icon: '🌅',
-    },
-    {
-      id: 'short2',
-      label: '2박 3일',
-      days: 3,
-      description: '가장 인기 있는 여행 기간',
-      icon: '⭐',
-    },
-    {
-      id: 'medium1',
-      label: '3박 4일',
-      days: 4,
-      description: '여유로운 일정으로 충분한 휴식',
-      icon: '🏖️',
-    },
-    {
-      id: 'medium2',
-      label: '4박 5일',
-      days: 5,
-      description: '깊이 있는 여행과 다양한 체험',
-      icon: '🎒',
-    },
-    {
-      id: 'long',
-      label: '5박 6일',
-      days: 6,
-      description: '여행지를 완전히 만끽하는 시간',
-      icon: '🌟',
-    },
-    {
-      id: 'extended',
-      label: '일주일 이상',
-      days: 7,
-      description: '장기 여행과 특별한 경험',
-      icon: '🌍',
-    },
-  ]
+  // 공통 상수에서 여행 기간 데이터 가져옴
+  const periods = TRAVEL_PERIODS;
 
   const handlePeriodSelect = (period) => {
     setSelectedPeriod(period)
+    // Redux 상태에도 저장
+    dispatch(setPeriod({
+      id: period.id,
+      label: period.label,
+      days: period.days
+    }))
   }
 
   const handleNext = () => {
     if (selectedPeriod) {
       window.scrollTo({ top: 0, behavior: 'auto' })
+      // URL 파라미터와 함께 이동 (하위 호환성 유지)
       navigate(
-        `/customized-schedule/who?region=${regionCode}&period=${selectedPeriod.label}&days=${selectedPeriod.days}`,
+        `/customized-schedule/who?region=${currentRegionCode}&period=${selectedPeriod.label}&days=${selectedPeriod.days}`,
       )
     }
   }
@@ -122,7 +105,7 @@ export default function CustomizedSchedulePeriodPage() {
       </div>
 
       {/* 선택된 지역 표시 */}
-      {regionCode && (
+      {currentRegionCode && (
         <div className="mb-6 rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
           <p className="mb-1 text-sm text-gray-600 dark:text-gray-400">
             선택된 여행지
@@ -131,7 +114,7 @@ export default function CustomizedSchedulePeriodPage() {
             variant="outline"
             className="text-gray-700 dark:border-gray-600 dark:text-gray-300"
           >
-            {regionName}
+            {displayRegionName}
           </Badge>
         </div>
       )}
