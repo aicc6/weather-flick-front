@@ -352,8 +352,10 @@ const generateDummyCourses = (count) => {
       viewCount: 80 + Math.floor(Math.random() * 200),
       theme: themeSet,
       bestMonths: [3, 4, 5, 9, 10, 11],
-      mainImage: `https://picsum.photos/800/600?random=${region}_${baseTimestamp}_${i}`,
-      images: [`https://picsum.photos/800/600?random=${region}_${baseTimestamp}_${i}`],
+      mainImage: `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
+      images: [
+        `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`
+      ],
       highlights: [`${regionName} 대표 명소`, `${themeSet[0]} 체험`, '현지 특산품 투어'],
       itinerary: [
         {
@@ -416,8 +418,10 @@ const generateRegionSpecificDummyCourses = (regionCode, count) => {
       viewCount: 80 + (index * 20),
       theme: themeSet,
       bestMonths: [3, 4, 5, 9, 10, 11],
-      mainImage: `https://picsum.photos/800/600?random=${regionCode}_${index}`,
-      images: [`https://picsum.photos/800/600?random=${regionCode}_${index}`],
+      mainImage: `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
+      images: [
+        `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`
+      ],
       highlights: [`${regionName} ${themeSet[0]} 명소`, `${themeSet[1]} 체험`, '현지 특산품'],
       itinerary: [
         {
@@ -605,11 +609,82 @@ export const travelCoursesApi = createApi({
         { type: 'TravelCourse', id: courseId },
       ],
       keepUnusedDataFor: 600, // 10분간 캐싱
-      transformResponse: (response) => {
+      transformResponse: (response, meta, arg) => {
+        if (import.meta.env.DEV) {
+          console.log('🔍 상세페이지 API 응답:', response)
+          console.log('🆔 요청된 courseId:', arg)
+        }
+
         const validatedResponse = validateAndSanitizeResponse(
           response,
           TRAVEL_COURSE_DEFAULTS,
         )
+
+        // 개발 환경에서는 더미 데이터 생성
+        if (import.meta.env.DEV) {
+          // courseId에서 지역 정보 추출 (더미 데이터 ID 형식: dummy_timestamp_index_region_random)
+          const courseId = arg
+          let regionCode = 'seoul' // 기본값
+          
+          if (typeof courseId === 'string' && courseId.includes('_')) {
+            const parts = courseId.split('_')
+            if (parts.length >= 4) {
+              regionCode = parts[3] // 지역 코드 추출
+            }
+          }
+          
+          const regionName = getRegionNameFromCode(regionCode)
+          
+          // 가격 생성 함수 (로컬)
+          const generatePrice = () => {
+            const basePrice = 80000 + Math.floor(Math.random() * 400000)
+            const roundedPrice = Math.round(basePrice / 10000) * 10000
+            return `${roundedPrice.toLocaleString()}원`
+          }
+          
+          // 더미 상세 데이터 생성
+          const dummyDetailData = {
+            id: courseId,
+            title: `${regionName} 자연 여행`,
+            subtitle: `${regionName}에서 즐기는 힐링 여행`,
+            summary: `${regionName}의 아름다운 자연과 문화를 만끽할 수 있는 여행 코스입니다.`,
+            description: `${regionName} 지역의 대표적인 관광지들을 둘러보는 힐링 코스입니다.`,
+            region: regionCode,
+            duration: '2박 3일',
+            price: generatePrice(),
+            rating: parseFloat((4.0 + (Math.random() * 1.0)).toFixed(1)),
+            reviewCount: 30 + Math.floor(Math.random() * 100),
+            likeCount: 15 + Math.floor(Math.random() * 50),
+            viewCount: 80 + Math.floor(Math.random() * 200),
+            theme: ['자연', '힐링'],
+            bestMonths: [3, 4, 5, 9, 10, 11],
+            mainImage: `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`,
+            images: [
+              `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(regionName + ' 여행')}`
+            ],
+            highlights: [`${regionName} 대표 명소`, '자연 체험', '현지 특산품 투어'],
+            itinerary: [
+              {
+                day: 1,
+                title: `${regionName} 자연 투어`,
+                activities: [
+                  { time: '09:00', type: 'transport', place: `${regionName} 역/터미널`, description: '도착 및 이동' },
+                  { time: '11:00', type: 'attraction', place: `${regionName} 명소`, description: '자연 관광지 방문' },
+                  { time: '12:30', type: 'restaurant', place: '현지 맛집', description: '점심 및 현지 음식 체험' },
+                  { time: '14:30', type: 'attraction', place: `${regionName} 힐링 명소`, description: '힐링 체험' },
+                  { time: '18:00', type: 'restaurant', place: '저녁 맛집', description: '저녁 식사' }
+                ]
+              }
+            ],
+            tips: ['편안한 신발 착용', '카메라 준비', '현지 날씨 확인', '대중교통 정보 사전 확인'],
+            includes: ['가이드 투어', '입장료', '중식'],
+            excludes: ['숙박비', '개인 경비', '교통비', '저녁 식사'],
+            tags: ['자연', '힐링']
+          }
+          
+          console.log('🎯 상세페이지 더미 데이터 생성:', dummyDetailData)
+          return dummyDetailData
+        }
 
         return validatedResponse
       },

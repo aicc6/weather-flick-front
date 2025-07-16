@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -32,6 +32,49 @@ import {
   useLikeCourseMutation,
   useUnlikeCourseMutation,
 } from '@/store/api'
+
+// 지역 코드를 한글 지역명으로 변환하는 함수
+const getRegionDisplayName = (regionCode) => {
+  const regionMapping = {
+    'jeju': '제주',
+    'busan': '부산',
+    'seoul': '서울',
+    'gangneung': '강릉',
+    'jeonju': '전주',
+    'gyeongju': '경주',
+    'yeosu': '여수',
+    'sokcho': '속초',
+    'tongyeong': '통영',
+    'andong': '안동',
+    'gapyeong': '가평',
+    'damyang': '담양',
+    'boseong': '보성',
+    'samcheok': '삼척',
+    'pyeongchang': '평창',
+    'chuncheon': '춘천',
+    'pohang': '포항',
+    'mokpo': '목포',
+    'suncheon': '순천',
+    'jinju': '진주',
+    'geoje': '거제',
+    'incheon': '인천',
+    'daegu': '대구',
+    'daejeon': '대전',
+    'gwangju': '광주',
+    'ulsan': '울산',
+    'sejong': '세종',
+    'gyeonggi': '경기',
+    'gangwon': '강원',
+    'chungbuk': '충북',
+    'chungnam': '충남',
+    'jeonbuk': '전북',
+    'jeonnam': '전남',
+    'gyeongbuk': '경북',
+    'gyeongnam': '경남'
+  }
+  
+  return regionMapping[regionCode] || regionCode
+}
 
 export default function TravelCourseDetailPage() {
   const { id } = useParams()
@@ -68,12 +111,39 @@ export default function TravelCourseDetailPage() {
   })
 
   // 이미지 처리 - course가 있을 때만 계산
-  const images =
-    course?.images && course.images.length > 0
-      ? course.images.filter(Boolean)
-      : course?.mainImage
-        ? [course.mainImage].filter(Boolean)
-        : []
+  const images = useMemo(() => {
+    if (import.meta.env.DEV) {
+      console.log('🖼️ 이미지 처리:', {
+        courseImages: course?.images,
+        mainImage: course?.mainImage,
+        courseId: course?.id
+      })
+    }
+    
+    if (course?.images && course.images.length > 0) {
+      const filteredImages = course.images.filter(Boolean)
+      if (import.meta.env.DEV) {
+        console.log('✅ 이미지 배열 사용:', filteredImages)
+      }
+      return filteredImages
+    }
+    if (course?.mainImage) {
+      const mainImageArray = [course.mainImage].filter(Boolean)
+      if (import.meta.env.DEV) {
+        console.log('✅ 메인 이미지 사용:', mainImageArray)
+      }
+      return mainImageArray
+    }
+    // 기본 이미지 제공
+    const fallbackImages = course?.id 
+      ? [`https://picsum.photos/800/600?random=${course.id}`]
+      : [`https://picsum.photos/800/600?random=default`]
+    
+    if (import.meta.env.DEV) {
+      console.log('🔄 기본 이미지 사용:', fallbackImages)
+    }
+    return fallbackImages
+  }, [course?.images, course?.mainImage, course?.id])
 
   // 모든 useCallback과 함수들을 early return 이전으로 이동
   const toggleDay = useCallback((dayNumber) => {
@@ -290,180 +360,18 @@ export default function TravelCourseDetailPage() {
     )
   }
 
-  // 안전한 배열 접근을 위한 헬퍼 함수
-  let safeItinerary = course.itinerary || []
-
-  // [DEV ONLY] id=1(제주도)일 때 mock 일정 강제 세팅
-  if (id === '1') {
-    safeItinerary = [
-      {
-        day: 1,
-        title: '제주 입도 & 서부 탐방',
-        activities: [
-          {
-            time: '09:00',
-            type: 'transport',
-            place: '제주국제공항',
-            description: '제주 여행의 시작! 공항 도착 후 렌터카 픽업.',
-            address: '제주시 공항로 2',
-          },
-          {
-            time: '11:00',
-            type: 'restaurant',
-            place: '제주 흑돼지거리',
-            description: '제주 대표 흑돼지로 든든한 점심 식사.',
-            address: '제주시 일도일동',
-          },
-          {
-            time: '13:00',
-            type: 'attraction',
-            place: '협재해수욕장',
-            description: '에메랄드빛 바다와 하얀 모래가 아름다운 해변 산책.',
-            address: '제주시 한림읍 협재리',
-          },
-          {
-            time: '15:30',
-            type: 'attraction',
-            place: '한림공원',
-            description: '야자수와 다양한 식물, 동굴 체험이 가능한 테마파크.',
-            address: '제주시 한림읍 한림로 300',
-          },
-          {
-            time: '18:00',
-            type: 'restaurant',
-            place: '애월 해안도로 해산물 식당',
-            description: '바다 전망과 함께 신선한 해산물 저녁 식사.',
-            address: '제주시 애월읍',
-          },
-          {
-            time: '19:30',
-            type: 'cafe',
-            place: '애월 카페거리',
-            description: '감성 가득한 제주 바다뷰 카페에서 휴식.',
-            address: '제주시 애월읍',
-          },
-          {
-            time: '21:00',
-            type: 'accommodation',
-            place: '제주시/애월 숙소',
-            description: '숙소 체크인 및 휴식.',
-            address: '제주시 또는 애월읍',
-          },
-        ],
-      },
-      {
-        day: 2,
-        title: '동부/성산 & 우도 일주',
-        activities: [
-          {
-            time: '08:00',
-            type: 'restaurant',
-            place: '숙소 조식 또는 근처 식당',
-            description: '든든한 아침 식사로 하루 시작.',
-            address: '',
-          },
-          {
-            time: '09:30',
-            type: 'cafe',
-            place: '협재/한림 카페',
-            description: '제주 감성 카페에서 여유로운 커피 타임.',
-            address: '',
-          },
-          {
-            time: '10:30',
-            type: 'attraction',
-            place: '성산일출봉',
-            description: '제주 대표 명소, 분화구와 탁 트인 전망 감상.',
-            address: '서귀포시 성산읍',
-          },
-          {
-            time: '12:30',
-            type: 'restaurant',
-            place: '성산/우도 해산물 식당',
-            description: '싱싱한 해산물로 점심 식사.',
-            address: '서귀포시 성산읍 또는 우도',
-          },
-          {
-            time: '14:00',
-            type: 'attraction',
-            place: '우도',
-            description:
-              '자전거/스쿠터로 우도 한바퀴, 땅콩아이스크림 맛집 방문.',
-            address: '제주시 우도면',
-          },
-          {
-            time: '17:00',
-            type: 'attraction',
-            place: '섭지코지',
-            description: '드라마 촬영지로 유명한 해안 절경 산책.',
-            address: '서귀포시 성산읍',
-          },
-          {
-            time: '19:00',
-            type: 'restaurant',
-            place: '서귀포 맛집',
-            description: '현지인 추천 저녁 식사.',
-            address: '서귀포시',
-          },
-          {
-            time: '21:00',
-            type: 'accommodation',
-            place: '서귀포/성산 숙소',
-            description: '숙소 체크인 및 휴식.',
-            address: '서귀포시 또는 성산읍',
-          },
-        ],
-      },
-      {
-        day: 3,
-        title: '중문 & 출도',
-        activities: [
-          {
-            time: '08:00',
-            type: 'restaurant',
-            place: '숙소 조식 또는 근처 식당',
-            description: '여행 마지막 날 아침 식사.',
-            address: '',
-          },
-          {
-            time: '09:30',
-            type: 'cafe',
-            place: '중문 카페거리',
-            description: '바다 전망 카페에서 여유로운 시간.',
-            address: '서귀포시 중문동',
-          },
-          {
-            time: '10:30',
-            type: 'attraction',
-            place: '천지연폭포',
-            description: '웅장한 폭포와 산책로 감상.',
-            address: '서귀포시 천지동',
-          },
-          {
-            time: '12:00',
-            type: 'restaurant',
-            place: '서귀포 해물탕 식당',
-            description: '제주 해물탕으로 점심 식사.',
-            address: '서귀포시',
-          },
-          {
-            time: '13:30',
-            type: 'attraction',
-            place: '이중섭거리',
-            description: '예술가의 거리 산책 및 기념품 쇼핑.',
-            address: '서귀포시 이중섭로',
-          },
-          {
-            time: '15:00',
-            type: 'transport',
-            place: '제주국제공항',
-            description: '공항으로 이동, 제주 여행 마무리.',
-            address: '제주시 공항로 2',
-          },
-        ],
-      },
-    ]
+  // 디버깅: course 데이터 확인
+  if (import.meta.env.DEV) {
+    console.log('📍 상세페이지 course 데이터:', {
+      id: course?.id,
+      title: course?.title,
+      region: course?.region,
+      fullCourse: course
+    })
   }
+
+  // 안전한 배열 접근을 위한 헬퍼 함수
+  const safeItinerary = course.itinerary || []
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -554,55 +462,16 @@ export default function TravelCourseDetailPage() {
         {/* 메인 콘텐츠 */}
         <div className="lg:col-span-2">
           {/* 이미지 갤러리 */}
-          {images.length > 0 && (
-            <Card className="mb-8 overflow-hidden dark:border-gray-700 dark:bg-gray-800">
-              <div className="relative">
-                <img
-                  src={images[currentImageIndex]}
-                  alt={course.title}
-                  className="h-96 w-full object-cover"
-                />
-                {images.length > 1 && (
-                  <>
-                    <button
-                      onClick={handlePrevImage}
-                      className="absolute top-1/2 left-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
-                    >
-                      <ChevronLeft className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={handleNextImage}
-                      className="absolute top-1/2 right-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
-                    >
-                      <ChevronRight className="h-5 w-5" />
-                    </button>
-                    <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
-                      {images.map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentImageIndex(index)}
-                          className={`h-2 w-2 rounded-full ${
-                            index === currentImageIndex
-                              ? 'bg-white'
-                              : 'bg-white/50'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="absolute right-4 bottom-4"
-                  onClick={openImageModal}
-                >
-                  <Camera className="mr-2 h-4 w-4" />
-                  크게보기
-                </Button>
+          <Card className="mb-8 overflow-hidden dark:border-gray-700 dark:bg-gray-800">
+            <div className="relative">
+              <div className="h-96 w-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                <div className="text-center text-white">
+                  <h3 className="text-2xl font-bold mb-2">{course.title}</h3>
+                  <p className="text-lg opacity-90">{getRegionDisplayName(course.region)}</p>
+                </div>
+              </div>
               </div>
             </Card>
-          )}
 
           {/* 이미지 모달 */}
           {isImageModalOpen && (
