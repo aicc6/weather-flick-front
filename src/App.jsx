@@ -74,7 +74,6 @@ const SettingsPage = lazy(() =>
 const PlannerPage = lazy(() => import('./pages/planner'))
 const TravelCoursePage = lazy(() => import('@/pages/recommend'))
 const TravelCourseDetailPage = lazy(() => import('@/pages/recommend/detail'))
-const TestFCMPage = lazy(() => import('./pages/test-fcm'))
 const TravelPlansPage = lazy(() =>
   import('./pages/travel-plans').then((module) => ({
     default: module.TravelPlansPage,
@@ -227,7 +226,6 @@ function AppContent() {
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
           <Route path="/offline" element={<OfflinePage />} />
-          <Route path="/test-fcm" element={<TestFCMPage />} />
           {/* 404 페이지 - 모든 라우트의 마지막에 위치 */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
