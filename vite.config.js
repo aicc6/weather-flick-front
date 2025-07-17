@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => {
           name: 'Weather Flick',
           short_name: 'WeatherFlick',
           description: '날씨 기반 여행지 추천 서비스',
+          lang: 'ko',
           theme_color: '#1e293b',
           background_color: '#ffffff',
           display: 'standalone',
