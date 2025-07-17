@@ -208,7 +208,12 @@ export function TravelPlanDetailPage() {
           date: date.toISOString(),
           city,
           day: index + 1,
-          // 실제 API 호출 결과는 useGetWeatherForecastByCityQuery에서 받아옴
+          // 기본값 설정 (API 호출 실패 시 사용)
+          temperature: { min: 15, max: 25 },
+          condition: '맑음',
+          icon: '☀️',
+          humidity: 60,
+          precipitation: 0,
         })
       })
 
@@ -304,27 +309,44 @@ export function TravelPlanDetailPage() {
               }
             }
 
-            // 캐시에 없으면 실제 API 호출
+            // 캐시에 없으면 실제 API 호출 - 예보 API 사용
+            const forecastDate = new Date(dayForecast.date).toISOString().split('T')[0]
             const weatherResponse = await fetch(
-              `/api/weather/current/${dayForecast.city}?country=KR`,
+              `/api/weather/forecast/${dayForecast.city}?country=KR&days=7`,
             )
 
             if (weatherResponse.ok) {
-              const weatherData = await weatherResponse.json()
+              const forecastData = await weatherResponse.json()
+              
+              // 해당 날짜의 예보 찾기
+              const dayForecastData = forecastData.forecast?.find(
+                f => f.date === forecastDate
+              )
 
-              // API 응답 데이터 구조화
-              const apiData = {
-                condition: weatherData.description || dayForecast.condition,
-                icon:
-                  getWeatherIconFromDescription(weatherData.description) ||
-                  dayForecast.icon,
-                temperature: weatherData.temperature
-                  ? {
-                      min: Math.round(weatherData.temperature - 5),
-                      max: Math.round(weatherData.temperature + 5),
-                    }
-                  : dayForecast.temperature,
-                humidity: weatherData.humidity || dayForecast.humidity,
+              let apiData
+              if (dayForecastData) {
+                // API 응답 데이터 구조화
+                apiData = {
+                  condition: dayForecastData.description || dayForecast.condition,
+                  icon:
+                    getWeatherIconFromDescription(dayForecastData.description) ||
+                    dayForecast.icon,
+                  temperature: {
+                    min: Math.round(dayForecastData.temperature_min),
+                    max: Math.round(dayForecastData.temperature_max),
+                  },
+                  humidity: dayForecastData.humidity || dayForecast.humidity,
+                  precipitation: dayForecastData.precipitation_chance || 0,
+                }
+              } else {
+                // 해당 날짜의 예보가 없으면 기본값 사용
+                apiData = {
+                  condition: dayForecast.condition,
+                  icon: dayForecast.icon,
+                  temperature: dayForecast.temperature || { min: 15, max: 25 },
+                  humidity: dayForecast.humidity || 60,
+                  precipitation: 0,
+                }
               }
 
               // 캐시에 저장

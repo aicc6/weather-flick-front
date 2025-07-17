@@ -20,7 +20,6 @@ import {
   Calendar,
   Users,
   Heart,
-  Share2,
   RefreshCw,
 } from '@/components/icons'
 import { http } from '@/lib/http'
@@ -293,12 +292,33 @@ const PlaceItem = memo(({ place, placeIndex }) => (
           {place.tags.map((tag, tagIndex) => (
             <Badge
               key={tagIndex}
-              variant="secondary"
-              className="text-xs dark:bg-gray-700 dark:text-gray-300"
+              variant={tag === '반려동물동반가능' || tag === '펫프렌들리' ? 'default' : 'secondary'}
+              className={`text-xs ${
+                tag === '반려동물동반가능' || tag === '펫프렌들리'
+                  ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                  : 'dark:bg-gray-700 dark:text-gray-300'
+              }`}
             >
-              {tag}
+              {tag === '반려동물동반가능' ? '🐕 ' + tag : tag}
             </Badge>
           ))}
+        </div>
+      )}
+      {place.pet_info && (
+        <div className="mt-2 rounded-lg bg-green-50 p-2 text-xs dark:bg-green-900/20">
+          <p className="font-medium text-green-800 dark:text-green-400">
+            🐾 반려동물 동반 정보
+          </p>
+          {place.pet_info.pet_acpt_abl && (
+            <p className="mt-1 text-green-700 dark:text-green-300">
+              {place.pet_info.pet_acpt_abl}
+            </p>
+          )}
+          {place.pet_info.pet_info && (
+            <p className="mt-1 text-green-600 dark:text-green-300">
+              {place.pet_info.pet_info}
+            </p>
+          )}
         </div>
       )}
     </div>
@@ -805,18 +825,6 @@ export default function CustomizedScheduleResultPage() {
     )
   }, [navigateCallback, region, period, days, who, styles])
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: '맞춤 여행 일정',
-        text: `${region} ${period} 여행 일정을 확인해보세요!`,
-        url: window.location.href,
-      })
-    } else {
-      navigator.clipboard.writeText(window.location.href)
-      alert('링크가 클립보드에 복사되었습니다!')
-    }
-  }
 
   const handleSavePlans = useCallback(() => {
     if (!isAuthenticated) {
@@ -1089,30 +1097,13 @@ export default function CustomizedScheduleResultPage() {
       </Card>
 
       {/* 액션 버튼들 */}
-      <div className="flex flex-col justify-center gap-4 sm:flex-row">
+      <div className="flex justify-center">
         <Button
           onClick={handleSavePlans}
           className="bg-blue-600 text-white hover:bg-blue-700"
           size="lg"
         >
           여행 플랜으로 저장하기
-        </Button>
-        <Button
-          onClick={handleShare}
-          variant="outline"
-          size="lg"
-          className="flex items-center gap-2 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-        >
-          <Share2 className="h-4 w-4" />
-          공유하기
-        </Button>
-        <Button
-          onClick={() => navigateCallback('/recommend')}
-          variant="outline"
-          size="lg"
-          className="dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-        >
-          새로운 추천 받기
         </Button>
       </div>
 
