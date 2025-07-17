@@ -292,7 +292,11 @@ const PlaceItem = memo(({ place, placeIndex }) => (
           {place.tags.map((tag, tagIndex) => (
             <Badge
               key={tagIndex}
-              variant={tag === '반려동물동반가능' || tag === '펫프렌들리' ? 'default' : 'secondary'}
+              variant={
+                tag === '반려동물동반가능' || tag === '펫프렌들리'
+                  ? 'default'
+                  : 'secondary'
+              }
               className={`text-xs ${
                 tag === '반려동물동반가능' || tag === '펫프렌들리'
                   ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
@@ -824,7 +828,6 @@ export default function CustomizedScheduleResultPage() {
       `/recommend/schedule?region=${region}&period=${period}&days=${days}&who=${who}&styles=${styles}`,
     )
   }, [navigateCallback, region, period, days, who, styles])
-
 
   const handleSavePlans = useCallback(() => {
     if (!isAuthenticated) {

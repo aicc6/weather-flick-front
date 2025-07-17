@@ -101,7 +101,9 @@ export function RealTimeTrafficWidget({
     return (
       <Card className={`w-full ${className}`}>
         <CardContent className="p-4 text-center">
-          <div className="text-gray-500 dark:text-gray-400">교통정보를 불러올 수 없습니다</div>
+          <div className="text-gray-500 dark:text-gray-400">
+            교통정보를 불러올 수 없습니다
+          </div>
         </CardContent>
       </Card>
     )
@@ -181,7 +183,9 @@ export function RealTimeTrafficWidget({
               <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
                 {trafficData?.summary?.distance || '계산중'}km
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">총 거리</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">
+                총 거리
+              </div>
             </div>
           </div>
         </div>
@@ -189,12 +193,14 @@ export function RealTimeTrafficWidget({
         {/* 도로별 상세 정보 */}
         {trafficData?.roads && (
           <div>
-            <h4 className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">주요 경로 상황</h4>
+            <h4 className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+              주요 경로 상황
+            </h4>
             <div className="space-y-2">
               {trafficData.roads.map((road, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between rounded bg-gray-50 dark:bg-gray-800 p-2"
+                  className="flex items-center justify-between rounded bg-gray-50 p-2 dark:bg-gray-800"
                 >
                   <div className="flex items-center space-x-2">
                     <div
@@ -206,7 +212,9 @@ export function RealTimeTrafficWidget({
                             : 'bg-red-500'
                       }`}
                     />
-                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{road.name}</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      {road.name}
+                    </span>
                   </div>
                   <div className="text-right">
                     <div className="text-xs text-gray-600 dark:text-gray-400">
@@ -245,7 +253,9 @@ export function RealTimeTrafficWidget({
                         : 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
                   }`}
                 >
-                  <div className="font-medium text-gray-900 dark:text-gray-100">{alert.title}</div>
+                  <div className="font-medium text-gray-900 dark:text-gray-100">
+                    {alert.title}
+                  </div>
                   <div className="text-xs text-gray-600 dark:text-gray-400">
                     {alert.description}
                   </div>
@@ -263,17 +273,21 @@ export function RealTimeTrafficWidget({
         {/* 대체 경로 제안 */}
         {trafficData?.alternatives && trafficData.alternatives.length > 0 && (
           <div>
-            <h4 className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">대체 경로</h4>
+            <h4 className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+              대체 경로
+            </h4>
             <div className="space-y-2">
               {trafficData.alternatives.map((alt, index) => (
                 <div
                   key={index}
-                  className="cursor-pointer rounded-lg border border-gray-200 dark:border-gray-700 p-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="cursor-pointer rounded-lg border border-gray-200 p-3 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
                   onClick={() => onRouteChange && onRouteChange(alt)}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{alt.name}</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {alt.name}
+                      </div>
                       <div className="text-xs text-gray-600 dark:text-gray-400">
                         {alt.distance}km • {alt.time}분
                       </div>
@@ -301,9 +315,11 @@ export function RealTimeTrafficWidget({
         {/* 교통 트렌드 */}
         {trafficData?.trends && (
           <div>
-            <h4 className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">교통 트렌드</h4>
+            <h4 className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+              교통 트렌드
+            </h4>
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded bg-blue-50 dark:bg-blue-900/20 p-2 text-center">
+              <div className="rounded bg-blue-50 p-2 text-center dark:bg-blue-900/20">
                 <div className="flex items-center justify-center space-x-1">
                   {trafficData.trends.direction === 'improving' ? (
                     <TrendingDown className="h-4 w-4 text-green-500" />
@@ -320,10 +336,12 @@ export function RealTimeTrafficWidget({
                   {trafficData.trends.prediction}
                 </div>
               </div>
-              <div className="rounded bg-purple-50 dark:bg-purple-900/20 p-2 text-center">
+              <div className="rounded bg-purple-50 p-2 text-center dark:bg-purple-900/20">
                 <div className="flex items-center justify-center space-x-1">
                   <Clock className="h-4 w-4 text-purple-500" />
-                  <span className="text-xs font-medium text-gray-900 dark:text-gray-100">최적 시간</span>
+                  <span className="text-xs font-medium text-gray-900 dark:text-gray-100">
+                    최적 시간
+                  </span>
                 </div>
                 <div className="mt-1 text-xs text-gray-600 dark:text-gray-400">
                   {trafficData.trends.bestTime}
@@ -406,7 +424,10 @@ const generateRealTimeTrafficData = (_route) => {
 
   return {
     summary: {
-      routeName: _route?.from && _route?.to ? `${_route.from} → ${_route.to}` : '경로 정보 없음',
+      routeName:
+        _route?.from && _route?.to
+          ? `${_route.from} → ${_route.to}`
+          : '경로 정보 없음',
       totalTime: 15 + baseDelay,
       delayFromNormal: baseDelay,
       distance: _route?.distance || '2.1',

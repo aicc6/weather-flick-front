@@ -156,7 +156,7 @@ export function MainPage() {
 
   // 이미지 영역 스타일 업데이트 - 날씨 테마
   const imageBoxClass =
-    'flex-shrink-0 flex items-center justify-center w-44 h-44 md:w-52 md:h-52 weather-card shadow-lg overflow-hidden'
+    'flex-shrink-0 flex items-center justify-center w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 weather-card shadow-lg overflow-hidden rounded-xl'
 
   // 각 서비스별 링크 경로
   const serviceLinks = ['/recommend', '/customized-schedule', '/planner']
@@ -167,7 +167,7 @@ export function MainPage() {
       <section
         ref={heroRef}
         onMouseMove={handleMouseMove}
-        className="relative flex min-h-[80vh] flex-col justify-center pt-12 pb-8 text-center"
+        className="relative flex min-h-[60vh] flex-col justify-center pt-8 pb-6 text-center sm:min-h-[70vh]"
         style={{
           backgroundImage: 'url(/home-background.jpg)',
           backgroundSize: 'cover',
@@ -180,25 +180,25 @@ export function MainPage() {
         <div className="from-sky-blue/30 via-cloud-white/20 to-sunshine-yellow/30 dark:from-storm-gray-dark/60 dark:via-storm-gray/40 dark:to-sky-blue/20 absolute inset-0 bg-gradient-to-br"></div>
 
         {/* Content */}
-        <div className="relative z-10">
-          <h1 className="mb-5 text-5xl font-bold text-white drop-shadow-lg">
+        <div className="relative z-10 px-2 sm:px-4">
+          <h1 className="mb-4 text-3xl font-bold text-white drop-shadow-lg sm:text-4xl lg:text-5xl">
             &quot;날씨 기반 스마트 여행 플래너&quot;
           </h1>
-          <p className="mb-8 text-lg text-white/95 drop-shadow-md">
+          <p className="mx-auto mb-6 max-w-2xl text-base text-white/95 drop-shadow-md sm:text-lg">
             실시간 날씨 정보를 기반으로 최적의 여행지를 추천해드립니다
           </p>
 
           {/* Call to Action Button */}
-          <div className="mt-8"></div>
+          <div className="mt-6"></div>
         </div>
       </section>
 
       {/* Rest of the content with weather theme background */}
       <div className="bg-background">
-        <section className="from-sky-blue-light/20 dark:from-sky-blue/10 bg-gradient-to-b to-transparent py-12">
-          <div className="container mx-auto px-4">
-            <div className="mb-8 text-center">
-              <h2 className="text-foreground mb-3 text-3xl font-bold">
+        <section className="from-sky-blue-light/20 dark:from-sky-blue/10 bg-gradient-to-b to-transparent py-8 sm:py-12">
+          <div className="container mx-auto px-2 sm:px-4">
+            <div className="mb-6 text-center">
+              <h2 className="text-foreground mb-3 text-2xl font-bold sm:text-3xl">
                 ☀️ 오늘의 추천 여행지
               </h2>
             </div>
@@ -246,13 +246,13 @@ export function MainPage() {
                       destinations={recommendedDestinations}
                     />
                     {/* 더 많은 여행지 보기 버튼 */}
-                    <div className="mt-8 text-center">
+                    <div className="mt-6 text-center">
                       <Link
                         to="/recommend"
-                        className="primary-button inline-flex items-center gap-2 rounded-full px-8 py-3 text-lg font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                        className="primary-button inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-base font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
                       >
                         🌍 더 많은 여행지 보기
-                        <span className="text-xl">→</span>
+                        <span className="text-lg">→</span>
                       </Link>
                     </div>
                   </>
@@ -263,12 +263,12 @@ export function MainPage() {
         </section>
 
         {/* 서비스별 설명 섹션 - 날씨 테마 적용 */}
-        <div className="container mx-auto mt-12 space-y-20 px-4 pb-20">
-          <div className="mb-16 text-center">
-            <h2 className="text-foreground mb-4 text-4xl font-bold">
+        <div className="container mx-auto mt-8 space-y-12 px-2 pb-16 sm:mt-12 sm:space-y-16 sm:px-4">
+          <div className="mb-8 text-center sm:mb-12">
+            <h2 className="text-foreground mb-3 text-2xl font-bold sm:text-3xl lg:text-4xl">
               🌈 Weather Flick 서비스
             </h2>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-muted-foreground mx-auto max-w-2xl text-base sm:text-lg">
               날씨를 기반으로 한 완벽한 여행 경험을 제공합니다
             </p>
           </div>
@@ -284,8 +284,8 @@ export function MainPage() {
                 key={sec.title}
                 ref={fadeProps.ref}
                 style={fadeProps.style}
-                className={`group weather-card focus:ring-sky-blue mx-auto flex max-w-6xl cursor-pointer flex-col items-center gap-10 rounded-2xl px-6 py-8 hover:shadow-xl focus:ring-2 focus:outline-none ${
-                  isEven ? 'md:flex-row' : 'md:flex-row-reverse'
+                className={`group weather-card focus:ring-sky-blue mx-auto flex max-w-5xl cursor-pointer flex-col items-center gap-6 rounded-2xl px-3 py-6 hover:shadow-xl focus:ring-2 focus:outline-none sm:gap-8 sm:px-6 sm:py-8 ${
+                  isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'
                 }`}
                 tabIndex={0}
                 aria-label={sec.title + ' 서비스로 이동'}
@@ -303,17 +303,17 @@ export function MainPage() {
                 </div>
 
                 <div
-                  className={`flex-1 text-center ${isEven ? 'md:pl-8 md:text-left' : 'md:pr-8 md:text-right'}`}
+                  className={`flex-1 text-center ${isEven ? 'lg:pl-8 lg:text-left' : 'lg:pr-8 lg:text-right'}`}
                 >
-                  <h3 className="text-foreground mb-4 text-3xl font-bold">
+                  <h3 className="text-foreground mb-3 text-xl font-bold sm:text-2xl lg:text-3xl">
                     {sec.title}
                   </h3>
-                  <p className="text-muted-foreground text-lg leading-relaxed">
+                  <p className="text-muted-foreground text-sm leading-relaxed sm:text-base lg:text-lg">
                     {sec.desc}
                   </p>
 
-                  <div className="mt-6">
-                    <span className="primary-button inline-flex items-center rounded-full px-6 py-2 text-sm font-medium text-white">
+                  <div className="mt-4 sm:mt-6">
+                    <span className="primary-button inline-flex items-center rounded-full px-4 py-1.5 text-xs font-medium text-white sm:text-sm">
                       자세히 보기 →
                     </span>
                   </div>

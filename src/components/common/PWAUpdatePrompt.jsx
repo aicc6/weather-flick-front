@@ -1,15 +1,21 @@
 import { useEffect, useState } from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { RefreshCw, X } from 'lucide-react'
 
 export default function PWAUpdatePrompt() {
   const [isVisible, setIsVisible] = useState(false)
-  
+
   // 개발 환경 여부 확인
   const isDevelopment = import.meta.env.DEV
-  
+
   const {
     offlineReady: [offlineReady, setOfflineReady],
     needRefresh: [needRefresh, setNeedRefresh],
@@ -57,8 +63,8 @@ export default function PWAUpdatePrompt() {
   if (!isVisible) return null
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 max-w-sm">
-      <Card className="shadow-lg border-2">
+    <div className="fixed right-4 bottom-4 z-50 max-w-sm">
+      <Card className="border-2 shadow-lg">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base">
@@ -74,29 +80,24 @@ export default function PWAUpdatePrompt() {
             </Button>
           </div>
           <CardDescription className="text-sm">
-            {needRefresh 
+            {needRefresh
               ? 'Weather Flick의 새 버전이 사용 가능합니다. 업데이트하시겠습니까?'
-              : 'Weather Flick을 이제 오프라인에서도 사용할 수 있습니다!'
-            }
+              : 'Weather Flick을 이제 오프라인에서도 사용할 수 있습니다!'}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="flex gap-2">
             {needRefresh && (
-              <Button 
-                onClick={handleUpdate} 
-                size="sm" 
-                className="flex-1"
-              >
+              <Button onClick={handleUpdate} size="sm" className="flex-1">
                 <RefreshCw className="mr-2 h-4 w-4" />
                 업데이트
               </Button>
             )}
-            <Button 
-              variant="outline" 
-              onClick={handleClose} 
+            <Button
+              variant="outline"
+              onClick={handleClose}
               size="sm"
-              className={needRefresh ? "flex-1" : "w-full"}
+              className={needRefresh ? 'flex-1' : 'w-full'}
             >
               {needRefresh ? '나중에' : '확인'}
             </Button>

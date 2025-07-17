@@ -35,7 +35,7 @@ function RecommendedDestCard({ destination, onClick }) {
       aria-label={`${destination.name} 여행지 추천 보기`}
     >
       {/* Image or Icon Display */}
-      <div className="relative h-48 w-full overflow-hidden rounded-t-xl">
+      <div className="relative h-36 w-full overflow-hidden rounded-t-xl sm:h-40">
         {destination.image && (
           <img
             src={destination.image}
@@ -56,9 +56,9 @@ function RecommendedDestCard({ destination, onClick }) {
         )}
       </div>
       {/* Content */}
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
         <div className="mb-2 flex items-center justify-between">
-          <h4 className="text-foreground text-lg font-bold transition-colors group-hover:text-blue-600">
+          <h4 className="text-foreground text-base font-bold transition-colors group-hover:text-blue-600 sm:text-lg">
             {destination.name}
           </h4>
           {/* 별점/리뷰 표시 */}
@@ -122,7 +122,7 @@ function RecommendedDestCard({ destination, onClick }) {
             )}
           </div>
         </div>
-        <p className="text-muted-foreground mb-3 line-clamp-2 text-sm">
+        <p className="text-muted-foreground mb-2 line-clamp-2 text-xs sm:text-sm">
           {destination.description || ''}
         </p>
         {/* 더미 태그/거리/예산/아이콘 등 완전 삭제 */}
@@ -198,10 +198,10 @@ export function RecommendedDestCarousel({ destinations = [] }) {
   )
 
   return (
-    <div className="relative mx-auto w-full max-w-6xl px-4">
+    <div className="relative mx-auto w-full max-w-6xl px-2 sm:px-4">
       {/* Carousel Container */}
       <div
-        className="weather-card relative overflow-hidden rounded-2xl p-6"
+        className="weather-card relative overflow-hidden rounded-2xl p-4 sm:p-6"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -229,7 +229,7 @@ export function RecommendedDestCarousel({ destinations = [] }) {
         )}
 
         {/* Carousel Content */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
           {visibleDestinations.map((destination, index) => (
             <RecommendedDestCard
               key={`${destination.name}-${currentIndex + index}`}
@@ -244,7 +244,7 @@ export function RecommendedDestCarousel({ destinations = [] }) {
 
         {/* Indicators */}
         {destinations.length > itemsToShow && (
-          <div className="mt-6 flex justify-center gap-2">
+          <div className="mt-4 flex justify-center gap-2 sm:mt-6">
             {Array.from({ length: maxIndex + 1 }).map((_, index) => (
               <button
                 key={index}

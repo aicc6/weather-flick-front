@@ -8,7 +8,10 @@ import { Separator } from '@/components/ui/separator'
 import { WithdrawModal } from '@/components/WithdrawModal'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
-import { getNotificationSettings, updateNotificationSettings } from '@/services/notificationService'
+import {
+  getNotificationSettings,
+  updateNotificationSettings,
+} from '@/services/notificationService'
 import {
   Settings,
   LogOut,
@@ -37,14 +40,14 @@ export function SettingsPage() {
     try {
       setLoading(true)
       const settings = await getNotificationSettings()
-      
+
       // 백엔드 API 응답에 맞게 매핑
       setWeatherAlert(settings.weather_alerts || false)
       setEmailAlert(settings.email_enabled || false)
       setMarketingAlert(settings.marketing_messages || false)
     } catch (error) {
       console.error('알림 설정 로드 실패:', error)
-      toast.error("알림 설정을 불러오는데 실패했습니다.")
+      toast.error('알림 설정을 불러오는데 실패했습니다.')
     } finally {
       setLoading(false)
     }
@@ -54,16 +57,16 @@ export function SettingsPage() {
   const updateNotificationSetting = async (settingKey, value) => {
     try {
       const settings = {
-        [settingKey]: value
+        [settingKey]: value,
       }
-      
+
       await updateNotificationSettings(settings)
-      
-      toast.success("알림 설정이 성공적으로 저장되었습니다.")
+
+      toast.success('알림 설정이 성공적으로 저장되었습니다.')
     } catch (error) {
       console.error('알림 설정 업데이트 실패:', error)
-      toast.error("설정 저장에 실패했습니다.")
-      
+      toast.error('설정 저장에 실패했습니다.')
+
       // 실패 시 이전 상태로 되돌리기
       if (settingKey === 'weather_alerts') setWeatherAlert(!value)
       if (settingKey === 'email_enabled') setEmailAlert(!value)
@@ -313,14 +316,14 @@ export function SettingsPage() {
             </div>
             {/* 개발자 전용 FCM 테스트 링크 */}
             {process.env.NODE_ENV === 'development' && (
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="mt-4 border-t border-gray-200 pt-4 dark:border-gray-700">
                 <Button
                   variant="outline"
                   size="sm"
                   className="w-full"
                   onClick={() => navigate('/test-fcm')}
                 >
-                  <Bell className="h-4 w-4 mr-2" />
+                  <Bell className="mr-2 h-4 w-4" />
                   FCM 푸시 알림 테스트
                 </Button>
               </div>

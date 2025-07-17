@@ -9,7 +9,7 @@ export const saveFCMToken = async (token) => {
         token,
         device_type: 'web',
         device_info: navigator.userAgent,
-      }
+      },
     })
     return response.data
   } catch (error) {
@@ -22,7 +22,7 @@ export const saveFCMToken = async (token) => {
 export const deleteFCMToken = async (token) => {
   try {
     const response = await authHttp.DELETE('/api/notifications/fcm-token', {
-      body: { token }
+      body: { token },
     })
     return response.data
   } catch (error) {
@@ -47,7 +47,7 @@ export const getNotificationSettings = async () => {
 export const updateNotificationSettings = async (settings) => {
   try {
     const response = await authHttp.PUT('/api/notifications/settings', {
-      body: settings
+      body: settings,
     })
     const data = await response.json()
     return data
@@ -60,7 +60,9 @@ export const updateNotificationSettings = async (settings) => {
 // 알림 히스토리 조회
 export const getNotificationHistory = async (params = {}) => {
   try {
-    const response = await authHttp.GET('/api/notifications/history', { params })
+    const response = await authHttp.GET('/api/notifications/history', {
+      params,
+    })
     const data = await response.json()
     return data
   } catch (error) {
@@ -72,7 +74,9 @@ export const getNotificationHistory = async (params = {}) => {
 // 알림 읽음 처리
 export const markNotificationAsRead = async (notificationId) => {
   try {
-    const response = await authHttp.PUT(`/api/notifications/${notificationId}/read`)
+    const response = await authHttp.PUT(
+      `/api/notifications/${notificationId}/read`,
+    )
     const data = await response.json()
     return data
   } catch (error) {
