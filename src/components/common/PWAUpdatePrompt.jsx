@@ -7,6 +7,9 @@ import { RefreshCw, X } from 'lucide-react'
 export default function PWAUpdatePrompt() {
   const [isVisible, setIsVisible] = useState(false)
   
+  // 개발 환경 여부 확인
+  const isDevelopment = import.meta.env.DEV
+  
   const {
     offlineReady: [offlineReady, setOfflineReady],
     needRefresh: [needRefresh, setNeedRefresh],
@@ -20,7 +23,10 @@ export default function PWAUpdatePrompt() {
     },
     onOfflineReady() {
       console.log('앱이 오프라인에서 사용 가능합니다')
-      setIsVisible(true)
+      // 개발 환경에서는 오프라인 준비 완료 팝업을 표시하지 않음
+      if (!isDevelopment) {
+        setIsVisible(true)
+      }
     },
     onNeedRefresh() {
       console.log('새 업데이트가 있습니다')
@@ -40,10 +46,13 @@ export default function PWAUpdatePrompt() {
   }
 
   useEffect(() => {
-    if (offlineReady || needRefresh) {
+    if (needRefresh) {
+      setIsVisible(true)
+    } else if (offlineReady && !isDevelopment) {
+      // 개발 환경에서는 오프라인 준비 완료 팝업을 표시하지 않음
       setIsVisible(true)
     }
-  }, [offlineReady, needRefresh])
+  }, [offlineReady, needRefresh, isDevelopment])
 
   if (!isVisible) return null
 
