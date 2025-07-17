@@ -3,6 +3,55 @@ import { useGetTravelCoursesQuery } from '@/store/api/travelCoursesApi'
 import { useGetGoogleReviewsQuery } from '@/store/api'
 import { Star } from '@/components/icons'
 
+// 아이콘 컴포넌트들
+const HeartIcon = ({ className, filled = false }) => (
+  <svg
+    className={className}
+    fill={filled ? 'currentColor' : 'none'}
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+    />
+  </svg>
+)
+
+const BookmarkIcon = ({ className, filled = false }) => (
+  <svg
+    className={className}
+    fill={filled ? 'currentColor' : 'none'}
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z"
+    />
+  </svg>
+)
+
+const ShareIcon = ({ className }) => (
+  <svg
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+    />
+  </svg>
+)
+
 // region_code <-> 태그 code 매핑
 const REGION_CODE_MAP = {
   1: 'seoul',
@@ -67,95 +116,240 @@ function RecommendCourseItem({ course }) {
     data: googleData,
     isLoading: isReviewLoading,
     isError: isReviewError,
+    error: reviewError,
   } = useGetGoogleReviewsQuery(course.place_id, { skip: !course.place_id })
   const rating = googleData?.rating
   const reviews = googleData?.reviews || []
   const [showAllReviews, setShowAllReviews] = useState(false)
+  const [isLiked, setIsLiked] = useState(false)
+  const [isBookmarked, setIsBookmarked] = useState(false)
 
   const handleShowAllReviews = () => {
     setShowAllReviews(true)
   }
 
+  const handleLike = (e) => {
+    e.stopPropagation()
+    setIsLiked(!isLiked)
+  }
+
+  const handleBookmark = (e) => {
+    e.stopPropagation()
+    setIsBookmarked(!isBookmarked)
+  }
+
+  const handleShare = (e) => {
+    e.stopPropagation()
+    // 공유 기능 구현
+    if (navigator.share) {
+      navigator.share({
+        title: course.title,
+        text: `${course.title} - ${course.address}`,
+        url: window.location.href,
+      })
+    } else {
+      // 폴백: 클립보드에 복사
+      navigator.clipboard.writeText(window.location.href)
+      alert('링크가 클립보드에 복사되었습니다!')
+    }
+  }
+
+  // 지역 태그 정보 가져오기
+  const regionName = getRegionName(course.region_code)
+
   return (
-    <li className="flex gap-6 border-b pb-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group">
       {/* 썸네일 */}
-      <div className="flex h-32 w-48 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-gray-100">
+      <div className="aspect-video w-full overflow-hidden relative">
         {course.mainImage ? (
           <img
             src={course.mainImage}
             alt={course.title}
-            className="h-full w-full object-cover"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             loading="lazy"
           />
         ) : (
-          <span className="text-gray-400">No Image</span>
+          <div className="w-full h-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center group-hover:bg-gray-200 dark:group-hover:bg-gray-600 transition-colors">
+            <span className="text-gray-400 dark:text-gray-500">No Image</span>
+          </div>
         )}
+        
+        {/* 지역 태그 오버레이 */}
+        <div className="absolute top-2 left-2">
+          <span className="bg-blue-600 dark:bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium shadow-md">
+            {regionName}
+          </span>
+        </div>
+        
+        {/* 별점 오버레이 */}
+        {rating && (
+          <div className="absolute top-2 right-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 shadow-md">
+            <Star className="h-3 w-3 text-yellow-500" aria-label="별점" />
+            <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">{rating}</span>
+          </div>
+        )}
+
+        {/* 호버 시 나타나는 액션 버튼들 */}
+        <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <button
+            onClick={handleLike}
+            className={`p-2 rounded-full backdrop-blur-sm transition-all duration-200 ${
+              isLiked
+                ? 'bg-red-500 text-white shadow-lg'
+                : 'bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500'
+            }`}
+            aria-label="좋아요"
+          >
+            <HeartIcon className="h-4 w-4" filled={isLiked} />
+          </button>
+          <button
+            onClick={handleBookmark}
+            className={`p-2 rounded-full backdrop-blur-sm transition-all duration-200 ${
+              isBookmarked
+                ? 'bg-amber-500 text-white shadow-lg'
+                : 'bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-600'
+            }`}
+            aria-label="북마크"
+          >
+            <BookmarkIcon className="h-4 w-4" filled={isBookmarked} />
+          </button>
+          <button
+            onClick={handleShare}
+            className="p-2 rounded-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-500 transition-all duration-200"
+            aria-label="공유"
+          >
+            <ShareIcon className="h-4 w-4" />
+          </button>
+        </div>
       </div>
-      {/* 정보 */}
-      <div className="min-w-0 flex-1">
-        <div className="mb-1 text-xl font-bold">{course.title}</div>
+      
+      {/* 카드 내용 */}
+      <div className="p-4">
+        <div className="mb-2 text-lg font-bold line-clamp-2 text-gray-900 dark:text-white">{course.title}</div>
         {/* 주소 표시 */}
-        <div className="mb-1 text-sm text-gray-600">{course.address}</div>
-        {/* 별점/리뷰 표시 */}
+        <div className="mb-3 text-sm text-gray-600 dark:text-gray-400 line-clamp-1">{course.address}</div>
+        
+        {/* 별점/리뷰 정보 */}
         {course.place_id ? (
-          <div className="mb-1">
+          <div className="mb-3">
             {isReviewLoading ? (
-              <span className="text-xs text-gray-400">별점 불러오는 중...</span>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-gray-200 dark:bg-gray-600 rounded animate-pulse"></div>
+                <span className="text-xs text-gray-400 dark:text-gray-500">별점 불러오는 중...</span>
+              </div>
             ) : isReviewError ? (
-              <span className="text-xs text-red-400">
-                별점 정보를 불러올 수 없습니다
-              </span>
-            ) : rating ? (
-              <div className="flex items-center gap-1 text-yellow-500">
-                <Star className="h-4 w-4" aria-label="별점" />
-                <span className="font-semibold">{rating}</span>
-                <span className="text-xs text-gray-500">/ 5</span>
-                <span className="ml-2 text-xs text-gray-500">
-                  ({reviews.length}개 리뷰)
+              <div className="flex items-center gap-2 text-red-400 dark:text-red-400">
+                <div className="w-4 h-4 bg-red-100 dark:bg-red-900/30 rounded flex items-center justify-center">
+                  <span className="text-xs">!</span>
+                </div>
+                <span className="text-xs">
+                  {reviewError?.status === 503 
+                    ? '구글 리뷰 서비스 일시 중단'
+                    : reviewError?.status === 403 
+                    ? '구글 리뷰 서비스 접근 권한 없음'
+                    : '별점 정보를 불러올 수 없습니다'
+                  }
                 </span>
               </div>
+            ) : rating ? (
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 text-yellow-500">
+                    <Star className="h-4 w-4" aria-label="별점" />
+                    <span className="font-semibold text-gray-800 dark:text-gray-200">{rating}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">/ 5</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full font-medium">
+                    리뷰 {reviews.length}개
+                  </span>
+                </div>
+              </div>
             ) : (
-              <span className="text-xs text-gray-400">정보가없습니다</span>
+              <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500">
+                <div className="w-4 h-4 bg-gray-100 dark:bg-gray-700 rounded"></div>
+                <span className="text-xs">리뷰 정보 없음</span>
+              </div>
             )}
+            
             {/* 리뷰 미리보기/전체보기 */}
             {reviews.length > 0 && (
-              <ul className="mt-1 space-y-1">
-                {(showAllReviews ? reviews : reviews.slice(0, 2)).map(
+              <div className="space-y-2">
+                {(showAllReviews ? reviews : reviews.slice(0, 1)).map(
                   (review, idx) => (
-                    <li
+                    <div
                       key={idx}
-                      className="border-b pb-2 text-xs text-gray-700 last:border-b-0 last:pb-0"
+                      className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-xs text-gray-700 dark:text-gray-300 border-l-2 border-blue-200 dark:border-blue-400 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                     >
-                      <span className="font-semibold">
-                        {review.author_name}:
-                      </span>{' '}
-                      {review.text}
-                      <span className="ml-2 text-gray-400">
-                        ({review.relative_time_description})
-                      </span>
-                    </li>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-gray-800 dark:text-gray-200">
+                          {review.author_name}
+                        </span>
+                        <span className="text-gray-400 dark:text-gray-500 text-xs">
+                          {review.relative_time_description}
+                        </span>
+                      </div>
+                      <p className="line-clamp-2 text-gray-600 dark:text-gray-400">{review.text}</p>
+                    </div>
                   ),
                 )}
-                {!showAllReviews && reviews.length > 2 && (
-                  <li className="text-xs text-blue-500">
-                    <button
-                      type="button"
-                      className="ml-1 rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700 hover:bg-blue-200 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                      aria-label={`리뷰 더보기 (${reviews.length}개)`}
-                      onClick={handleShowAllReviews}
-                    >
-                      리뷰 더보기
-                    </button>
-                  </li>
+                {!showAllReviews && reviews.length > 1 && (
+                  <button
+                    type="button"
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 px-3 py-1 rounded-full transition-all duration-200 hover:shadow-sm"
+                    aria-label={`리뷰 더보기 (${reviews.length}개)`}
+                    onClick={handleShowAllReviews}
+                  >
+                    리뷰 더보기 ({reviews.length}개)
+                  </button>
                 )}
-              </ul>
+              </div>
             )}
           </div>
         ) : (
-          <span className="text-xs text-gray-400">정보가없습니다</span>
+          <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500 mb-3">
+            <div className="w-4 h-4 bg-gray-100 dark:bg-gray-700 rounded"></div>
+            <span className="text-xs">리뷰 정보 없음</span>
+          </div>
         )}
+        
+        {/* 카드 하단 액션 바 */}
+        <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleLike}
+              className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-all duration-200 ${
+                isLiked
+                  ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                  : 'text-gray-500 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400'
+              }`}
+            >
+              <HeartIcon className="h-3 w-3" filled={isLiked} />
+              좋아요
+            </button>
+            <button
+              onClick={handleBookmark}
+              className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-all duration-200 ${
+                isBookmarked
+                  ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
+                  : 'text-gray-500 dark:text-gray-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-600 dark:hover:text-amber-400'
+              }`}
+            >
+              <BookmarkIcon className="h-3 w-3" filled={isBookmarked} />
+              저장
+            </button>
+          </div>
+          <button
+            onClick={handleShare}
+            className="flex items-center gap-1 px-2 py-1 rounded-full text-xs text-gray-500 dark:text-gray-400 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400 transition-all duration-200"
+          >
+            <ShareIcon className="h-3 w-3" />
+            공유
+          </button>
+        </div>
       </div>
-    </li>
+    </div>
   )
 }
 
@@ -204,26 +398,28 @@ export default function RecommendListPage() {
     <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 md:grid-cols-3">
       {/* 왼쪽: 여행지 리스트 */}
       <div className="md:col-span-2">
-        <h1 className="mb-6 text-2xl font-bold">여행지 리스트</h1>
-        <ul className="mb-8 space-y-8">
+        <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">여행지 리스트</h1>
+        <div className="mb-8">
           {isLoading ? (
-            <li>로딩 중...</li>
+            <div className="text-center py-8 text-gray-600 dark:text-gray-400">로딩 중...</div>
           ) : isError ? (
-            <li className="text-red-500">
+            <div className="text-red-500 dark:text-red-400 text-center py-8">
               에러: {error?.data?.detail || '데이터를 불러올 수 없습니다.'}
-            </li>
+            </div>
           ) : courses.length === 0 ? (
-            <li className="text-gray-500">데이터가 없습니다.</li>
+            <div className="text-gray-500 dark:text-gray-400 text-center py-8">데이터가 없습니다.</div>
           ) : (
-            sortedCourses.map((course) => (
-              <RecommendCourseItem key={course.id} course={course} />
-            ))
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {sortedCourses.map((course) => (
+                <RecommendCourseItem key={course.id} course={course} />
+              ))}
+            </div>
           )}
-        </ul>
+        </div>
         {/* 페이지네이션 */}
         <div className="flex items-center justify-center gap-2">
           <button
-            className="rounded border bg-white px-3 py-1 text-gray-800 hover:bg-gray-100 disabled:opacity-50"
+            className="rounded border bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 px-3 py-1 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
             onClick={() => setPage(1)}
             disabled={page === 1}
             aria-label="맨 처음"
@@ -231,18 +427,18 @@ export default function RecommendListPage() {
             {'<<'}
           </button>
           <button
-            className="rounded border bg-white px-3 py-1 text-gray-800 hover:bg-gray-100 disabled:opacity-50"
+            className="rounded border bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 px-3 py-1 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
             aria-label="이전"
           >
             {'<'}
           </button>
-          <span className="mx-2 text-sm">
+          <span className="mx-2 text-sm text-gray-600 dark:text-gray-400">
             {page} / {totalPages}
           </span>
           <button
-            className="rounded border bg-white px-3 py-1 text-gray-800 hover:bg-gray-100 disabled:opacity-50"
+            className="rounded border bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 px-3 py-1 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
             aria-label="다음"
@@ -250,7 +446,7 @@ export default function RecommendListPage() {
             {'>'}
           </button>
           <button
-            className="rounded border bg-white px-3 py-1 text-gray-800 hover:bg-gray-100 disabled:opacity-50"
+            className="rounded border bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 px-3 py-1 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
             onClick={() => setPage(totalPages)}
             disabled={page === totalPages}
             aria-label="맨 끝"
@@ -261,15 +457,15 @@ export default function RecommendListPage() {
       </div>
       {/* 오른쪽: 지역별 태그 */}
       <aside className="md:col-span-1">
-        <div className="mb-4 text-lg font-semibold">지역별</div>
+        <div className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">지역별</div>
         <div className="flex flex-wrap gap-2">
           {REGION_TAGS.map((tag) => (
             <button
               key={tag.code}
-              className={`rounded-full border px-3 py-1 text-sm font-medium ${
+              className={`rounded-full border px-3 py-1 text-sm font-medium transition-colors ${
                 region === tag.code
-                  ? 'bg-blue-700 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-blue-100'
+                  ? 'bg-blue-700 dark:bg-blue-600 text-white border-blue-700 dark:border-blue-600'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-blue-100 dark:hover:bg-blue-900/30'
               }`}
               onClick={() => handleRegionClick(tag.code)}
             >
