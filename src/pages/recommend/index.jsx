@@ -174,12 +174,6 @@ function RecommendCourseItem({ course }) {
           </div>
         )}
         
-        {/* 지역 태그 오버레이 */}
-        <div className="absolute top-2 left-2">
-          <span className="bg-blue-600 dark:bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium shadow-md">
-            {regionName}
-          </span>
-        </div>
         
         {/* 별점 오버레이 */}
         {rating && (
@@ -224,25 +218,25 @@ function RecommendCourseItem({ course }) {
       </div>
       
       {/* 카드 내용 */}
-      <div className="p-4">
-        <div className="mb-2 text-lg font-bold line-clamp-2 text-gray-900 dark:text-white">{course.title}</div>
+      <div className="p-6">
+        <div className="mb-4 text-xl font-bold line-clamp-2 text-gray-900 dark:text-white leading-tight">{course.title}</div>
         {/* 주소 표시 */}
-        <div className="mb-3 text-sm text-gray-600 dark:text-gray-400 line-clamp-1">{course.address}</div>
+        <div className="mb-4 text-sm text-gray-600 dark:text-gray-400 line-clamp-1">{course.address}</div>
         
         {/* 별점/리뷰 정보 */}
         {course.place_id ? (
-          <div className="mb-3">
+          <div className="mb-6">
             {isReviewLoading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-gray-200 dark:bg-gray-600 rounded animate-pulse"></div>
-                <span className="text-xs text-gray-400 dark:text-gray-500">별점 불러오는 중...</span>
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 bg-gray-200 dark:bg-gray-600 rounded animate-pulse"></div>
+                <span className="text-sm text-gray-400 dark:text-gray-500">별점 불러오는 중...</span>
               </div>
             ) : isReviewError ? (
-              <div className="flex items-center gap-2 text-red-400 dark:text-red-400">
-                <div className="w-4 h-4 bg-red-100 dark:bg-red-900/30 rounded flex items-center justify-center">
-                  <span className="text-xs">!</span>
+              <div className="flex items-center gap-3 text-red-400 dark:text-red-400">
+                <div className="w-5 h-5 bg-red-100 dark:bg-red-900/30 rounded flex items-center justify-center">
+                  <span className="text-sm">!</span>
                 </div>
-                <span className="text-xs">
+                <span className="text-sm">
                   {reviewError?.status === 503 
                     ? '구글 리뷰 서비스 일시 중단'
                     : reviewError?.status === 403 
@@ -252,41 +246,41 @@ function RecommendCourseItem({ course }) {
                 </span>
               </div>
             ) : rating ? (
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 text-yellow-500">
-                    <Star className="h-4 w-4" aria-label="별점" />
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{rating}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">/ 5</span>
+                  <div className="flex items-center gap-2 text-yellow-500">
+                    <Star className="h-5 w-5" aria-label="별점" />
+                    <span className="font-semibold text-lg text-gray-800 dark:text-gray-200">{rating}</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">/ 5</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="text-xs text-gray-500 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full font-medium">
+                  <span className="text-sm text-gray-500 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full font-medium">
                     리뷰 {reviews.length}개
                   </span>
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500">
-                <div className="w-4 h-4 bg-gray-100 dark:bg-gray-700 rounded"></div>
-                <span className="text-xs">리뷰 정보 없음</span>
+              <div className="flex items-center gap-3 text-gray-400 dark:text-gray-500">
+                <div className="w-5 h-5 bg-gray-100 dark:bg-gray-700 rounded"></div>
+                <span className="text-sm">리뷰 정보 없음</span>
               </div>
             )}
             
             {/* 리뷰 미리보기/전체보기 */}
             {reviews.length > 0 && (
-              <div className="space-y-2">
+              <div className="space-y-4">
                 {(showAllReviews ? reviews : reviews.slice(0, 1)).map(
                   (review, idx) => (
                     <div
                       key={idx}
-                      className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-xs text-gray-700 dark:text-gray-300 border-l-2 border-blue-200 dark:border-blue-400 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                      className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg text-sm text-gray-700 dark:text-gray-300 border-l-4 border-blue-200 dark:border-blue-400 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                     >
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-3 mb-2">
                         <span className="font-semibold text-gray-800 dark:text-gray-200">
                           {review.author_name}
                         </span>
-                        <span className="text-gray-400 dark:text-gray-500 text-xs">
+                        <span className="text-gray-400 dark:text-gray-500 text-sm">
                           {review.relative_time_description}
                         </span>
                       </div>
@@ -297,7 +291,7 @@ function RecommendCourseItem({ course }) {
                 {!showAllReviews && reviews.length > 1 && (
                   <button
                     type="button"
-                    className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 px-3 py-1 rounded-full transition-all duration-200 hover:shadow-sm"
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 px-4 py-2 rounded-full transition-all duration-200 hover:shadow-sm"
                     aria-label={`리뷰 더보기 (${reviews.length}개)`}
                     onClick={handleShowAllReviews}
                   >
@@ -308,43 +302,43 @@ function RecommendCourseItem({ course }) {
             )}
           </div>
         ) : (
-          <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500 mb-3">
-            <div className="w-4 h-4 bg-gray-100 dark:bg-gray-700 rounded"></div>
-            <span className="text-xs">리뷰 정보 없음</span>
+          <div className="flex items-center gap-3 text-gray-400 dark:text-gray-500 mb-6">
+            <div className="w-5 h-5 bg-gray-100 dark:bg-gray-700 rounded"></div>
+            <span className="text-sm">리뷰 정보 없음</span>
           </div>
         )}
         
         {/* 카드 하단 액션 바 */}
-        <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
+          <div className="flex items-center gap-4">
             <button
               onClick={handleLike}
-              className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-all duration-200 ${
+              className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm transition-all duration-200 ${
                 isLiked
                   ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
                   : 'text-gray-500 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400'
               }`}
             >
-              <HeartIcon className="h-3 w-3" filled={isLiked} />
+              <HeartIcon className="h-4 w-4" filled={isLiked} />
               좋아요
             </button>
             <button
               onClick={handleBookmark}
-              className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-all duration-200 ${
+              className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm transition-all duration-200 ${
                 isBookmarked
                   ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
                   : 'text-gray-500 dark:text-gray-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-600 dark:hover:text-amber-400'
               }`}
             >
-              <BookmarkIcon className="h-3 w-3" filled={isBookmarked} />
+              <BookmarkIcon className="h-4 w-4" filled={isBookmarked} />
               저장
             </button>
           </div>
           <button
             onClick={handleShare}
-            className="flex items-center gap-1 px-2 py-1 rounded-full text-xs text-gray-500 dark:text-gray-400 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400 transition-all duration-200"
+            className="flex items-center gap-2 px-3 py-2 rounded-full text-sm text-gray-500 dark:text-gray-400 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400 transition-all duration-200"
           >
-            <ShareIcon className="h-3 w-3" />
+            <ShareIcon className="h-4 w-4" />
             공유
           </button>
         </div>
@@ -395,74 +389,17 @@ export default function RecommendListPage() {
   }, [courses])
 
   return (
-    <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 md:grid-cols-3">
-      {/* 왼쪽: 여행지 리스트 */}
-      <div className="md:col-span-2">
-        <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">여행지 리스트</h1>
-        <div className="mb-8">
-          {isLoading ? (
-            <div className="text-center py-8 text-gray-600 dark:text-gray-400">로딩 중...</div>
-          ) : isError ? (
-            <div className="text-red-500 dark:text-red-400 text-center py-8">
-              에러: {error?.data?.detail || '데이터를 불러올 수 없습니다.'}
-            </div>
-          ) : courses.length === 0 ? (
-            <div className="text-gray-500 dark:text-gray-400 text-center py-8">데이터가 없습니다.</div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sortedCourses.map((course) => (
-                <RecommendCourseItem key={course.id} course={course} />
-              ))}
-            </div>
-          )}
-        </div>
-        {/* 페이지네이션 */}
-        <div className="flex items-center justify-center gap-2">
-          <button
-            className="rounded border bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 px-3 py-1 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
-            onClick={() => setPage(1)}
-            disabled={page === 1}
-            aria-label="맨 처음"
-          >
-            {'<<'}
-          </button>
-          <button
-            className="rounded border bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 px-3 py-1 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            aria-label="이전"
-          >
-            {'<'}
-          </button>
-          <span className="mx-2 text-sm text-gray-600 dark:text-gray-400">
-            {page} / {totalPages}
-          </span>
-          <button
-            className="rounded border bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 px-3 py-1 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            aria-label="다음"
-          >
-            {'>'}
-          </button>
-          <button
-            className="rounded border bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 px-3 py-1 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
-            onClick={() => setPage(totalPages)}
-            disabled={page === totalPages}
-            aria-label="맨 끝"
-          >
-            {'>>'}
-          </button>
-        </div>
-      </div>
-      {/* 오른쪽: 지역별 태그 */}
-      <aside className="md:col-span-1">
-        <div className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">지역별</div>
-        <div className="flex flex-wrap gap-2">
+    <div className="mx-auto max-w-7xl px-4 py-10">
+      <h1 className="mb-8 text-3xl font-bold text-gray-900 dark:text-white text-center">여행지 리스트</h1>
+      
+      {/* 지역별 필터 태그 */}
+      <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+        <div className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">지역별 필터</div>
+        <div className="flex flex-wrap gap-3">
           {REGION_TAGS.map((tag) => (
             <button
               key={tag.code}
-              className={`rounded-full border px-3 py-1 text-sm font-medium transition-colors ${
+              className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                 region === tag.code
                   ? 'bg-blue-700 dark:bg-blue-600 text-white border-blue-700 dark:border-blue-600'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-blue-100 dark:hover:bg-blue-900/30'
@@ -473,7 +410,65 @@ export default function RecommendListPage() {
             </button>
           ))}
         </div>
-      </aside>
+      </div>
+
+      {/* 여행지 리스트 */}
+      <div className="mb-8">
+        {isLoading ? (
+          <div className="text-center py-8 text-gray-600 dark:text-gray-400">로딩 중...</div>
+        ) : isError ? (
+          <div className="text-red-500 dark:text-red-400 text-center py-8">
+            에러: {error?.data?.detail || '데이터를 불러올 수 없습니다.'}
+          </div>
+        ) : courses.length === 0 ? (
+          <div className="text-gray-500 dark:text-gray-400 text-center py-8">데이터가 없습니다.</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {sortedCourses.map((course) => (
+              <RecommendCourseItem key={course.id} course={course} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 페이지네이션 */}
+      <div className="flex items-center justify-center gap-2">
+        <button
+          className="rounded border bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
+          onClick={() => setPage(1)}
+          disabled={page === 1}
+          aria-label="맨 처음"
+        >
+          {'<<'}
+        </button>
+        <button
+          className="rounded border bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
+          disabled={page === 1}
+          aria-label="이전"
+        >
+          {'<'}
+        </button>
+        <span className="mx-4 text-sm text-gray-600 dark:text-gray-400">
+          {page} / {totalPages}
+        </span>
+        <button
+          className="rounded border bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
+          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+          disabled={page === totalPages}
+          aria-label="다음"
+        >
+          {'>'}
+        </button>
+        <button
+          className="rounded border bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
+          onClick={() => setPage(totalPages)}
+          disabled={page === totalPages}
+          aria-label="맨 끝"
+        >
+          {'>>'}
+        </button>
+      </div>
     </div>
   )
 }
