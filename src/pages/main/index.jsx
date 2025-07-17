@@ -201,9 +201,6 @@ export function MainPage() {
               <h2 className="text-foreground mb-3 text-3xl font-bold">
                 ☀️ 오늘의 추천 여행지
               </h2>
-              <p className="text-muted-foreground text-lg">
-                날씨와 계절을 고려한 맞춤형 여행지를 만나보세요
-              </p>
             </div>
             <div className="flex justify-center">
               <div className="w-full max-w-5xl">
