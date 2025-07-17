@@ -193,17 +193,7 @@ const normalizeItem = (item) => {
   })
 
   // 기본값 적용
-  const defaultValues = {
-    rating: 4.5,
-    reviewCount: 0,
-    likeCount: 0,
-    viewCount: 0,
-    price: '문의',
-    duration: '2박 3일',
-    summary: '멋진 여행을 즐겨보세요',
-    description: '상세한 여행 정보를 확인하세요',
-    theme: ['관광'],
-  }
+  const defaultValues = {}
 
   Object.entries(defaultValues).forEach(([field, defaultValue]) => {
     if (

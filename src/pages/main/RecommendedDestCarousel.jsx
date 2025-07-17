@@ -1,6 +1,135 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from '@/components/icons'
+import { useGetGoogleReviewsQuery } from '@/store/api'
+import { Star } from '@/components/icons'
+
+function RecommendedDestCard({ destination, onClick }) {
+  const [showAllReviews, setShowAllReviews] = useState(false)
+  const {
+    data: googleData,
+    isLoading: isReviewLoading,
+    isError: isReviewError,
+  } = useGetGoogleReviewsQuery(destination.place_id, {
+    skip: !destination.place_id,
+  })
+  const rating = googleData?.rating
+  const reviews = googleData?.reviews || []
+  const handleShowAllReviews = (e) => {
+    e.stopPropagation()
+    setShowAllReviews(true)
+  }
+
+  return (
+    <div
+      className="weather-card group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClick()
+        }
+      }}
+      tabIndex={0}
+      role="button"
+      aria-label={`${destination.name} 여행지 추천 보기`}
+    >
+      {/* Image or Icon Display */}
+      <div className="relative h-48 w-full overflow-hidden rounded-t-xl">
+        {destination.image && (
+          <img
+            src={destination.image}
+            alt={destination.name}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+            loading="lazy"
+          />
+        )}
+        {!destination.image && (
+          <div className="from-sky-blue-light/80 via-sunshine-yellow-light/60 to-sunset-orange-light/80 dark:from-sky-blue/20 dark:via-sunshine-yellow/10 dark:to-sunset-orange/20 flex h-full w-full items-center justify-center bg-gradient-to-br">
+            <div className="text-center">
+              <div className="mb-4 text-6xl">🏞️</div>
+              <h3 className="text-foreground text-xl font-bold">
+                {destination.name}
+              </h3>
+            </div>
+          </div>
+        )}
+      </div>
+      {/* Content */}
+      <div className="p-4">
+        <div className="mb-2 flex items-center justify-between">
+          <h4 className="text-foreground text-lg font-bold transition-colors group-hover:text-blue-600">
+            {destination.name}
+          </h4>
+          {/* 별점/리뷰 표시 */}
+          <div className="flex flex-col items-end gap-1">
+            {destination.place_id ? (
+              isReviewLoading ? (
+                <span className="text-xs text-gray-400">
+                  별점 불러오는 중...
+                </span>
+              ) : isReviewError ? (
+                <span className="text-xs text-red-400">
+                  별점 정보를 불러올 수 없습니다
+                </span>
+              ) : rating ? (
+                <div className="flex items-center gap-1 text-yellow-500">
+                  <Star className="h-4 w-4" aria-label="별점" />
+                  <span className="font-semibold">{rating}</span>
+                  <span className="text-xs text-gray-500">/ 5</span>
+                  <span className="ml-2 text-xs text-gray-500">
+                    ({reviews.length}개 리뷰)
+                  </span>
+                </div>
+              ) : (
+                <span className="text-xs text-gray-400">정보가없습니다</span>
+              )
+            ) : (
+              <span className="text-xs text-gray-400">정보가없습니다</span>
+            )}
+            {/* 리뷰 미리보기/전체보기 */}
+            {reviews.length > 0 && (
+              <ul className="mt-1 space-y-1">
+                {(showAllReviews ? reviews : reviews.slice(0, 2)).map(
+                  (review, idx) => (
+                    <li
+                      key={idx}
+                      className="border-b pb-2 text-xs text-gray-700 last:border-b-0 last:pb-0"
+                    >
+                      <span className="font-semibold">
+                        {review.author_name}:
+                      </span>{' '}
+                      {review.text}
+                      <span className="ml-2 text-gray-400">
+                        ({review.relative_time_description})
+                      </span>
+                    </li>
+                  ),
+                )}
+                {!showAllReviews && reviews.length > 2 && (
+                  <li className="text-xs text-blue-500">
+                    <button
+                      type="button"
+                      className="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700 hover:bg-blue-200 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                      aria-label={`리뷰 더보기 (${reviews.length}개)`}
+                      onClick={handleShowAllReviews}
+                    >
+                      리뷰 더보기
+                    </button>
+                  </li>
+                )}
+              </ul>
+            )}
+          </div>
+        </div>
+        <p className="text-muted-foreground mb-3 line-clamp-2 text-sm">
+          {destination.description || ''}
+        </p>
+        {/* 더미 태그/거리/예산/아이콘 등 완전 삭제 */}
+      </div>
+    </div>
+  )
+}
 
 export function RecommendedDestCarousel({ destinations = [] }) {
   const navigate = useNavigate()
@@ -101,136 +230,16 @@ export function RecommendedDestCarousel({ destinations = [] }) {
 
         {/* Carousel Content */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {visibleDestinations.map((destination, index) => {
-            const imageState = imageLoadStates[destination.id] || {
-              loaded: false,
-              error: false,
-            }
-            const hasImage = destination.image && !imageState.error
-            const showImageOverlays = hasImage && imageState.loaded
-
-            return (
-              <div
-                key={`${destination.name}-${currentIndex + index}`}
-                className="weather-card group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
-                onClick={() => {
-                  // 여행지 추천 페이지로 이동
-                  navigate('/recommend')
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    navigate('/recommend')
-                  }
-                }}
-                tabIndex={0}
-                role="button"
-                aria-label={`${destination.name} 여행지 추천 보기`}
-              >
-                {/* Image or Icon Display */}
-                <div className="relative h-48 w-full overflow-hidden rounded-t-xl">
-                  {hasImage && !imageState.error ? (
-                    <>
-                      <img
-                        src={destination.image}
-                        alt={destination.name}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-                        loading="lazy"
-                        onLoad={() => handleImageLoad(destination.id)}
-                        onError={() => handleImageError(destination.id)}
-                      />
-                      {!imageState.loaded && (
-                        <div className="from-sky-blue-light/80 via-sunshine-yellow-light/60 to-sunset-orange-light/80 dark:from-sky-blue/20 dark:via-sunshine-yellow/10 dark:to-sunset-orange/20 absolute inset-0 flex items-center justify-center bg-gradient-to-br">
-                          <div className="text-center">
-                            <div className="mb-2 text-4xl">
-                              {destination.icon || '🏞️'}
-                            </div>
-                            <p className="text-muted-foreground text-sm">
-                              로딩 중...
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    // Fallback to icon when no image or image failed
-                    <div className="from-sky-blue-light/80 via-sunshine-yellow-light/60 to-sunset-orange-light/80 dark:from-sky-blue/20 dark:via-sunshine-yellow/10 dark:to-sunset-orange/20 flex h-full w-full items-center justify-center bg-gradient-to-br">
-                      <div className="text-center">
-                        <div className="mb-4 text-6xl">
-                          {destination.icon || '🏞️'}
-                        </div>
-                        <h3 className="text-foreground text-xl font-bold">
-                          {destination.name}
-                        </h3>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Weather overlay - only show when image is loaded or no image */}
-                  {/* 날씨 오버레이 제거
-                  {(showImageOverlays || !hasImage) && (
-                    <div className="weather-sunny absolute top-3 right-3 rounded-full px-3 py-1 text-xs font-semibold">
-                      {destination.weather || '☀️ 맑음'}
-                    </div>
-                  )}
-                  */}
-
-                  {/* Temperature with proper unit - only show when image is loaded or no image */}
-                  {/* 온도 표시 제거
-                  {(showImageOverlays || !hasImage) && (
-                    <div className="dark:bg-card/90 text-sky-blue-dark absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-sm font-bold">
-                      🌡️ {destination.temperature || 22}°C
-                    </div>
-                  )}
-                  */}
-                </div>
-
-                {/* Content */}
-                <div className="p-4">
-                  <div className="mb-2 flex items-center justify-between">
-                    <h4 className="text-foreground text-lg font-bold transition-colors group-hover:text-blue-600">
-                      {destination.name}
-                    </h4>
-                    <div className="flex items-center gap-1">
-                      <span className="text-yellow-500">⭐</span>
-                      <span className="text-muted-foreground text-sm font-medium">
-                        {destination.rating || '4.5'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <p className="text-muted-foreground mb-3 line-clamp-2 text-sm">
-                    {destination.description ||
-                      '아름다운 자연과 완벽한 날씨를 즐길 수 있는 최고의 여행지입니다.'}
-                  </p>
-
-                  {/* Tags */}
-                  <div className="mb-3 flex flex-wrap gap-2">
-                    {(destination.tags || ['자연', '관광'])
-                      .slice(0, 2)
-                      .map((tag, tagIndex) => (
-                        <span
-                          key={tagIndex}
-                          className="status-primary rounded-full px-2 py-1 text-xs font-medium"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                  </div>
-
-                  {/* Distance & Duration */}
-                  <div className="text-muted-foreground flex items-center justify-between text-xs">
-                    <span className="flex items-center gap-1">
-                      🚗 {destination.distance || '2시간 거리'}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      💰 {destination.budget || '10만원대'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
+          {visibleDestinations.map((destination, index) => (
+            <RecommendedDestCard
+              key={`${destination.name}-${currentIndex + index}`}
+              destination={destination}
+              onClick={() => {
+                // 여행지 추천 페이지로 이동
+                navigate('/recommend')
+              }}
+            />
+          ))}
         </div>
 
         {/* Indicators */}

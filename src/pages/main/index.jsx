@@ -44,18 +44,14 @@ export function MainPage() {
       courses = recommendationsResponse.courses
     }
 
-    // 여행 코스 데이터를 추천 여행지 형태로 변환
+    // 여행 코스 데이터를 추천 여행지 형태로 변환 (더미/하드코딩 제거)
     return courses.slice(0, 6).map((course) => ({
       id: course.id,
       name: course.title || course.name,
       description: course.summary || course.description,
       image: course.mainImage || course.image,
-      rating: course.rating || 4.5,
-      tags: course.theme || course.tags || ['여행'],
-      distance: course.duration || '2박 3일',
-      budget: course.price || '문의',
-      icon: '🏞️',
-      region: course.region,
+      place_id: course.place_id,
+      // 별점/리뷰 등은 RecommendedDestCard에서 별도 처리
     }))
   }, [recommendationsResponse])
 
