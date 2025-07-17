@@ -377,7 +377,10 @@ export default function ContactPage() {
                           onClick={() => handleTitleClick(inquiry)}
                           aria-label="문의 상세 보기"
                         >
-                          {inquiry.title}
+                          {inquiry.isPrivate === true ||
+                          inquiry.is_private === true
+                            ? '비밀글입니다'
+                            : inquiry.title}
                         </button>
                         {/* 비공개 아이콘: 비공개글이면 모두 표시 */}
                         {(inquiry.isPrivate === true ||
@@ -453,7 +456,7 @@ export default function ContactPage() {
               {'>'}
             </button>
             <button
-              className="rounded border bg-white px-2 py-1 text-lg text-gray-800 hover:bg-gray-100 hover:text-blue-600 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 dark:hover:text-blue-400"
+              className="egion=jeju, regionName=제주text-gray-800 rounded border bg-white px-2 py-1 text-lg hover:bg-gray-100 hover:text-blue-600 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 dark:hover:text-blue-400"
               onClick={() => setPage(totalPages)}
               disabled={page === totalPages}
               aria-label="마지막 페이지"
