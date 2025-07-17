@@ -184,6 +184,22 @@ export default function RecommendListPage() {
     [total, pageSize],
   )
 
+  // 여행지 리스트 정렬 (ㄱㄴㄷ 순으로 정렬하되 No Image 항목은 하단으로)
+  const sortedCourses = useMemo(() => {
+    return [...courses].sort((a, b) => {
+      // 1. 이미지가 있는 것과 없는 것 분리 (No Image를 하단으로)
+      const aHasImage = Boolean(a.mainImage)
+      const bHasImage = Boolean(b.mainImage)
+      
+      if (aHasImage !== bHasImage) {
+        return bHasImage - aHasImage // 이미지가 있는 것을 먼저
+      }
+      
+      // 2. 같은 그룹 내에서 제목 기준 ㄱㄴㄷ 순 정렬
+      return a.title.localeCompare(b.title, 'ko', { numeric: true })
+    })
+  }, [courses])
+
   return (
     <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 md:grid-cols-3">
       {/* 왼쪽: 여행지 리스트 */}
@@ -199,7 +215,7 @@ export default function RecommendListPage() {
           ) : courses.length === 0 ? (
             <li className="text-gray-500">데이터가 없습니다.</li>
           ) : (
-            courses.map((course) => (
+            sortedCourses.map((course) => (
               <RecommendCourseItem key={course.id} course={course} />
             ))
           )}
