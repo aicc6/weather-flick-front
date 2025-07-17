@@ -70,6 +70,11 @@ function RecommendCourseItem({ course }) {
   } = useGetGoogleReviewsQuery(course.place_id, { skip: !course.place_id })
   const rating = googleData?.rating
   const reviews = googleData?.reviews || []
+  const [showAllReviews, setShowAllReviews] = useState(false)
+
+  const handleShowAllReviews = () => {
+    setShowAllReviews(true)
+  }
 
   return (
     <li className="flex gap-6 border-b pb-6">
@@ -112,32 +117,43 @@ function RecommendCourseItem({ course }) {
             ) : (
               <span className="text-xs text-gray-400">정보가없습니다</span>
             )}
-            {/* 리뷰 미리보기 */}
+            {/* 리뷰 미리보기/전체보기 */}
             {reviews.length > 0 && (
               <ul className="mt-1 space-y-1">
-                {reviews.slice(0, 2).map((review, idx) => (
-                  <li key={idx} className="text-xs text-gray-700">
-                    <span className="font-semibold">{review.author_name}:</span>{' '}
-                    {review.text}
+                {(showAllReviews ? reviews : reviews.slice(0, 2)).map(
+                  (review, idx) => (
+                    <li
+                      key={idx}
+                      className="border-b pb-2 text-xs text-gray-700 last:border-b-0 last:pb-0"
+                    >
+                      <span className="font-semibold">
+                        {review.author_name}:
+                      </span>{' '}
+                      {review.text}
+                      <span className="ml-2 text-gray-400">
+                        ({review.relative_time_description})
+                      </span>
+                    </li>
+                  ),
+                )}
+                {!showAllReviews && reviews.length > 2 && (
+                  <li className="text-xs text-blue-500">
+                    <button
+                      type="button"
+                      className="ml-1 rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700 hover:bg-blue-200 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                      aria-label={`리뷰 더보기 (${reviews.length}개)`}
+                      onClick={handleShowAllReviews}
+                    >
+                      리뷰 더보기
+                    </button>
                   </li>
-                ))}
+                )}
               </ul>
             )}
           </div>
         ) : (
           <span className="text-xs text-gray-400">정보가없습니다</span>
         )}
-        {/* 해시태그 */}
-        <div className="flex flex-wrap gap-2">
-          {(course.theme || []).map((tag) => (
-            <span
-              key={tag}
-              className="rounded bg-gray-200 px-2 py-0.5 text-xs text-gray-700"
-            >
-              #{tag}
-            </span>
-          ))}
-        </div>
       </div>
     </li>
   )
