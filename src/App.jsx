@@ -4,6 +4,7 @@ import { DefaultLayout } from './layouts/default-layout'
 import LoadingSpinner from './components/LoadingSpinner'
 import ErrorBoundary from './components/common/ErrorBoundary'
 import PWAInstallPrompt from './components/common/PWAInstallPrompt'
+import PWAUpdatePrompt from './components/common/PWAUpdatePrompt'
 import NotificationPermission from './components/common/NotificationPermission'
 import ProtectedRoute from './components/common/ProtectedRoute'
 import { initializeApiMonitoring } from '@/utils/apiKeyMonitoring'
@@ -92,6 +93,7 @@ function AppContent() {
   return (
     <DefaultLayout>
       <PWAInstallPrompt />
+      <PWAUpdatePrompt />
       <NotificationPermission />
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
