@@ -35,7 +35,7 @@ function RecommendedDestCard({ destination, onClick }) {
       aria-label={`${destination.name} 여행지 추천 보기`}
     >
       {/* Image or Icon Display */}
-      <div className="relative h-36 w-full overflow-hidden rounded-t-xl sm:h-40">
+      <div className="relative h-48 w-full overflow-hidden rounded-t-xl sm:h-52 md:h-56">
         {destination.image && (
           <img
             src={destination.image}
@@ -56,76 +56,77 @@ function RecommendedDestCard({ destination, onClick }) {
         )}
       </div>
       {/* Content */}
-      <div className="p-3 sm:p-4">
-        <div className="mb-2 flex items-center justify-between">
-          <h4 className="text-foreground text-base font-bold transition-colors group-hover:text-blue-600 sm:text-lg">
-            {destination.name}
-          </h4>
-          {/* 별점/리뷰 표시 */}
-          <div className="flex flex-col items-end gap-1">
-            {destination.place_id ? (
-              isReviewLoading ? (
-                <span className="text-xs text-gray-400">
-                  별점 불러오는 중...
-                </span>
-              ) : isReviewError ? (
-                <span className="text-xs text-red-400">
-                  별점 정보를 불러올 수 없습니다
-                </span>
-              ) : rating ? (
-                <div className="flex items-center gap-1 text-yellow-500">
-                  <Star className="h-4 w-4" aria-label="별점" />
-                  <span className="font-semibold">{rating}</span>
-                  <span className="text-xs text-gray-500">/ 5</span>
-                  <span className="ml-2 text-xs text-gray-500">
-                    ({reviews.length}개 리뷰)
-                  </span>
-                </div>
-              ) : (
-                <span className="text-xs text-gray-400">정보가없습니다</span>
-              )
-            ) : (
-              <span className="text-xs text-gray-400">정보가없습니다</span>
-            )}
-            {/* 리뷰 미리보기/전체보기 */}
-            {reviews.length > 0 && (
-              <ul className="mt-1 space-y-1">
-                {(showAllReviews ? reviews : reviews.slice(0, 2)).map(
-                  (review, idx) => (
-                    <li
-                      key={idx}
-                      className="border-b pb-2 text-xs text-gray-700 last:border-b-0 last:pb-0"
-                    >
-                      <span className="font-semibold">
-                        {review.author_name}:
-                      </span>{' '}
-                      {review.text}
-                      <span className="ml-2 text-gray-400">
-                        ({review.relative_time_description})
-                      </span>
-                    </li>
-                  ),
-                )}
-                {!showAllReviews && reviews.length > 2 && (
-                  <li className="text-xs text-blue-500">
-                    <button
-                      type="button"
-                      className="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700 hover:bg-blue-200 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                      aria-label={`리뷰 더보기 (${reviews.length}개)`}
-                      onClick={handleShowAllReviews}
-                    >
-                      리뷰 더보기
-                    </button>
-                  </li>
-                )}
-              </ul>
-            )}
-          </div>
-        </div>
-        <p className="text-muted-foreground mb-2 line-clamp-2 text-xs sm:text-sm">
+      <div className="p-4 sm:p-5 md:p-6">
+        {/* 제목을 한 줄로 표시 */}
+        <h4 className="text-foreground mb-3 text-lg font-bold transition-colors group-hover:text-blue-600 sm:text-xl md:text-2xl leading-tight truncate">
+          {destination.name}
+        </h4>
+        
+        <p className="text-muted-foreground mb-4 line-clamp-3 text-sm sm:text-base md:text-lg leading-relaxed">
           {destination.description || ''}
         </p>
-        {/* 더미 태그/거리/예산/아이콘 등 완전 삭제 */}
+        
+        {/* 별점/리뷰 정보를 하단에 표시 */}
+        <div className="flex flex-col gap-2">
+          {destination.place_id ? (
+            isReviewLoading ? (
+              <span className="text-xs text-gray-400">
+                별점 불러오는 중...
+              </span>
+            ) : isReviewError ? (
+              <span className="text-xs text-red-400">
+                별점 정보를 불러올 수 없습니다
+              </span>
+            ) : rating ? (
+              <div className="flex items-center gap-1 text-yellow-500">
+                <Star className="h-4 w-4" aria-label="별점" />
+                <span className="font-semibold">{rating}</span>
+                <span className="text-xs text-gray-500">/ 5</span>
+                <span className="ml-2 text-xs text-gray-500">
+                  ({reviews.length}개 리뷰)
+                </span>
+              </div>
+            ) : (
+              <span className="text-xs text-gray-400">정보가없습니다</span>
+            )
+          ) : (
+            <span className="text-xs text-gray-400">정보가없습니다</span>
+          )}
+          
+          {/* 리뷰 미리보기/전체보기 */}
+          {reviews.length > 0 && (
+            <div className="space-y-1">
+              {(showAllReviews ? reviews : reviews.slice(0, 2)).map(
+                (review, idx) => (
+                  <div
+                    key={idx}
+                    className="border-b pb-2 text-xs text-gray-700 last:border-b-0 last:pb-0"
+                  >
+                    <span className="font-semibold">
+                      {review.author_name}:
+                    </span>{' '}
+                    {review.text}
+                    <span className="ml-2 text-gray-400">
+                      ({review.relative_time_description})
+                    </span>
+                  </div>
+                ),
+              )}
+              {!showAllReviews && reviews.length > 2 && (
+                <div className="text-xs text-blue-500">
+                  <button
+                    type="button"
+                    className="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700 hover:bg-blue-200 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                    aria-label={`리뷰 더보기 (${reviews.length}개)`}
+                    onClick={handleShowAllReviews}
+                  >
+                    리뷰 더보기
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -198,10 +199,10 @@ export function RecommendedDestCarousel({ destinations = [] }) {
   )
 
   return (
-    <div className="relative mx-auto w-full max-w-6xl px-2 sm:px-4">
+    <div className="relative mx-auto w-full max-w-7xl px-2 sm:px-4">
       {/* Carousel Container */}
       <div
-        className="weather-card relative overflow-hidden rounded-2xl p-4 sm:p-6"
+        className="weather-card relative overflow-hidden rounded-2xl p-6 sm:p-8 md:p-10"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -229,7 +230,7 @@ export function RecommendedDestCarousel({ destinations = [] }) {
         )}
 
         {/* Carousel Content */}
-        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
           {visibleDestinations.map((destination, index) => (
             <RecommendedDestCard
               key={`${destination.name}-${currentIndex + index}`}
