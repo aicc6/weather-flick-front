@@ -11,6 +11,7 @@ export { localInfoApi } from './localInfoApi'
 export { travelCoursesApi } from './travelCoursesApi'
 export { recommendLikesApi } from './recommendLikesApi'
 export { customTravelApi } from './customTravelApi'
+export { googleReviewsApi } from './googleReviewsApi'
 
 // Export all hooks for convenience
 export {
@@ -99,3 +100,5 @@ export {
   // Custom Travel API hooks
   useGetCustomTravelRecommendationsMutation,
 } from './customTravelApi'
+
+export { useGetGoogleReviewsQuery } from './googleReviewsApi'

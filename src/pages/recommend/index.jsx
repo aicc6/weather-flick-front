@@ -1,5 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useGetTravelCoursesQuery } from '@/store/api/travelCoursesApi'
+import { useGetGoogleReviewsQuery } from '@/store/api'
+import { Star } from '@/components/icons'
 
 // region_code <-> 태그 code 매핑
 const REGION_CODE_MAP = {
@@ -60,6 +62,87 @@ const getRegionCodeParam = (code) => {
   return entry ? Number(entry[0]) : code
 }
 
+function RecommendCourseItem({ course }) {
+  const {
+    data: googleData,
+    isLoading: isReviewLoading,
+    isError: isReviewError,
+  } = useGetGoogleReviewsQuery(course.place_id, { skip: !course.place_id })
+  const rating = googleData?.rating
+  const reviews = googleData?.reviews || []
+
+  return (
+    <li className="flex gap-6 border-b pb-6">
+      {/* 썸네일 */}
+      <div className="flex h-32 w-48 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-gray-100">
+        {course.mainImage ? (
+          <img
+            src={course.mainImage}
+            alt={course.title}
+            className="h-full w-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <span className="text-gray-400">No Image</span>
+        )}
+      </div>
+      {/* 정보 */}
+      <div className="min-w-0 flex-1">
+        <div className="mb-1 text-xl font-bold">{course.title}</div>
+        {/* 주소 표시 */}
+        <div className="mb-1 text-sm text-gray-600">{course.address}</div>
+        {/* 별점/리뷰 표시 */}
+        {course.place_id ? (
+          <div className="mb-1">
+            {isReviewLoading ? (
+              <span className="text-xs text-gray-400">별점 불러오는 중...</span>
+            ) : isReviewError ? (
+              <span className="text-xs text-red-400">
+                별점 정보를 불러올 수 없습니다
+              </span>
+            ) : rating ? (
+              <div className="flex items-center gap-1 text-yellow-500">
+                <Star className="h-4 w-4" aria-label="별점" />
+                <span className="font-semibold">{rating}</span>
+                <span className="text-xs text-gray-500">/ 5</span>
+                <span className="ml-2 text-xs text-gray-500">
+                  ({reviews.length}개 리뷰)
+                </span>
+              </div>
+            ) : (
+              <span className="text-xs text-gray-400">정보가없습니다</span>
+            )}
+            {/* 리뷰 미리보기 */}
+            {reviews.length > 0 && (
+              <ul className="mt-1 space-y-1">
+                {reviews.slice(0, 2).map((review, idx) => (
+                  <li key={idx} className="text-xs text-gray-700">
+                    <span className="font-semibold">{review.author_name}:</span>{' '}
+                    {review.text}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ) : (
+          <span className="text-xs text-gray-400">정보가없습니다</span>
+        )}
+        {/* 해시태그 */}
+        <div className="flex flex-wrap gap-2">
+          {(course.theme || []).map((tag) => (
+            <span
+              key={tag}
+              className="rounded bg-gray-200 px-2 py-0.5 text-xs text-gray-700"
+            >
+              #{tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    </li>
+  )
+}
+
 export default function RecommendListPage() {
   const [page, setPage] = useState(1)
   // region 상태를 REGION_CODE_MAP의 value(영문)로 관리
@@ -101,44 +184,7 @@ export default function RecommendListPage() {
             <li className="text-gray-500">데이터가 없습니다.</li>
           ) : (
             courses.map((course) => (
-              <li key={course.id} className="flex gap-6 border-b pb-6">
-                {/* 썸네일 */}
-                <div className="flex h-32 w-48 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-gray-100">
-                  {course.mainImage ? (
-                    <img
-                      src={course.mainImage}
-                      alt={course.title}
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <span className="text-gray-400">No Image</span>
-                  )}
-                </div>
-                {/* 정보 */}
-                <div className="min-w-0 flex-1">
-                  <div className="mb-1 text-xl font-bold">{course.title}</div>
-                  {/* 주소 표시 */}
-                  <div className="mb-1 text-sm text-gray-600">
-                    {course.address}
-                  </div>
-                  {/* 기존 summary/설명 대신 address만 표시 */}
-                  {/* <div className="mb-2 line-clamp-2 text-gray-700">
-                    {course.summary || course.description}
-                  </div> */}
-                  {/* 해시태그 */}
-                  <div className="flex flex-wrap gap-2">
-                    {(course.theme || []).map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded bg-gray-200 px-2 py-0.5 text-xs text-gray-700"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </li>
+              <RecommendCourseItem key={course.id} course={course} />
             ))
           )}
         </ul>
