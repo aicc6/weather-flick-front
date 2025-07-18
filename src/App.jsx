@@ -243,22 +243,7 @@ function App() {
     initializeApiMonitoring()
   }, [])
 
-  // Firebase 메시징을 위한 서비스 워커 등록
-  useEffect(() => {
-    // 알림 테스트 페이지에서만 서비스 워커 등록
-    if (window.location.pathname === '/notification-test') {
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker
-          .register('/firebase-messaging-sw.js')
-          .then((registration) => {
-            console.log('Firebase 서비스 워커 등록 성공:', registration)
-          })
-          .catch((error) => {
-            console.error('Firebase 서비스 워커 등록 실패:', error)
-          })
-      }
-    }
-  }, [])
+  // PWA 서비스 워커가 FCM 기능을 포함하므로 별도 등록 불필요
 
   return (
     <ErrorBoundary>

@@ -113,6 +113,13 @@ export default defineConfig(({ mode }) => {
           enabled: false, // 개발 모드에서 PWA 비활성화 (무한 리로드 문제 해결)
         },
         includeAssets: ['firebase-messaging-sw.js'],
+        srcDir: 'src',
+        filename: 'sw.js',
+        strategies: 'injectManifest',
+        injectManifest: {
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+        },
       }),
       {
         name: 'firebase-sw-env-replace',
@@ -143,10 +150,11 @@ export default defineConfig(({ mode }) => {
           const fs = await import('fs')
           const path = await import('path')
           
-          const swPath = path.resolve('dist/firebase-messaging-sw.js')
+          // firebase-messaging-sw.js 처리
+          const firebaseSwPath = path.resolve('dist/firebase-messaging-sw.js')
           
-          if (fs.existsSync(swPath)) {
-            let content = fs.readFileSync(swPath, 'utf-8')
+          if (fs.existsSync(firebaseSwPath)) {
+            let content = fs.readFileSync(firebaseSwPath, 'utf-8')
             
             content = content
               .replace('__VITE_FIREBASE_API_KEY__', env.VITE_FIREBASE_API_KEY || '')
@@ -156,8 +164,26 @@ export default defineConfig(({ mode }) => {
               .replace('__VITE_FIREBASE_MESSAGING_SENDER_ID__', env.VITE_FIREBASE_MESSAGING_SENDER_ID || '')
               .replace('__VITE_FIREBASE_APP_ID__', env.VITE_FIREBASE_APP_ID || '')
               
-            fs.writeFileSync(swPath, content)
+            fs.writeFileSync(firebaseSwPath, content)
             console.log('Firebase service worker 환경변수 대체 완료')
+          }
+          
+          // sw.js (PWA 서비스 워커) 처리
+          const pwaSwPath = path.resolve('dist/sw.js')
+          
+          if (fs.existsSync(pwaSwPath)) {
+            let content = fs.readFileSync(pwaSwPath, 'utf-8')
+            
+            content = content
+              .replace('__VITE_FIREBASE_API_KEY__', env.VITE_FIREBASE_API_KEY || '')
+              .replace('__VITE_FIREBASE_AUTH_DOMAIN__', env.VITE_FIREBASE_AUTH_DOMAIN || '')
+              .replace('__VITE_FIREBASE_PROJECT_ID__', env.VITE_FIREBASE_PROJECT_ID || '')
+              .replace('__VITE_FIREBASE_STORAGE_BUCKET__', env.VITE_FIREBASE_STORAGE_BUCKET || '')
+              .replace('__VITE_FIREBASE_MESSAGING_SENDER_ID__', env.VITE_FIREBASE_MESSAGING_SENDER_ID || '')
+              .replace('__VITE_FIREBASE_APP_ID__', env.VITE_FIREBASE_APP_ID || '')
+              
+            fs.writeFileSync(pwaSwPath, content)
+            console.log('PWA service worker 환경변수 대체 완료')
           }
         },
       },
