@@ -110,17 +110,19 @@ export default defineConfig(({ mode }) => {
           ],
         },
         devOptions: {
-          enabled: true,
+          enabled: false, // 개발 모드에서 PWA 비활성화 (무한 리로드 문제 해결)
         },
         includeAssets: ['firebase-messaging-sw.js'],
       }),
       {
         name: 'firebase-sw-env-replace',
-        configureServer(server) {
+        async configureServer(server) {
           // 개발 서버에서 firebase-messaging-sw.js 요청 처리
-          server.middlewares.use('/firebase-messaging-sw.js', (req, res) => {
-            const fs = require('fs')
-            const path = require('path')
+          server.middlewares.use('/firebase-messaging-sw.js', async (req, res, next) => {
+            if (req.method !== 'GET') return next()
+            
+            const fs = await import('fs')
+            const path = await import('path')
             
             const swPath = path.resolve('public/firebase-messaging-sw.js')
             let content = fs.readFileSync(swPath, 'utf-8')

@@ -83,6 +83,7 @@ const TravelPlanDetailPage = lazy(() => import('./pages/travel-plans/detail'))
 const HelpPage = lazy(() => import('./pages/help/help'))
 const ContactPage = lazy(() => import('./pages/contact'))
 const TermsPage = lazy(() => import('./pages/terms'))
+const NotificationTestPage = lazy(() => import('./pages/notification-test'))
 
 // 내부 컴포넌트 - BrowserRouter 내부에서 실행
 function AppContent() {
@@ -225,6 +226,7 @@ function AppContent() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/notification-test" element={<NotificationTestPage />} />
           <Route path="/offline" element={<OfflinePage />} />
           {/* 404 페이지 - 모든 라우트의 마지막에 위치 */}
           <Route path="*" element={<NotFoundPage />} />
@@ -239,6 +241,23 @@ function App() {
   // API 모니터링 시스템 초기화
   useEffect(() => {
     initializeApiMonitoring()
+  }, [])
+
+  // Firebase 메시징을 위한 서비스 워커 등록
+  useEffect(() => {
+    // 알림 테스트 페이지에서만 서비스 워커 등록
+    if (window.location.pathname === '/notification-test') {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker
+          .register('/firebase-messaging-sw.js')
+          .then((registration) => {
+            console.log('Firebase 서비스 워커 등록 성공:', registration)
+          })
+          .catch((error) => {
+            console.error('Firebase 서비스 워커 등록 실패:', error)
+          })
+      }
+    }
   }, [])
 
   return (
