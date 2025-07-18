@@ -7,14 +7,11 @@ import {
   regionsApi,
   travelCoursesApi,
   customTravelApi,
-  googleReviewsApi,
 } from './api'
 import { contactApi } from './api/contactApi'
-import { recommendReviewsApi } from './api/recommendReviewsApi'
 import { localInfoApi } from './api/localInfoApi'
 import { chatbotApi } from './api/chatbotApi'
 import { recommendLikesApi } from './api/recommendLikesApi'
-import { reviewLikesApi } from './api/reviewLikesApi'
 import { travelCourseLikesApi } from './api/travelCourseLikesApi'
 import customizedScheduleReducer from './slices/customizedScheduleSlice'
 
@@ -30,13 +27,10 @@ export const store = configureStore({
     [localInfoApi.reducerPath]: localInfoApi.reducer,
     [chatbotApi.reducerPath]: chatbotApi.reducer,
     [travelCoursesApi.reducerPath]: travelCoursesApi.reducer,
-    [recommendReviewsApi.reducerPath]: recommendReviewsApi.reducer,
     [recommendLikesApi.reducerPath]: recommendLikesApi.reducer,
-    [reviewLikesApi.reducerPath]: reviewLikesApi.reducer,
     [travelCourseLikesApi.reducerPath]: travelCourseLikesApi.reducer,
     [customTravelApi.reducerPath]: customTravelApi.reducer,
     [contactApi.reducerPath]: contactApi.reducer,
-    [googleReviewsApi.reducerPath]: googleReviewsApi.reducer,
     customizedSchedule: customizedScheduleReducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -54,12 +48,9 @@ export const store = configureStore({
       .concat(localInfoApi.middleware)
       .concat(chatbotApi.middleware)
       .concat(travelCoursesApi.middleware)
-      .concat(recommendReviewsApi.middleware)
       .concat(recommendLikesApi.middleware)
-      .concat(reviewLikesApi.middleware)
       .concat(travelCourseLikesApi.middleware)
       .concat(customTravelApi.middleware)
-      .concat(contactApi.middleware)
-      .concat(googleReviewsApi.middleware),
+      .concat(contactApi.middleware),
   devTools: import.meta.env.MODE !== 'production',
 })

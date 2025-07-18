@@ -1,25 +1,8 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from '@/components/icons'
-import { useGetGoogleReviewsQuery } from '@/store/api'
-import { Star } from '@/components/icons'
 
 function RecommendedDestCard({ destination, onClick }) {
-  const [showAllReviews, setShowAllReviews] = useState(false)
-  const {
-    data: googleData,
-    isLoading: isReviewLoading,
-    isError: isReviewError,
-  } = useGetGoogleReviewsQuery(destination.place_id, {
-    skip: !destination.place_id,
-  })
-  const rating = googleData?.rating
-  const reviews = googleData?.reviews || []
-  const handleShowAllReviews = (e) => {
-    e.stopPropagation()
-    setShowAllReviews(true)
-  }
-
   return (
     <div
       className="weather-card group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
@@ -58,75 +41,13 @@ function RecommendedDestCard({ destination, onClick }) {
       {/* Content */}
       <div className="p-4 sm:p-5 md:p-6">
         {/* 제목을 한 줄로 표시 */}
-        <h4 className="text-foreground mb-3 text-lg font-bold transition-colors group-hover:text-blue-600 sm:text-xl md:text-2xl leading-tight truncate">
+        <h4 className="text-foreground mb-3 truncate text-lg leading-tight font-bold transition-colors group-hover:text-blue-600 sm:text-xl md:text-2xl">
           {destination.name}
         </h4>
-        
-        <p className="text-muted-foreground mb-4 line-clamp-3 text-sm sm:text-base md:text-lg leading-relaxed">
+
+        <p className="text-muted-foreground mb-4 line-clamp-3 text-sm leading-relaxed sm:text-base md:text-lg">
           {destination.description || ''}
         </p>
-        
-        {/* 별점/리뷰 정보를 하단에 표시 */}
-        <div className="flex flex-col gap-2">
-          {destination.place_id ? (
-            isReviewLoading ? (
-              <span className="text-xs text-gray-400">
-                별점 불러오는 중...
-              </span>
-            ) : isReviewError ? (
-              <span className="text-xs text-red-400">
-                별점 정보를 불러올 수 없습니다
-              </span>
-            ) : rating ? (
-              <div className="flex items-center gap-1 text-yellow-500">
-                <Star className="h-4 w-4" aria-label="별점" />
-                <span className="font-semibold">{rating}</span>
-                <span className="text-xs text-gray-500">/ 5</span>
-                <span className="ml-2 text-xs text-gray-500">
-                  ({reviews.length}개 리뷰)
-                </span>
-              </div>
-            ) : (
-              <span className="text-xs text-gray-400">정보가없습니다</span>
-            )
-          ) : (
-            <span className="text-xs text-gray-400">정보가없습니다</span>
-          )}
-          
-          {/* 리뷰 미리보기/전체보기 */}
-          {reviews.length > 0 && (
-            <div className="space-y-1">
-              {(showAllReviews ? reviews : reviews.slice(0, 2)).map(
-                (review, idx) => (
-                  <div
-                    key={idx}
-                    className="border-b pb-2 text-xs text-gray-700 last:border-b-0 last:pb-0"
-                  >
-                    <span className="font-semibold">
-                      {review.author_name}:
-                    </span>{' '}
-                    {review.text}
-                    <span className="ml-2 text-gray-400">
-                      ({review.relative_time_description})
-                    </span>
-                  </div>
-                ),
-              )}
-              {!showAllReviews && reviews.length > 2 && (
-                <div className="text-xs text-blue-500">
-                  <button
-                    type="button"
-                    className="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700 hover:bg-blue-200 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                    aria-label={`리뷰 더보기 (${reviews.length}개)`}
-                    onClick={handleShowAllReviews}
-                  >
-                    리뷰 더보기
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
       </div>
     </div>
   )

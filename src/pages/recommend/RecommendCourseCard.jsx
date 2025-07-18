@@ -15,7 +15,6 @@ import {
   useUnlikeCourseMutation,
   useCreateTravelCourseLikeMutation,
 } from '@/store/api'
-import { useGetReviewsByCourseQuery } from '@/store/api/recommendReviewsApi'
 import { useAuth } from '@/contexts/AuthContextRTK'
 
 const regionNames = {
@@ -103,13 +102,6 @@ const RecommendCourseCard = React.memo(function RecommendCourseCard({
   const [likeCourse] = useLikeCourseMutation()
   const [unlikeCourse] = useUnlikeCourseMutation()
   const [createTravelCourseLike] = useCreateTravelCourseLikeMutation()
-  const {
-    data: reviews = [],
-    isLoading: reviewsLoading,
-    isError: reviewsError,
-  } = useGetReviewsByCourseQuery(course.id, {
-    skip: !course?.id || isNaN(Number(course.id)), // course.id가 없거나 숫자가 아닐 때 스킵
-  })
 
   const handleLikeClick = useCallback(
     async (e) => {
@@ -279,10 +271,6 @@ const RecommendCourseCard = React.memo(function RecommendCourseCard({
                   <span className="flex items-center gap-1">
                     <Heart className="h-3 w-3" />
                     {likeLoading ? '-' : (likeData?.total ?? 0)}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <MessageSquare className="h-3 w-3" />
-                    {reviewsLoading ? '-' : reviewsError ? '!' : reviews.length}
                   </span>
                 </div>
               </div>

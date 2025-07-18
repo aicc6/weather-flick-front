@@ -19,7 +19,6 @@ import {
   List,
 } from '@/components/icons'
 import { getMultipleRegionImages } from '@/services/imageService'
-import { useGetReviewsByCourseQuery } from '@/store/api/recommendReviewsApi'
 import { useGetTravelCoursesQuery } from '@/store/api/travelCoursesApi'
 
 // 새로운 고도화 컴포넌트들 (선택적 사용)
@@ -33,17 +32,8 @@ import RecommendCourseCard from './RecommendCourseCard'
 function useCourseRatings(courseIds) {
   const ratings = {}
   courseIds.forEach((id) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { data: reviews = [] } = useGetReviewsByCourseQuery(id, {
-      skip: !id || isNaN(Number(id)), // id가 없거나 숫자가 아닐 때 스킵
-    })
-    ratings[id] =
-      reviews.length > 0
-        ? (
-            reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
-            reviews.length
-          ).toFixed(1)
-        : null
+    // 평점 기능 완전 제거
+    ratings[id] = null
   })
   return ratings
 }

@@ -3,11 +3,9 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Textarea } from '@/components/ui/textarea'
 import { useGetTravelCourseDetailQuery } from '@/store/api'
 import { useAuth } from '@/contexts/AuthContextRTK'
 import {
-  Star,
   Heart,
   Share2,
   Calendar,
@@ -18,14 +16,8 @@ import {
   ChevronDown,
   ChevronUp,
   ArrowLeft,
-  MessageSquare,
   X,
 } from '@/components/icons'
-import ReviewTree from '@/components/common/ReviewTree'
-import {
-  useGetReviewsTreeByCourseQuery,
-  useCreateReviewMutation,
-} from '@/store/api/recommendReviewsApi'
 import {
   useGetCourseLikeQuery,
   useLikeCourseMutation,
@@ -93,9 +85,6 @@ export default function TravelCourseDetailPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isLiked, setIsLiked] = useState(false)
   const [isBookmarked, setIsBookmarked] = useState(false)
-  const [_rating, setRating] = useState(0)
-  const [comment, setComment] = useState('')
-  const [comments, setComments] = useState([])
   const [isImageModalOpen, setIsImageModalOpen] = useState(false)
   const [modalImageIndex, setModalImageIndex] = useState(0)
 
@@ -196,38 +185,7 @@ export default function TravelCourseDetailPage() {
     alert('내 여행 코스에 추가되었습니다!')
   }, [])
 
-  const handleRatingSubmit = useCallback((value) => {
-    setRating(value)
-    alert(`${value}점으로 평가해주셔서 감사합니다!`)
-  }, [])
-
   const { user } = useAuth()
-
-  // 트리형 댓글 데이터
-  const {
-    data: reviewTree = [],
-    isLoading: isReviewsLoading,
-    isError: isReviewsError,
-    refetch: refetchReviews,
-  } = useGetReviewsTreeByCourseQuery(id, {
-    skip: !id || isNaN(Number(id)), // id가 없거나 숫자가 아닐 때 스킵
-  })
-  const [createReview, { isLoading: isPosting }] = useCreateReviewMutation()
-
-  // 댓글/답글 등록 핸들러
-  const handleReviewSubmit = useCallback(
-    async (parentId, content, rating) => {
-      await createReview({
-        course_id: Number(id),
-        rating: rating || 5,
-        content,
-        nickname: user?.nickname || user?.email || '사용자',
-        parent_id: parentId || null,
-      }).unwrap()
-      // invalidatesTags로 자동 갱신됨
-    },
-    [id, user, createReview],
-  )
 
   // 좋아요 상태/카운트 RTK Query
   const { data: likeData, isLoading: likeLoading } = useGetCourseLikeQuery(
@@ -246,18 +204,6 @@ export default function TravelCourseDetailPage() {
       await likeCourse(Number(id))
     }
   }
-
-  // 리뷰 별점 평균/인원 계산 함수
-  function getAvgRatingAndCount(reviews) {
-    const topLevel = reviews.filter((r) => !r.parent_id)
-    const totalRating = topLevel.reduce((sum, r) => sum + (r.rating || 0), 0)
-    const avgRating = topLevel.length > 0 ? totalRating / topLevel.length : 0
-    const peopleCount = topLevel.length
-    return { avgRating, peopleCount }
-  }
-
-  // 별점 평균/인원 계산 (reviewTree fetch 이후)
-  const { avgRating, peopleCount } = getAvgRatingAndCount(reviewTree)
 
   // 모든 useEffect들을 early return 이전으로 이동
   useEffect(() => {
@@ -404,23 +350,8 @@ export default function TravelCourseDetailPage() {
           {course.subtitle}
         </p>
 
-        {/* 평점 및 통계 */}
+        {/* 통계 */}
         <div className="mb-6 flex flex-wrap items-center gap-6">
-          {/* 별점 평균/인원 표시 */}
-          <div className="flex items-center gap-2">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`h-5 w-5 ${i < Math.round(avgRating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-zinc-500'}`}
-              />
-            ))}
-            <span className="text-lg font-semibold">
-              {typeof avgRating === 'number' ? avgRating.toFixed(1) : '4.5'}
-            </span>
-            <span className="text-gray-500">
-              ({typeof peopleCount === 'number' ? peopleCount : 0}명 평가)
-            </span>
-          </div>
           <div className="flex items-center gap-2">
             <Heart
               className={`h-5 w-5 ${likeData?.liked ? 'text-red-500' : 'text-gray-400'}`}
@@ -428,10 +359,6 @@ export default function TravelCourseDetailPage() {
             <span className="text-gray-600">
               좋아요 {likeLoading ? '-' : (likeData?.total ?? 0)}
             </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-gray-400" />
-            <span className="text-gray-600">리뷰 {reviewTree.length}건</span>
           </div>
         </div>
 
@@ -665,74 +592,6 @@ export default function TravelCourseDetailPage() {
               </CardContent>
             </Card>
           )}
-
-          {/* 댓글 섹션 */}
-          <Card className="dark:border-gray-700 dark:bg-gray-800">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 dark:text-white">
-                <MessageSquare className="h-5 w-5" />
-                댓글 ({reviewTree.length}건)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* 댓글 작성 폼 */}
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  handleReviewSubmit(null, comment, _rating)
-                  setComment('')
-                  setRating(0)
-                }}
-                className="mb-5"
-              >
-                <div className="space-y-2 rounded-lg border border-gray-300 bg-white p-3 dark:border-zinc-600 dark:bg-zinc-800">
-                  <Textarea
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    placeholder="댓글을 입력하세요"
-                    required
-                    className="w-full border-none bg-transparent shadow-none focus:border-none focus:ring-0 dark:text-zinc-100"
-                  />
-                  <div className="flex items-center gap-2">
-                    {/* 별점 선택 UI */}
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-6 w-6 cursor-pointer ${
-                          i < _rating
-                            ? 'fill-yellow-400 text-yellow-400'
-                            : 'text-gray-300'
-                        }`}
-                        onClick={() => setRating(i + 1)}
-                        aria-label={`${i + 1}점`}
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ')
-                            setRating(i + 1)
-                        }}
-                      />
-                    ))}
-                    <span className="ml-2 text-sm text-gray-600">
-                      {_rating > 0 ? `${_rating}점` : '별점을 선택하세요'}
-                    </span>
-                    <div className="flex flex-1 justify-end">
-                      <Button
-                        type="submit"
-                        variant="outline"
-                        className="hover:bg-gray-100 dark:hover:bg-zinc-700"
-                        disabled={isPosting || !comment.trim()}
-                      >
-                        {isPosting ? '등록 중...' : '댓글 등록'}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </form>
-
-              {/* 트리형 댓글 UI */}
-              <ReviewTree reviews={reviewTree} onReply={handleReviewSubmit} />
-            </CardContent>
-          </Card>
         </div>
 
         {/* 사이드바 */}

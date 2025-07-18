@@ -1,7 +1,5 @@
 import { useState, useMemo } from 'react'
 import { useGetTravelCoursesQuery } from '@/store/api/travelCoursesApi'
-import { useGetGoogleReviewsQuery } from '@/store/api'
-import { Star } from '@/components/icons'
 
 // 아이콘 컴포넌트들
 const HeartIcon = ({ className, filled = false }) => (
@@ -112,21 +110,8 @@ const getRegionCodeParam = (code) => {
 }
 
 function RecommendCourseItem({ course }) {
-  const {
-    data: googleData,
-    isLoading: isReviewLoading,
-    isError: isReviewError,
-    error: reviewError,
-  } = useGetGoogleReviewsQuery(course.place_id, { skip: !course.place_id })
-  const rating = googleData?.rating
-  const reviews = googleData?.reviews || []
-  const [showAllReviews, setShowAllReviews] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
   const [isBookmarked, setIsBookmarked] = useState(false)
-
-  const handleShowAllReviews = () => {
-    setShowAllReviews(true)
-  }
 
   const handleLike = (e) => {
     e.stopPropagation()
@@ -174,16 +159,6 @@ function RecommendCourseItem({ course }) {
           </div>
         )}
 
-        {/* 별점 오버레이 */}
-        {rating && (
-          <div className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 shadow-md backdrop-blur-sm dark:bg-gray-800/90">
-            <Star className="h-3 w-3 text-yellow-500" aria-label="별점" />
-            <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">
-              {rating}
-            </span>
-          </div>
-        )}
-
         {/* 호버 시 나타나는 액션 버튼들 */}
         <div className="absolute right-2 bottom-2 flex gap-1 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <button
@@ -227,98 +202,6 @@ function RecommendCourseItem({ course }) {
         <div className="mb-4 line-clamp-1 text-sm text-gray-600 dark:text-gray-400">
           {course.address}
         </div>
-
-        {/* 별점/리뷰 정보 */}
-        {course.place_id ? (
-          <div className="mb-6">
-            {isReviewLoading ? (
-              <div className="flex items-center gap-3">
-                <div className="h-5 w-5 animate-pulse rounded bg-gray-200 dark:bg-gray-600"></div>
-                <span className="text-sm text-gray-400 dark:text-gray-500">
-                  별점 불러오는 중...
-                </span>
-              </div>
-            ) : isReviewError ? (
-              <div className="flex items-center gap-3 text-red-400 dark:text-red-400">
-                <div className="flex h-5 w-5 items-center justify-center rounded bg-red-100 dark:bg-red-900/30">
-                  <span className="text-sm">!</span>
-                </div>
-                <span className="text-sm">
-                  {reviewError?.status === 503
-                    ? '구글 리뷰 서비스 일시 중단'
-                    : reviewError?.status === 403
-                      ? '구글 리뷰 서비스 접근 권한 없음'
-                      : '별점 정보를 불러올 수 없습니다'}
-                </span>
-              </div>
-            ) : rating ? (
-              <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-2 text-yellow-500">
-                    <Star className="h-5 w-5" aria-label="별점" />
-                    <span className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                      {rating}
-                    </span>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      / 5
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700 text-gray-500 dark:bg-blue-900/30 dark:text-blue-300 dark:text-gray-400">
-                    리뷰 {reviews.length}개
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-3 text-gray-400 dark:text-gray-500">
-                <div className="h-5 w-5 rounded bg-gray-100 dark:bg-gray-700"></div>
-                <span className="text-sm">리뷰 정보 없음</span>
-              </div>
-            )}
-
-            {/* 리뷰 미리보기/전체보기 */}
-            {reviews.length > 0 && (
-              <div className="space-y-4">
-                {(showAllReviews ? reviews : reviews.slice(0, 1)).map(
-                  (review, idx) => (
-                    <div
-                      key={idx}
-                      className="rounded-lg border-l-4 border-blue-200 bg-gray-50 p-4 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:border-blue-400 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                    >
-                      <div className="mb-2 flex items-center gap-3">
-                        <span className="font-semibold text-gray-800 dark:text-gray-200">
-                          {review.author_name}
-                        </span>
-                        <span className="text-sm text-gray-400 dark:text-gray-500">
-                          {review.relative_time_description}
-                        </span>
-                      </div>
-                      <p className="line-clamp-2 text-gray-600 dark:text-gray-400">
-                        {review.text}
-                      </p>
-                    </div>
-                  ),
-                )}
-                {!showAllReviews && reviews.length > 1 && (
-                  <button
-                    type="button"
-                    className="rounded-full bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 transition-all duration-200 hover:bg-blue-100 hover:text-blue-800 hover:shadow-sm dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 dark:hover:text-blue-300"
-                    aria-label={`리뷰 더보기 (${reviews.length}개)`}
-                    onClick={handleShowAllReviews}
-                  >
-                    리뷰 더보기 ({reviews.length}개)
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="mb-6 flex items-center gap-3 text-gray-400 dark:text-gray-500">
-            <div className="h-5 w-5 rounded bg-gray-100 dark:bg-gray-700"></div>
-            <span className="text-sm">리뷰 정보 없음</span>
-          </div>
-        )}
 
         {/* 카드 하단 액션 바 */}
         <div className="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-gray-700">
