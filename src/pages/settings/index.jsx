@@ -299,9 +299,20 @@ export function SettingsPage() {
 
               {permission === 'denied' && (
                 <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                  <p className="text-sm text-red-700 dark:text-red-300">
-                    알림 권한이 차단되었습니다. 브라우저 설정에서 권한을 허용해주세요.
-                  </p>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-red-700 dark:text-red-300">
+                      알림 권한이 차단되었습니다.
+                    </p>
+                    <p className="text-xs text-red-600 dark:text-red-400">
+                      브라우저 설정에서 권한을 허용해주세요:
+                    </p>
+                    <ol className="text-xs text-red-600 dark:text-red-400 list-decimal list-inside space-y-1">
+                      <li>주소창 왼쪽의 자물쇠 아이콘 클릭</li>
+                      <li>"사이트 설정" 또는 "권한" 클릭</li>
+                      <li>"알림"을 "허용"으로 변경</li>
+                      <li>페이지 새로고침 후 다시 시도</li>
+                    </ol>
+                  </div>
                 </div>
               )}
 

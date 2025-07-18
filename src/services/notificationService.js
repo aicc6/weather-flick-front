@@ -14,7 +14,8 @@ export const saveFCMToken = async (token) => {
         user_agent: navigator.userAgent,
       },
     })
-    return response.data
+    const data = await response.json()
+    return data
   } catch (error) {
     console.error('FCM 토큰 저장 오류:', error)
     throw error

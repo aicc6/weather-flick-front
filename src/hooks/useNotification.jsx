@@ -44,6 +44,11 @@ export function useNotification() {
           const notificationData = extractNotificationFromFCM(payload)
           const savedNotification = saveReceivedNotification(notificationData)
           console.log('알림 저장 완료:', savedNotification)
+          
+          // 알림 페이지에 있다면 새로고침 이벤트 발생
+          if (window.location.pathname === '/notifications') {
+            window.dispatchEvent(new CustomEvent('notification-received'))
+          }
 
           // 커스텀 토스트 알림 표시
           toast.custom(

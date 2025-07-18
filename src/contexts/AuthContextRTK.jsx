@@ -101,8 +101,27 @@ export const AuthProvider = ({ children }) => {
         let fcmToken = null
         try {
           const { getFCMToken } = await import('@/lib/firebase')
+          // 알림 권한이 이미 허용된 경우에만 토큰 생성
           if (Notification.permission === 'granted') {
-            fcmToken = await getFCMToken()
+            // 서비스 워커가 등록될 때까지 대기
+            const maxRetries = 3
+            for (let i = 0; i < maxRetries; i++) {
+              fcmToken = await getFCMToken()
+              if (fcmToken) {
+                console.log(`로그인 시 FCM 토큰 생성 성공 (시도 ${i + 1}/${maxRetries})`)
+                break
+              }
+              // 잠시 대기 후 재시도
+              if (i < maxRetries - 1) {
+                await new Promise(resolve => setTimeout(resolve, 1000))
+              }
+            }
+            
+            if (!fcmToken) {
+              console.warn('FCM 토큰 생성 실패 (모든 재시도 실패)')
+            }
+          } else {
+            console.log('알림 권한 없음, FCM 토큰 생성 건너뜀')
           }
         } catch (fcmError) {
           console.warn('FCM 토큰 생성 실패 (로그인은 계속 진행):', fcmError)
@@ -127,6 +146,15 @@ export const AuthProvider = ({ children }) => {
         // FCM 토큰을 로컬 스토리지에도 저장
         if (fcmToken) {
           localStorage.setItem('fcm_token', fcmToken)
+          
+          // FCM 토큰이 있으면 백엔드에 별도로 등록
+          try {
+            const { saveFCMToken } = await import('@/services/notificationService')
+            await saveFCMToken(fcmToken)
+            console.log('FCM 토큰 백엔드 등록 성공')
+          } catch (error) {
+            console.warn('FCM 토큰 백엔드 등록 실패:', error)
+          }
         }
 
         return response

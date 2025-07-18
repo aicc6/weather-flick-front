@@ -59,9 +59,21 @@ export const getFCMToken = async () => {
   }
 
   try {
-    const currentToken = await getToken(messaging, { vapidKey })
+    // 서비스 워커 등록 확인
+    const registration = await navigator.serviceWorker.getRegistration()
+    if (!registration) {
+      console.log('서비스 워커가 등록되지 않았습니다. 대기 중...')
+      // 서비스 워커 등록 대기
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    }
+
+    const currentToken = await getToken(messaging, { 
+      vapidKey,
+      serviceWorkerRegistration: registration 
+    })
+    
     if (currentToken) {
-      console.log('FCM 토큰:', currentToken)
+      console.log('FCM 토큰 생성 성공:', currentToken.substring(0, 10) + '...')
       return currentToken
     } else {
       console.log('FCM 토큰을 가져올 수 없습니다.')
@@ -69,6 +81,12 @@ export const getFCMToken = async () => {
     }
   } catch (error) {
     console.error('FCM 토큰 가져오기 오류:', error)
+    // 특정 에러에 대한 자세한 설명
+    if (error.code === 'messaging/permission-blocked') {
+      console.error('알림 권한이 차단되었습니다.')
+    } else if (error.code === 'messaging/failed-service-worker-registration') {
+      console.error('서비스 워커 등록 실패')
+    }
     return null
   }
 }
