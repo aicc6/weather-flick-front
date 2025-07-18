@@ -7,7 +7,7 @@ const Toaster = ({ ...props }) => {
   return (
     <Sonner
       theme={theme}
-      position="center"
+      position="bottom-right"
       className="toaster group"
       style={{
         '--normal-bg': 'var(--popover)',
