@@ -4,6 +4,10 @@ import { onMessage } from 'firebase/messaging'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
 import { isAuthenticated } from '@/utils/authCheck'
+import { 
+  saveReceivedNotification, 
+  extractNotificationFromFCM 
+} from '@/utils/receivedNotifications'
 
 export function useNotification() {
   const [notification, setNotification] = useState(null)
@@ -36,11 +40,16 @@ export function useNotification() {
           // 알림 표시
           if (!notification) return
 
+          // 받은 알림을 저장소에 저장
+          const notificationData = extractNotificationFromFCM(payload)
+          const savedNotification = saveReceivedNotification(notificationData)
+          console.log('알림 저장 완료:', savedNotification)
+
           // 커스텀 토스트 알림 표시
           toast.custom(
             (t) => (
               <div
-                className="ring-opacity-5 flex w-full max-w-md items-start gap-3 rounded-lg bg-white p-4 shadow-lg ring-1 ring-black"
+                className="ring-opacity-5 flex w-full max-w-md items-start gap-3 rounded-lg bg-white p-4 shadow-lg ring-1 ring-black cursor-pointer"
                 onClick={() => {
                   // 알림 클릭 시 동작
                   if (data?.url) {
@@ -49,11 +58,14 @@ export function useNotification() {
                   toast.dismiss(t)
                 }}
               >
-                <img
-                  src="/pwa-64x64.png"
-                  alt="Weather Flick"
-                  className="h-10 w-10 rounded-full"
-                />
+                <div className="relative">
+                  <img
+                    src="/pwa-64x64.png"
+                    alt="Weather Flick"
+                    className="h-10 w-10 rounded-full"
+                  />
+                  <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500"></div>
+                </div>
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-gray-900">
                     {notification.title}
@@ -61,11 +73,14 @@ export function useNotification() {
                   <p className="mt-1 text-sm text-gray-600">
                     {notification.body}
                   </p>
+                  <p className="mt-1 text-xs text-gray-400">
+                    방금 전
+                  </p>
                 </div>
               </div>
             ),
             {
-              duration: 5000,
+              duration: 8000,
               position: 'top-right',
             },
           )
@@ -96,6 +111,16 @@ export function useNotification() {
   // 브라우저 알림 표시 (대체 방법)
   const showBrowserNotification = (title, body, data = {}) => {
     if ('Notification' in window && Notification.permission === 'granted') {
+      // 받은 알림으로 저장
+      const notificationData = {
+        title,
+        body,
+        data,
+        type: 'system'
+      }
+      const savedNotification = saveReceivedNotification(notificationData)
+      console.log('시스템 알림 저장 완료:', savedNotification)
+
       const notification = new Notification(title, {
         body,
         icon: '/pwa-192x192.png',

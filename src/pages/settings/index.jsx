@@ -11,7 +11,9 @@ import { toast } from 'sonner'
 import {
   getNotificationSettings,
   updateNotificationSettings,
+  saveFCMToken,
 } from '@/services/notificationService'
+import { requestNotificationPermission, getFCMToken } from '@/lib/firebase'
 import {
   Settings,
   LogOut,
@@ -31,23 +33,29 @@ export function SettingsPage() {
   const [loading, setLoading] = useState(false)
 
   // 알림 설정 상태 관리
-  const [weatherAlert, setWeatherAlert] = useState(true)
-  const [emailAlert, setEmailAlert] = useState(false)
-  const [marketingAlert, setMarketingAlert] = useState(false)
+  const [notificationSettings, setNotificationSettings] = useState({
+    push_enabled: false,
+    travel_plan_updates: true,
+    weather_alerts: true,
+    recommendation_updates: true,
+    marketing_messages: false,
+    email_enabled: false,
+    quiet_hours_enabled: false,
+    quiet_hours_start: '22:00',
+    quiet_hours_end: '08:00',
+  })
+  const [permission, setPermission] = useState(Notification.permission)
+  const [fcmLoading, setFcmLoading] = useState(false)
 
   // 알림 설정 로드
   const loadNotificationSettings = async () => {
     try {
       setLoading(true)
       const settings = await getNotificationSettings()
-
-      // 백엔드 API 응답에 맞게 매핑
-      setWeatherAlert(settings.weather_alerts || false)
-      setEmailAlert(settings.email_enabled || false)
-      setMarketingAlert(settings.marketing_messages || false)
+      setNotificationSettings(settings)
     } catch (error) {
       console.error('알림 설정 로드 실패:', error)
-      toast.error('알림 설정을 불러오는데 실패했습니다.')
+      // 백엔드 API가 없는 경우 기본값 사용
     } finally {
       setLoading(false)
     }
@@ -55,39 +63,78 @@ export function SettingsPage() {
 
   // 알림 설정 업데이트
   const updateNotificationSetting = async (settingKey, value) => {
+    const previousSettings = { ...notificationSettings }
+    
+    // 즉시 UI 업데이트
+    setNotificationSettings(prev => ({
+      ...prev,
+      [settingKey]: value
+    }))
+
     try {
-      const settings = {
-        [settingKey]: value,
+      const newSettings = {
+        ...notificationSettings,
+        [settingKey]: value
       }
-
-      await updateNotificationSettings(settings)
-
-      toast.success('알림 설정이 성공적으로 저장되었습니다.')
+      
+      await updateNotificationSettings(newSettings)
+      toast.success('알림 설정이 저장되었습니다.')
     } catch (error) {
       console.error('알림 설정 업데이트 실패:', error)
       toast.error('설정 저장에 실패했습니다.')
-
+      
       // 실패 시 이전 상태로 되돌리기
-      if (settingKey === 'weather_alerts') setWeatherAlert(!value)
-      if (settingKey === 'email_enabled') setEmailAlert(!value)
-      if (settingKey === 'marketing_messages') setMarketingAlert(!value)
+      setNotificationSettings(previousSettings)
     }
   }
 
-  // 알림 설정 핸들러들
-  const handleWeatherAlertChange = (checked) => {
-    setWeatherAlert(checked)
-    updateNotificationSetting('weather_alerts', checked)
+  // 브라우저 알림 권한 요청
+  const handleEnableNotifications = async () => {
+    if (permission === 'granted') {
+      // 이미 권한이 있는 경우 FCM 토큰만 생성
+      await setupFCMToken()
+      return
+    }
+
+    setFcmLoading(true)
+    try {
+      const result = await requestNotificationPermission()
+      setPermission(result)
+
+      if (result === 'granted') {
+        await setupFCMToken()
+        updateNotificationSetting('push_enabled', true)
+        toast.success('알림이 활성화되었습니다.')
+      } else if (result === 'denied') {
+        toast.error('알림 권한이 거부되었습니다. 브라우저 설정에서 변경할 수 있습니다.')
+      }
+    } catch (error) {
+      console.error('알림 활성화 오류:', error)
+      toast.error('알림 활성화 중 오류가 발생했습니다.')
+    } finally {
+      setFcmLoading(false)
+    }
   }
 
-  const handleEmailAlertChange = (checked) => {
-    setEmailAlert(checked)
-    updateNotificationSetting('email_enabled', checked)
+  // FCM 토큰 설정
+  const setupFCMToken = async () => {
+    try {
+      const fcmToken = await getFCMToken()
+      if (fcmToken) {
+        await saveFCMToken(fcmToken)
+        localStorage.setItem('fcm_token', fcmToken)
+      } else {
+        toast.error('알림 토큰을 가져올 수 없습니다.')
+      }
+    } catch (error) {
+      console.error('FCM 토큰 설정 실패:', error)
+      // 백엔드 API가 아직 구현되지 않은 경우에도 프론트엔드는 정상 작동
+    }
   }
 
-  const handleMarketingAlertChange = (checked) => {
-    setMarketingAlert(checked)
-    updateNotificationSetting('marketing_messages', checked)
+  // 알림 설정 핸들러
+  const handleToggle = (key) => {
+    updateNotificationSetting(key, !notificationSettings[key])
   }
 
   // 컴포넌트 마운트 시 설정 로드
@@ -218,50 +265,173 @@ export function SettingsPage() {
                 알림 설정
               </h2>
             </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">날씨 변화 알림</p>
+            
+            <div className="space-y-6">
+              {/* 푸시 알림 메인 설정 */}
+              <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="space-y-1">
+                  <p className="font-medium text-base">푸시 알림</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    비 예보 시 대체 플랜 자동 알림
+                    {permission === 'granted' 
+                      ? '브라우저 알림이 활성화되었습니다' 
+                      : '브라우저 알림 권한이 필요합니다'
+                    }
                   </p>
                 </div>
-                <Switch
-                  checked={weatherAlert}
-                  onCheckedChange={handleWeatherAlertChange}
-                  disabled={loading}
-                  aria-label="날씨 변화 알림 토글"
-                />
+                {permission === 'granted' ? (
+                  <Switch
+                    checked={notificationSettings.push_enabled}
+                    onCheckedChange={() => handleToggle('push_enabled')}
+                    disabled={loading}
+                    aria-label="푸시 알림 토글"
+                  />
+                ) : (
+                  <Button
+                    onClick={handleEnableNotifications}
+                    disabled={fcmLoading || permission === 'denied'}
+                    size="sm"
+                    className="min-w-20"
+                  >
+                    {fcmLoading ? '처리 중...' : '활성화'}
+                  </Button>
+                )}
               </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">이메일 알림</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    여행 관련 업데이트 및 추천
+
+              {permission === 'denied' && (
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    알림 권한이 차단되었습니다. 브라우저 설정에서 권한을 허용해주세요.
                   </p>
                 </div>
-                <Switch
-                  checked={emailAlert}
-                  onCheckedChange={handleEmailAlertChange}
-                  disabled={loading}
-                  aria-label="이메일 알림 토글"
-                />
+              )}
+
+              <Separator />
+
+              {/* 알림 유형 설정 */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">알림 유형</h3>
+                
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="font-medium">여행 계획 업데이트</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      여행 계획 변경사항 알림
+                    </p>
+                  </div>
+                  <Switch
+                    checked={notificationSettings.travel_plan_updates}
+                    onCheckedChange={() => handleToggle('travel_plan_updates')}
+                    disabled={loading || !notificationSettings.push_enabled}
+                    aria-label="여행 계획 업데이트 알림 토글"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="font-medium">날씨 알림</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      여행지 날씨 변화 알림
+                    </p>
+                  </div>
+                  <Switch
+                    checked={notificationSettings.weather_alerts}
+                    onCheckedChange={() => handleToggle('weather_alerts')}
+                    disabled={loading || !notificationSettings.push_enabled}
+                    aria-label="날씨 알림 토글"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="font-medium">추천 업데이트</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      새로운 여행지 추천 알림
+                    </p>
+                  </div>
+                  <Switch
+                    checked={notificationSettings.recommendation_updates}
+                    onCheckedChange={() => handleToggle('recommendation_updates')}
+                    disabled={loading || !notificationSettings.push_enabled}
+                    aria-label="추천 업데이트 알림 토글"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="font-medium">이메일 알림</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      이메일로 여행 정보 수신
+                    </p>
+                  </div>
+                  <Switch
+                    checked={notificationSettings.email_enabled}
+                    onCheckedChange={() => handleToggle('email_enabled')}
+                    disabled={loading}
+                    aria-label="이메일 알림 토글"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="font-medium">마케팅 메시지</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      프로모션 및 이벤트 알림
+                    </p>
+                  </div>
+                  <Switch
+                    checked={notificationSettings.marketing_messages}
+                    onCheckedChange={() => handleToggle('marketing_messages')}
+                    disabled={loading}
+                    aria-label="마케팅 메시지 토글"
+                  />
+                </div>
               </div>
+
               <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">마케팅 알림</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    새로운 기능 및 이벤트 안내
-                  </p>
+
+              {/* 방해 금지 시간 */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="font-medium text-base">방해 금지 시간</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      설정한 시간에는 알림을 받지 않습니다
+                    </p>
+                  </div>
+                  <Switch
+                    checked={notificationSettings.quiet_hours_enabled}
+                    onCheckedChange={() => handleToggle('quiet_hours_enabled')}
+                    disabled={loading || !notificationSettings.push_enabled}
+                    aria-label="방해 금지 시간 토글"
+                  />
                 </div>
-                <Switch
-                  checked={marketingAlert}
-                  onCheckedChange={handleMarketingAlertChange}
-                  disabled={loading}
-                  aria-label="마케팅 알림 토글"
-                />
+
+                {notificationSettings.quiet_hours_enabled && (
+                  <div className="flex gap-4 pl-4">
+                    <div className="space-y-2 flex-1">
+                      <label htmlFor="quiet-start" className="text-sm font-medium">시작 시간</label>
+                      <input
+                        id="quiet-start"
+                        type="time"
+                        value={notificationSettings.quiet_hours_start}
+                        onChange={(e) => updateNotificationSetting('quiet_hours_start', e.target.value)}
+                        className="border-input bg-background flex h-10 w-full rounded-md border px-3 py-2 text-sm"
+                        disabled={loading || !notificationSettings.push_enabled}
+                      />
+                    </div>
+                    <div className="space-y-2 flex-1">
+                      <label htmlFor="quiet-end" className="text-sm font-medium">종료 시간</label>
+                      <input
+                        id="quiet-end"
+                        type="time"
+                        value={notificationSettings.quiet_hours_end}
+                        onChange={(e) => updateNotificationSetting('quiet_hours_end', e.target.value)}
+                        className="border-input bg-background flex h-10 w-full rounded-md border px-3 py-2 text-sm"
+                        disabled={loading || !notificationSettings.push_enabled}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
