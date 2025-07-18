@@ -96,13 +96,44 @@ export const AuthProvider = ({ children }) => {
   // 로그인 함수
   const login = useCallback(
     async (credentials) => {
-      const response = await loginMutation(credentials).unwrap()
-      const { user_info, access_token, refresh_token } = response
+      try {
+        // FCM 토큰 생성 시도 (실패해도 로그인 진행)
+        let fcmToken = null
+        try {
+          const { getFCMToken } = await import('@/lib/firebase')
+          if (Notification.permission === 'granted') {
+            fcmToken = await getFCMToken()
+          }
+        } catch (fcmError) {
+          console.warn('FCM 토큰 생성 실패 (로그인은 계속 진행):', fcmError)
+        }
 
-      // 토큰과 사용자 정보 저장
-      tokenManager.setToken(access_token, user_info, refresh_token)
+        // 로그인 요청에 FCM 토큰 포함
+        const loginData = {
+          ...credentials,
+          ...(fcmToken && {
+            fcm_token: fcmToken,
+            device_type: 'web',
+            device_name: 'Web Browser',
+          })
+        }
 
-      return response
+        const response = await loginMutation(loginData).unwrap()
+        const { user_info, access_token, refresh_token } = response
+
+        // 토큰과 사용자 정보 저장
+        tokenManager.setToken(access_token, user_info, refresh_token)
+
+        // FCM 토큰을 로컬 스토리지에도 저장
+        if (fcmToken) {
+          localStorage.setItem('fcm_token', fcmToken)
+        }
+
+        return response
+      } catch (error) {
+        console.error('로그인 실패:', error)
+        throw error
+      }
     },
     [loginMutation, tokenManager],
   )
@@ -110,6 +141,14 @@ export const AuthProvider = ({ children }) => {
   // 로그아웃 함수
   const logout = useCallback(async () => {
     try {
+      // FCM 토큰 정리 (로그아웃 전에 수행)
+      try {
+        const { cleanupFCMToken } = await import('@/services/notificationService')
+        await cleanupFCMToken()
+      } catch (fcmError) {
+        console.warn('FCM 토큰 정리 실패 (로그아웃은 계속 진행):', fcmError)
+      }
+
       // 서버에 로그아웃 요청 (토큰이 있는 경우에만)
       if (tokenManager.isLoggedIn()) {
         try {
@@ -121,6 +160,9 @@ export const AuthProvider = ({ children }) => {
     } finally {
       // 클라이언트 상태 정리
       tokenManager.clearTokens()
+
+      // FCM 토큰도 로컬 스토리지에서 제거
+      localStorage.removeItem('fcm_token')
 
       // RTK Query 캐시 리셋 - 사용자 정보 완전 제거
       dispatch(authApi.util.resetApiState())

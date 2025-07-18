@@ -78,10 +78,10 @@ export const authApi = createApi({
 
     // 임시 인증 코드를 JWT 토큰으로 교환 (새로운 보안 방식)
     exchangeGoogleAuthCode: builder.mutation({
-      query: (authCode) => ({
+      query: (authData) => ({
         url: 'auth/google/exchange',
         method: 'POST',
-        body: { auth_code: authCode },
+        body: authData,
       }),
       invalidatesTags: ['User'],
     }),

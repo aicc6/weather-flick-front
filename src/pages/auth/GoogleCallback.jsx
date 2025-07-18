@@ -41,7 +41,33 @@ export function GoogleCallbackPage() {
         if (authCode) {
           // 임시 인증 코드를 JWT 토큰으로 교환
           try {
-            const response = await exchangeGoogleAuthCode(authCode).unwrap()
+            // FCM 토큰 생성 시도 (실패해도 로그인 진행)
+            let fcmToken = null
+            try {
+              const { getFCMToken } = await import('@/lib/firebase')
+              if (Notification.permission === 'granted') {
+                fcmToken = await getFCMToken()
+              }
+            } catch (fcmError) {
+              console.warn('FCM 토큰 생성 실패 (로그인은 계속 진행):', fcmError)
+            }
+
+            // Exchange 요청에 FCM 토큰 포함
+            const exchangeData = {
+              auth_code: authCode,
+              ...(fcmToken && {
+                fcm_token: fcmToken,
+                device_type: 'web',
+                device_name: 'Web Browser',
+              })
+            }
+
+            const response = await exchangeGoogleAuthCode(exchangeData).unwrap()
+
+            // FCM 토큰을 로컬 스토리지에 저장
+            if (fcmToken) {
+              localStorage.setItem('fcm_token', fcmToken)
+            }
 
             // AuthContext의 Google 인증 성공 처리 함수 사용
             try {
