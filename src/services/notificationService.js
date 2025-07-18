@@ -24,7 +24,9 @@ export const saveFCMToken = async (token) => {
 // FCM 토큰 삭제 (로그아웃 시)
 export const deleteFCMToken = async (tokenId) => {
   try {
-    const response = await authHttp.DELETE(`/notifications/device-tokens/${tokenId}`)
+    const response = await authHttp.DELETE(
+      `/notifications/device-tokens/${tokenId}`,
+    )
     return response.data
   } catch (error) {
     console.error('FCM 토큰 삭제 오류:', error)
@@ -86,9 +88,7 @@ export const getNotificationHistory = async (params = {}) => {
 // 알림 읽음 처리
 export const markNotificationAsRead = async (notificationId) => {
   try {
-    const response = await authHttp.PUT(
-      `/notifications/${notificationId}/read`,
-    )
+    const response = await authHttp.PUT(`/notifications/${notificationId}/read`)
     const data = await response.json()
     return data
   } catch (error) {
@@ -139,7 +139,7 @@ export const cleanupFCMToken = async () => {
     if (token) {
       // 사용자의 디바이스 토큰 목록을 조회하여 해당 토큰의 ID를 찾아서 삭제
       const deviceTokens = await getUserDeviceTokens()
-      const targetToken = deviceTokens.find(dt => dt.device_token === token)
+      const targetToken = deviceTokens.find((dt) => dt.device_token === token)
 
       if (targetToken) {
         await deleteFCMToken(targetToken.id)

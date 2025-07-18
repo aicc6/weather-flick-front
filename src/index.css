@@ -88,24 +88,24 @@
   --neutral-gray-800: #1e293b;
   --neutral-gray-900: #0f172a;
 
-  /* 🌤️ 라이트 모드 - 새로운 색상 시스템 */
-  --background: var(--neutral-white);
-  --foreground: var(--neutral-gray-800);
-  --card: var(--neutral-white);
-  --card-foreground: var(--neutral-gray-800);
+  /* 🌤️ 라이트 모드 - 개선된 가독성 색상 시스템 */
+  --background: #fafbfc; /* 약간 회색빛이 도는 흰색으로 변경 */
+  --foreground: var(--neutral-gray-900); /* 더 진한 텍스트 */
+  --card: #ffffff; /* 카드 배경을 순백색으로 유지하여 배경과 구분 */
+  --card-foreground: var(--neutral-gray-900);
   --popover: var(--neutral-white);
-  --popover-foreground: var(--neutral-gray-800);
+  --popover-foreground: var(--neutral-gray-900);
   --primary: var(--primary-blue);
   --primary-foreground: var(--neutral-white);
-  --secondary: var(--accent-cyan-light);
-  --secondary-foreground: var(--neutral-gray-800);
-  --muted: var(--neutral-gray-100);
-  --muted-foreground: var(--neutral-gray-600);
+  --secondary: #f1f5f9; /* 더 구분되는 세컨더리 색상 */
+  --secondary-foreground: var(--neutral-gray-900);
+  --muted: #f8fafc; /* 배경보다 약간 더 밝은 muted 배경 */
+  --muted-foreground: var(--neutral-gray-600); /* 더 진한 muted 텍스트 */
   --accent: var(--soft-mint);
-  --accent-foreground: var(--neutral-gray-800);
+  --accent-foreground: var(--neutral-gray-900);
   --destructive: #ef4444;
-  --border: var(--neutral-gray-200);
-  --input: var(--neutral-white);
+  --border: #9ca3af; /* 훨씬 더 진한 보더 색상으로 변경 */
+  --input: #ffffff; /* 입력 필드는 순백색으로 구분 */
   --ring: var(--primary-blue);
   --chart-1: var(--primary-blue);
   --chart-2: var(--accent-cyan);
@@ -113,12 +113,12 @@
   --chart-4: var(--primary-blue-light);
   --chart-5: var(--soft-mint);
   --sidebar: var(--neutral-white);
-  --sidebar-foreground: var(--neutral-gray-800);
+  --sidebar-foreground: var(--neutral-gray-900);
   --sidebar-primary: var(--primary-blue);
   --sidebar-primary-foreground: var(--neutral-white);
   --sidebar-accent: var(--soft-mint);
-  --sidebar-accent-foreground: var(--neutral-gray-800);
-  --sidebar-border: var(--neutral-gray-200);
+  --sidebar-accent-foreground: var(--neutral-gray-900);
+  --sidebar-border: #9ca3af; /* 훨씬 더 진한 사이드바 보더 */
   --sidebar-ring: var(--primary-blue);
 }
 
@@ -162,6 +162,56 @@
     border-color: var(--border);
     outline-color: color-mix(in srgb, var(--ring) 50%, transparent 50%);
   }
+  
+  /* 기본 테이블 스타일 강화 */
+  table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+  
+  th, td {
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid color-mix(in srgb, var(--border) 60%, transparent 40%);
+    padding: 0.75rem;
+  }
+  
+  th:last-child, td:last-child {
+    border-right: none;
+  }
+  
+  tr:last-child td {
+    border-bottom: none;
+  }
+  
+  th {
+    background-color: var(--muted);
+    font-weight: 600;
+    color: var(--foreground);
+  }
+  
+  /* Shadcn UI 컴포넌트 보더 강화 */
+  [data-slot="card"] {
+    border-width: 2px !important;
+    border-color: var(--border) !important;
+  }
+  
+  [data-slot="button"] {
+    border-width: 2px !important;
+  }
+  
+  /* 모든 일반적인 카드, 패널, 컨테이너에 강한 보더 적용 */
+  .bg-card, .border {
+    border-width: 2px !important;
+    border-color: var(--border) !important;
+  }
+  
+  /* 그리드 및 플렉스 컨테이너 내의 아이템들 */
+  .grid > *, .flex > * {
+    border-color: var(--border) !important;
+  }
   body {
     background-color: var(--background);
     color: var(--foreground);
@@ -193,31 +243,57 @@
 /* 🎨 새로운 컴포넌트 스타일 */
 /* ===================== */
 @layer components {
-  /* Main Card - 메인 카드 */
+  /* Main Card - 개선된 메인 카드 */
   .weather-card {
     background-color: var(--card);
-    border-color: var(--border);
+    border: 2px solid var(--border); /* 보더 두께 증가 */
     border-radius: 0.75rem;
-    border-width: 1px;
     box-shadow:
-      0 1px 3px 0 rgba(0, 0, 0, 0.1),
-      0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    background: linear-gradient(
-      135deg,
-      var(--card) 0%,
-      color-mix(in srgb, var(--card) 98%, var(--soft-mint) 2%) 100%
-    );
-    transition: none;
+      0 2px 4px 0 rgba(0, 0, 0, 0.1),
+      0 1px 2px 0 rgba(0, 0, 0, 0.08),
+      0 0 0 1px rgba(0, 0, 0, 0.06); /* 더 진한 그림자 */
+    background: var(--card);
+    transition: all 0.2s ease-in-out;
   }
 
   .weather-card:hover {
+    transform: translateY(-1px);
     box-shadow:
-      0 4px 6px -1px rgba(0, 0, 0, 0.1),
-      0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    border-color: var(--primary-blue-light);
-    box-shadow:
-      0 4px 6px -1px rgba(54, 116, 181, 0.1),
-      0 2px 4px -1px rgba(54, 116, 181, 0.06);
+      0 8px 25px -5px rgba(0, 0, 0, 0.15),
+      0 4px 6px -2px rgba(0, 0, 0, 0.12),
+      0 0 0 2px rgba(54, 116, 181, 0.3); /* 더 진한 호버 효과 */
+    border-color: var(--primary-blue);
+  }
+
+  /* 테이블 스타일 개선 */
+  .table-container {
+    background-color: var(--card);
+    border: 2px solid var(--border); /* 보더 두께 증가 */
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 
+      0 2px 4px 0 rgba(0, 0, 0, 0.1),
+      0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  }
+
+  .table-header {
+    background-color: var(--muted);
+    border-bottom: 2px solid var(--border); /* 헤더 보더 강화 */
+    font-weight: 600;
+    color: var(--foreground);
+  }
+
+  .table-row {
+    border-bottom: 1px solid var(--border); /* 완전 불투명한 보더 */
+    transition: background-color 0.15s ease-in-out;
+  }
+
+  .table-row:hover {
+    background-color: var(--muted);
+  }
+
+  .table-row:last-child {
+    border-bottom: none;
   }
 
   /* Primary Button - 주요 버튼 */
@@ -370,43 +446,86 @@
     border: 1px solid color-mix(in srgb, var(--soft-mint) 50%, transparent 50%);
   }
 
-  /* Form Controls - 폼 요소 */
+  /* Form Controls - 개선된 폼 요소 */
   .form-input {
-    background-color: white;
-    border: 1px solid var(--neutral-gray-200);
-    color: var(--neutral-gray-800);
+    background-color: var(--input);
+    border: 1px solid var(--border); /* 통일된 보더 색상 사용 */
+    color: var(--foreground);
     border-radius: 0.375rem;
     padding: 0.5rem 0.75rem;
+    box-shadow: 
+      0 1px 2px 0 rgba(0, 0, 0, 0.05),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.5); /* 내부 하이라이트 추가 */
     transition:
       border-color 0.2s,
-      box-shadow 0.2s;
+      box-shadow 0.2s,
+      background-color 0.2s;
   }
 
   .form-input:focus {
     outline: none;
     border-color: var(--primary-blue);
-    box-shadow: 0 0 0 3px
-      color-mix(in srgb, var(--primary-blue) 20%, transparent 80%);
+    background-color: var(--input); /* 포커스 시 순백색 유지 */
+    box-shadow: 
+      0 0 0 3px color-mix(in srgb, var(--primary-blue) 15%, transparent 85%),
+      0 2px 4px 0 rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
   }
 
   .form-input::placeholder {
-    color: var(--neutral-gray-600);
+    color: var(--muted-foreground);
   }
 
   .dark .form-input {
     background-color: var(--card);
     border-color: var(--border);
     color: var(--foreground);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
   }
 
   .dark .form-input:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px
-      color-mix(in srgb, var(--primary) 20%, transparent 80%);
+    box-shadow: 
+      0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent 80%),
+      0 2px 4px 0 rgba(0, 0, 0, 0.3);
   }
 
   .dark .form-input::placeholder {
     color: var(--muted-foreground);
+  }
+
+  /* 카드 컨테이너 개선 */
+  .card-container {
+    background-color: var(--card);
+    border: 2px solid var(--border); /* 보더 두께 증가 */
+    border-radius: 0.75rem;
+    box-shadow: 
+      0 2px 4px 0 rgba(0, 0, 0, 0.1),
+      0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease-in-out;
+  }
+
+  .card-container:hover {
+    box-shadow: 
+      0 4px 6px -1px rgba(0, 0, 0, 0.15),
+      0 2px 4px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+    border-color: var(--primary-blue);
+  }
+
+  /* 목록 아이템 스타일 */
+  .list-item {
+    background-color: var(--card);
+    border: 2px solid var(--border); /* 보더 두께 증가 */
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.15s ease-in-out;
+  }
+
+  .list-item:hover {
+    background-color: var(--muted);
+    border-color: var(--primary-blue);
   }
 
   /* Navigation - 네비게이션 */
