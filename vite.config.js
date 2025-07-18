@@ -63,6 +63,7 @@ export default defineConfig(({ mode }) => {
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
           navigateFallback: '/offline',
           navigateFallbackDenylist: [/^\/api/],
+          importScripts: ['/firebase-messaging-sw.js'],
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/pixabay\.com\/api\/.*/i,
@@ -114,13 +115,6 @@ export default defineConfig(({ mode }) => {
           type: 'module',
         },
         includeAssets: ['firebase-messaging-sw.js'],
-        srcDir: 'src',
-        filename: 'sw.js',
-        strategies: 'injectManifest',
-        injectManifest: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
-        },
       }),
       {
         name: 'firebase-sw-env-replace',
