@@ -88,18 +88,6 @@ export default function PlannerPage() {
   return (
     <div className="mx-auto max-w-7xl p-4 sm:p-8">
       {/* 페이지 헤더 */}
-      <div className="mb-8 text-center">
-        <h1 className="mb-2 text-4xl font-bold text-gray-900 dark:text-white">
-          여행 플래너
-          <Badge variant="secondary" className="ml-3">
-            <Sparkles className="mr-1 h-3 w-3" />
-            날씨 교통 정보 추천
-          </Badge>
-        </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300">
-          날씨와 교통정보를 한 눈에 볼 수 있는 여행 플래너
-        </p>
-      </div>
 
       {/* 메인 콘텐츠 */}
       <div className="space-y-6">
@@ -107,7 +95,10 @@ export default function PlannerPage() {
         <div className="w-full">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">여행 기본 정보</CardTitle>
+              <Badge variant="secondary" className="ml-3">
+                <Sparkles className="mr-1 h-3 w-3" />
+                날씨 교통 정보 추천
+              </Badge>
             </CardHeader>
             <CardContent>
               <PlannerForm
