@@ -116,37 +116,46 @@ export default defineConfig(({ mode }) => {
       }),
       {
         name: 'firebase-sw-env-replace',
-        transformIndexHtml() {
-          return []
+        configureServer(server) {
+          // 개발 서버에서 firebase-messaging-sw.js 요청 처리
+          server.middlewares.use('/firebase-messaging-sw.js', (req, res) => {
+            const fs = require('fs')
+            const path = require('path')
+            
+            const swPath = path.resolve('public/firebase-messaging-sw.js')
+            let content = fs.readFileSync(swPath, 'utf-8')
+            
+            content = content
+              .replace('__VITE_FIREBASE_API_KEY__', env.VITE_FIREBASE_API_KEY || '')
+              .replace('__VITE_FIREBASE_AUTH_DOMAIN__', env.VITE_FIREBASE_AUTH_DOMAIN || '')
+              .replace('__VITE_FIREBASE_PROJECT_ID__', env.VITE_FIREBASE_PROJECT_ID || '')
+              .replace('__VITE_FIREBASE_STORAGE_BUCKET__', env.VITE_FIREBASE_STORAGE_BUCKET || '')
+              .replace('__VITE_FIREBASE_MESSAGING_SENDER_ID__', env.VITE_FIREBASE_MESSAGING_SENDER_ID || '')
+              .replace('__VITE_FIREBASE_APP_ID__', env.VITE_FIREBASE_APP_ID || '')
+              
+            res.setHeader('Content-Type', 'application/javascript')
+            res.end(content)
+          })
         },
-        generateBundle(options, bundle) {
-          const swFile = bundle['firebase-messaging-sw.js']
-          if (swFile && 'source' in swFile) {
-            swFile.source = swFile.source
-              .replace(
-                '__VITE_FIREBASE_API_KEY__',
-                env.VITE_FIREBASE_API_KEY || '',
-              )
-              .replace(
-                '__VITE_FIREBASE_AUTH_DOMAIN__',
-                env.VITE_FIREBASE_AUTH_DOMAIN || '',
-              )
-              .replace(
-                '__VITE_FIREBASE_PROJECT_ID__',
-                env.VITE_FIREBASE_PROJECT_ID || '',
-              )
-              .replace(
-                '__VITE_FIREBASE_STORAGE_BUCKET__',
-                env.VITE_FIREBASE_STORAGE_BUCKET || '',
-              )
-              .replace(
-                '__VITE_FIREBASE_MESSAGING_SENDER_ID__',
-                env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-              )
-              .replace(
-                '__VITE_FIREBASE_APP_ID__',
-                env.VITE_FIREBASE_APP_ID || '',
-              )
+        async writeBundle() {
+          const fs = await import('fs')
+          const path = await import('path')
+          
+          const swPath = path.resolve('dist/firebase-messaging-sw.js')
+          
+          if (fs.existsSync(swPath)) {
+            let content = fs.readFileSync(swPath, 'utf-8')
+            
+            content = content
+              .replace('__VITE_FIREBASE_API_KEY__', env.VITE_FIREBASE_API_KEY || '')
+              .replace('__VITE_FIREBASE_AUTH_DOMAIN__', env.VITE_FIREBASE_AUTH_DOMAIN || '')
+              .replace('__VITE_FIREBASE_PROJECT_ID__', env.VITE_FIREBASE_PROJECT_ID || '')
+              .replace('__VITE_FIREBASE_STORAGE_BUCKET__', env.VITE_FIREBASE_STORAGE_BUCKET || '')
+              .replace('__VITE_FIREBASE_MESSAGING_SENDER_ID__', env.VITE_FIREBASE_MESSAGING_SENDER_ID || '')
+              .replace('__VITE_FIREBASE_APP_ID__', env.VITE_FIREBASE_APP_ID || '')
+              
+            fs.writeFileSync(swPath, content)
+            console.log('Firebase service worker 환경변수 대체 완료')
           }
         },
       },
