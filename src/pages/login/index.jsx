@@ -61,7 +61,7 @@ export function LoginPage() {
     try {
       // AuthContext를 통한 로그인
       const credentials = {
-        username: data.email, // FastAPI OAuth2PasswordRequestForm은 username 필드를 사용
+        email: data.email,
         password: data.password,
       }
 

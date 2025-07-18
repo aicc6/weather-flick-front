@@ -15,22 +15,16 @@ export const authApi = createApi({
       }),
     }),
 
-    // 로그인 (FastAPI OAuth2PasswordRequestForm 형식)
+    // 로그인 (JSON 형식)
     login: builder.mutation({
-      query: (credentials) => {
-        const formData = new URLSearchParams()
-        formData.append('username', credentials.username)
-        formData.append('password', credentials.password)
-
-        return {
-          url: 'auth/login',
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        }
-      },
+      query: (credentials) => ({
+        url: 'auth/login',
+        method: 'POST',
+        body: {
+          email: credentials.email,
+          password: credentials.password,
+        },
+      }),
       invalidatesTags: ['User'],
     }),
 

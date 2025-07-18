@@ -1,8 +1,7 @@
 // 로그인 상태 확인 유틸리티
 export const isAuthenticated = () => {
   const token = localStorage.getItem('access_token')
-  const userId = localStorage.getItem('user_id')
-  return !!(token && userId)
+  return !!token
 }
 
 // 토큰 유효성 확인 (선택적)
