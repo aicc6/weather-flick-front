@@ -110,7 +110,8 @@ export default defineConfig(({ mode }) => {
           ],
         },
         devOptions: {
-          enabled: false, // 개발 모드에서 PWA 비활성화 (무한 리로드 문제 해결)
+          enabled: true, // 개발 모드에서 PWA 활성화 (FCM 테스트를 위해)
+          type: 'module',
         },
         includeAssets: ['firebase-messaging-sw.js'],
         srcDir: 'src',

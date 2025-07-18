@@ -84,6 +84,7 @@ const HelpPage = lazy(() => import('./pages/help/help'))
 const ContactPage = lazy(() => import('./pages/contact'))
 const TermsPage = lazy(() => import('./pages/terms'))
 const NotificationTestPage = lazy(() => import('./pages/notification-test'))
+const TestFCMPage = lazy(() => import('./pages/test-fcm'))
 
 // 내부 컴포넌트 - BrowserRouter 내부에서 실행
 function AppContent() {
@@ -227,6 +228,7 @@ function AppContent() {
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
           <Route path="/notification-test" element={<NotificationTestPage />} />
+          <Route path="/test-fcm" element={<TestFCMPage />} />
           <Route path="/offline" element={<OfflinePage />} />
           {/* 404 페이지 - 모든 라우트의 마지막에 위치 */}
           <Route path="*" element={<NotFoundPage />} />
