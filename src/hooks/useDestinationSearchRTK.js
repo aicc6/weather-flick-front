@@ -41,7 +41,10 @@ export default function useDestinationSearchRTK() {
           destinationsApi.endpoints.searchDestinations.initiate(query.trim()),
         ).unwrap()
 
+        console.log('🔍 목적지 검색 결과:', { query: query.trim(), result })
+
         const suggestions = result?.suggestions || []
+        console.log('📍 검색된 제안:', suggestions)
 
         setDestSuggestions((prev) => ({
           ...prev,

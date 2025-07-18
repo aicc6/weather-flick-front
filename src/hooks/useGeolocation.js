@@ -14,16 +14,20 @@ export default function useGeolocation() {
 
   const getCurrentLocation = useCallback(async () => {
     return new Promise((resolve, reject) => {
+      console.log('📍 현재 위치 요청 시작')
       setIsLocating(true)
 
       if (!navigator.geolocation) {
         const errorMessage =
           '위치 서비스 미지원: 이 브라우저는 위치 정보를 지원하지 않습니다.'
+        console.error('❌ Geolocation 미지원:', errorMessage)
         toast.error(errorMessage)
         setIsLocating(false)
         reject(new Error(errorMessage))
         return
       }
+
+      console.log('✅ Geolocation API 지원됨')
 
       const options = {
         enableHighAccuracy: true,
