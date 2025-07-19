@@ -64,14 +64,14 @@ export const getFCMToken = async () => {
     if (!registration) {
       console.log('서비스 워커가 등록되지 않았습니다. 대기 중...')
       // 서비스 워커 등록 대기
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000))
     }
 
-    const currentToken = await getToken(messaging, { 
+    const currentToken = await getToken(messaging, {
       vapidKey,
-      serviceWorkerRegistration: registration 
+      serviceWorkerRegistration: registration,
     })
-    
+
     if (currentToken) {
       console.log('FCM 토큰 생성 성공:', currentToken.substring(0, 10) + '...')
       return currentToken

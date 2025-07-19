@@ -17,10 +17,8 @@ import {
   Zap,
 } from '@/components/icons'
 import NavigationDropdown from './NavigationDropdown'
-import NotificationSettings from './NotificationSettings'
 import SmartTimeSelector from './SmartTimeSelector'
 import RealTimeTrafficWidget from './RealTimeTrafficWidget'
-import AdvancedTimeMachineInsights from './AdvancedTimeMachineInsights'
 
 // 교통수단 아이콘 매핑
 const transportIcons = {
@@ -1748,12 +1746,7 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
 
         <RouteComparison routes={filteredRoutes} />
 
-        <AdvancedTimeMachineInsights
-          time={selectedTime}
-          predictions={currentTimeMachine}
-          route={route}
-          userPreferences={{}}
-        />
+        {/* AdvancedTimeMachineInsights 컴포넌트는 아직 구현되지 않았습니다 */}
 
         {/* 추가 정보 확장 영역 */}
         <div className="border-t pt-3">
@@ -1852,11 +1845,7 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
             variant="outline"
             className="flex-1"
           />
-          <NotificationSettings
-            route={route}
-            planId={route?.plan_id}
-            className="flex-1"
-          />
+          {/* NotificationSettings 컴포넌트는 아직 구현되지 않았습니다 */}
         </div>
       </CardContent>
     </Card>

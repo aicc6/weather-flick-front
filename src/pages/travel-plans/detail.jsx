@@ -24,6 +24,7 @@ import {
   Navigation,
   Zap,
   Route,
+  Share2,
 } from '@/components/icons'
 import {
   Dialog,
@@ -37,6 +38,7 @@ import { toast } from 'sonner'
 import EnhancedTransportCard from '@/components/transport/EnhancedTransportCard'
 import { CompactDayItinerary } from '@/components/travel'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import SharePlanModal from '@/components/SharePlanModal'
 
 // 안전한 key 생성 유틸리티 함수
 const generateSafeKey = (item, prefix = '', index = 0) => {
@@ -56,6 +58,8 @@ const formatDate = (dateString) => {
 
 export function TravelPlanDetailPage() {
   const { planId } = useParams()
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
+
   const {
     data: plan,
     isLoading,
@@ -1357,8 +1361,12 @@ export function TravelPlanDetailPage() {
                         : '자동 경로 생성'}
                     </Button>
                   )}
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <span>📤</span>
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    onClick={() => setIsShareModalOpen(true)}
+                  >
+                    <Share2 className="h-4 w-4" />
                     공유하기
                   </Button>
                   <Button variant="outline" className="flex items-center gap-2">
@@ -1461,8 +1469,9 @@ export function TravelPlanDetailPage() {
                       variant="outline"
                       size="sm"
                       className="flex items-center gap-2"
+                      onClick={() => setIsShareModalOpen(true)}
                     >
-                      <span>📤</span>
+                      <Share2 className="h-4 w-4" />
                       공유
                     </Button>
                     <Button
@@ -2832,6 +2841,14 @@ export function TravelPlanDetailPage() {
             ) : null}
           </DialogContent>
         </Dialog>
+
+        {/* 공유 모달 */}
+        <SharePlanModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          planId={planId}
+          planTitle={plan?.title || ''}
+        />
       </div>
     </div>
   )
