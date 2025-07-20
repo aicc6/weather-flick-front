@@ -309,7 +309,9 @@ export function SettingsPage() {
                     </p>
                     <ol className="list-inside list-decimal space-y-1 text-xs text-red-600 dark:text-red-400">
                       <li>주소창 왼쪽의 자물쇠 아이콘 클릭</li>
-                      <li>&quot;사이트 설정&quot; 또는 &quot;권한&quot; 클릭</li>
+                      <li>
+                        &quot;사이트 설정&quot; 또는 &quot;권한&quot; 클릭
+                      </li>
                       <li>&quot;알림&quot;을 &quot;허용&quot;으로 변경</li>
                       <li>페이지 새로고침 후 다시 시도</li>
                     </ol>

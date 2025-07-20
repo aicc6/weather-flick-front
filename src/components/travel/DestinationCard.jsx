@@ -3,13 +3,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import {
-  Heart,
-  Bookmark,
-  MapPin,
-  Star,
-  Navigation,
-} from '@/components/icons'
+import { Heart, Bookmark, MapPin, Star } from '@/components/icons'
 import {
   useAddDestinationLikeMutation,
   useRemoveDestinationLikeMutation,
@@ -113,7 +107,9 @@ export function DestinationCard({
   const locationInfo = getLocationInfo()
 
   return (
-    <Card className={`overflow-hidden transition-shadow hover:shadow-lg ${className}`}>
+    <Card
+      className={`overflow-hidden transition-shadow hover:shadow-lg ${className}`}
+    >
       {/* 이미지 섹션 */}
       {destination.image_url && (
         <div className="relative h-48 overflow-hidden">
@@ -204,7 +200,9 @@ export function DestinationCard({
               {destination.rating && (
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span className="font-medium">{destination.rating.toFixed(1)}</span>
+                  <span className="font-medium">
+                    {destination.rating.toFixed(1)}
+                  </span>
                 </div>
               )}
               <div className="flex items-center gap-1 text-gray-500">

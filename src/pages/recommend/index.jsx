@@ -1,5 +1,12 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useGetTravelCoursesQuery } from '@/store/api/travelCoursesApi'
+import {
+  useGetCourseLikeQuery,
+  useLikeCourseMutation,
+  useUnlikeCourseMutation,
+} from '@/store/api/recommendLikesApi'
+import { useAuth } from '@/contexts/AuthContextRTK'
 
 // 아이콘 컴포넌트들
 const HeartIcon = ({ className, filled = false }) => (
@@ -110,16 +117,63 @@ const getRegionCodeParam = (code) => {
 }
 
 function RecommendCourseItem({ course }) {
-  const [isLiked, setIsLiked] = useState(false)
+  const navigate = useNavigate()
+  const { user } = useAuth()
   const [isBookmarked, setIsBookmarked] = useState(false)
 
-  const handleLike = (e) => {
-    e.stopPropagation()
-    setIsLiked(!isLiked)
-  }
+  // 좋아요 API 연동
+  const { data: likeData, isLoading: likeLoading } = useGetCourseLikeQuery(
+    course.id,
+    {
+      skip: !course?.id || isNaN(Number(course.id)) || !user,
+    },
+  )
+  const [likeCourse] = useLikeCourseMutation()
+  const [unlikeCourse] = useUnlikeCourseMutation()
+
+  const handleLike = useCallback(
+    async (e) => {
+      e.stopPropagation()
+
+      // 비로그인 사용자 처리
+      if (!user) {
+        const shouldLogin = window.confirm(
+          '해당 기능은 로그인해야 가능합니다.\n로그인 페이지로 이동하시겠습니까?',
+        )
+        if (shouldLogin) {
+          navigate('/login')
+        }
+        return
+      }
+
+      try {
+        if (likeData?.liked) {
+          await unlikeCourse(course.id).unwrap()
+        } else {
+          await likeCourse(course.id).unwrap()
+        }
+      } catch (error) {
+        console.error('좋아요 처리 실패:', error)
+        alert('좋아요 처리에 실패했습니다. 다시 시도해주세요.')
+      }
+    },
+    [likeData?.liked, course.id, likeCourse, unlikeCourse, user, navigate],
+  )
 
   const handleBookmark = (e) => {
     e.stopPropagation()
+
+    // 비로그인 사용자 처리
+    if (!user) {
+      const shouldLogin = window.confirm(
+        '해당 기능은 로그인해야 가능합니다.\n로그인 페이지로 이동하시겠습니까?',
+      )
+      if (shouldLogin) {
+        navigate('/login')
+      }
+      return
+    }
+
     setIsBookmarked(!isBookmarked)
   }
 
@@ -164,13 +218,14 @@ function RecommendCourseItem({ course }) {
           <button
             onClick={handleLike}
             className={`rounded-full p-2 backdrop-blur-sm transition-all duration-200 ${
-              isLiked
+              likeData?.liked
                 ? 'bg-red-500 text-white shadow-lg'
                 : 'bg-white/90 text-gray-700 hover:bg-red-50 hover:text-red-500 dark:bg-gray-800/90 dark:text-gray-300 dark:hover:bg-red-900/20'
             }`}
-            aria-label="좋아요"
+            aria-label={likeData?.liked ? '좋아요 취소' : '좋아요'}
+            disabled={likeLoading}
           >
-            <HeartIcon className="h-4 w-4" filled={isLiked} />
+            <HeartIcon className="h-4 w-4" filled={likeData?.liked} />
           </button>
           <button
             onClick={handleBookmark}
@@ -209,13 +264,17 @@ function RecommendCourseItem({ course }) {
             <button
               onClick={handleLike}
               className={`flex items-center gap-2 rounded-full px-3 py-2 text-sm transition-all duration-200 ${
-                isLiked
+                likeData?.liked
                   ? 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400'
                   : 'text-gray-500 hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-400'
               }`}
+              disabled={likeLoading}
             >
-              <HeartIcon className="h-4 w-4" filled={isLiked} />
-              좋아요
+              <HeartIcon className="h-4 w-4" filled={likeData?.liked} />
+              <span>좋아요</span>
+              {likeData?.total !== undefined && (
+                <span className="text-xs">({likeData.total})</span>
+              )}
             </button>
             <button
               onClick={handleBookmark}

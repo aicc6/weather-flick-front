@@ -1,5 +1,5 @@
-import { createApi } from '@reduxjs/toolkit/query/react';
-import { baseQuery } from './baseQuery';
+import { createApi } from '@reduxjs/toolkit/query/react'
+import { baseQuery } from './baseQuery'
 
 export const destinationLikesSavesApi = createApi({
   reducerPath: 'destinationLikesSavesApi',
@@ -91,7 +91,7 @@ export const destinationLikesSavesApi = createApi({
       ],
     }),
   }),
-});
+})
 
 export const {
   useAddDestinationLikeMutation,
@@ -102,4 +102,4 @@ export const {
   useGetMyDestinationSavesQuery,
   useUpdateDestinationSaveNoteMutation,
   useGetDestinationDetailQuery,
-} = destinationLikesSavesApi;
+} = destinationLikesSavesApi

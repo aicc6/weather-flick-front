@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContextRTK'
 import { useGetUserPlansQuery } from '@/store/api/travelPlansApi'
 import { useGetTravelCourseLikesQuery } from '@/store/api/travelCourseLikesApi'
-import { 
+import {
   useGetMyDestinationSavesQuery,
   useGetMyDestinationLikesQuery,
 } from '@/store/api/destinationLikesSavesApi'
@@ -57,24 +57,27 @@ export default function ProfilePage() {
     data: savedDestinations = [],
     isLoading: savedLoading,
     refetch: refetchSavedDestinations,
-  } = useGetMyDestinationSavesQuery({
-    skip: 0,
-    limit: 20,
-  }, {
-    skip: !isAuthenticated,
-  })
+  } = useGetMyDestinationSavesQuery(
+    {
+      skip: 0,
+      limit: 20,
+    },
+    {
+      skip: !isAuthenticated,
+    },
+  )
 
   // 좋아요한 여행지 데이터 가져오기 (통계용)
-  const {
-    data: likedDestinations = [],
-    isLoading: likedLoading,
-  } = useGetMyDestinationLikesQuery({
-    skip: 0,
-    limit: 50,
-  }, {
-    skip: !isAuthenticated,
-  })
-
+  const { data: likedDestinations = [], isLoading: likedLoading } =
+    useGetMyDestinationLikesQuery(
+      {
+        skip: 0,
+        limit: 50,
+      },
+      {
+        skip: !isAuthenticated,
+      },
+    )
 
   // 최근 여행 플랜 데이터 가공 (최신순으로 정렬하고 최대 5개만)
   const recentPlans =
@@ -405,7 +408,6 @@ export default function ProfilePage() {
               )}
             </CardContent>
           </Card>
-
 
           {/* 저장한 여행지 */}
           <Card className="weather-card">

@@ -491,128 +491,128 @@ export default function ContactPage() {
             </div>
             <form className="flex flex-1 flex-col overflow-hidden">
               <div className="flex-1 space-y-5 overflow-y-auto px-6 py-4">
-              {/* 문의 분류 */}
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
-                  문의 분류
-                </label>
-                <input
-                  type="text"
-                  value={(detailInquiry || selectedInquiry).category || ''}
-                  readOnly
-                  className="w-full rounded border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-                />
-              </div>
-              {/* 제목 */}
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
-                  제목
-                </label>
-                <input
-                  type="text"
-                  value={(detailInquiry || selectedInquiry).title || ''}
-                  readOnly
-                  className="w-full rounded border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-                />
-              </div>
-              {/* 문의 내용 */}
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
-                  문의 내용
-                </label>
-                <div className="max-h-64 overflow-y-auto rounded border border-gray-300 bg-gray-100 p-3 dark:border-gray-700 dark:bg-gray-800">
-                  <p className="whitespace-pre-wrap text-gray-900 dark:text-gray-100">
-                    {(detailInquiry || selectedInquiry).content || ''}
-                  </p>
-                </div>
-              </div>
-              {/* 이름/이메일 */}
-              <div className="flex gap-4">
-                <div className="flex-1">
+                {/* 문의 분류 */}
+                <div>
                   <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
-                    이름
+                    문의 분류
                   </label>
                   <input
                     type="text"
-                    value={(detailInquiry || selectedInquiry).name || ''}
+                    value={(detailInquiry || selectedInquiry).category || ''}
                     readOnly
                     className="w-full rounded border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
                   />
                 </div>
-                <div className="flex-1">
+                {/* 제목 */}
+                <div>
                   <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
-                    이메일
+                    제목
                   </label>
                   <input
-                    type="email"
-                    value={(detailInquiry || selectedInquiry).email || ''}
+                    type="text"
+                    value={(detailInquiry || selectedInquiry).title || ''}
                     readOnly
                     className="w-full rounded border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
                   />
                 </div>
-              </div>
-              {/* 공개/비공개, 등록일, 답변상태, 조회수 */}
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                    공개여부:
-                  </span>
-                  <span className="rounded bg-gray-200 px-2 py-0.5 text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-100">
-                    {(detailInquiry || selectedInquiry).isPrivate === true ||
-                    (detailInquiry || selectedInquiry).is_private === true
-                      ? '비공개'
-                      : '공개'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                    등록일:
-                  </span>
-                  <span className="text-xs text-gray-600 dark:text-gray-300">
-                    {formatDate(
-                      (detailInquiry || selectedInquiry).created_at ||
-                        (detailInquiry || selectedInquiry).date,
-                    )}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                    답변상태:
-                  </span>
-                  <span className="rounded bg-gray-200 px-2 py-0.5 text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-100">
-                    {approvalStatusLabels[
-                      (detailInquiry || selectedInquiry).approval_status
-                    ] || '대기중'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                    조회수:
-                  </span>
-                  <span className="text-xs text-gray-600 dark:text-gray-300">
-                    {(detailInquiry || selectedInquiry).views ?? 0}
-                  </span>
-                </div>
-              </div>
-              {/* 답변 섹션 추가 */}
-              {(detailInquiry || selectedInquiry).answer && (
-                <div className="mt-6 border-t pt-4">
-                  <h3 className="mb-3 text-lg font-bold text-gray-800 dark:text-gray-200">
-                    관리자 답변
-                  </h3>
-                  <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
-                    <p className="whitespace-pre-wrap text-gray-700 dark:text-gray-300">
-                      {(detailInquiry || selectedInquiry).answer.content}
+                {/* 문의 내용 */}
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
+                    문의 내용
+                  </label>
+                  <div className="max-h-64 overflow-y-auto rounded border border-gray-300 bg-gray-100 p-3 dark:border-gray-700 dark:bg-gray-800">
+                    <p className="whitespace-pre-wrap text-gray-900 dark:text-gray-100">
+                      {(detailInquiry || selectedInquiry).content || ''}
                     </p>
-                    <div className="mt-3 text-right text-sm text-gray-500 dark:text-gray-400">
-                      답변일:{' '}
-                      {formatDate(
-                        (detailInquiry || selectedInquiry).answer.created_at,
-                      )}
-                    </div>
                   </div>
                 </div>
-              )}
+                {/* 이름/이메일 */}
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
+                      이름
+                    </label>
+                    <input
+                      type="text"
+                      value={(detailInquiry || selectedInquiry).name || ''}
+                      readOnly
+                      className="w-full rounded border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
+                      이메일
+                    </label>
+                    <input
+                      type="email"
+                      value={(detailInquiry || selectedInquiry).email || ''}
+                      readOnly
+                      className="w-full rounded border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                    />
+                  </div>
+                </div>
+                {/* 공개/비공개, 등록일, 답변상태, 조회수 */}
+                <div className="flex flex-wrap gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                      공개여부:
+                    </span>
+                    <span className="rounded bg-gray-200 px-2 py-0.5 text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-100">
+                      {(detailInquiry || selectedInquiry).isPrivate === true ||
+                      (detailInquiry || selectedInquiry).is_private === true
+                        ? '비공개'
+                        : '공개'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                      등록일:
+                    </span>
+                    <span className="text-xs text-gray-600 dark:text-gray-300">
+                      {formatDate(
+                        (detailInquiry || selectedInquiry).created_at ||
+                          (detailInquiry || selectedInquiry).date,
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                      답변상태:
+                    </span>
+                    <span className="rounded bg-gray-200 px-2 py-0.5 text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-100">
+                      {approvalStatusLabels[
+                        (detailInquiry || selectedInquiry).approval_status
+                      ] || '대기중'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                      조회수:
+                    </span>
+                    <span className="text-xs text-gray-600 dark:text-gray-300">
+                      {(detailInquiry || selectedInquiry).views ?? 0}
+                    </span>
+                  </div>
+                </div>
+                {/* 답변 섹션 추가 */}
+                {(detailInquiry || selectedInquiry).answer && (
+                  <div className="mt-6 border-t pt-4">
+                    <h3 className="mb-3 text-lg font-bold text-gray-800 dark:text-gray-200">
+                      관리자 답변
+                    </h3>
+                    <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+                      <p className="whitespace-pre-wrap text-gray-700 dark:text-gray-300">
+                        {(detailInquiry || selectedInquiry).answer.content}
+                      </p>
+                      <div className="mt-3 text-right text-sm text-gray-500 dark:text-gray-400">
+                        답변일:{' '}
+                        {formatDate(
+                          (detailInquiry || selectedInquiry).answer.created_at,
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="border-t border-gray-200 px-6 py-4 text-right dark:border-gray-700">
                 <button

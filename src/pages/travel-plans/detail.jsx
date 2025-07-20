@@ -39,7 +39,6 @@ import EnhancedTransportCard from '@/components/transport/EnhancedTransportCard'
 import { CompactDayItinerary } from '@/components/travel'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import SharePlanModal from '@/components/SharePlanModal'
-import { addToBatchQueue, getCachedRoute } from '@/utils/transportCache'
 
 // 안전한 key 생성 유틸리티 함수
 const generateSafeKey = (item, prefix = '', index = 0) => {
@@ -827,7 +826,6 @@ export function TravelPlanDetailPage() {
 
     return null
   }
-
 
   // 상세 경로 정보 렌더링
   const renderDetailedRouteInfo = (route) => {
@@ -2272,52 +2270,52 @@ export function TravelPlanDetailPage() {
 
                 {/* 대중교통 정보 */}
                 {timemachineRouteInfo.timemachine_info?.message && (
-                    <div className="rounded border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-900/20">
-                      <div className="text-sm text-yellow-800 dark:text-yellow-200">
-                        ℹ️ {timemachineRouteInfo.timemachine_info.message}
-                      </div>
-                      <div className="mt-3 grid grid-cols-3 gap-4">
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                            {formatDuration(
-                              timemachineRouteInfo.timemachine_info.fallback
-                                ?.duration,
-                            )}
-                          </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400">
-                            소요시간
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-green-600 dark:text-green-400">
-                            {formatDistance(
-                              timemachineRouteInfo.timemachine_info.fallback
-                                ?.distance,
-                            )}
-                          </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400">
-                            이동거리
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-purple-600 dark:text-purple-400">
-                            {formatCost(
-                              timemachineRouteInfo.timemachine_info.fallback
-                                ?.cost,
-                            )}
-                          </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400">
-                            예상 비용
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* 대중교통 상세 정보 렌더링 추가 */}
-                      {selectedRoute?.transport_type === 'transit' &&
-                        selectedRoute?.route_data &&
-                        renderTransitDetails(selectedRoute.route_data)}
+                  <div className="rounded border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-900/20">
+                    <div className="text-sm text-yellow-800 dark:text-yellow-200">
+                      ℹ️ {timemachineRouteInfo.timemachine_info.message}
                     </div>
-                  )}
+                    <div className="mt-3 grid grid-cols-3 gap-4">
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                          {formatDuration(
+                            timemachineRouteInfo.timemachine_info.fallback
+                              ?.duration,
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">
+                          소요시간
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-green-600 dark:text-green-400">
+                          {formatDistance(
+                            timemachineRouteInfo.timemachine_info.fallback
+                              ?.distance,
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">
+                          이동거리
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                          {formatCost(
+                            timemachineRouteInfo.timemachine_info.fallback
+                              ?.cost,
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">
+                          예상 비용
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 대중교통 상세 정보 렌더링 추가 */}
+                    {selectedRoute?.transport_type === 'transit' &&
+                      selectedRoute?.route_data &&
+                      renderTransitDetails(selectedRoute.route_data)}
+                  </div>
+                )}
 
                 {/* 경로 비교 결과 (대중교통인 경우) */}
                 {timemachineRouteInfo.timemachine_info?.comparison?.routes && (
