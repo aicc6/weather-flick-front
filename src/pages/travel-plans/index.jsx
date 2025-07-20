@@ -370,9 +370,11 @@ export function TravelPlansPage() {
                           </Badge>
                         )}
                       </div>
-                      <p className="text-muted-foreground mt-1 text-sm">
-                        {plan.destination || '목적지 미정'}
-                      </p>
+                      {plan.destination && (
+                        <p className="text-muted-foreground mt-1 text-sm">
+                          {plan.destination}
+                        </p>
+                      )}
                     </div>
                     <Button
                       variant="ghost"
