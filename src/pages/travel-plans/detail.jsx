@@ -823,129 +823,6 @@ export function TravelPlanDetailPage() {
     return null
   }
 
-  // 자동차 경로 상세 정보 렌더링
-  const renderCarRouteDetails = (routeData) => {
-    if (!routeData) return null
-
-    // TMAP API 응답 (detailed_guides 우선 사용)
-    if (routeData.detailed_guides && routeData.detailed_guides.length > 0) {
-      return (
-        <div className="mt-2 space-y-2">
-          <div className="text-xs font-medium text-gray-700 dark:text-gray-300">
-            🗺️ 경로 안내
-          </div>
-          {routeData.detailed_guides.map((guide, index) => (
-            <div
-              key={generateSafeKey(guide, 'guide', index)}
-              className="flex items-start space-x-2 text-xs"
-            >
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-800">
-                {guide.step}
-              </span>
-              <div className="flex-1">
-                <div className="font-medium text-gray-800">
-                  {guide.description}
-                </div>
-                <div className="mt-1 flex items-center space-x-2 text-gray-600">
-                  <span className="inline-flex items-center">
-                    📍 {guide.distance}
-                  </span>
-                  <span className="inline-flex items-center">
-                    ⏱️ {guide.time}
-                  </span>
-                  {guide.instruction && (
-                    <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
-                      {guide.instruction}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {/* 경로 요약 정보 */}
-          {routeData.route_summary && (
-            <div className="mt-3 rounded-lg bg-gray-50 p-2 dark:bg-gray-800">
-              <div className="mb-1 text-xs font-medium text-gray-800">
-                경로 요약
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-xs text-gray-700">
-                <div>총 {routeData.route_summary.total_steps}개 안내점</div>
-                <div>주요 구간 {routeData.route_summary.major_steps}개</div>
-                <div>
-                  예상 연료비{' '}
-                  {routeData.route_summary.estimated_fuel_cost?.toLocaleString()}
-                  원
-                </div>
-                <div>
-                  총 예상비용{' '}
-                  {routeData.route_summary.total_cost_estimate?.toLocaleString()}
-                  원
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="mt-2 flex items-center space-x-4 text-xs text-gray-600">
-            {routeData.toll_fee > 0 && (
-              <span className="inline-flex items-center">
-                🛣️ 통행료 {routeData.toll_fee.toLocaleString()}원
-              </span>
-            )}
-            {routeData.taxi_fee > 0 && (
-              <span className="inline-flex items-center">
-                🚖 택시요금 {routeData.taxi_fee.toLocaleString()}원
-              </span>
-            )}
-            <span className="inline-flex items-center">🗺️ TMAP 기반 경로</span>
-          </div>
-        </div>
-      )
-    }
-
-    // 기존 guide_points 사용 (fallback)
-    if (routeData.guide_points && routeData.guide_points.length > 0) {
-      const guidePoints = routeData.guide_points.slice(0, 5) // 최대 5개만 표시
-
-      return (
-        <div className="mt-2 space-y-1">
-          <div className="text-xs font-medium text-gray-700 dark:text-gray-300">
-            🗺️ 경로 안내
-          </div>
-          {guidePoints.map((point, index) => (
-            <div
-              key={generateSafeKey(point, 'point', index)}
-              className="flex items-start space-x-2 text-xs text-gray-700"
-            >
-              <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-800">
-                {index + 1}
-              </span>
-              <div className="flex-1">
-                <div className="font-medium text-gray-800">
-                  {point.description}
-                </div>
-                <div className="mt-1 flex items-center space-x-2 text-gray-600">
-                  <span className="inline-flex items-center">
-                    📍 {point.distance}
-                  </span>
-                  <span className="inline-flex items-center">
-                    ⏱️ {point.time}
-                  </span>
-                  {point.instruction && (
-                    <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
-                      {point.instruction}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )
-    }
-
-    return null
-  }
 
   // 상세 경로 정보 렌더링
   const renderDetailedRouteInfo = (route) => {
@@ -1095,7 +972,7 @@ export function TravelPlanDetailPage() {
             데이터 소스: {routeData.source || '기본'}
           </div>
           {routeData.source === 'TMAP' && (
-            <Badge variant="outline">🚗 실시간 교통정보</Badge>
+            <Badge variant="outline">🚌 실시간 대중교통정보</Badge>
           )}
         </div>
       </div>
@@ -1231,7 +1108,7 @@ export function TravelPlanDetailPage() {
               className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-800 dark:data-[state=active]:text-gray-100"
             >
               <Navigation className="mr-2 h-4 w-4" />
-              교통
+              지하철/버스
             </TabsTrigger>
             <TabsTrigger
               value="weather"
@@ -1491,7 +1368,7 @@ export function TravelPlanDetailPage() {
                       날씨 예보 포함
                     </Badge>
                     <Badge variant="outline" className="text-xs">
-                      교통 정보 연결
+                      대중교통/도보 정보 연결
                     </Badge>
                   </div>
                 </CardTitle>
@@ -1768,7 +1645,7 @@ export function TravelPlanDetailPage() {
                               {dayRoutes.length > 0 ? (
                                 <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
                                   <div>
-                                    🚗 총 거리: {formatDistance(totalDistance)}
+                                    🚌 총 거리: {formatDistance(totalDistance)}
                                   </div>
                                   <div>
                                     ⏱️ 총 시간: {formatDuration(totalDuration)}
@@ -1853,10 +1730,10 @@ export function TravelPlanDetailPage() {
                   {routes && routes.length > 0 && (
                     <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
                       <div className="flex items-start gap-2">
-                        <span className="text-lg">🚗</span>
+                        <span className="text-lg">🚌</span>
                         <div>
                           <h4 className="mb-1 font-medium text-blue-800 dark:text-blue-300">
-                            교통 정보
+                            대중교통/도보 정보
                           </h4>
                           <p className="text-sm text-blue-800 dark:text-blue-400">
                             총 {routes.length}개의 경로가 생성되어 있습니다.
@@ -1889,11 +1766,11 @@ export function TravelPlanDetailPage() {
             )}
           </TabsContent>
 
-          {/* 교통 탭 */}
+          {/* 대중교통 탭 */}
           <TabsContent value="transport" className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-                교통 정보
+                지하철/버스/도보 정보
               </h3>
               {itineraryDays.length > 0 && (
                 <Button
@@ -1927,14 +1804,14 @@ export function TravelPlanDetailPage() {
                       <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600 dark:border-blue-800 dark:border-t-blue-400"></div>
                     </div>
                     <h4 className="mb-2 text-lg font-semibold text-blue-800 dark:text-blue-300">
-                      교통 정보 로딩 중
+                      대중교통/도보 정보 로딩 중
                     </h4>
                     <p className="text-center text-gray-600 dark:text-gray-300">
                       최적의 경로를 찾고 있습니다...
                     </p>
                     <div className="mt-4 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                       <div className="h-2 w-2 animate-pulse rounded-full bg-blue-500"></div>
-                      <span>실시간 교통 정보 분석</span>
+                      <span>실시간 대중교통/도보 정보 분석</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -2309,9 +2186,6 @@ export function TravelPlanDetailPage() {
                   <>
                     {selectedRoute.departure_name} →{' '}
                     {selectedRoute.destination_name}
-                    {selectedRoute?.transport_type === 'car' && (
-                      <> • ⏰ 여행 계획 일정 기준으로 교통상황 예측</>
-                    )}
                   </>
                 )}
               </DialogDescription>
@@ -2386,9 +2260,8 @@ export function TravelPlanDetailPage() {
                   </div>
                 </div>
 
-                {/* 자동차가 아닌 경우 */}
-                {selectedRoute?.transport_type !== 'car' &&
-                  timemachineRouteInfo.timemachine_info?.message && (
+                {/* 대중교통 정보 */}
+                {timemachineRouteInfo.timemachine_info?.message && (
                     <div className="rounded border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-900/20">
                       <div className="text-sm text-yellow-800 dark:text-yellow-200">
                         ℹ️ {timemachineRouteInfo.timemachine_info.message}
@@ -2436,7 +2309,7 @@ export function TravelPlanDetailPage() {
                     </div>
                   )}
 
-                {/* 경로 비교 결과 (자동차인 경우) */}
+                {/* 경로 비교 결과 (대중교통인 경우) */}
                 {timemachineRouteInfo.timemachine_info?.comparison?.routes && (
                   <div>
                     <h4 className="mb-3 flex items-center font-semibold text-gray-800">
@@ -2468,7 +2341,7 @@ export function TravelPlanDetailPage() {
                                     {route.name}
                                     {route.is_recommended && (
                                       <span className="ml-2 rounded-full bg-green-100 px-2 py-1 text-xs text-green-700">
-                                        🚗 추천
+                                        🚌 추천
                                       </span>
                                     )}
                                   </div>
