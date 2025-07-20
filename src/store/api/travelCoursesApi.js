@@ -604,7 +604,13 @@ const selectRegionsForGeneration = (existingRegions, maxCount = 3) => {
 export const travelCoursesApi = createApi({
   reducerPath: 'travelCoursesApi',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['TravelCourse', 'TravelCourseList', 'Regions', 'Themes', 'TravelCourseLike'],
+  tagTypes: [
+    'TravelCourse',
+    'TravelCourseList',
+    'Regions',
+    'Themes',
+    'TravelCourseLike',
+  ],
   endpoints: (builder) => ({
     // 여행 코스 목록 조회
     getTravelCourses: builder.query({
@@ -628,13 +634,13 @@ export const travelCoursesApi = createApi({
         'TravelCourseList',
         'TravelCourseLike',
         { type: 'TravelCourseLike', id: 'LIST' },
-        ...(result?.courses || []).map(course => ({ 
-          type: 'TravelCourseLike', 
-          id: course.content_id || course.id 
+        ...(result?.courses || []).map((course) => ({
+          type: 'TravelCourseLike',
+          id: course.content_id || course.id,
         })),
-        ...(result?.courses || []).map(course => ({ 
-          type: 'TravelCourse', 
-          id: course.content_id || course.id 
+        ...(result?.courses || []).map((course) => ({
+          type: 'TravelCourse',
+          id: course.content_id || course.id,
         })),
       ],
       keepUnusedDataFor: 0, // 캐싱 비활성화 (개발 중 테스트용)
@@ -855,15 +861,15 @@ export const travelCoursesApi = createApi({
       }),
       providesTags: (result) => [
         'TravelCourseList',
-        'TravelCourseLike', 
+        'TravelCourseLike',
         { type: 'TravelCourseLike', id: 'LIST' },
-        ...(result?.courses || []).map(course => ({ 
-          type: 'TravelCourseLike', 
-          id: course.content_id || course.id 
+        ...(result?.courses || []).map((course) => ({
+          type: 'TravelCourseLike',
+          id: course.content_id || course.id,
         })),
-        ...(result?.courses || []).map(course => ({ 
-          type: 'TravelCourse', 
-          id: course.content_id || course.id 
+        ...(result?.courses || []).map((course) => ({
+          type: 'TravelCourse',
+          id: course.content_id || course.id,
         })),
       ],
       keepUnusedDataFor: 0, // 캐싱 비활성화 (개발 중 테스트용)

@@ -1,9 +1,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGetTravelCoursesQuery } from '@/store/api/travelCoursesApi'
-import {
-  useToggleTravelCourseLikeMutation,
-} from '@/store/api/travelCourseLikesApi'
+import { useToggleTravelCourseLikeMutation } from '@/store/api/travelCourseLikesApi'
 import { useAuth } from '@/contexts/AuthContextRTK'
 
 // 아이콘 컴포넌트들
@@ -152,14 +150,14 @@ function RecommendCourseItem({ course, onLikeChange }) {
           region: course.region || '',
           itinerary: course.itinerary || [],
         }
-        
+
         const result = await toggleTravelCourseLike({
           courseId: course.content_id || course.id,
-          courseData: courseData
+          courseData: courseData,
         }).unwrap()
-        
+
         console.log('좋아요 처리 결과:', result)
-        
+
         // 상위 컴포넌트에 좋아요 변경 알림
         if (onLikeChange) {
           onLikeChange()
@@ -169,12 +167,7 @@ function RecommendCourseItem({ course, onLikeChange }) {
         alert('좋아요 처리에 실패했습니다. 다시 시도해주세요.')
       }
     },
-    [
-      course,
-      toggleTravelCourseLike,
-      user,
-      navigate,
-    ],
+    [course, toggleTravelCourseLike, user, navigate],
   )
 
   const handleBookmark = (e) => {
@@ -327,12 +320,14 @@ export default function RecommendListPage() {
   const pageSize = 10
 
   // 통합된 여행 코스 데이터 조회 (좋아요 필터 포함)
-  const { data, isLoading, isError, error, refetch } = useGetTravelCoursesQuery({
-    page,
-    page_size: pageSize,
-    region_code: region, // region은 숫자 ID
-    liked_only: showFavoritesOnly, // 좋아요 필터 조건
-  })
+  const { data, isLoading, isError, error, refetch } = useGetTravelCoursesQuery(
+    {
+      page,
+      page_size: pageSize,
+      region_code: region, // region은 숫자 ID
+      liked_only: showFavoritesOnly, // 좋아요 필터 조건
+    },
+  )
 
   // 태그 클릭 시 숫자 ID를 region에 저장
   const handleRegionClick = (code) => {
@@ -472,8 +467,8 @@ export default function RecommendListPage() {
         ) : (
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {sortedCourses.map((course) => (
-              <RecommendCourseItem 
-                key={course.content_id || course.id} 
+              <RecommendCourseItem
+                key={course.content_id || course.id}
                 course={course}
                 onLikeChange={handleLikeChange}
               />

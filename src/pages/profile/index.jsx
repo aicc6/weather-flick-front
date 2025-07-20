@@ -291,7 +291,7 @@ export default function ProfilePage() {
                   {savedDestinations.length}
                 </div>
                 <div className="text-muted-foreground text-sm">
-                  즐겨찾는 여행 코스
+                  좋아요한 여행지 수
                 </div>
               </CardContent>
             </Card>

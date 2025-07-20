@@ -1,5 +1,3 @@
-import React from 'react'
-
 /**
  * 지하철 노선도 스타일 컴포넌트
  * ODsay API의 stations 데이터를 시각적으로 표시

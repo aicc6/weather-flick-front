@@ -100,18 +100,22 @@ export function TravelPlanDetailPage() {
     if (routes[0]?.route_data) {
       console.log('🛤️ Route Data Analysis:', routes[0].route_data)
       if (routes[0].route_data.sub_paths) {
-        console.log('🛤️ Sub Paths Count:', routes[0].route_data.sub_paths.length)
+        console.log(
+          '🛤️ Sub Paths Count:',
+          routes[0].route_data.sub_paths.length,
+        )
         routes[0].route_data.sub_paths.forEach((path, idx) => {
           console.log(`🛤️ Path ${idx + 1}:`, {
             type: path.type,
             stations_count: path.stations?.length || 0,
             line_name: path.lane?.name || path.lane?.busNo,
             start_station: path.start_station,
-            end_station: path.end_station
+            end_station: path.end_station,
           })
           if (path.type === 'subway' && path.stations) {
-            console.log(`🚇 Subway stations for path ${idx + 1}:`, 
-              path.stations.map(s => s.station_name || s.stationName)
+            console.log(
+              `🚇 Subway stations for path ${idx + 1}:`,
+              path.stations.map((s) => s.station_name || s.stationName),
             )
           }
         })
@@ -1423,7 +1427,10 @@ export function TravelPlanDetailPage() {
                               <h4 className="font-medium text-green-800 dark:text-green-200">
                                 🏠 출발지
                               </h4>
-                              <Badge variant="outline" className="border-green-300 text-green-700 dark:border-green-600 dark:text-green-400">
+                              <Badge
+                                variant="outline"
+                                className="border-green-300 text-green-700 dark:border-green-600 dark:text-green-400"
+                              >
                                 여행 시작점
                               </Badge>
                             </div>
@@ -1432,39 +1439,48 @@ export function TravelPlanDetailPage() {
                             </p>
                             {plan.start_date && (
                               <p className="mt-1 text-xs text-green-600 dark:text-green-400">
-                                출발일: {new Date(plan.start_date).toLocaleDateString('ko-KR', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                                  weekday: 'short'
-                                })}
+                                출발일:{' '}
+                                {new Date(plan.start_date).toLocaleDateString(
+                                  'ko-KR',
+                                  {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                    weekday: 'short',
+                                  },
+                                )}
                               </p>
                             )}
                           </div>
                         </div>
                       </div>
                     )}
-                    
+
                     {/* 출발지에서 첫 번째 목적지로의 연결선 */}
                     {plan?.start_location && itineraryDays.length > 0 && (
                       <div className="flex items-center justify-center py-2">
                         <div className="flex items-center gap-2 text-gray-400">
                           <div className="h-px w-8 bg-gray-300"></div>
                           <div className="rounded-full bg-blue-100 p-2 dark:bg-blue-900/30">
-                            <svg 
-                              className="h-4 w-4 text-blue-600 dark:text-blue-400" 
-                              fill="none" 
-                              stroke="currentColor" 
+                            <svg
+                              className="h-4 w-4 text-blue-600 dark:text-blue-400"
+                              fill="none"
+                              stroke="currentColor"
                               viewBox="0 0 24 24"
                             >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                              />
                             </svg>
                           </div>
                           <div className="h-px w-8 bg-gray-300"></div>
                         </div>
                       </div>
                     )}
-                    
+
                     {itineraryDays.map((day) => {
                       const dayNumber = parseInt(day.replace(/\D/g, ''))
                       const places = plan.itinerary[day] || []
@@ -1540,7 +1556,7 @@ export function TravelPlanDetailPage() {
                         />
                       )
                     })}
-                    
+
                     {/* 최종 목적지 정보 표시 */}
                     {plan?.destination && itineraryDays.length > 0 && (
                       <>
@@ -1549,31 +1565,46 @@ export function TravelPlanDetailPage() {
                           <div className="flex items-center gap-2 text-gray-400">
                             <div className="h-px w-8 bg-gray-300"></div>
                             <div className="rounded-full bg-red-100 p-2 dark:bg-red-900/30">
-                              <svg 
-                                className="h-4 w-4 text-red-600 dark:text-red-400" 
-                                fill="none" 
-                                stroke="currentColor" 
+                              <svg
+                                className="h-4 w-4 text-red-600 dark:text-red-400"
+                                fill="none"
+                                stroke="currentColor"
                                 viewBox="0 0 24 24"
                               >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                                />
                               </svg>
                             </div>
                             <div className="h-px w-8 bg-gray-300"></div>
                           </div>
                         </div>
-                        
+
                         {/* 최종 목적지 */}
                         <div className="rounded-lg border-2 border-dashed border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
                           <div className="flex items-center gap-3">
                             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-800">
-                              <svg 
-                                className="h-5 w-5 text-red-600 dark:text-red-400" 
-                                fill="none" 
-                                stroke="currentColor" 
+                              <svg
+                                className="h-5 w-5 text-red-600 dark:text-red-400"
+                                fill="none"
+                                stroke="currentColor"
                                 viewBox="0 0 24 24"
                               >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                />
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                />
                               </svg>
                             </div>
                             <div className="flex-1">
@@ -1581,7 +1612,10 @@ export function TravelPlanDetailPage() {
                                 <h4 className="font-medium text-red-800 dark:text-red-200">
                                   🏁 최종 목적지
                                 </h4>
-                                <Badge variant="outline" className="border-red-300 text-red-700 dark:border-red-600 dark:text-red-400">
+                                <Badge
+                                  variant="outline"
+                                  className="border-red-300 text-red-700 dark:border-red-600 dark:text-red-400"
+                                >
                                   여행 종료점
                                 </Badge>
                               </div>
@@ -1590,12 +1624,16 @@ export function TravelPlanDetailPage() {
                               </p>
                               {plan.end_date && (
                                 <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-                                  도착일: {new Date(plan.end_date).toLocaleDateString('ko-KR', {
-                                    year: 'numeric',
-                                    month: 'long', 
-                                    day: 'numeric',
-                                    weekday: 'short'
-                                  })}
+                                  도착일:{' '}
+                                  {new Date(plan.end_date).toLocaleDateString(
+                                    'ko-KR',
+                                    {
+                                      year: 'numeric',
+                                      month: 'long',
+                                      day: 'numeric',
+                                      weekday: 'short',
+                                    },
+                                  )}
                                 </p>
                               )}
                             </div>

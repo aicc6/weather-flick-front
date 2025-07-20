@@ -13,6 +13,7 @@ import {
   ChevronUp,
   Info,
   Star,
+  Zap,
 } from '@/components/icons'
 import NavigationDropdown from './NavigationDropdown'
 import SmartTimeSelector from './SmartTimeSelector'
@@ -237,20 +238,38 @@ const RouteComparison = ({ routes }) => {
 
                   {/* 지하철 노선도 시각화 - 지하철 구간이 있는 모든 경로에서 표시 */}
                   {(() => {
-                    console.log('🔍 RouteComparison - Checking subway paths for route:', route.name)
-                    console.log('🔍 RouteComparison - transitInfo:', route.transitInfo)
-                    console.log('🔍 RouteComparison - subPaths:', route.transitInfo?.subPaths)
+                    console.log(
+                      '🔍 RouteComparison - Checking subway paths for route:',
+                      route.name,
+                    )
+                    console.log(
+                      '🔍 RouteComparison - transitInfo:',
+                      route.transitInfo,
+                    )
+                    console.log(
+                      '🔍 RouteComparison - subPaths:',
+                      route.transitInfo?.subPaths,
+                    )
                     if (route.transitInfo?.subPaths) {
                       const subwayPaths = route.transitInfo.subPaths.filter(
-                        (path) => path.type === 'subway' && path.stations && path.stations.length > 0
+                        (path) =>
+                          path.type === 'subway' &&
+                          path.stations &&
+                          path.stations.length > 0,
                       )
-                      console.log('🔍 RouteComparison - Filtered subway paths:', subwayPaths.length)
+                      console.log(
+                        '🔍 RouteComparison - Filtered subway paths:',
+                        subwayPaths.length,
+                      )
                       subwayPaths.forEach((path, idx) => {
-                        console.log(`🔍 RouteComparison - Subway path ${idx + 1}:`, {
-                          type: path.type,
-                          stations: path.stations?.length || 0,
-                          line_name: path.lane?.name
-                        })
+                        console.log(
+                          `🔍 RouteComparison - Subway path ${idx + 1}:`,
+                          {
+                            type: path.type,
+                            stations: path.stations?.length || 0,
+                            line_name: path.lane?.name,
+                          },
+                        )
                       })
                     }
                     return null
@@ -321,36 +340,6 @@ const RouteComparison = ({ routes }) => {
   )
 }
 
-<<<<<<< HEAD
-=======
-// 타임머신 인사이트 컴포넌트
-const _TimeMachineInsights = ({ time, predictions }) => {
-  if (!predictions || !predictions[time]) return null
-
-  const insight = predictions[time]
-
-  return (
-    <div className="rounded-lg bg-blue-50 p-3">
-      <div className="mb-2 flex items-center space-x-2">
-        <Zap className="h-4 w-4 text-blue-600" />
-        <span className="font-medium text-blue-800">시간대별 예측</span>
-      </div>
-      <div className="space-y-1 text-sm text-blue-700">
-        <div>
-          🚇 지하철: {insight.subwayDuration || insight.transitDuration}
-        </div>
-        <div>🚌 버스: {insight.busDuration || insight.transitDuration}</div>
-        <div>🚶 도보: {insight.walkDuration || '예상 시간'}</div>
-        <div className="font-medium">💡 추천: {insight.recommendation}</div>
-        <div className="text-xs text-blue-600">
-          이유: {insight.reasons?.join(', ')}
-        </div>
-      </div>
-    </div>
-  )
-}
-
->>>>>>> 0209c3f (UI 개선: 대중교통 정보 카드에서 실시간 교통 위젯 제거 및 지하철 노선도 컴포넌트 추가)
 // 포맷팅 유틸리티 함수들
 const formatDistance = (distance) => {
   if (!distance) return '0km'
@@ -366,12 +355,6 @@ const formatCost = (cost) => {
   return `${Math.round(cost).toLocaleString()}원`
 }
 
-<<<<<<< HEAD
-// 실시간 지연정보 생성 함수
-const generateRealTimeDelays = (transitData) => {
-  if (!transitData?.route_info || !transitData.real_time_info) {
-    return []
-=======
 // 교통수단 타입을 한글로 변환
 const formatTransportType = (type) => {
   const typeMap = {
@@ -386,14 +369,13 @@ const formatTransportType = (type) => {
 const createRoutesFromExistingData = (routeData) => {
   console.log('📋 Processing existing route data:', routeData)
   const routes = []
-  
+
   if (!routeData || !routeData.sub_paths) {
     return routes
->>>>>>> 0209c3f (UI 개선: 대중교통 정보 카드에서 실시간 교통 위젯 제거 및 지하철 노선도 컴포넌트 추가)
   }
-  
+
   const subPaths = routeData.sub_paths
-  
+
   // 기본 도보 경로
   routes.push({
     name: '도보',
@@ -405,28 +387,28 @@ const createRoutesFromExistingData = (routeData) => {
     recommendation: '건강',
     details: ['🚶 걸어서 이동', '💪 운동 효과', '🌱 친환경'],
   })
-  
+
   // 지하철과 버스 사용 여부 확인
-  const hasSubway = subPaths.some(path => path.type === 'subway')
-  const hasBus = subPaths.some(path => path.type === 'bus')
-  
+  const hasSubway = subPaths.some((path) => path.type === 'subway')
+  const hasBus = subPaths.some((path) => path.type === 'bus')
+
   if (hasSubway) {
-    const subwayPaths = subPaths.filter(path => path.type === 'subway')
+    const subwayPaths = subPaths.filter((path) => path.type === 'subway')
     const routeInfo = []
     const subwayDetails = []
-    
+
     subwayPaths.forEach((path) => {
       const lineName = path.lane?.name || '지하철'
       const startStation = path.start_station || '출발역'
       const endStation = path.end_station || '도착역'
       const stationCount = path.station_count || 0
       const sectionTime = path.section_time || 0
-      
+
       subwayDetails.push(`🚇 ${lineName} (${startStation} → ${endStation})`)
       if (stationCount > 0) {
         subwayDetails.push(`   ${stationCount}개 역, ${sectionTime}분`)
       }
-      
+
       routeInfo.push({
         type: 'subway',
         name: lineName,
@@ -437,16 +419,18 @@ const createRoutesFromExistingData = (routeData) => {
         duration: sectionTime,
       })
     })
-    
+
     subwayDetails.push('💳 교통카드 결제')
     subwayDetails.push('♿ 휠체어 이용 가능')
     subwayDetails.push('🌱 친환경 교통수단')
-    
+
     routes.push({
       name: '지하철',
       mode: 'subway',
       duration: routeData.summary?.totalTime || 20,
-      distance: formatDistance((routeData.summary?.totalDistance || 2000) / 1000),
+      distance: formatDistance(
+        (routeData.summary?.totalDistance || 2000) / 1000,
+      ),
       cost: formatCost(routeData.summary?.payment || 1370),
       rating: 5,
       recommendation: '정시성',
@@ -455,31 +439,34 @@ const createRoutesFromExistingData = (routeData) => {
         transferCount: routeData.summary?.subwayTransitCount || 0,
         routeInfo: routeInfo,
         walkingDistance: routeData.summary?.totalWalk || 0,
-        totalStops: subwayPaths.reduce((sum, path) => sum + (path.station_count || 0), 0),
+        totalStops: subwayPaths.reduce(
+          (sum, path) => sum + (path.station_count || 0),
+          0,
+        ),
         peakTimeMultiplier: 1.1,
         serviceDisruption: getServiceDisruption(),
         subPaths: subPaths, // 전체 경로 정보 포함
       },
     })
   }
-  
+
   if (hasBus) {
-    const busPaths = subPaths.filter(path => path.type === 'bus')
+    const busPaths = subPaths.filter((path) => path.type === 'bus')
     const busRouteInfo = []
     const busDetails = []
-    
+
     busPaths.forEach((path) => {
       const busNo = path.lane?.busNo || path.lane?.name || '버스'
       const startStation = path.start_station || '출발정류장'
       const endStation = path.end_station || '도착정류장'
       const stationCount = path.station_count || 0
       const sectionTime = path.section_time || 0
-      
+
       busDetails.push(`🚌 ${busNo} (${startStation} → ${endStation})`)
       if (stationCount > 0) {
         busDetails.push(`   ${stationCount}개 정류장, ${sectionTime}분`)
       }
-      
+
       busRouteInfo.push({
         type: 'bus',
         name: busNo,
@@ -490,16 +477,18 @@ const createRoutesFromExistingData = (routeData) => {
         duration: sectionTime,
       })
     })
-    
+
     busDetails.push('💳 교통카드 결제')
     busDetails.push('📱 버스 도착정보 앱')
     busDetails.push('🌱 친환경 교통수단')
-    
+
     routes.push({
       name: '버스',
       mode: 'bus',
       duration: routeData.summary?.totalTime || 25,
-      distance: formatDistance((routeData.summary?.totalDistance || 2000) / 1000),
+      distance: formatDistance(
+        (routeData.summary?.totalDistance || 2000) / 1000,
+      ),
       cost: formatCost(routeData.summary?.payment || 1500),
       rating: 4,
       recommendation: '경제적',
@@ -508,14 +497,17 @@ const createRoutesFromExistingData = (routeData) => {
         transferCount: routeData.summary?.busTransitCount || 0,
         routeInfo: busRouteInfo,
         walkingDistance: routeData.summary?.totalWalk || 0,
-        totalStops: busPaths.reduce((sum, path) => sum + (path.station_count || 0), 0),
+        totalStops: busPaths.reduce(
+          (sum, path) => sum + (path.station_count || 0),
+          0,
+        ),
         peakTimeMultiplier: 1.3,
         serviceDisruption: getServiceDisruption(),
         subPaths: subPaths, // 전체 경로 정보 포함
       },
     })
   }
-  
+
   console.log('📋 Generated routes from existing data:', routes)
   return routes
 }
@@ -584,11 +576,11 @@ const EnhancedTransportCard = ({
   // 여행 날짜가 과거인지 확인
   const isPastTravel =
     travelDate && new Date(travelDate) < new Date().setHours(0, 0, 0, 0)
-  
+
   console.log('🗓️ Travel Date Check:', {
     travelDate,
     isPastTravel,
-    today: new Date().toISOString().split('T')[0]
+    today: new Date().toISOString().split('T')[0],
   })
   const isToday =
     travelDate &&
@@ -747,36 +739,37 @@ const EnhancedTransportCard = ({
             departure_time: departureTime,
           }
 
-<<<<<<< HEAD
           try {
             const data = await addToBatchQueue(requestData, token)
+            console.log('🚌 Enhanced Transport API Response:', data)
+            console.log('🚇 Transit Data:', data.routes?.transit)
+            if (data.routes?.transit?.route_data?.sub_paths) {
+              console.log(
+                '🛤️ API Sub Paths:',
+                data.routes.transit.route_data.sub_paths,
+              )
+              // 지하철 구간 상세 분석
+              const subwayPaths =
+                data.routes.transit.route_data.sub_paths.filter(
+                  (path) => path.type === 'subway',
+                )
+              console.log('🚇 API Subway Paths Found:', subwayPaths.length)
+              subwayPaths.forEach((path, idx) => {
+                console.log(`🚇 API Subway Path ${idx + 1}:`, {
+                  type: path.type,
+                  line_name: path.lane?.name,
+                  stations_count: path.stations?.length || 0,
+                  stations: path.stations?.map((s) => s.station_name) || [],
+                  full_path: path,
+                })
+              })
+            } else {
+              console.log('❌ No sub_paths in API response')
+            }
             setTransportData(data)
           } catch (batchError) {
             // 배치 처리 실패 시 개별 호출로 폴백
             console.warn('배치 처리 실패, 개별 호출 시도:', batchError)
-=======
-        const data = await response.json()
-        console.log('🚌 Enhanced Transport API Response:', data)
-        console.log('🚇 Transit Data:', data.routes?.transit)
-        if (data.routes?.transit?.route_data?.sub_paths) {
-          console.log('🛤️ API Sub Paths:', data.routes.transit.route_data.sub_paths)
-          // 지하철 구간 상세 분석
-          const subwayPaths = data.routes.transit.route_data.sub_paths.filter(path => path.type === 'subway')
-          console.log('🚇 API Subway Paths Found:', subwayPaths.length)
-          subwayPaths.forEach((path, idx) => {
-            console.log(`🚇 API Subway Path ${idx + 1}:`, {
-              type: path.type,
-              line_name: path.lane?.name,
-              stations_count: path.stations?.length || 0,
-              stations: path.stations?.map(s => s.station_name) || [],
-              full_path: path
-            })
-          })
-        } else {
-          console.log('❌ No sub_paths in API response')
-        }
-        setTransportData(data)
->>>>>>> 0209c3f (UI 개선: 대중교통 정보 카드에서 실시간 교통 위젯 제거 및 지하철 노선도 컴포넌트 추가)
 
             const response = await authHttp.POST(
               '/routes/enhanced-multi-route',
@@ -863,22 +856,28 @@ const EnhancedTransportCard = ({
     if (!apiData) return []
 
     console.log('🔧 Creating routes from API data:', apiData)
-    
+
     // 기존 여행 계획에서 저장된 route_data 활용 (API 호출 전 데이터 표시용)
     // 단, stations 정보가 있는 경우만 사용
     if (route?.route_data && !apiData.routes) {
-      const hasStationsData = route.route_data.sub_paths?.some(path => 
-        path.type === 'subway' && path.stations && path.stations.length > 0
+      const hasStationsData = route.route_data.sub_paths?.some(
+        (path) =>
+          path.type === 'subway' && path.stations && path.stations.length > 0,
       )
-      
+
       if (hasStationsData) {
-        console.log('📋 Using existing route_data from travel plan (with stations):', route.route_data)
+        console.log(
+          '📋 Using existing route_data from travel plan (with stations):',
+          route.route_data,
+        )
         return createRoutesFromExistingData(route.route_data)
       } else {
-        console.log('📋 Existing route_data has no station details, will use API data')
+        console.log(
+          '📋 Existing route_data has no station details, will use API data',
+        )
       }
     }
-    
+
     const routes = []
 
     // API 데이터가 있지만 routes가 없거나 success가 false인 경우도 처리
@@ -921,36 +920,6 @@ const EnhancedTransportCard = ({
     }
 
     // 대중교통 경로 - 지하철과 버스로 분리
-<<<<<<< HEAD
-    if (apiData.routes.transit?.success) {
-      const transit = apiData.routes.transit
-
-      // 지하철과 버스 사용 여부 확인
-      const hasSubway =
-        transit.route_info?.some((route) => route.type === 'subway') ||
-        transit.subway_transfer_count > 0
-      const hasBus =
-        transit.route_info?.some((route) => route.type === 'bus') ||
-        transit.bus_transfer_count > 0
-
-      // 지하철 경로 생성
-      if (hasSubway) {
-        const subwayRoutes =
-          transit.route_info?.filter((route) => route.type === 'subway') || []
-        const subwayDetails = []
-
-        // 지하철 노선 정보
-        if (subwayRoutes.length > 0) {
-          const routeNames = subwayRoutes
-            .map((route) => `🚇 ${route.name || route.line_name}`)
-            .join(' → ')
-          subwayDetails.push(routeNames)
-        }
-
-        // 지하철 환승 정보
-        if (transit.subway_transfer_count > 0) {
-          subwayDetails.push(`🔄 환승 ${transit.subway_transfer_count}회`)
-=======
     if (apiRoutes.transit?.success) {
       const transit = apiRoutes.transit
 
@@ -1022,7 +991,6 @@ const EnhancedTransportCard = ({
               )
             }
           }
->>>>>>> 0209c3f (UI 개선: 대중교통 정보 카드에서 실시간 교통 위젯 제거 및 지하철 노선도 컴포넌트 추가)
         } else {
           // 실제 경로 정보가 없을 때 기본 표시
           subwayDetails.push('🚇 지하철')
@@ -1046,25 +1014,6 @@ const EnhancedTransportCard = ({
           distance: formatDistance(transit.distance),
           cost: formatCost(transit.cost),
           rating: 5,
-<<<<<<< HEAD
-          recommendation:
-            transit.subway_transfer_count === 0 ? '직통 편리' : '정시성',
-          details: subwayDetails,
-          transitInfo: {
-            transferCount: transit.subway_transfer_count || 0,
-            routeInfo: subwayRoutes,
-            walkingDistance: transit.walking_distance || 0,
-            totalStops: Math.round((transit.total_stops || 0) * 0.6),
-            peakTimeMultiplier: 1.1, // 지하철은 교통체증 영향 적음
-            realTimeDelays: generateRealTimeDelays({
-              ...transit,
-              route_info: subwayRoutes,
-            }),
-            nextArrivals: generateNextArrivals({
-              ...transit,
-              route_info: subwayRoutes,
-            }),
-=======
           recommendation: transit.transfer_count === 0 ? '직통 편리' : '정시성',
           details: subwayDetails,
           transitInfo: {
@@ -1076,7 +1025,6 @@ const EnhancedTransportCard = ({
               0,
             ),
             peakTimeMultiplier: 1.1,
->>>>>>> 0209c3f (UI 개선: 대중교통 정보 카드에서 실시간 교통 위젯 제거 및 지하철 노선도 컴포넌트 추가)
             serviceDisruption: getServiceDisruption(),
             subPaths: subPaths, // 전체 경로 정보 포함
           },
@@ -1085,23 +1033,6 @@ const EnhancedTransportCard = ({
 
       // 버스 경로 생성
       if (hasBus) {
-<<<<<<< HEAD
-        const busRoutes =
-          transit.route_info?.filter((route) => route.type === 'bus') || []
-        const busDetails = []
-
-        // 버스 노선 정보
-        if (busRoutes.length > 0) {
-          const routeNames = busRoutes
-            .map((route) => `🚌 ${route.name || route.line_name}`)
-            .join(' → ')
-          busDetails.push(routeNames)
-        }
-
-        // 버스 환승 정보
-        if (transit.bus_transfer_count > 0) {
-          busDetails.push(`🔄 환승 ${transit.bus_transfer_count}회`)
-=======
         const busPaths = subPaths.filter((path) => path.type === 'bus')
         const busRouteInfo = []
         const busDetails = []
@@ -1153,16 +1084,17 @@ const EnhancedTransportCard = ({
               )
             }
           }
->>>>>>> 0209c3f (UI 개선: 대중교통 정보 카드에서 실시간 교통 위젯 제거 및 지하철 노선도 컴포넌트 추가)
         } else {
           // 실제 경로 정보가 없을 때 기본 표시
           busDetails.push('🚌 버스')
-          busRouteInfo.push({
-            type: 'bus',
-            name: '버스',
-            line_name: '버스',
-            duration: Math.round(transit.duration * 0.9),
-          })
+          if (!busRouteInfo.length) {
+            busRouteInfo.push({
+              type: 'bus',
+              name: '버스',
+              line_name: '버스',
+              duration: Math.round(transit.duration * 0.9),
+            })
+          }
         }
 
         // 버스 특화 정보
@@ -1183,21 +1115,6 @@ const EnhancedTransportCard = ({
           recommendation: '경제적',
           details: busDetails,
           transitInfo: {
-<<<<<<< HEAD
-            transferCount: transit.bus_transfer_count || 0,
-            routeInfo: busRoutes,
-            walkingDistance: transit.walking_distance || 0,
-            totalStops: Math.round((transit.total_stops || 0) * 0.4),
-            peakTimeMultiplier: 1.3, // 버스는 교통체증 영향 큼
-            realTimeDelays: generateRealTimeDelays({
-              ...transit,
-              route_info: busRoutes,
-            }),
-            nextArrivals: generateNextArrivals({
-              ...transit,
-              route_info: busRoutes,
-            }),
-=======
             transferCount: transit.transfer_count || 0,
             routeInfo: busRouteInfo,
             walkingDistance: transit.walk_time || 0,
@@ -1206,7 +1123,6 @@ const EnhancedTransportCard = ({
               0,
             ),
             peakTimeMultiplier: 1.3,
->>>>>>> 0209c3f (UI 개선: 대중교통 정보 카드에서 실시간 교통 위젯 제거 및 지하철 노선도 컴포넌트 추가)
             serviceDisruption: getServiceDisruption(),
             subPaths: subPaths, // 전체 경로 정보 포함
           },
@@ -1333,60 +1249,12 @@ const EnhancedTransportCard = ({
         },
       })
     }
-
-<<<<<<< HEAD
-=======
-    // 자동차 경로 처리
-    if (apiRoutes.car?.success) {
-      const car = apiRoutes.car
-      routes.push({
-        name: car.display_name || '자동차',
-        mode: 'car',
-        duration: car.duration,
-        distance: formatDistance(car.distance),
-        cost: formatCost(car.cost || 0),
-        rating: 4,
-        recommendation: '빠른 이동',
-        details: [
-          '🚗 자동차',
-          '⛽ 연료비 포함',
-          '🅿️ 주차 필요',
-          car.environmental_impact || '일반',
-        ].filter(Boolean),
-      })
-    } else {
-      // 자동차 API 실패하거나 없는 경우 기본 정보 표시
-      routes.push({
-        name: '자동차',
-        mode: 'car',
-        duration: 20,
-        distance: '2.0km',
-        cost: '3,000원',
-        rating: 3,
-        recommendation: 'API 정보 없음',
-        details: [
-          '🚗 자동차',
-          '⛽ 연료비 포함',
-          '🅿️ 주차 필요',
-          '⚠️ 교통정보 미제공',
-        ],
-      })
-    }
-
->>>>>>> 0209c3f (UI 개선: 대중교통 정보 카드에서 실시간 교통 위젯 제거 및 지하철 노선도 컴포넌트 추가)
     return routes
   }
 
   const currentRoutes = transportData
     ? createRoutesFromApiData(transportData)
     : []
-<<<<<<< HEAD
-=======
-  const currentTimeMachine =
-    transportData && transportData.success
-      ? createTimeMachineData(transportData)
-      : {}
->>>>>>> 0209c3f (UI 개선: 대중교통 정보 카드에서 실시간 교통 위젯 제거 및 지하철 노선도 컴포넌트 추가)
 
   const filteredRoutes =
     selectedMode === 'all'

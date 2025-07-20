@@ -50,6 +50,14 @@ export const travelCourseLikesApi = createApi({
         'TravelCourseList',
       ],
     }),
+    // 사용자별 좋아요한 여행 코스 조회
+    getTravelCourseLikes: builder.query({
+      query: (userId) => `/travel-courses/likes/user/${userId}`,
+      providesTags: (result, error, userId) => [
+        { type: 'TravelCourseLike', id: 'LIST' },
+        { type: 'TravelCourseLike', id: userId },
+      ],
+    }),
   }),
 })
 
@@ -57,4 +65,5 @@ export const {
   useToggleTravelCourseLikeMutation,
   useCreateTravelCourseLikeMutation,
   useDeleteTravelCourseLikeMutation,
+  useGetTravelCourseLikesQuery,
 } = travelCourseLikesApi
