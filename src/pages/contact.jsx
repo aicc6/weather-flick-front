@@ -697,21 +697,6 @@ export default function ContactPage() {
           </div>
         </div>
       )}
-      {/* 하단 안내 */}
-      <div className="mt-12 text-center text-sm text-gray-500 dark:text-gray-400">
-        <p className="mb-2">
-          문의사항 이외의 민원성 요청은 서울시 홈페이지 응답소를 이용해 주시기
-          바랍니다.
-        </p>
-        <a
-          href="https://eungdapso.seoul.go.kr"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 hover:underline"
-        >
-          서울시 응답소 바로가기
-        </a>
-      </div>
     </div>
   )
 }
