@@ -386,7 +386,7 @@ const RecommendCourseCard = React.memo(function RecommendCourseCard({
               </span>
               <span className="flex items-center gap-1">
                 <MessageSquare className="h-3 w-3" />
-                {reviewsLoading ? '-' : reviewsError ? '!' : reviews.length}
+                {course.review_count || 0}
               </span>
             </div>
           </div>

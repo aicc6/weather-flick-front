@@ -59,7 +59,7 @@ export function GoogleCallbackPage() {
                 fcm_token: fcmToken,
                 device_type: 'web',
                 device_name: 'Web Browser',
-              })
+              }),
             }
 
             const response = await exchangeGoogleAuthCode(exchangeData).unwrap()

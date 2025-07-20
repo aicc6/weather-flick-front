@@ -10,7 +10,6 @@ import {
   Settings,
   BarChart3,
 } from '@/components/icons'
-import TimelinePrediction from './TimelinePrediction'
 
 /**
  * 스마트 시간 선택기 - 3단계 확장 가능
@@ -347,13 +346,7 @@ export function SmartTimeSelector({ value, onChange, route, className = '' }) {
         </Button>
       </div>
 
-      {/* 전체 타임라인 예측 컴포넌트 */}
-      <TimelinePrediction
-        route={route}
-        onTimeSelect={onChange}
-        selectedTime={value}
-        currentPredictions={{}}
-      />
+      {/* TimelinePrediction 컴포넌트는 아직 구현되지 않았습니다 */}
     </div>
   )
 

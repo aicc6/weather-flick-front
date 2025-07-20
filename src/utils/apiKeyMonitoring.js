@@ -23,15 +23,15 @@ const API_KEYS_INFO = {
   },
 
   // 날씨 서비스
-  WEATHER_API: {
-    name: 'WeatherAPI.com',
-    provider: 'WeatherAPI',
-    services: ['Current Weather', 'Forecast', 'Historical'],
+  OPENWEATHERMAP_API: {
+    name: 'OpenWeatherMap API',
+    provider: 'OpenWeatherMap',
+    services: ['Current Weather', 'Forecast', 'Air Quality'],
     dailyLimit: 1000,
-    monthlyLimit: 10000,
-    expiryDate: '2025-01-19', // 실제 만료일
+    monthlyLimit: 30000,
+    expiryDate: '2026-12-31', // 예시 만료일 (실제 서비스는 만료일이 없을 수 있음)
     critical: true,
-    warningDays: 7, // 만료 7일 전 경고
+    warningDays: 30, // 만료 30일 전 경고
   },
 
   KMA_API: {
@@ -51,8 +51,10 @@ const API_KEYS_INFO = {
     services: ['경로검색', '실시간교통'],
     dailyLimit: 500,
     monthlyLimit: 15000,
-    expiryDate: '2025-06-30',
+    expiryDate: '2025-06-30', // 실제 만료일 - 갱신 필요
     critical: true,
+    warningDays: 60, // 만료 60일 전 경고
+    renewalRequired: true, // 갱신 필요 플래그
   },
 
   ODSAY_API: {
