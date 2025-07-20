@@ -616,7 +616,7 @@ const EnhancedTransportCard = ({ route, travelDate }) => {
             console.warn('배치 처리 실패, 개별 호출 시도:', batchError)
 
             const response = await authHttp.POST(
-              '/api/routes/enhanced-multi-route',
+              '/routes/enhanced-multi-route',
               {
                 headers: {
                   'Content-Type': 'application/json',
