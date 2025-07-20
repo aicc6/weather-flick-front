@@ -63,6 +63,7 @@ export default defineConfig(({ mode }) => {
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
           navigateFallback: '/offline',
           navigateFallbackDenylist: [/^\/api/],
+          importScripts: ['/firebase-messaging-sw.js'],
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/pixabay\.com\/api\/.*/i,
@@ -110,52 +111,131 @@ export default defineConfig(({ mode }) => {
           ],
         },
         devOptions: {
-          enabled: true,
+          enabled: true, // 개발 모드에서 PWA 활성화 (FCM 테스트를 위해)
+          type: 'module',
         },
         includeAssets: ['firebase-messaging-sw.js'],
       }),
       {
         name: 'firebase-sw-env-replace',
-        configureServer(server) {
+        async configureServer(server) {
           // 개발 서버에서 firebase-messaging-sw.js 요청 처리
-          server.middlewares.use('/firebase-messaging-sw.js', (req, res) => {
-            const fs = require('fs')
-            const path = require('path')
-            
-            const swPath = path.resolve('public/firebase-messaging-sw.js')
-            let content = fs.readFileSync(swPath, 'utf-8')
-            
-            content = content
-              .replace('__VITE_FIREBASE_API_KEY__', env.VITE_FIREBASE_API_KEY || '')
-              .replace('__VITE_FIREBASE_AUTH_DOMAIN__', env.VITE_FIREBASE_AUTH_DOMAIN || '')
-              .replace('__VITE_FIREBASE_PROJECT_ID__', env.VITE_FIREBASE_PROJECT_ID || '')
-              .replace('__VITE_FIREBASE_STORAGE_BUCKET__', env.VITE_FIREBASE_STORAGE_BUCKET || '')
-              .replace('__VITE_FIREBASE_MESSAGING_SENDER_ID__', env.VITE_FIREBASE_MESSAGING_SENDER_ID || '')
-              .replace('__VITE_FIREBASE_APP_ID__', env.VITE_FIREBASE_APP_ID || '')
-              
-            res.setHeader('Content-Type', 'application/javascript')
-            res.end(content)
-          })
+          server.middlewares.use(
+            '/firebase-messaging-sw.js',
+            async (req, res, next) => {
+              if (req.method !== 'GET') return next()
+
+              const fs = await import('fs')
+              const path = await import('path')
+
+              const swPath = path.resolve('public/firebase-messaging-sw.js')
+              let content = fs.readFileSync(swPath, 'utf-8')
+
+              content = content
+                .replace(
+                  '__VITE_FIREBASE_API_KEY__',
+                  env.VITE_FIREBASE_API_KEY || '',
+                )
+                .replace(
+                  '__VITE_FIREBASE_AUTH_DOMAIN__',
+                  env.VITE_FIREBASE_AUTH_DOMAIN || '',
+                )
+                .replace(
+                  '__VITE_FIREBASE_PROJECT_ID__',
+                  env.VITE_FIREBASE_PROJECT_ID || '',
+                )
+                .replace(
+                  '__VITE_FIREBASE_STORAGE_BUCKET__',
+                  env.VITE_FIREBASE_STORAGE_BUCKET || '',
+                )
+                .replace(
+                  '__VITE_FIREBASE_MESSAGING_SENDER_ID__',
+                  env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+                )
+                .replace(
+                  '__VITE_FIREBASE_APP_ID__',
+                  env.VITE_FIREBASE_APP_ID || '',
+                )
+
+              res.setHeader('Content-Type', 'application/javascript')
+              res.end(content)
+            },
+          )
         },
         async writeBundle() {
           const fs = await import('fs')
           const path = await import('path')
-          
-          const swPath = path.resolve('dist/firebase-messaging-sw.js')
-          
-          if (fs.existsSync(swPath)) {
-            let content = fs.readFileSync(swPath, 'utf-8')
-            
+
+          // firebase-messaging-sw.js 처리
+          const firebaseSwPath = path.resolve('dist/firebase-messaging-sw.js')
+
+          if (fs.existsSync(firebaseSwPath)) {
+            let content = fs.readFileSync(firebaseSwPath, 'utf-8')
+
             content = content
-              .replace('__VITE_FIREBASE_API_KEY__', env.VITE_FIREBASE_API_KEY || '')
-              .replace('__VITE_FIREBASE_AUTH_DOMAIN__', env.VITE_FIREBASE_AUTH_DOMAIN || '')
-              .replace('__VITE_FIREBASE_PROJECT_ID__', env.VITE_FIREBASE_PROJECT_ID || '')
-              .replace('__VITE_FIREBASE_STORAGE_BUCKET__', env.VITE_FIREBASE_STORAGE_BUCKET || '')
-              .replace('__VITE_FIREBASE_MESSAGING_SENDER_ID__', env.VITE_FIREBASE_MESSAGING_SENDER_ID || '')
-              .replace('__VITE_FIREBASE_APP_ID__', env.VITE_FIREBASE_APP_ID || '')
-              
-            fs.writeFileSync(swPath, content)
+              .replace(
+                '__VITE_FIREBASE_API_KEY__',
+                env.VITE_FIREBASE_API_KEY || '',
+              )
+              .replace(
+                '__VITE_FIREBASE_AUTH_DOMAIN__',
+                env.VITE_FIREBASE_AUTH_DOMAIN || '',
+              )
+              .replace(
+                '__VITE_FIREBASE_PROJECT_ID__',
+                env.VITE_FIREBASE_PROJECT_ID || '',
+              )
+              .replace(
+                '__VITE_FIREBASE_STORAGE_BUCKET__',
+                env.VITE_FIREBASE_STORAGE_BUCKET || '',
+              )
+              .replace(
+                '__VITE_FIREBASE_MESSAGING_SENDER_ID__',
+                env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+              )
+              .replace(
+                '__VITE_FIREBASE_APP_ID__',
+                env.VITE_FIREBASE_APP_ID || '',
+              )
+
+            fs.writeFileSync(firebaseSwPath, content)
             console.log('Firebase service worker 환경변수 대체 완료')
+          }
+
+          // sw.js (PWA 서비스 워커) 처리
+          const pwaSwPath = path.resolve('dist/sw.js')
+
+          if (fs.existsSync(pwaSwPath)) {
+            let content = fs.readFileSync(pwaSwPath, 'utf-8')
+
+            content = content
+              .replace(
+                '__VITE_FIREBASE_API_KEY__',
+                env.VITE_FIREBASE_API_KEY || '',
+              )
+              .replace(
+                '__VITE_FIREBASE_AUTH_DOMAIN__',
+                env.VITE_FIREBASE_AUTH_DOMAIN || '',
+              )
+              .replace(
+                '__VITE_FIREBASE_PROJECT_ID__',
+                env.VITE_FIREBASE_PROJECT_ID || '',
+              )
+              .replace(
+                '__VITE_FIREBASE_STORAGE_BUCKET__',
+                env.VITE_FIREBASE_STORAGE_BUCKET || '',
+              )
+              .replace(
+                '__VITE_FIREBASE_MESSAGING_SENDER_ID__',
+                env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+              )
+              .replace(
+                '__VITE_FIREBASE_APP_ID__',
+                env.VITE_FIREBASE_APP_ID || '',
+              )
+
+            fs.writeFileSync(pwaSwPath, content)
+            console.log('PWA service worker 환경변수 대체 완료')
           }
         },
       },
@@ -206,8 +286,6 @@ export default defineConfig(({ mode }) => {
             recommend: [
               './src/pages/recommend/index.jsx',
               './src/pages/recommend/detail.jsx',
-              './src/pages/recommend/enhanced-compatible.jsx',
-              './src/pages/recommend/enhanced-index.jsx',
               './src/pages/recommend/RecommendCourseCard.jsx',
             ],
             'customized-schedule': [
@@ -242,9 +320,15 @@ export default defineConfig(({ mode }) => {
         'react-router-dom',
         'framer-motion',
         'date-fns',
+        'date-fns/locale',
+        'date-fns/locale/ko',
         'lucide-react',
         'zod',
         'sonner',
+        'react-day-picker',
+        '@radix-ui/react-popover',
+        '@radix-ui/react-dropdown-menu',
+        '@radix-ui/react-slot',
       ],
     },
   }

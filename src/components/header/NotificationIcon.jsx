@@ -13,7 +13,6 @@ import { Bell, X, Clock, Trash2 } from '@/components/icons'
 import {
   getScheduledNotifications,
   removeScheduledNotification,
-  updateScheduledNotificationStatus,
   addNotificationChangeListener,
 } from '@/utils/notificationStorage'
 import {
@@ -50,10 +49,14 @@ export function NotificationIcon({ className = '' }) {
     loadReceivedNotifications()
 
     // 스케줄된 알림 변경 이벤트 리스너 등록
-    const unsubscribeScheduled = addNotificationChangeListener(loadScheduledNotifications)
-    
+    const unsubscribeScheduled = addNotificationChangeListener(
+      loadScheduledNotifications,
+    )
+
     // 받은 알림 변경 이벤트 리스너 등록
-    const unsubscribeReceived = addReceivedNotificationChangeListener(loadReceivedNotifications)
+    const unsubscribeReceived = addReceivedNotificationChangeListener(
+      loadReceivedNotifications,
+    )
 
     // 10초마다 알림 목록 업데이트 (만료된 알림 정리용)
     const interval = setInterval(() => {
@@ -89,7 +92,7 @@ export function NotificationIcon({ className = '' }) {
   const loadReceivedNotifications = () => {
     const received = getReceivedNotifications()
     const unread = getUnreadNotificationCount()
-    
+
     setReceivedNotifications(received)
     setUnreadCount(unread)
   }
@@ -209,7 +212,7 @@ export function NotificationIcon({ className = '' }) {
           <Bell className="h-5 w-5" />
           {badgeCount > 0 && (
             <Badge
-              variant={unreadCount > 0 ? "destructive" : "secondary"}
+              variant={unreadCount > 0 ? 'destructive' : 'secondary'}
               className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center p-0 text-xs"
             >
               {badgeCount > 99 ? '99+' : badgeCount}
@@ -226,7 +229,8 @@ export function NotificationIcon({ className = '' }) {
         <div className="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
           <h3 className="text-sm font-semibold">알림</h3>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            받은 알림 {receivedNotifications.length}개 • 예약된 알림 {scheduledNotifications.length}개
+            받은 알림 {receivedNotifications.length}개 • 예약된 알림{' '}
+            {scheduledNotifications.length}개
           </p>
         </div>
 
@@ -246,11 +250,10 @@ export function NotificationIcon({ className = '' }) {
             <TabsTrigger value="scheduled">
               예약된 알림
               {scheduledNotifications.length > 0 && (
-                <Badge
-                  variant="secondary"
-                  className="ml-1 h-4 w-4 p-0 text-xs"
-                >
-                  {scheduledNotifications.length > 9 ? '9+' : scheduledNotifications.length}
+                <Badge variant="secondary" className="ml-1 h-4 w-4 p-0 text-xs">
+                  {scheduledNotifications.length > 9
+                    ? '9+'
+                    : scheduledNotifications.length}
                 </Badge>
               )}
             </TabsTrigger>
@@ -313,7 +316,9 @@ export function NotificationIcon({ className = '' }) {
                             <span className="text-base">
                               {getNotificationIcon(notification.type)}
                             </span>
-                            <span className={`truncate text-sm ${!notification.isRead ? 'font-semibold' : 'font-medium'}`}>
+                            <span
+                              className={`truncate text-sm ${!notification.isRead ? 'font-semibold' : 'font-medium'}`}
+                            >
                               {notification.title}
                             </span>
                             {!notification.isRead && (
@@ -346,7 +351,9 @@ export function NotificationIcon({ className = '' }) {
                       </div>
                     </DropdownMenuItem>
 
-                    {index < receivedNotifications.length - 1 && <DropdownMenuSeparator />}
+                    {index < receivedNotifications.length - 1 && (
+                      <DropdownMenuSeparator />
+                    )}
                   </div>
                 ))}
               </div>
@@ -436,7 +443,9 @@ export function NotificationIcon({ className = '' }) {
                       </div>
                     </DropdownMenuItem>
 
-                    {index < scheduledNotifications.length - 1 && <DropdownMenuSeparator />}
+                    {index < scheduledNotifications.length - 1 && (
+                      <DropdownMenuSeparator />
+                    )}
                   </div>
                 ))}
               </div>

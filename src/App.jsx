@@ -83,6 +83,8 @@ const TravelPlanDetailPage = lazy(() => import('./pages/travel-plans/detail'))
 const HelpPage = lazy(() => import('./pages/help/help'))
 const ContactPage = lazy(() => import('./pages/contact'))
 const TermsPage = lazy(() => import('./pages/terms'))
+const TestFCMPage = lazy(() => import('./pages/test-fcm'))
+const SharedPlanView = lazy(() => import('./pages/shared/SharedPlanView'))
 
 // 내부 컴포넌트 - BrowserRouter 내부에서 실행
 function AppContent() {
@@ -225,7 +227,9 @@ function AppContent() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/test-fcm" element={<TestFCMPage />} />
           <Route path="/offline" element={<OfflinePage />} />
+          <Route path="/shared/:shareToken" element={<SharedPlanView />} />
           {/* 404 페이지 - 모든 라우트의 마지막에 위치 */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
@@ -240,6 +244,8 @@ function App() {
   useEffect(() => {
     initializeApiMonitoring()
   }, [])
+
+  // PWA 서비스 워커가 FCM 기능을 포함하므로 별도 등록 불필요
 
   return (
     <ErrorBoundary>

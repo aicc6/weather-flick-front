@@ -60,9 +60,7 @@ export default function PWAUpdatePrompt() {
       <Card className="border-2 shadow-lg">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base">
-              새 업데이트 사용 가능
-            </CardTitle>
+            <CardTitle className="text-base">새 업데이트 사용 가능</CardTitle>
             <Button
               variant="ghost"
               size="sm"

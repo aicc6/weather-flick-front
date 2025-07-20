@@ -64,25 +64,25 @@ export function SettingsPage() {
   // 알림 설정 업데이트
   const updateNotificationSetting = async (settingKey, value) => {
     const previousSettings = { ...notificationSettings }
-    
+
     // 즉시 UI 업데이트
-    setNotificationSettings(prev => ({
+    setNotificationSettings((prev) => ({
       ...prev,
-      [settingKey]: value
+      [settingKey]: value,
     }))
 
     try {
       const newSettings = {
         ...notificationSettings,
-        [settingKey]: value
+        [settingKey]: value,
       }
-      
+
       await updateNotificationSettings(newSettings)
       toast.success('알림 설정이 저장되었습니다.')
     } catch (error) {
       console.error('알림 설정 업데이트 실패:', error)
       toast.error('설정 저장에 실패했습니다.')
-      
+
       // 실패 시 이전 상태로 되돌리기
       setNotificationSettings(previousSettings)
     }
@@ -106,7 +106,9 @@ export function SettingsPage() {
         updateNotificationSetting('push_enabled', true)
         toast.success('알림이 활성화되었습니다.')
       } else if (result === 'denied') {
-        toast.error('알림 권한이 거부되었습니다. 브라우저 설정에서 변경할 수 있습니다.')
+        toast.error(
+          '알림 권한이 거부되었습니다. 브라우저 설정에서 변경할 수 있습니다.',
+        )
       }
     } catch (error) {
       console.error('알림 활성화 오류:', error)
@@ -265,17 +267,16 @@ export function SettingsPage() {
                 알림 설정
               </h2>
             </div>
-            
+
             <div className="space-y-6">
               {/* 푸시 알림 메인 설정 */}
-              <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div className="flex items-center justify-between rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
                 <div className="space-y-1">
-                  <p className="font-medium text-base">푸시 알림</p>
+                  <p className="text-base font-medium">푸시 알림</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {permission === 'granted' 
-                      ? '브라우저 알림이 활성화되었습니다' 
-                      : '브라우저 알림 권한이 필요합니다'
-                    }
+                    {permission === 'granted'
+                      ? '브라우저 알림이 활성화되었습니다'
+                      : '브라우저 알림 권한이 필요합니다'}
                   </p>
                 </div>
                 {permission === 'granted' ? (
@@ -298,7 +299,7 @@ export function SettingsPage() {
               </div>
 
               {permission === 'denied' && (
-                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-red-700 dark:text-red-300">
                       알림 권한이 차단되었습니다.
@@ -306,10 +307,10 @@ export function SettingsPage() {
                     <p className="text-xs text-red-600 dark:text-red-400">
                       브라우저 설정에서 권한을 허용해주세요:
                     </p>
-                    <ol className="text-xs text-red-600 dark:text-red-400 list-decimal list-inside space-y-1">
+                    <ol className="list-inside list-decimal space-y-1 text-xs text-red-600 dark:text-red-400">
                       <li>주소창 왼쪽의 자물쇠 아이콘 클릭</li>
-                      <li>"사이트 설정" 또는 "권한" 클릭</li>
-                      <li>"알림"을 "허용"으로 변경</li>
+                      <li>&quot;사이트 설정&quot; 또는 &quot;권한&quot; 클릭</li>
+                      <li>&quot;알림&quot;을 &quot;허용&quot;으로 변경</li>
                       <li>페이지 새로고침 후 다시 시도</li>
                     </ol>
                   </div>
@@ -320,8 +321,10 @@ export function SettingsPage() {
 
               {/* 알림 유형 설정 */}
               <div className="space-y-4">
-                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">알림 유형</h3>
-                
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  알림 유형
+                </h3>
+
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <p className="font-medium">여행 계획 업데이트</p>
@@ -361,7 +364,9 @@ export function SettingsPage() {
                   </div>
                   <Switch
                     checked={notificationSettings.recommendation_updates}
-                    onCheckedChange={() => handleToggle('recommendation_updates')}
+                    onCheckedChange={() =>
+                      handleToggle('recommendation_updates')
+                    }
                     disabled={loading || !notificationSettings.push_enabled}
                     aria-label="추천 업데이트 알림 토글"
                   />
@@ -404,7 +409,7 @@ export function SettingsPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <p className="font-medium text-base">방해 금지 시간</p>
+                    <p className="text-base font-medium">방해 금지 시간</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       설정한 시간에는 알림을 받지 않습니다
                     </p>
@@ -419,24 +424,44 @@ export function SettingsPage() {
 
                 {notificationSettings.quiet_hours_enabled && (
                   <div className="flex gap-4 pl-4">
-                    <div className="space-y-2 flex-1">
-                      <label htmlFor="quiet-start" className="text-sm font-medium">시작 시간</label>
+                    <div className="flex-1 space-y-2">
+                      <label
+                        htmlFor="quiet-start"
+                        className="text-sm font-medium"
+                      >
+                        시작 시간
+                      </label>
                       <input
                         id="quiet-start"
                         type="time"
                         value={notificationSettings.quiet_hours_start}
-                        onChange={(e) => updateNotificationSetting('quiet_hours_start', e.target.value)}
+                        onChange={(e) =>
+                          updateNotificationSetting(
+                            'quiet_hours_start',
+                            e.target.value,
+                          )
+                        }
                         className="border-input bg-background flex h-10 w-full rounded-md border px-3 py-2 text-sm"
                         disabled={loading || !notificationSettings.push_enabled}
                       />
                     </div>
-                    <div className="space-y-2 flex-1">
-                      <label htmlFor="quiet-end" className="text-sm font-medium">종료 시간</label>
+                    <div className="flex-1 space-y-2">
+                      <label
+                        htmlFor="quiet-end"
+                        className="text-sm font-medium"
+                      >
+                        종료 시간
+                      </label>
                       <input
                         id="quiet-end"
                         type="time"
                         value={notificationSettings.quiet_hours_end}
-                        onChange={(e) => updateNotificationSetting('quiet_hours_end', e.target.value)}
+                        onChange={(e) =>
+                          updateNotificationSetting(
+                            'quiet_hours_end',
+                            e.target.value,
+                          )
+                        }
                         className="border-input bg-background flex h-10 w-full rounded-md border px-3 py-2 text-sm"
                         disabled={loading || !notificationSettings.push_enabled}
                       />

@@ -4,9 +4,9 @@ import { onMessage } from 'firebase/messaging'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
 import { isAuthenticated } from '@/utils/authCheck'
-import { 
-  saveReceivedNotification, 
-  extractNotificationFromFCM 
+import {
+  saveReceivedNotification,
+  extractNotificationFromFCM,
 } from '@/utils/receivedNotifications'
 
 export function useNotification() {
@@ -44,7 +44,7 @@ export function useNotification() {
           const notificationData = extractNotificationFromFCM(payload)
           const savedNotification = saveReceivedNotification(notificationData)
           console.log('알림 저장 완료:', savedNotification)
-          
+
           // 알림 페이지에 있다면 새로고침 이벤트 발생
           if (window.location.pathname === '/notifications') {
             window.dispatchEvent(new CustomEvent('notification-received'))
@@ -54,7 +54,7 @@ export function useNotification() {
           toast.custom(
             (t) => (
               <div
-                className="ring-opacity-5 flex w-full max-w-md items-start gap-3 rounded-lg bg-white p-4 shadow-lg ring-1 ring-black cursor-pointer"
+                className="ring-opacity-5 flex w-full max-w-md cursor-pointer items-start gap-3 rounded-lg bg-white p-4 shadow-lg ring-1 ring-black"
                 onClick={() => {
                   // 알림 클릭 시 동작
                   if (data?.url) {
@@ -78,9 +78,7 @@ export function useNotification() {
                   <p className="mt-1 text-sm text-gray-600">
                     {notification.body}
                   </p>
-                  <p className="mt-1 text-xs text-gray-400">
-                    방금 전
-                  </p>
+                  <p className="mt-1 text-xs text-gray-400">방금 전</p>
                 </div>
               </div>
             ),
@@ -121,7 +119,7 @@ export function useNotification() {
         title,
         body,
         data,
-        type: 'system'
+        type: 'system',
       }
       const savedNotification = saveReceivedNotification(notificationData)
       console.log('시스템 알림 저장 완료:', savedNotification)
