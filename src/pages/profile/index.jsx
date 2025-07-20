@@ -3,10 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContextRTK'
 import { useGetUserPlansQuery } from '@/store/api/travelPlansApi'
 import { useGetTravelCourseLikesQuery } from '@/store/api/travelCourseLikesApi'
+import { 
+  useGetMyDestinationSavesQuery,
+  useGetMyDestinationLikesQuery,
+} from '@/store/api/destinationLikesSavesApi'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { DestinationCard } from '@/components/travel'
 import {
   Calendar,
   Heart,
@@ -14,6 +19,7 @@ import {
   MapPin,
   Settings,
   ChevronRight,
+  Bookmark,
 } from '@/components/icons'
 
 // 안전한 key 생성 유틸리티 함수
@@ -45,6 +51,30 @@ export default function ProfilePage() {
   } = useGetTravelCourseLikesQuery(authUser?.id, {
     skip: !authUser?.id,
   })
+
+  // 저장한 여행지 데이터 가져오기
+  const {
+    data: savedDestinations = [],
+    isLoading: savedLoading,
+    refetch: refetchSavedDestinations,
+  } = useGetMyDestinationSavesQuery({
+    skip: 0,
+    limit: 20,
+  }, {
+    skip: !isAuthenticated,
+  })
+
+  // 좋아요한 여행지 데이터 가져오기 (통계용)
+  const {
+    data: likedDestinations = [],
+    isLoading: likedLoading,
+  } = useGetMyDestinationLikesQuery({
+    skip: 0,
+    limit: 50,
+  }, {
+    skip: !isAuthenticated,
+  })
+
 
   // 최근 여행 플랜 데이터 가공 (최신순으로 정렬하고 최대 5개만)
   const recentPlans =
@@ -255,10 +285,10 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div className="text-foreground mb-1 text-2xl font-bold">
-                  {favoritePlaces.length}
+                  {savedDestinations.length}
                 </div>
                 <div className="text-muted-foreground text-sm">
-                  즐겨찾기 장소
+                  즐겨찾는 여행 코스
                 </div>
               </CardContent>
             </Card>
@@ -271,7 +301,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div className="text-foreground mb-1 text-2xl font-bold">
-                  12
+                  {favoritePlaces.length}
                 </div>
                 <div className="text-muted-foreground text-sm">방문한 도시</div>
               </CardContent>
@@ -376,46 +406,51 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
+
           {/* 저장한 여행지 */}
           <Card className="weather-card">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-foreground flex items-center gap-2">
-                  <Heart className="text-sunset-orange h-5 w-5" />
+                  <Bookmark className="text-sky-blue h-5 w-5" />
                   저장한 여행지
                 </CardTitle>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-sky-blue-dark hover:text-sky-blue hover:bg-sky-blue-light/50"
-                >
-                  전체보기
-                  <ChevronRight className="ml-1 h-4 w-4" />
-                </Button>
+                {savedDestinations.length > 4 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-sky-blue-dark hover:text-sky-blue hover:bg-sky-blue-light/50"
+                  >
+                    전체보기
+                    <ChevronRight className="ml-1 h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </CardHeader>
             <CardContent>
-              {favoritePlaces.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {favoritePlaces.map((place, index) => (
-                    <Badge
-                      key={generateSafeKey(place, 'place', index)}
-                      variant="outline"
-                      className="weather-cloudy cursor-pointer transition-all duration-300 hover:scale-105"
-                    >
-                      <Heart className="mr-1 h-3 w-3" />
-                      {place.name}
-                    </Badge>
+              {savedLoading ? (
+                <div className="text-muted-foreground py-8 text-center">
+                  <p>로딩 중...</p>
+                </div>
+              ) : savedDestinations.length > 0 ? (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  {savedDestinations.slice(0, 4).map((save) => (
+                    <DestinationCard
+                      key={save.id}
+                      destination={save.destination}
+                      className="h-full"
+                      onRefresh={refetchSavedDestinations}
+                    />
                   ))}
                 </div>
               ) : (
                 <div className="text-muted-foreground py-8 text-center">
-                  <Heart className="mx-auto mb-4 h-12 w-12 opacity-50" />
+                  <Bookmark className="mx-auto mb-4 h-12 w-12 opacity-50" />
                   <p className="mb-2">저장한 여행지가 없습니다.</p>
                   <Button
                     variant="outline"
                     className="weather-input"
-                    onClick={() => navigate('/destinations')}
+                    onClick={() => navigate('/recommend')}
                   >
                     <MapPin className="mr-2 h-4 w-4" />
                     여행지 둘러보기
@@ -424,6 +459,35 @@ export default function ProfilePage() {
               )}
             </CardContent>
           </Card>
+
+          {/* 즐겨찾는 여행 코스 */}
+          {likedCourses.length > 0 && (
+            <Card className="weather-card">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-foreground flex items-center gap-2">
+                    <Heart className="text-sunset-orange h-5 w-5" />
+                    즐겨찾는 여행 코스
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {likedCourses.map((course, index) => (
+                    <Badge
+                      key={generateSafeKey(course, 'course', index)}
+                      variant="outline"
+                      className="weather-cloudy cursor-pointer transition-all duration-300 hover:scale-105"
+                      onClick={() => navigate(`/recommend/detail/${course.id}`)}
+                    >
+                      <Heart className="mr-1 h-3 w-3" />
+                      {course.title}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* 계정 관리 */}
           {/* (추가로 비밀번호 변경 관련 버튼/링크/섹션도 모두 삭제) */}

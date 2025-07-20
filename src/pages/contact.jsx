@@ -478,18 +478,19 @@ export default function ContactPage() {
       {/* 상세 모달 */}
       {modalOpen && (detailInquiry || selectedInquiry) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-lg dark:bg-gray-900">
-            <button
-              className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full text-3xl font-bold text-gray-500 transition-colors hover:text-gray-900 focus:ring-2 focus:ring-blue-400 focus:outline-none dark:hover:text-white"
-              onClick={handleCloseModal}
-              aria-label="닫기"
-            >
-              ×
-            </button>
-            <h2 className="mb-6 text-center text-2xl font-bold">
-              문의 상세보기
-            </h2>
-            <form className="space-y-5">
+          <div className="relative flex h-[90vh] w-full max-w-2xl flex-col rounded-lg bg-white shadow-lg dark:bg-gray-900">
+            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+              <h2 className="text-2xl font-bold">문의 상세보기</h2>
+              <button
+                className="flex h-10 w-10 items-center justify-center rounded-full text-3xl font-bold text-gray-500 transition-colors hover:text-gray-900 focus:ring-2 focus:ring-blue-400 focus:outline-none dark:hover:text-white"
+                onClick={handleCloseModal}
+                aria-label="닫기"
+              >
+                ×
+              </button>
+            </div>
+            <form className="flex flex-1 flex-col overflow-hidden">
+              <div className="flex-1 space-y-5 overflow-y-auto px-6 py-4">
               {/* 문의 분류 */}
               <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
@@ -519,12 +520,11 @@ export default function ContactPage() {
                 <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
                   문의 내용
                 </label>
-                <textarea
-                  value={(detailInquiry || selectedInquiry).content || ''}
-                  readOnly
-                  rows={5}
-                  className="w-full resize-none rounded border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-                />
+                <div className="max-h-64 overflow-y-auto rounded border border-gray-300 bg-gray-100 p-3 dark:border-gray-700 dark:bg-gray-800">
+                  <p className="whitespace-pre-wrap text-gray-900 dark:text-gray-100">
+                    {(detailInquiry || selectedInquiry).content || ''}
+                  </p>
+                </div>
               </div>
               {/* 이름/이메일 */}
               <div className="flex gap-4">
@@ -613,7 +613,8 @@ export default function ContactPage() {
                   </div>
                 </div>
               )}
-              <div className="pt-4 text-right">
+              </div>
+              <div className="border-t border-gray-200 px-6 py-4 text-right dark:border-gray-700">
                 <button
                   type="button"
                   className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"

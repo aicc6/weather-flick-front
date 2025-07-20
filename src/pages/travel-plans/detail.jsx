@@ -39,6 +39,7 @@ import EnhancedTransportCard from '@/components/transport/EnhancedTransportCard'
 import { CompactDayItinerary } from '@/components/travel'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import SharePlanModal from '@/components/SharePlanModal'
+import { addToBatchQueue, getCachedRoute } from '@/utils/transportCache'
 
 // 안전한 key 생성 유틸리티 함수
 const generateSafeKey = (item, prefix = '', index = 0) => {

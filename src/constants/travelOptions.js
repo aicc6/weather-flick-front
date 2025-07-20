@@ -185,7 +185,7 @@ export const TRAVEL_STYLES = [
 // 일정 스타일 정의
 export const SCHEDULE_TYPES = [
   {
-    id: 'busy',
+    id: 'packed',
     label: '빼곡한 일정 선호',
     description: '많은 곳을 보고 다양한 경험을 하고 싶어요',
     icon: '⚡',

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 import {
   Navigation,
   Cloud,
@@ -10,8 +11,17 @@ import {
   ChevronDown,
   ChevronUp,
   Thermometer,
+  Heart,
+  Bookmark,
 } from '@/components/icons'
 import { NavigationButton } from '@/components/navigation'
+import {
+  useAddDestinationLikeMutation,
+  useRemoveDestinationLikeMutation,
+  useAddDestinationSaveMutation,
+  useRemoveDestinationSaveMutation,
+} from '@/store/api/destinationLikesSavesApi'
+import { useAuth } from '@/contexts/AuthContextRTK'
 
 /**
  * 여행 장소 통합 카드 컴포넌트
@@ -23,8 +33,19 @@ export function PlaceCard({
   weather = null,
   showWeather = true,
   className = '',
+  showActions = false, // 좋아요/저장 버튼 표시 여부
+  onRefresh = null,
 }) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const { user } = useAuth()
+  const [isLiking, setIsLiking] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // API mutations
+  const [addLike] = useAddDestinationLikeMutation()
+  const [removeLike] = useRemoveDestinationLikeMutation()
+  const [addSave] = useAddDestinationSaveMutation()
+  const [removeSave] = useRemoveDestinationSaveMutation()
 
   if (!place) return null
 
@@ -83,6 +104,76 @@ export function PlaceCard({
   const locationInfo = getLocationInfo(place)
   const hasNavigation = locationInfo || place.place_id || place.description
 
+  // 좋아요 토글
+  const handleLikeToggle = async (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (!user) {
+      toast.error('로그인이 필요한 기능입니다.')
+      return
+    }
+
+    if (!place.destination_id) {
+      toast.error('여행지 정보가 올바르지 않습니다.')
+      return
+    }
+
+    if (isLiking) return
+
+    setIsLiking(true)
+    try {
+      if (place.is_liked) {
+        await removeLike(place.destination_id).unwrap()
+        toast.success('좋아요를 취소했습니다.')
+      } else {
+        await addLike({ destination_id: place.destination_id }).unwrap()
+        toast.success('좋아요를 추가했습니다.')
+      }
+      if (onRefresh) onRefresh()
+    } catch (error) {
+      console.error('좋아요 처리 실패:', error)
+      toast.error('처리 중 오류가 발생했습니다.')
+    } finally {
+      setIsLiking(false)
+    }
+  }
+
+  // 저장(북마크) 토글
+  const handleSaveToggle = async (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (!user) {
+      toast.error('로그인이 필요한 기능입니다.')
+      return
+    }
+
+    if (!place.destination_id) {
+      toast.error('여행지 정보가 올바르지 않습니다.')
+      return
+    }
+
+    if (isSaving) return
+
+    setIsSaving(true)
+    try {
+      if (place.is_saved) {
+        await removeSave(place.destination_id).unwrap()
+        toast.success('저장을 취소했습니다.')
+      } else {
+        await addSave({ destination_id: place.destination_id }).unwrap()
+        toast.success('여행지를 저장했습니다.')
+      }
+      if (onRefresh) onRefresh()
+    } catch (error) {
+      console.error('저장 처리 실패:', error)
+      toast.error('처리 중 오류가 발생했습니다.')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <Card className={`transition-shadow hover:shadow-md ${className}`}>
       <CardContent className="p-4">
@@ -114,6 +205,42 @@ export function PlaceCard({
 
           {/* 오른쪽: 날씨 + 내비게이션 */}
           <div className="ml-4 flex flex-col items-end gap-2">
+            {/* 좋아요/저장 버튼 */}
+            {showActions && place.destination_id && (
+              <div className="flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={handleLikeToggle}
+                  disabled={isLiking}
+                >
+                  <Heart
+                    className={`h-4 w-4 transition-colors ${
+                      place.is_liked
+                        ? 'fill-red-500 text-red-500'
+                        : 'text-gray-500'
+                    }`}
+                  />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={handleSaveToggle}
+                  disabled={isSaving}
+                >
+                  <Bookmark
+                    className={`h-4 w-4 transition-colors ${
+                      place.is_saved
+                        ? 'fill-blue-500 text-blue-500'
+                        : 'text-gray-500'
+                    }`}
+                  />
+                </Button>
+              </div>
+            )}
+
             {/* 날씨 정보 (간단 표시) */}
             {showWeather && weather && (
               <div className="flex items-center gap-1 text-sm">

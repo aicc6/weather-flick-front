@@ -87,6 +87,7 @@ export {
   Wallet,
   DollarSign,
   Zap,
+  Bookmark,
 } from 'lucide-react'
 
 // Communication Icons
