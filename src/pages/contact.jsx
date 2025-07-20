@@ -350,7 +350,7 @@ export default function ContactPage() {
                 <tr className="border-b border-gray-200 dark:border-gray-700">
                   <th className="px-2 py-3 text-center">번호</th>
                   <th className="px-2 py-3 text-center">분류</th>
-                  <th className="px-2 py-3 text-left">제목</th>
+                  <th className="px-2 py-3 text-center">제목</th>
                   <th className="px-2 py-3 text-center">답변여부</th>
                   <th className="px-2 py-3 text-center">조회수</th>
                   <th className="px-2 py-3 text-center">등록일</th>
