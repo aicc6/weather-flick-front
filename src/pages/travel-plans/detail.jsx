@@ -81,6 +81,11 @@ export function TravelPlanDetailPage() {
   console.log('Routes Length:', routes?.length || 0)
   console.log('Routes Error:', routesError)
   console.log('Plan ID:', planId)
+  console.log('Plan Data:', plan)
+  if (plan) {
+    console.log('Plan Start Location:', plan.start_location)
+    console.log('Plan Destination:', plan.destination)
+  }
   if (routes && routes.length > 0) {
     console.log('First Route Sample:', routes[0])
     console.log('Route Fields:', Object.keys(routes[0]))
@@ -90,6 +95,28 @@ export function TravelPlanDetailPage() {
       destination_lat: routes[0].destination_lat,
       destination_lng: routes[0].destination_lng,
     })
+
+    // route_data 상세 분석
+    if (routes[0]?.route_data) {
+      console.log('🛤️ Route Data Analysis:', routes[0].route_data)
+      if (routes[0].route_data.sub_paths) {
+        console.log('🛤️ Sub Paths Count:', routes[0].route_data.sub_paths.length)
+        routes[0].route_data.sub_paths.forEach((path, idx) => {
+          console.log(`🛤️ Path ${idx + 1}:`, {
+            type: path.type,
+            stations_count: path.stations?.length || 0,
+            line_name: path.lane?.name || path.lane?.busNo,
+            start_station: path.start_station,
+            end_station: path.end_station
+          })
+          if (path.type === 'subway' && path.stations) {
+            console.log(`🚇 Subway stations for path ${idx + 1}:`, 
+              path.stations.map(s => s.station_name || s.stationName)
+            )
+          }
+        })
+      }
+    }
     console.log('Day Info:', {
       day: routes[0].day,
       sequence: routes[0].sequence,
@@ -975,7 +1002,7 @@ export function TravelPlanDetailPage() {
             데이터 소스: {routeData.source || '기본'}
           </div>
           {routeData.source === 'TMAP' && (
-            <Badge variant="outline">🚌 실시간 대중교통정보</Badge>
+            <Badge variant="outline">🚌 대중교통정보</Badge>
           )}
         </div>
       </div>
@@ -1384,6 +1411,60 @@ export function TravelPlanDetailPage() {
               <CardContent>
                 {itineraryDays.length > 0 ? (
                   <div className="space-y-4">
+                    {/* 출발지 정보 표시 */}
+                    {plan?.start_location && (
+                      <div className="rounded-lg border-2 border-dashed border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-800">
+                            <MapPin className="h-5 w-5 text-green-600 dark:text-green-400" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium text-green-800 dark:text-green-200">
+                                🏠 출발지
+                              </h4>
+                              <Badge variant="outline" className="border-green-300 text-green-700 dark:border-green-600 dark:text-green-400">
+                                여행 시작점
+                              </Badge>
+                            </div>
+                            <p className="mt-1 text-sm text-green-700 dark:text-green-300">
+                              {plan.start_location}
+                            </p>
+                            {plan.start_date && (
+                              <p className="mt-1 text-xs text-green-600 dark:text-green-400">
+                                출발일: {new Date(plan.start_date).toLocaleDateString('ko-KR', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric',
+                                  weekday: 'short'
+                                })}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* 출발지에서 첫 번째 목적지로의 연결선 */}
+                    {plan?.start_location && itineraryDays.length > 0 && (
+                      <div className="flex items-center justify-center py-2">
+                        <div className="flex items-center gap-2 text-gray-400">
+                          <div className="h-px w-8 bg-gray-300"></div>
+                          <div className="rounded-full bg-blue-100 p-2 dark:bg-blue-900/30">
+                            <svg 
+                              className="h-4 w-4 text-blue-600 dark:text-blue-400" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                            </svg>
+                          </div>
+                          <div className="h-px w-8 bg-gray-300"></div>
+                        </div>
+                      </div>
+                    )}
+                    
                     {itineraryDays.map((day) => {
                       const dayNumber = parseInt(day.replace(/\D/g, ''))
                       const places = plan.itinerary[day] || []
@@ -1459,6 +1540,69 @@ export function TravelPlanDetailPage() {
                         />
                       )
                     })}
+                    
+                    {/* 최종 목적지 정보 표시 */}
+                    {plan?.destination && itineraryDays.length > 0 && (
+                      <>
+                        {/* 마지막 일정에서 목적지로의 연결선 */}
+                        <div className="flex items-center justify-center py-2">
+                          <div className="flex items-center gap-2 text-gray-400">
+                            <div className="h-px w-8 bg-gray-300"></div>
+                            <div className="rounded-full bg-red-100 p-2 dark:bg-red-900/30">
+                              <svg 
+                                className="h-4 w-4 text-red-600 dark:text-red-400" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                viewBox="0 0 24 24"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                              </svg>
+                            </div>
+                            <div className="h-px w-8 bg-gray-300"></div>
+                          </div>
+                        </div>
+                        
+                        {/* 최종 목적지 */}
+                        <div className="rounded-lg border-2 border-dashed border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-800">
+                              <svg 
+                                className="h-5 w-5 text-red-600 dark:text-red-400" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                viewBox="0 0 24 24"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-medium text-red-800 dark:text-red-200">
+                                  🏁 최종 목적지
+                                </h4>
+                                <Badge variant="outline" className="border-red-300 text-red-700 dark:border-red-600 dark:text-red-400">
+                                  여행 종료점
+                                </Badge>
+                              </div>
+                              <p className="mt-1 text-sm text-red-700 dark:text-red-300">
+                                {plan.destination}
+                              </p>
+                              {plan.end_date && (
+                                <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                                  도착일: {new Date(plan.end_date).toLocaleDateString('ko-KR', {
+                                    year: 'numeric',
+                                    month: 'long', 
+                                    day: 'numeric',
+                                    weekday: 'short'
+                                  })}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ) : (
                   <div className="py-8 text-center">
@@ -1745,8 +1889,7 @@ export function TravelPlanDetailPage() {
                           </h4>
                           <p className="text-sm text-blue-800 dark:text-blue-400">
                             총 {routes.length}개의 경로가 생성되어 있습니다.
-                            타임머신 기능으로 실시간 교통상황을 확인할 수
-                            있습니다.
+                            타임머신 기능으로 교통상황을 분석할 수 있습니다.
                           </p>
                         </div>
                       </div>
@@ -1819,7 +1962,7 @@ export function TravelPlanDetailPage() {
                     </p>
                     <div className="mt-4 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                       <div className="h-2 w-2 animate-pulse rounded-full bg-blue-500"></div>
-                      <span>실시간 대중교통/도보 정보 분석</span>
+                      <span>대중교통/도보 정보 분석</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -1860,65 +2003,30 @@ export function TravelPlanDetailPage() {
                                 </div>
                               )}
 
-                              {/* 기존 route_data가 있는 경우 직접 렌더링 */}
-                              {route.route_data &&
-                              route.transport_type === 'transit' ? (
-                                <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                                  <div className="mb-4 flex items-center justify-between">
-                                    <div className="flex items-center space-x-3">
-                                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
-                                        <span className="text-lg">🚌</span>
-                                      </div>
-                                      <div>
-                                        <h3 className="font-semibold text-gray-800 dark:text-gray-100">
-                                          {route.departure_name} →{' '}
-                                          {route.destination_name}
-                                        </h3>
-                                        <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-                                          <span>🚌 대중교통</span>
-                                          <span>•</span>
-                                          <span>
-                                            {formatDuration(route.duration)}
-                                          </span>
-                                          <span>•</span>
-                                          <span>
-                                            {formatDistance(route.distance)}
-                                          </span>
-                                          <span>•</span>
-                                          <span>{formatCost(route.cost)}</span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  {/* 대중교통 상세 정보 렌더링 */}
-                                  <div className="space-y-2">
-                                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                      📋 상세 경로 정보
-                                    </div>
-                                    {renderTransitDetails(route.route_data)}
-                                  </div>
-                                </div>
-                              ) : (
-                                /* 기존 EnhancedTransportCard 사용 */
-                                <EnhancedTransportCard
-                                  route={{
-                                    from: route.departure_name,
-                                    to: route.destination_name,
-                                    departure_lat: route.departure_lat,
-                                    departure_lng: route.departure_lng,
-                                    destination_lat: route.destination_lat,
-                                    destination_lng: route.destination_lng,
-                                    duration: route.duration,
-                                    distance: route.distance,
-                                    cost: route.cost,
-                                    transport_type: route.transport_type,
-                                    route_data: route.route_data,
-                                    isInterDay: route.sequence === 0,
-                                  }}
-                                  travelDate={plan?.start_date}
-                                />
-                              )}
+                              {/* 향상된 교통수단 카드 - 지하철/버스 분리 UI 포함 */}
+                              <EnhancedTransportCard
+                                route={{
+                                  from: route.departure_name,
+                                  to: route.destination_name,
+                                  departure_lat: route.departure_lat,
+                                  departure_lng: route.departure_lng,
+                                  destination_lat: route.destination_lat,
+                                  destination_lng: route.destination_lng,
+                                  duration: route.duration,
+                                  distance: route.distance,
+                                  cost: route.cost,
+                                  transport_type: route.transport_type,
+                                  route_data: route.route_data,
+                                  isInterDay: route.sequence === 0,
+                                }}
+                                key={`${route.route_id}-enhanced-transport`}
+                                travelDate={plan?.start_date}
+                                onRouteDetailClick={() => {
+                                  setSelectedRoute(route)
+                                  setIsRouteDetailOpen(true)
+                                }}
+                                showAdvancedTransportOptions={true}
+                              />
                             </div>
                           )
                         })}
@@ -2379,7 +2487,7 @@ export function TravelPlanDetailPage() {
                             {route.route_data?.route_summary && (
                               <div className="mt-3 rounded border bg-blue-50 p-3 dark:bg-blue-900/20">
                                 <div className="mb-2 text-sm font-medium text-gray-800 dark:text-gray-200">
-                                  🚦 실시간 교통 예측
+                                  🚦 교통 예측
                                 </div>
                                 {route.route_data.route_summary
                                   .traffic_prediction && (
