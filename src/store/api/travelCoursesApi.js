@@ -604,7 +604,7 @@ const selectRegionsForGeneration = (existingRegions, maxCount = 3) => {
 export const travelCoursesApi = createApi({
   reducerPath: 'travelCoursesApi',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['TravelCourse', 'TravelCourseList', 'Regions', 'Themes'],
+  tagTypes: ['TravelCourse', 'TravelCourseList', 'Regions', 'Themes', 'TravelCourseLike'],
   endpoints: (builder) => ({
     // 여행 코스 목록 조회
     getTravelCourses: builder.query({
@@ -613,16 +613,30 @@ export const travelCoursesApi = createApi({
         page_size = 20,
         region_code,
         course_theme,
+        liked_only = false,
       } = {}) => ({
         url: 'travel-courses/',
         params: {
           page,
           page_size,
-          ...(region_code && { regionCode: region_code }), // region_code -> regionCode로 변경
+          ...(region_code && { region_code }), // 숫자 ID로 직접 전달
           ...(course_theme && { course_theme }),
+          ...(liked_only && { liked_only }),
         },
       }),
-      providesTags: ['TravelCourseList'],
+      providesTags: (result) => [
+        'TravelCourseList',
+        'TravelCourseLike',
+        { type: 'TravelCourseLike', id: 'LIST' },
+        ...(result?.courses || []).map(course => ({ 
+          type: 'TravelCourseLike', 
+          id: course.content_id || course.id 
+        })),
+        ...(result?.courses || []).map(course => ({ 
+          type: 'TravelCourse', 
+          id: course.content_id || course.id 
+        })),
+      ],
       keepUnusedDataFor: 0, // 캐싱 비활성화 (개발 중 테스트용)
       transformResponse: async (response) => {
         if (response.totalCount !== undefined) {
@@ -839,7 +853,19 @@ export const travelCoursesApi = createApi({
           ...(theme && { course_theme: theme }),
         },
       }),
-      providesTags: ['TravelCourseList'],
+      providesTags: (result) => [
+        'TravelCourseList',
+        'TravelCourseLike', 
+        { type: 'TravelCourseLike', id: 'LIST' },
+        ...(result?.courses || []).map(course => ({ 
+          type: 'TravelCourseLike', 
+          id: course.content_id || course.id 
+        })),
+        ...(result?.courses || []).map(course => ({ 
+          type: 'TravelCourse', 
+          id: course.content_id || course.id 
+        })),
+      ],
       keepUnusedDataFor: 0, // 캐싱 비활성화 (개발 중 테스트용)
       transformResponse: async (response, meta, arg) => {
         const validatedResponse = validateAndSanitizeResponse(

@@ -2,15 +2,7 @@ import { useState, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGetTravelCoursesQuery } from '@/store/api/travelCoursesApi'
 import {
-  useGetCourseLikeQuery,
-  useLikeCourseMutation,
-  useUnlikeCourseMutation,
-} from '@/store/api/recommendLikesApi'
-import {
-  useCreateTravelCourseLikeMutation,
-  useDeleteTravelCourseLikeMutation,
-  useCheckTravelCourseLikeQuery,
-  useGetTravelCourseLikesQuery,
+  useToggleTravelCourseLikeMutation,
 } from '@/store/api/travelCourseLikesApi'
 import { useAuth } from '@/contexts/AuthContextRTK'
 
@@ -85,24 +77,24 @@ const REGION_CODE_MAP = {
 }
 
 const REGION_TAGS = [
-  { code: '', label: '전체' },
-  { code: 'seoul', label: '서울' },
-  { code: 'busan', label: '부산' },
-  { code: 'daegu', label: '대구' },
-  { code: 'incheon', label: '인천' },
-  { code: 'gwangju', label: '광주' },
-  { code: 'daejeon', label: '대전' },
-  { code: 'ulsan', label: '울산' },
-  { code: 'sejong', label: '세종' },
-  { code: 'gyeonggi', label: '경기' },
-  { code: 'gangwon', label: '강원' },
-  { code: 'chungbuk', label: '충북' },
-  { code: 'chungnam', label: '충남' },
-  { code: 'gyeongbuk', label: '경북' },
-  { code: 'gyeongnam', label: '경남' },
-  { code: 'jeonbuk', label: '전북' },
-  { code: 'jeonnam', label: '전남' },
-  { code: 'jeju', label: '제주' },
+  { code: null, label: '전체' },
+  { code: 1, label: '서울' },
+  { code: 6, label: '부산' },
+  { code: 4, label: '대구' },
+  { code: 2, label: '인천' },
+  { code: 5, label: '광주' },
+  { code: 3, label: '대전' },
+  { code: 7, label: '울산' },
+  { code: 8, label: '세종' },
+  { code: 31, label: '경기' },
+  { code: 32, label: '강원' },
+  { code: 33, label: '충북' },
+  { code: 34, label: '충남' },
+  { code: 35, label: '경북' },
+  { code: 36, label: '경남' },
+  { code: 37, label: '전북' },
+  { code: 38, label: '전남' },
+  { code: 39, label: '제주' },
 ]
 
 // region_code로 지역명 반환
@@ -122,30 +114,17 @@ const getRegionCodeParam = (code) => {
   return entry ? Number(entry[0]) : code
 }
 
-function RecommendCourseItem({ course }) {
+function RecommendCourseItem({ course, onLikeChange }) {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [isBookmarked, setIsBookmarked] = useState(false)
 
-  // 기존 좋아요 API (likes-recommend)
-  const { data: likeData, isLoading: likeLoading } = useGetCourseLikeQuery(
-    course.id,
-    {
-      skip: !course?.id || isNaN(Number(course.id)) || !user,
-    },
-  )
-  const [likeCourse] = useLikeCourseMutation()
-  const [unlikeCourse] = useUnlikeCourseMutation()
+  // 백엔드에서 받아온 좋아요 정보 사용 (개별 API 호출 제거)
+  const isLiked = course.is_liked || false
+  const totalLikes = course.total_likes || 0
 
-  // 새로운 travel_course_likes API
-  const { data: travelCourseLikeData } = useCheckTravelCourseLikeQuery(
-    course.id,
-    {
-      skip: !course?.id || !user,
-    },
-  )
-  const [createTravelCourseLike] = useCreateTravelCourseLikeMutation()
-  const [deleteTravelCourseLike] = useDeleteTravelCourseLikeMutation()
+  // 좋아요 상태 변경을 위한 API
+  const [toggleTravelCourseLike] = useToggleTravelCourseLikeMutation()
 
   const handleLike = useCallback(
     async (e) => {
@@ -163,37 +142,27 @@ function RecommendCourseItem({ course }) {
       }
 
       try {
-        if (likeData?.liked) {
-          // 좋아요 취소
-          await unlikeCourse(course.id).unwrap()
-          // travel_course_likes 테이블에서도 삭제
-          if (travelCourseLikeData?.liked) {
-            await deleteTravelCourseLike(course.id).unwrap()
-          }
-        } else {
-          // 좋아요 추가
-          await likeCourse(course.id).unwrap()
-          // travel_course_likes 테이블에도 저장
-          const courseData = {
-            content_id: course.id,
-            title: course.title || '',
-            subtitle: course.subtitle || '',
-            summary: course.summary || '',
-            description: course.description || '',
-            region: course.region || '',
-            itinerary: course.itinerary || [],
-          }
-
-          try {
-            await createTravelCourseLike(courseData).unwrap()
-            console.log('travel_course_likes에 데이터 저장 성공:', courseData)
-          } catch (travelLikeError) {
-            console.warn(
-              'travel_course_likes 저장 실패 (좋아요는 성공):',
-              travelLikeError,
-            )
-            // travel_course_likes 저장 실패는 사용자에게 알리지 않음 (기본 좋아요는 성공했으므로)
-          }
+        // 새로운 통합 API를 사용하여 좋아요 토글
+        const courseData = {
+          content_id: course.content_id || course.id,
+          title: course.course_name || course.title || '',
+          subtitle: course.subtitle || '',
+          summary: course.summary || '',
+          description: course.overview || course.description || '',
+          region: course.region || '',
+          itinerary: course.itinerary || [],
+        }
+        
+        const result = await toggleTravelCourseLike({
+          courseId: course.content_id || course.id,
+          courseData: courseData
+        }).unwrap()
+        
+        console.log('좋아요 처리 결과:', result)
+        
+        // 상위 컴포넌트에 좋아요 변경 알림
+        if (onLikeChange) {
+          onLikeChange()
         }
       } catch (error) {
         console.error('좋아요 처리 실패:', error)
@@ -201,13 +170,8 @@ function RecommendCourseItem({ course }) {
       }
     },
     [
-      likeData?.liked,
-      travelCourseLikeData?.liked,
       course,
-      likeCourse,
-      unlikeCourse,
-      createTravelCourseLike,
-      deleteTravelCourseLike,
+      toggleTravelCourseLike,
       user,
       navigate,
     ],
@@ -253,10 +217,10 @@ function RecommendCourseItem({ course }) {
     <div className="group cursor-pointer overflow-hidden rounded-lg bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:bg-gray-800">
       {/* 썸네일 */}
       <div className="relative aspect-video w-full overflow-hidden">
-        {course.mainImage ? (
+        {course.first_image || course.mainImage ? (
           <img
-            src={course.mainImage}
-            alt={course.title}
+            src={course.first_image || course.mainImage}
+            alt={course.course_name || course.title}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
           />
@@ -271,14 +235,13 @@ function RecommendCourseItem({ course }) {
           <button
             onClick={handleLike}
             className={`rounded-full p-2 backdrop-blur-sm transition-all duration-200 ${
-              likeData?.liked
+              isLiked
                 ? 'bg-red-500 text-white shadow-lg'
                 : 'bg-white/90 text-gray-700 hover:bg-red-50 hover:text-red-500 dark:bg-gray-800/90 dark:text-gray-300 dark:hover:bg-red-900/20'
             }`}
-            aria-label={likeData?.liked ? '좋아요 취소' : '좋아요'}
-            disabled={likeLoading}
+            aria-label={isLiked ? '좋아요 취소' : '좋아요'}
           >
-            <HeartIcon className="h-4 w-4" filled={likeData?.liked} />
+            <HeartIcon className="h-4 w-4" filled={isLiked} />
           </button>
           <button
             onClick={handleBookmark}
@@ -304,11 +267,11 @@ function RecommendCourseItem({ course }) {
       {/* 카드 내용 */}
       <div className="p-6">
         <div className="mb-4 line-clamp-2 text-xl leading-tight font-bold text-gray-900 dark:text-white">
-          {course.title}
+          {course.course_name || course.title}
         </div>
         {/* 주소 표시 */}
         <div className="mb-4 line-clamp-1 text-sm text-gray-600 dark:text-gray-400">
-          {course.address}
+          {course.address || '주소 정보 없음'}
         </div>
 
         {/* 카드 하단 액션 바 */}
@@ -317,16 +280,15 @@ function RecommendCourseItem({ course }) {
             <button
               onClick={handleLike}
               className={`flex items-center gap-2 rounded-full px-3 py-2 text-sm transition-all duration-200 ${
-                likeData?.liked
+                isLiked
                   ? 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400'
                   : 'text-gray-500 hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-400'
               }`}
-              disabled={likeLoading}
             >
-              <HeartIcon className="h-4 w-4" filled={likeData?.liked} />
+              <HeartIcon className="h-4 w-4" filled={isLiked} />
               <span>좋아요</span>
-              {likeData?.total !== undefined && (
-                <span className="text-xs">({likeData.total})</span>
+              {totalLikes !== null && (
+                <span className="text-xs">({totalLikes})</span>
               )}
             </button>
             <button
@@ -358,45 +320,23 @@ export default function RecommendListPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [page, setPage] = useState(1)
-  // region 상태를 REGION_CODE_MAP의 value(영문)로 관리
-  const [region, setRegion] = useState('')
+  // region 상태를 DB ID(숫자)로 관리
+  const [region, setRegion] = useState(null)
   // 좋아요 필터 상태
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
   const pageSize = 10
 
-  // 내 좋아요 목록 조회 (로그인한 사용자만)
-  const { data: myLikes } = useGetTravelCourseLikesQuery(undefined, {
-    skip: !user || !showFavoritesOnly,
+  // 통합된 여행 코스 데이터 조회 (좋아요 필터 포함)
+  const { data, isLoading, isError, error, refetch } = useGetTravelCoursesQuery({
+    page,
+    page_size: pageSize,
+    region_code: region, // region은 숫자 ID
+    liked_only: showFavoritesOnly, // 좋아요 필터 조건
   })
 
-  // 좋아요 필터용 전체 데이터 조회 (좋아요 필터가 활성화된 경우에만)
-  const { data: allCoursesData, isLoading: allCoursesLoading } =
-    useGetTravelCoursesQuery(
-      {
-        page: 1,
-        page_size: 1000, // 충분히 큰 수로 전체 데이터 가져오기
-        region_code: region || undefined,
-      },
-      {
-        skip: !showFavoritesOnly, // 좋아요 필터가 비활성화되면 호출하지 않음
-      },
-    )
-
-  // 일반 페이지네이션 데이터 조회 (좋아요 필터가 비활성화된 경우에만)
-  const { data, isLoading, isError, error } = useGetTravelCoursesQuery(
-    {
-      page,
-      page_size: pageSize,
-      region_code: region || undefined, // region은 영문 문자열
-    },
-    {
-      skip: showFavoritesOnly, // 좋아요 필터가 활성화되면 호출하지 않음
-    },
-  )
-
-  // 태그 클릭 시 code(영문)를 region에 저장
+  // 태그 클릭 시 숫자 ID를 region에 저장
   const handleRegionClick = (code) => {
-    setRegion(code) // code는 'busan', 'seoul' 등 영문 문자열
+    setRegion(code) // code는 1, 6 등 숫자 ID (또는 전체일 때 null)
     setPage(1)
   }
 
@@ -415,87 +355,37 @@ export default function RecommendListPage() {
     setPage(1)
   }
 
-  // 데이터 소스 결정 (좋아요 필터 활성화 여부에 따라)
-  const currentData = showFavoritesOnly ? allCoursesData : data
-  const currentLoading = showFavoritesOnly ? allCoursesLoading : isLoading
+  // 좋아요 상태 변경 시 데이터 다시 로드
+  const handleLikeChange = useCallback(() => {
+    console.log('좋아요 상태 변경, 데이터 재조회 시작')
+    refetch()
+  }, [refetch])
 
-  const courses = currentData?.courses || []
-  const total = currentData?.total || 0
+  const courses = data?.courses || []
+  const total = data?.total || 0
 
-  // 좋아요 필터가 활성화된 경우 필터링된 코스 목록
-  const filteredCourses = useMemo(() => {
-    if (!showFavoritesOnly || !myLikes) {
-      return courses
-    }
-
-    // 좋아요 목록에서 직접 코스 데이터 생성
-    // travel_course_likes에 이미 필요한 코스 정보가 모두 들어있음
-    const likedCourses = myLikes.map((like) => ({
-      // travel_course_likes의 데이터를 코스 형식으로 변환
-      id: like.content_id,
-      content_id: like.content_id,
-      title: like.title,
-      subtitle: like.subtitle || '',
-      summary: like.summary || '',
-      description: like.description || '',
-      region: like.region || '',
-      itinerary: like.itinerary || [],
-      
-      // 기본값들 추가
-      mainImage: null,
-      images: [],
-      rating: 4.5,
-      reviewCount: 0,
-      likeCount: 0,
-      viewCount: 0,
-      theme: [],
-      duration: '1일',
-      price: '무료',
-      address: '',
-      created_at: like.created_at,
-    }))
-
-    console.log('좋아요 목록에서 생성된 코스들:', likedCourses)
-
-    return likedCourses
-  }, [myLikes, showFavoritesOnly])
-
-  // 페이지네이션 계산 (좋아요 필터에 따라 다르게)
+  // 페이지네이션 계산
   const totalPages = useMemo(() => {
-    if (showFavoritesOnly) {
-      // 좋아요 필터: 필터링된 결과의 페이지 수
-      return Math.max(1, Math.ceil(filteredCourses.length / pageSize))
-    } else {
-      // 일반 필터: 서버에서 받은 총 개수의 페이지 수
-      return Math.max(1, Math.ceil(total / pageSize))
-    }
-  }, [total, pageSize, showFavoritesOnly, filteredCourses.length])
+    return Math.max(1, Math.ceil(total / pageSize))
+  }, [total, pageSize])
 
-  // 여행지 리스트 정렬 및 페이지네이션 (ㄱㄴㄷ 순으로 정렬하되 No Image 항목은 하단으로)
+  // 여행지 리스트 정렬 (ㄱㄴㄷ 순으로 정렬하되 No Image 항목은 하단으로)
   const sortedCourses = useMemo(() => {
-    const sorted = [...filteredCourses].sort((a, b) => {
+    return [...courses].sort((a, b) => {
       // 1. 이미지가 있는 것과 없는 것 분리 (No Image를 하단으로)
-      const aHasImage = Boolean(a.mainImage)
-      const bHasImage = Boolean(b.mainImage)
+      const aHasImage = Boolean(a.mainImage || a.first_image)
+      const bHasImage = Boolean(b.mainImage || b.first_image)
 
       if (aHasImage !== bHasImage) {
         return bHasImage - aHasImage // 이미지가 있는 것을 먼저
       }
 
       // 2. 같은 그룹 내에서 제목 기준 ㄱㄴㄷ 순 정렬
-      return a.title.localeCompare(b.title, 'ko', { numeric: true })
+      const titleA = a.title || a.course_name || ''
+      const titleB = b.title || b.course_name || ''
+      return titleA.localeCompare(titleB, 'ko', { numeric: true })
     })
-
-    // 좋아요 필터가 활성화된 경우 클라이언트 사이드 페이지네이션
-    if (showFavoritesOnly) {
-      const startIndex = (page - 1) * pageSize
-      const endIndex = startIndex + pageSize
-      return sorted.slice(startIndex, endIndex)
-    }
-
-    // 일반 필터는 서버 사이드 페이지네이션이므로 그대로 반환
-    return sorted
-  }, [filteredCourses, showFavoritesOnly, page, pageSize])
+  }, [courses])
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10">
@@ -523,8 +413,8 @@ export default function RecommendListPage() {
           >
             <HeartIcon className="h-4 w-4" filled={showFavoritesOnly} />
             <span>{showFavoritesOnly ? '좋아요만 보기' : '좋아요 필터'}</span>
-            {showFavoritesOnly && myLikes && (
-              <span className="text-xs">({myLikes.length})</span>
+            {showFavoritesOnly && total > 0 && (
+              <span className="text-xs">({total})</span>
             )}
           </button>
         </div>
@@ -547,19 +437,15 @@ export default function RecommendListPage() {
 
       {/* 여행지 리스트 */}
       <div className="mb-8">
-        {currentLoading ? (
+        {isLoading ? (
           <div className="py-8 text-center text-gray-600 dark:text-gray-400">
             로딩 중...
           </div>
-        ) : isError && !showFavoritesOnly ? (
+        ) : isError ? (
           <div className="py-8 text-center text-red-500 dark:text-red-400">
             에러: {error?.data?.detail || '데이터를 불러올 수 없습니다.'}
           </div>
-        ) : courses.length === 0 ? (
-          <div className="py-8 text-center text-gray-500 dark:text-gray-400">
-            데이터가 없습니다.
-          </div>
-        ) : sortedCourses.length === 0 && showFavoritesOnly ? (
+        ) : showFavoritesOnly && sortedCourses.length === 0 ? (
           <div className="py-8 text-center text-gray-500 dark:text-gray-400">
             <div className="flex flex-col items-center gap-4">
               <HeartIcon className="h-12 w-12 text-gray-300" />
@@ -579,10 +465,18 @@ export default function RecommendListPage() {
               </button>
             </div>
           </div>
+        ) : sortedCourses.length === 0 ? (
+          <div className="py-8 text-center text-gray-500 dark:text-gray-400">
+            해당 지역에는 여행 코스가 없습니다.
+          </div>
         ) : (
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {sortedCourses.map((course) => (
-              <RecommendCourseItem key={course.id} course={course} />
+              <RecommendCourseItem 
+                key={course.content_id || course.id} 
+                course={course}
+                onLikeChange={handleLikeChange}
+              />
             ))}
           </div>
         )}

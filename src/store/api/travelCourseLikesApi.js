@@ -4,48 +4,57 @@ import { baseQueryWithReauth } from './baseQuery'
 export const travelCourseLikesApi = createApi({
   reducerPath: 'travelCourseLikesApi',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['TravelCourseLike'],
+  tagTypes: ['TravelCourseLike', 'TravelCourse', 'TravelCourseList'],
   endpoints: (builder) => ({
-    createTravelCourseLike: builder.mutation({
-      query: (courseData) => ({
-        url: '/travel-course-likes/',
-        method: 'POST',
+    // 새로운 통합 좋아요 토글 API
+    toggleTravelCourseLike: builder.mutation({
+      query: ({ courseId, courseData }) => ({
+        url: `/travel-courses/${courseId}/likes`,
+        method: 'PUT',
         body: courseData,
       }),
-      invalidatesTags: (result, error, { content_id }) => [
-        { type: 'TravelCourseLike', id: content_id },
+      invalidatesTags: (result, error, { courseId }) => [
+        { type: 'TravelCourseLike', id: courseId },
         { type: 'TravelCourseLike', id: 'LIST' },
+        { type: 'TravelCourse', id: courseId },
+        'TravelCourse',
+        'TravelCourseList',
       ],
     }),
-    getTravelCourseLikes: builder.query({
-      query: () => '/travel-course-likes/',
-      providesTags: [
-        'TravelCourseLike',
+    // 기존 API들은 호환성을 위해 유지하되, 새로운 엔드포인트를 사용하도록 수정
+    createTravelCourseLike: builder.mutation({
+      query: ({ courseId, courseData }) => ({
+        url: `/travel-courses/${courseId}/likes`,
+        method: 'PUT',
+        body: courseData,
+      }),
+      invalidatesTags: (result, error, { courseId }) => [
+        { type: 'TravelCourseLike', id: courseId },
         { type: 'TravelCourseLike', id: 'LIST' },
+        { type: 'TravelCourse', id: courseId },
+        'TravelCourse',
+        'TravelCourseList',
       ],
     }),
     deleteTravelCourseLike: builder.mutation({
-      query: (contentId) => ({
-        url: `/travel-course-likes/${contentId}`,
-        method: 'DELETE',
+      query: ({ courseId, courseData }) => ({
+        url: `/travel-courses/${courseId}/likes`,
+        method: 'PUT',
+        body: courseData,
       }),
-      invalidatesTags: (result, error, contentId) => [
-        { type: 'TravelCourseLike', id: contentId },
+      invalidatesTags: (result, error, { courseId }) => [
+        { type: 'TravelCourseLike', id: courseId },
         { type: 'TravelCourseLike', id: 'LIST' },
-      ],
-    }),
-    checkTravelCourseLike: builder.query({
-      query: (contentId) => `/travel-course-likes/check/${contentId}`,
-      providesTags: (result, error, contentId) => [
-        { type: 'TravelCourseLike', id: contentId },
+        { type: 'TravelCourse', id: courseId },
+        'TravelCourse',
+        'TravelCourseList',
       ],
     }),
   }),
 })
 
 export const {
+  useToggleTravelCourseLikeMutation,
   useCreateTravelCourseLikeMutation,
-  useGetTravelCourseLikesQuery,
   useDeleteTravelCourseLikeMutation,
-  useCheckTravelCourseLikeQuery,
 } = travelCourseLikesApi
