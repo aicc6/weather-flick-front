@@ -1,7 +1,16 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGetTravelCoursesQuery } from '@/store/api/travelCoursesApi'
 import { useToggleTravelCourseLikeMutation } from '@/store/api/travelCourseLikesApi'
+import { 
+  useAddDestinationSaveMutation,
+  useRemoveDestinationSaveMutation,
+  useSearchDestinationByNameQuery
+} from '@/store/api/destinationLikesSavesApi'
+import {
+  useCreateTravelCourseSaveMutation,
+  useDeleteTravelCourseSaveMutation,
+} from '@/store/api/travelCourseSavesApi'
 import { useAuth } from '@/contexts/AuthContextRTK'
 
 // 아이콘 컴포넌트들
@@ -115,14 +124,29 @@ const getRegionCodeParam = (code) => {
 function RecommendCourseItem({ course, onLikeChange }) {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [isBookmarked, setIsBookmarked] = useState(false)
+  
+  // 백엔드에서 받아온 저장 정보 사용 (API에서 받은 is_saved 값으로 초기화)
+  const [isBookmarked, setIsBookmarked] = useState(course.is_saved || false)
 
   // 백엔드에서 받아온 좋아요 정보 사용 (개별 API 호출 제거)
   const isLiked = course.is_liked || false
   const totalLikes = course.total_likes || 0
 
+  // course.is_saved 값이 변경될 때마다 local state 동기화
+  useEffect(() => {
+    setIsBookmarked(course.is_saved || false)
+  }, [course.is_saved])
+
   // 좋아요 상태 변경을 위한 API
   const [toggleTravelCourseLike] = useToggleTravelCourseLikeMutation()
+  
+  // 여행지 저장을 위한 API (destinations용 - 기존 호환성)
+  const [addDestinationSave] = useAddDestinationSaveMutation()
+  const [removeDestinationSave] = useRemoveDestinationSaveMutation()
+  
+  // 여행 코스 저장을 위한 API (새로운 기능)
+  const [createTravelCourseSave] = useCreateTravelCourseSaveMutation()
+  const [deleteTravelCourseSave] = useDeleteTravelCourseSaveMutation()
 
   const handleLike = useCallback(
     async (e) => {
@@ -170,22 +194,69 @@ function RecommendCourseItem({ course, onLikeChange }) {
     [course, toggleTravelCourseLike, user, navigate],
   )
 
-  const handleBookmark = (e) => {
-    e.stopPropagation()
+  const handleBookmark = useCallback(
+    async (e) => {
+      e.stopPropagation()
 
-    // 비로그인 사용자 처리
-    if (!user) {
-      const shouldLogin = window.confirm(
-        '해당 기능은 로그인해야 가능합니다.\n로그인 페이지로 이동하시겠습니까?',
-      )
-      if (shouldLogin) {
-        navigate('/login')
+      // 비로그인 사용자 처리
+      if (!user) {
+        const shouldLogin = window.confirm(
+          '해당 기능은 로그인해야 가능합니다.\n로그인 페이지로 이동하시겠습니까?',
+        )
+        if (shouldLogin) {
+          navigate('/login')
+        }
+        return
       }
-      return
-    }
 
-    setIsBookmarked(!isBookmarked)
-  }
+      try {
+        const contentId = course.content_id || course.id
+        if (!contentId) {
+          throw new Error('여행 코스 ID를 찾을 수 없습니다.')
+        }
+
+        if (isBookmarked) {
+          // 여행 코스 저장 취소
+          console.log('🗑️ 여행 코스 저장 취소 시도:', contentId)
+          await deleteTravelCourseSave(contentId).unwrap()
+          setIsBookmarked(false)
+          console.log('✅ 여행 코스 저장 취소 성공:', course.course_name || course.title)
+        } else {
+          // 여행 코스 저장 추가
+          console.log('💾 여행 코스 저장 추가 시도:', contentId)
+          await createTravelCourseSave({ 
+            content_id: contentId,
+            note: null // 메모는 선택사항
+          }).unwrap()
+          setIsBookmarked(true)
+          console.log('✅ 여행 코스 저장 성공:', course.course_name || course.title)
+        }
+        
+        // 상위 컴포넌트에 변경 사항 알림 (데이터 새로고침 요청)
+        if (onLikeChange) {
+          onLikeChange()
+        }
+      } catch (error) {
+        console.error('❌ 저장 처리 실패:', error)
+        const errorMessage = error.message || error.data?.detail || error.error || '알 수 없는 오류가 발생했습니다.'
+        console.log('🔍 에러 상세:', {
+          message: error.message,
+          data: error.data,
+          status: error.status,
+          error: error.error
+        })
+        
+        if (errorMessage.includes('Already saved')) {
+          alert('이미 저장된 여행 코스입니다.')
+        } else if (errorMessage.includes('not found')) {
+          alert('여행 코스를 찾을 수 없습니다.')
+        } else {
+          alert('저장 처리에 실패했습니다. 다시 시도해주세요.')
+        }
+      }
+    },
+    [isBookmarked, createTravelCourseSave, deleteTravelCourseSave, course, user, navigate]
+  )
 
   const handleShare = (e) => {
     e.stopPropagation()

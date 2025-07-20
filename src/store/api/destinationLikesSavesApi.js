@@ -90,6 +90,15 @@ export const destinationLikesSavesApi = createApi({
         { type: 'Destination', id: destinationId },
       ],
     }),
+
+    // 여행지 이름으로 검색
+    searchDestinationByName: builder.query({
+      query: (name) => ({
+        url: `/destinations/search-by-name`,
+        params: { name },
+      }),
+      providesTags: ['Destination'],
+    }),
   }),
 })
 
@@ -102,4 +111,5 @@ export const {
   useGetMyDestinationSavesQuery,
   useUpdateDestinationSaveNoteMutation,
   useGetDestinationDetailQuery,
+  useSearchDestinationByNameQuery,
 } = destinationLikesSavesApi

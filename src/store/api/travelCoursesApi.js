@@ -72,6 +72,7 @@ const normalizeItem = (item) => {
     like_count: 'likeCount',
     view_count: 'viewCount',
 
+
     // 테마 관련
     course_theme: 'theme',
     course_themes: 'theme',
