@@ -293,113 +293,56 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       rollupOptions: {
+        external: [],
         output: {
-          manualChunks: (id) => {
-            // Node modules 분리
-            if (id.includes('node_modules')) {
-              // React 관련 라이브러리 (더 정확한 조건)
-              if (id.includes('react') || id.includes('react-dom')) {
-                if (id.includes('react-router')) {
-                  return 'react-router-vendor';
-                }
-                if (id.includes('react-redux') || id.includes('@reduxjs')) {
-                  return 'state-vendor';
-                }
-                if (id.includes('react-hook-form')) {
-                  return 'form-vendor';
-                }
-                // 핵심 React 라이브러리만 포함
-                if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('react/index') || id.includes('react-dom/index')) {
-                  return 'react-core';
-                }
-                return 'react-vendor';
-              }
-              
-              // UI 컴포넌트 라이브러리 (세분화)
-              if (id.includes('@radix-ui')) {
-                return 'radix-vendor';
-              }
-              
-              if (id.includes('lucide-react')) {
-                return 'icons-vendor';
-              }
-              
-              if (id.includes('class-variance-authority') || id.includes('clsx') || 
-                  id.includes('tailwind-merge')) {
-                return 'ui-utils-vendor';
-              }
-              
-              // 상태 관리
-              if (id.includes('@reduxjs') || id.includes('react-redux') || id.includes('redux')) {
-                return 'state-vendor';
-              }
-              
-              // Firebase (동적 로딩 대상 - 청크 분리)
-              if (id.includes('firebase')) {
-                if (id.includes('firebase/app') || id.includes('firebase/auth')) {
-                  return 'firebase-core';
-                }
-                if (id.includes('firebase/messaging')) {
-                  return 'firebase-messaging';
-                }
-                return 'firebase-vendor';
-              }
-              
-              // 애니메이션 (동적 로딩 대상)
-              if (id.includes('framer-motion')) {
-                return 'animation-vendor';
-              }
-              
-              // 지도 관련 (동적 로딩 대상)
-              if (id.includes('@googlemaps') || id.includes('google-maps')) {
-                return 'maps-vendor';
-              }
-              
-              // 드래그앤드롭 (동적 로딩 대상)
-              if (id.includes('@dnd-kit')) {
-                return 'dnd-vendor';
-              }
-              
-              // 캐러셀 (동적 로딩 대상)
-              if (id.includes('embla-carousel')) {
-                return 'carousel-vendor';
-              }
-              
-              // 유틸리티 (자주 사용되는 것만)
-              if (id.includes('date-fns') || id.includes('zod')) {
-                return 'utils-vendor';
-              }
-              
-              // 폼 관련
-              if (id.includes('react-hook-form') || id.includes('@hookform')) {
-                return 'form-vendor';
-              }
-              
-              // 알림 및 기타
-              if (id.includes('sonner') || id.includes('react-hot-toast')) {
-                return 'notification-vendor';
-              }
-              
-              // 나머지 vendor 라이브러리
-              return 'vendor';
-            }
-            
-            // 페이지별 분리
-            if (id.includes('src/pages/')) {
-              if (id.includes('customized-schedule')) return 'customized-schedule';
-              if (id.includes('recommend')) return 'recommend';
-              if (id.includes('planner')) return 'planner';
-              if (id.includes('profile')) return 'profile';
-              if (id.includes('auth')) return 'auth';
-              return 'pages';
-            }
-            
-            // 컴포넌트별 분리
-            if (id.includes('src/components/')) {
-              if (id.includes('ui/')) return 'ui-components';
-              if (id.includes('layout/')) return 'layout-components';
-              return 'components';
-            }
+          manualChunks: {
+            // React 코어 (절대 분리하지 않음)
+            'react-core': ['react', 'react-dom'],
+            // React 생태계
+            'react-ecosystem': ['react-router-dom', 'react-redux', '@reduxjs/toolkit'],
+            // UI 라이브러리
+            'ui-vendor': [
+              '@radix-ui/react-accordion',
+              '@radix-ui/react-alert-dialog',
+              '@radix-ui/react-avatar',
+              '@radix-ui/react-checkbox',
+              '@radix-ui/react-collapsible',
+              '@radix-ui/react-dialog',
+              '@radix-ui/react-dropdown-menu',
+              '@radix-ui/react-label',
+              '@radix-ui/react-popover',
+              '@radix-ui/react-radio-group',
+              '@radix-ui/react-scroll-area',
+              '@radix-ui/react-select',
+              '@radix-ui/react-separator',
+              '@radix-ui/react-slider',
+              '@radix-ui/react-slot',
+              '@radix-ui/react-switch',
+              '@radix-ui/react-tabs',
+              '@radix-ui/react-toggle',
+              '@radix-ui/react-tooltip'
+            ],
+            // 유틸리티
+            'utils-vendor': [
+              'class-variance-authority',
+              'clsx',
+              'tailwind-merge',
+              'date-fns',
+              'zod',
+              'lucide-react'
+            ],
+            // 폼 관련
+            'form-vendor': ['react-hook-form', '@hookform/resolvers'],
+            // 기타 대용량 라이브러리
+            'heavy-vendor': [
+              'framer-motion',
+              '@googlemaps/js-api-loader',
+              '@dnd-kit/core',
+              '@dnd-kit/sortable',
+              '@dnd-kit/utilities',
+              'embla-carousel-react',
+              'sonner'
+            ]
           },
         },
       },
@@ -423,7 +366,10 @@ export default defineConfig(({ mode }) => {
       include: [
         'react',
         'react-dom',
+        'react/jsx-runtime',
         'react-router-dom',
+        'react-redux',
+        '@reduxjs/toolkit',
         'framer-motion',
         'date-fns',
         'date-fns/locale',
@@ -435,12 +381,22 @@ export default defineConfig(({ mode }) => {
         '@radix-ui/react-popover',
         '@radix-ui/react-dropdown-menu',
         '@radix-ui/react-slot',
+        'clsx',
+        'tailwind-merge',
+        'class-variance-authority'
       ],
       exclude: ['@firebase/app'],
       force: true,
+      esbuildOptions: {
+        target: 'es2020',
+      },
     },
     resolve: {
-      dedupe: ['react', 'react-dom'],
+      alias: {
+        react: 'react',
+        'react-dom': 'react-dom',
+      },
+      dedupe: ['react', 'react-dom', 'react-router-dom'],
     },
   }
 })
