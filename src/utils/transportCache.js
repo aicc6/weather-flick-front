@@ -108,6 +108,18 @@ const processBatchRequests = async () => {
   // 각 배치 처리
   for (const batch of batches) {
     try {
+      // 배치 API 요청 구조 - TMAP 관련 필드 제거
+      const requestBody = {
+        routes: batch.map((item) => item.request),
+      }
+
+      console.log('🚀 배치 API 호출:', {
+        batchSize: batch.length,
+        token: batch[0].token ? '토큰 있음' : '토큰 없음',
+        tokenLength: batch[0].token?.length || 0,
+        requestBody: requestBody,
+      })
+
       const response = await fetch(
         'http://localhost:8000/api/routes/enhanced-multi-route/batch',
         {
@@ -116,16 +128,21 @@ const processBatchRequests = async () => {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${batch[0].token}`,
           },
-          body: JSON.stringify({
-            routes: batch.map((item) => item.request),
-            include_timemachine: true,
-            departure_time: null,
-          }),
+          body: JSON.stringify(requestBody),
         },
       )
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        // 422 에러의 경우 응답 본문을 확인
+        let errorDetails = `HTTP error! status: ${response.status}`
+        try {
+          const errorData = await response.json()
+          console.error('🚨 배치 API 에러 상세:', errorData)
+          errorDetails = `HTTP ${response.status}: ${errorData.error?.message || errorData.message || '알 수 없는 오류'}`
+        } catch (parseError) {
+          console.error('🚨 에러 응답 파싱 실패:', parseError)
+        }
+        throw new Error(errorDetails)
       }
 
       const result = await response.json()

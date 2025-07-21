@@ -18,7 +18,7 @@ import {
 import NavigationDropdown from './NavigationDropdown'
 import SmartTimeSelector from './SmartTimeSelector'
 import SubwayRouteMap from './SubwayRouteMap'
-import { addToBatchQueue, getCachedRoute } from '@/utils/transportCache'
+import { getCachedRoute } from '@/utils/transportCache'
 import { authHttp } from '@/lib/http'
 
 // 교통수단 아이콘 매핑
@@ -708,6 +708,11 @@ const EnhancedTransportCard = ({
         }
 
         const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
+        console.log('🔑 Transport Token Check:', {
+          storageKey: STORAGE_KEYS.ACCESS_TOKEN,
+          token: token ? '토큰 있음' : '토큰 없음',
+          tokenLength: token?.length || 0,
+        })
         if (!token) {
           throw new Error('로그인이 필요합니다')
         }
@@ -735,41 +740,12 @@ const EnhancedTransportCard = ({
             departure_lng: route.departure_lng,
             destination_lat: route.destination_lat,
             destination_lng: route.destination_lng,
-            include_timemachine: true,
             departure_time: departureTime,
           }
 
           try {
-            const data = await addToBatchQueue(requestData, token)
-            console.log('🚌 Enhanced Transport API Response:', data)
-            console.log('🚇 Transit Data:', data.routes?.transit)
-            if (data.routes?.transit?.route_data?.sub_paths) {
-              console.log(
-                '🛤️ API Sub Paths:',
-                data.routes.transit.route_data.sub_paths,
-              )
-              // 지하철 구간 상세 분석
-              const subwayPaths =
-                data.routes.transit.route_data.sub_paths.filter(
-                  (path) => path.type === 'subway',
-                )
-              console.log('🚇 API Subway Paths Found:', subwayPaths.length)
-              subwayPaths.forEach((path, idx) => {
-                console.log(`🚇 API Subway Path ${idx + 1}:`, {
-                  type: path.type,
-                  line_name: path.lane?.name,
-                  stations_count: path.stations?.length || 0,
-                  stations: path.stations?.map((s) => s.station_name) || [],
-                  full_path: path,
-                })
-              })
-            } else {
-              console.log('❌ No sub_paths in API response')
-            }
-            setTransportData(data)
-          } catch (batchError) {
-            // 배치 처리 실패 시 개별 호출로 폴백
-            console.warn('배치 처리 실패, 개별 호출 시도:', batchError)
+            // 배치 API 비활성화 - 직접 개별 API 호출
+            console.log('🚌 개별 API 호출 시작:', requestData)
 
             const response = await authHttp.POST(
               '/routes/enhanced-multi-route',
@@ -803,6 +779,9 @@ const EnhancedTransportCard = ({
                 recordApiUsage('ODSAY_API', 1, 'transit-route')
               }
             }
+          } catch (apiError) {
+            console.error('개별 API 호출 실패:', apiError)
+            throw apiError
           }
         }
       } catch (err) {
