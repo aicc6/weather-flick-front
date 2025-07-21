@@ -100,20 +100,47 @@ export function CompactPlaceCard({
           {/* 중간: 날씨 정보 */}
           {showWeather && weather && (
             <div className="mx-3 flex flex-shrink-0 items-center gap-1">
-              {getWeatherIcon(weather.condition)}
-              <span className="text-xs text-gray-700 dark:text-gray-300">
-                {weather.temperature}°
-              </span>
+              <div className="flex flex-col items-center gap-0.5">
+                <div className="flex items-center gap-1">
+                  {getWeatherIcon(weather.condition)}
+                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    {weather.temperature?.min && weather.temperature?.max
+                      ? `${weather.temperature.min}°~${weather.temperature.max}°`
+                      : weather.temperature?.current
+                        ? `${weather.temperature.current}°`
+                        : weather.temperature
+                          ? `${weather.temperature}°`
+                          : '-°'}
+                  </span>
+                </div>
+                {weather.precipitation > 0 && (
+                  <span className="text-xs text-blue-500 dark:text-blue-400">
+                    💧{weather.precipitation}%
+                  </span>
+                )}
+                {weather.condition && (
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {weather.condition}
+                  </span>
+                )}
+              </div>
             </div>
           )}
 
-          {/* 날씨 정보가 없을 때 디버깅용 */}
+          {/* 날씨 정보가 없을 때 */}
           {showWeather && !weather && (
             <div className="mx-3 flex flex-shrink-0 items-center gap-1">
-              <Cloud className="h-3 w-3 text-gray-300" />
-              <span className="text-xs text-gray-600 dark:text-gray-400">
-                -°
-              </span>
+              <div className="flex flex-col items-center gap-0.5">
+                <div className="flex items-center gap-1">
+                  <Cloud className="h-3 w-3 text-gray-300" />
+                  <span className="text-xs text-gray-600 dark:text-gray-400">
+                    날씨정보
+                  </span>
+                </div>
+                <span className="text-xs text-gray-500 dark:text-gray-500">
+                  없음
+                </span>
+              </div>
             </div>
           )}
 

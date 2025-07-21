@@ -348,12 +348,39 @@ export function TravelPlanDetailPage() {
             const forecastDate = new Date(dayForecast.date)
               .toISOString()
               .split('T')[0]
+            // 오늘 날짜와 비교하여 현재 날씨 또는 예보 API 선택
+            const today = new Date().toISOString().split('T')[0]
+            const isToday = forecastDate === today
+
+            // 현재 날씨와 예보 정보를 모두 가져오기
             const weatherResponse = await fetch(
               `/api/weather/forecast/${dayForecast.city}?country=KR&days=7`,
             )
 
+            // 현재 날씨 정보도 함께 가져오기 (오늘 날짜인 경우)
+            let currentWeatherResponse = null
+            if (isToday) {
+              try {
+                currentWeatherResponse = await fetch(
+                  `/api/weather/current/${dayForecast.city}?country=KR`,
+                )
+              } catch (error) {
+                console.warn('현재 날씨 정보 조회 실패:', error)
+              }
+            }
+
             if (weatherResponse.ok) {
               const forecastData = await weatherResponse.json()
+
+              // 현재 날씨 데이터 처리
+              let currentWeatherData = null
+              if (currentWeatherResponse && currentWeatherResponse.ok) {
+                try {
+                  currentWeatherData = await currentWeatherResponse.json()
+                } catch (error) {
+                  console.warn('현재 날씨 데이터 파싱 실패:', error)
+                }
+              }
 
               // 해당 날짜의 예보 찾기
               const dayForecastData = forecastData.forecast?.find(
@@ -361,21 +388,59 @@ export function TravelPlanDetailPage() {
               )
 
               let apiData
-              if (dayForecastData) {
-                // API 응답 데이터 구조화
+              if (dayForecastData || currentWeatherData) {
+                // 현재 날씨 정보가 있으면 우선 사용, 없으면 예보 정보 사용
+                const weatherInfo =
+                  currentWeatherData?.current || dayForecastData
+                const baseData = dayForecastData || {}
+
+                // API 응답 데이터 구조화 (상세 정보 포함)
                 apiData = {
                   condition:
-                    dayForecastData.description || dayForecast.condition,
+                    weatherInfo?.description ||
+                    baseData.description ||
+                    dayForecast.condition,
                   icon:
                     getWeatherIconFromDescription(
-                      dayForecastData.description,
+                      weatherInfo?.description || baseData.description,
                     ) || dayForecast.icon,
                   temperature: {
-                    min: Math.round(dayForecastData.temperature_min),
-                    max: Math.round(dayForecastData.temperature_max),
+                    min: baseData.temperature_min
+                      ? Math.round(baseData.temperature_min)
+                      : dayForecast.temperature?.min,
+                    max: baseData.temperature_max
+                      ? Math.round(baseData.temperature_max)
+                      : dayForecast.temperature?.max,
+                    current: weatherInfo?.temperature
+                      ? Math.round(weatherInfo.temperature)
+                      : null,
                   },
-                  humidity: dayForecastData.humidity || dayForecast.humidity,
-                  precipitation: dayForecastData.precipitation_chance || 0,
+                  feels_like:
+                    weatherInfo?.feels_like || baseData.feels_like || null,
+                  humidity:
+                    weatherInfo?.humidity ||
+                    baseData.humidity ||
+                    dayForecast.humidity,
+                  precipitation: baseData.precipitation_chance || 0,
+                  precipitation_chance: baseData.precipitation_chance || 0,
+                  wind_speed:
+                    weatherInfo?.wind_speed || baseData.wind_speed || null,
+                  wind_direction:
+                    weatherInfo?.wind_direction ||
+                    baseData.wind_direction ||
+                    null,
+                  pressure: weatherInfo?.pressure || baseData.pressure || null,
+                  visibility:
+                    weatherInfo?.visibility || baseData.visibility || null,
+                  uv_index: weatherInfo?.uv_index || baseData.uv_index || null,
+                  // 오늘 날짜 여부 표시
+                  isToday: isToday,
+                  // 현재 날씨 데이터 사용 여부
+                  isCurrentWeather: isToday && currentWeatherData,
+                  // 날씨 조건별 추천 메시지 생성
+                  recommendation: generateWeatherRecommendation(
+                    weatherInfo || baseData,
+                  ),
                 }
               } else {
                 // 해당 날짜의 예보가 없으면 기본값 사용
@@ -434,6 +499,73 @@ export function TravelPlanDetailPage() {
         isMultiCity: false,
       }
     }
+  }
+
+  // 날씨 조건별 추천 메시지 생성
+  const generateWeatherRecommendation = (weatherData) => {
+    if (!weatherData) return null
+
+    const {
+      temperature_min,
+      temperature_max,
+      precipitation_chance,
+      humidity,
+      wind_speed,
+      uv_index,
+      description,
+    } = weatherData
+
+    const recommendations = []
+
+    // 온도 기반 추천
+    if (temperature_max >= 30) {
+      recommendations.push(
+        '매우 더운 날씨입니다. 충분한 수분 섭취와 그늘에서 휴식을 취하세요.',
+      )
+    } else if (temperature_max >= 25) {
+      recommendations.push('따뜻한 날씨입니다. 가벼운 옷차림을 추천합니다.')
+    } else if (temperature_min <= 5) {
+      recommendations.push('추운 날씨입니다. 따뜻한 옷과 겉옷을 준비하세요.')
+    } else if (temperature_min <= 10) {
+      recommendations.push('쌀쌀한 날씨입니다. 가벼운 겉옷을 준비하세요.')
+    }
+
+    // 강수 확률 기반 추천
+    if (precipitation_chance >= 70) {
+      recommendations.push('비 올 확률이 높습니다. 우산을 꼭 챙기세요.')
+    } else if (precipitation_chance >= 30) {
+      recommendations.push(
+        '비 올 가능성이 있습니다. 우산을 준비하는 것이 좋겠습니다.',
+      )
+    }
+
+    // UV 지수 기반 추천
+    if (uv_index >= 8) {
+      recommendations.push(
+        'UV 지수가 매우 높습니다. 선크림과 모자를 착용하세요.',
+      )
+    } else if (uv_index >= 6) {
+      recommendations.push('UV 지수가 높습니다. 자외선 차단제를 사용하세요.')
+    }
+
+    // 풍속 기반 추천
+    if (wind_speed >= 20) {
+      recommendations.push('바람이 강합니다. 외출 시 주의하세요.')
+    }
+
+    // 습도 기반 추천
+    if (humidity >= 80) {
+      recommendations.push('습도가 높습니다. 통풍이 잘 되는 옷을 입으세요.')
+    } else if (humidity <= 30) {
+      recommendations.push('습도가 낮습니다. 수분 보충과 보습에 신경 쓰세요.')
+    }
+
+    // 날씨 조건별 추천
+    if (description && description.includes('눈')) {
+      recommendations.push('눈이 예상됩니다. 미끄럼 방지 신발을 신으세요.')
+    }
+
+    return recommendations.length > 0 ? recommendations[0] : null
   }
 
   // 날씨 설명으로부터 아이콘 가져오기
@@ -1524,23 +1656,62 @@ export function TravelPlanDetailPage() {
 
                           weatherForPlaces[place.description] = {
                             condition: adjustedCondition,
-                            temperature: Math.round(
-                              ((dayWeather.temperature?.min || 15) +
-                                (dayWeather.temperature?.max || 25)) /
-                                2 +
-                                variation.tempOffset,
-                            ),
-                            humidity: dayWeather.humidity,
-                            precipitation: dayWeather.precipitation,
+                            temperature: {
+                              min: Math.round(
+                                (dayWeather.temperature?.min || 15) +
+                                  variation.tempOffset -
+                                  2,
+                              ),
+                              max: Math.round(
+                                (dayWeather.temperature?.max || 25) +
+                                  variation.tempOffset +
+                                  2,
+                              ),
+                              current: dayWeather.isCurrentWeather
+                                ? Math.round(
+                                    (dayWeather.temperature?.current ||
+                                      dayWeather.temperature?.max ||
+                                      20) + variation.tempOffset,
+                                  )
+                                : null,
+                            },
+                            feels_like: dayWeather.feels_like
+                              ? Math.round(
+                                  dayWeather.feels_like + variation.tempOffset,
+                                )
+                              : null,
+                            humidity: dayWeather.humidity || 60,
+                            precipitation:
+                              dayWeather.precipitation ||
+                              dayWeather.precipitation_chance ||
+                              0,
+                            wind_speed: dayWeather.wind_speed || null,
+                            uv_index: dayWeather.uv_index || null,
+                            isToday: dayWeather.isToday || false,
+                            isCurrentWeather:
+                              dayWeather.isCurrentWeather || false,
+                            isFromAPI: dayWeather.isFromAPI || false,
+                            recommendation: dayWeather.recommendation || null,
                           }
                         })
                       } else {
                         places.forEach((place) => {
                           weatherForPlaces[place.description] = {
                             condition: '맑음',
-                            temperature: 20,
+                            temperature: {
+                              min: 18,
+                              max: 24,
+                              current: null,
+                            },
+                            feels_like: null,
                             humidity: 60,
                             precipitation: 0,
+                            wind_speed: null,
+                            uv_index: null,
+                            isToday: false,
+                            isCurrentWeather: false,
+                            isFromAPI: false,
+                            recommendation: null,
                           }
                         })
                       }
@@ -1773,24 +1944,42 @@ export function TravelPlanDetailPage() {
                               </div>
                             </div>
                             {dayWeather && (
-                              <div className="flex items-center gap-2 text-sm">
-                                <span className="text-lg">
-                                  {dayWeather.condition === '맑음'
-                                    ? '☀️'
-                                    : dayWeather.condition === '구름조금'
-                                      ? '🌤️'
-                                      : dayWeather.condition === '구름많음'
-                                        ? '☁️'
-                                        : dayWeather.condition === '흐림'
+                              <div className="flex items-center gap-3 text-sm">
+                                <div className="flex items-center gap-1">
+                                  <span className="text-lg">
+                                    {dayWeather.condition === '맑음'
+                                      ? '☀️'
+                                      : dayWeather.condition === '구름조금'
+                                        ? '🌤️'
+                                        : dayWeather.condition === '구름많음'
                                           ? '☁️'
-                                          : dayWeather.condition === '비'
-                                            ? '🌧️'
-                                            : '☀️'}
-                                </span>
-                                <span className="text-gray-600 dark:text-gray-300">
-                                  {dayWeather.temperature?.min || '--'}°~
-                                  {dayWeather.temperature?.max || '--'}°
-                                </span>
+                                          : dayWeather.condition === '흐림'
+                                            ? '☁️'
+                                            : dayWeather.condition === '비'
+                                              ? '🌧️'
+                                              : '☀️'}
+                                  </span>
+                                  <span className="text-gray-600 dark:text-gray-300">
+                                    {dayWeather.condition}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {dayWeather.isCurrentWeather &&
+                                  dayWeather.temperature?.current ? (
+                                    <span className="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                                      현재 {dayWeather.temperature.current}°
+                                    </span>
+                                  ) : null}
+                                  <span className="text-gray-600 dark:text-gray-300">
+                                    {dayWeather.temperature?.min || '--'}°~
+                                    {dayWeather.temperature?.max || '--'}°
+                                  </span>
+                                  {dayWeather.precipitation > 0 && (
+                                    <span className="text-blue-500 dark:text-blue-400">
+                                      💧{dayWeather.precipitation}%
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             )}
                           </div>
@@ -1855,15 +2044,140 @@ export function TravelPlanDetailPage() {
                                 날씨 상세
                               </h5>
                               {dayWeather ? (
-                                <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
-                                  <div>🌤️ {dayWeather.condition}</div>
-                                  <div>
-                                    🌡️ {dayWeather.temperature?.min || '--'}°~
-                                    {dayWeather.temperature?.max || '--'}°
+                                <div className="space-y-2">
+                                  {/* 기본 날씨 정보 */}
+                                  <div className="rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 p-3 dark:from-blue-900/20 dark:to-cyan-900/20">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-xl">
+                                          {dayWeather.condition === '맑음'
+                                            ? '☀️'
+                                            : dayWeather.condition ===
+                                                '구름조금'
+                                              ? '🌤️'
+                                              : dayWeather.condition ===
+                                                  '구름많음'
+                                                ? '☁️'
+                                                : dayWeather.condition ===
+                                                    '흐림'
+                                                  ? '☁️'
+                                                  : dayWeather.condition ===
+                                                      '비'
+                                                    ? '🌧️'
+                                                    : '☀️'}
+                                        </span>
+                                        <div>
+                                          <div className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                            {dayWeather.condition}
+                                          </div>
+                                          {dayWeather.isToday && (
+                                            <div className="text-xs text-green-600 dark:text-green-400">
+                                              📅 오늘
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <div className="text-right">
+                                        {dayWeather.isCurrentWeather &&
+                                        dayWeather.temperature?.current ? (
+                                          <div className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                                            현재{' '}
+                                            {dayWeather.temperature.current}°
+                                          </div>
+                                        ) : null}
+                                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                          {dayWeather.temperature?.min || '--'}
+                                          °~
+                                          {dayWeather.temperature?.max || '--'}°
+                                        </div>
+                                        {dayWeather.feels_like && (
+                                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                                            체감 {dayWeather.feels_like}°
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
                                   </div>
-                                  {dayWeather.precipitation > 0 && (
-                                    <div>
-                                      💧 강수확률: {dayWeather.precipitation}%
+
+                                  {/* 상세 날씨 정보 그리드 */}
+                                  <div className="grid grid-cols-2 gap-2 text-xs">
+                                    {/* 강수 확률 */}
+                                    {(dayWeather.precipitation > 0 ||
+                                      dayWeather.precipitation_chance > 0) && (
+                                      <div className="flex items-center justify-between rounded bg-white/70 px-2 py-1 dark:bg-gray-700/50">
+                                        <span className="text-blue-600 dark:text-blue-400">
+                                          💧 강수
+                                        </span>
+                                        <span className="font-medium">
+                                          {dayWeather.precipitation_chance ||
+                                            dayWeather.precipitation}
+                                          %
+                                        </span>
+                                      </div>
+                                    )}
+
+                                    {/* 습도 */}
+                                    {dayWeather.humidity && (
+                                      <div className="flex items-center justify-between rounded bg-white/70 px-2 py-1 dark:bg-gray-700/50">
+                                        <span className="text-cyan-600 dark:text-cyan-400">
+                                          💨 습도
+                                        </span>
+                                        <span className="font-medium">
+                                          {dayWeather.humidity}%
+                                        </span>
+                                      </div>
+                                    )}
+
+                                    {/* 풍속 */}
+                                    {dayWeather.wind_speed && (
+                                      <div className="flex items-center justify-between rounded bg-white/70 px-2 py-1 dark:bg-gray-700/50">
+                                        <span className="text-gray-600 dark:text-gray-400">
+                                          🌬️ 풍속
+                                        </span>
+                                        <span className="font-medium">
+                                          {dayWeather.wind_speed}km/h
+                                        </span>
+                                      </div>
+                                    )}
+
+                                    {/* UV 지수 */}
+                                    {dayWeather.uv_index && (
+                                      <div className="flex items-center justify-between rounded bg-white/70 px-2 py-1 dark:bg-gray-700/50">
+                                        <span className="text-orange-600 dark:text-orange-400">
+                                          ☀️ UV
+                                        </span>
+                                        <span className="font-medium">
+                                          {dayWeather.uv_index}
+                                          {dayWeather.uv_index <= 2 &&
+                                            ' (낮음)'}
+                                          {dayWeather.uv_index > 2 &&
+                                            dayWeather.uv_index <= 5 &&
+                                            ' (보통)'}
+                                          {dayWeather.uv_index > 5 &&
+                                            dayWeather.uv_index <= 7 &&
+                                            ' (높음)'}
+                                          {dayWeather.uv_index > 7 && ' (위험)'}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* 날씨 추천 */}
+                                  {dayWeather.recommendation && (
+                                    <div className="rounded bg-yellow-50 p-2 text-xs dark:bg-yellow-900/20">
+                                      <span className="text-yellow-700 dark:text-yellow-300">
+                                        💡 {dayWeather.recommendation}
+                                      </span>
+                                    </div>
+                                  )}
+
+                                  {/* API 데이터 표시 */}
+                                  {dayWeather.isFromAPI && (
+                                    <div className="text-xs text-green-500 dark:text-green-400">
+                                      📡{' '}
+                                      {dayWeather.isCached
+                                        ? '캐시된 데이터'
+                                        : '실시간 데이터'}
                                     </div>
                                   )}
                                 </div>
@@ -2204,7 +2518,8 @@ export function TravelPlanDetailPage() {
                             key={index}
                             className="rounded-lg border border-gray-200 bg-gradient-to-br from-blue-50 to-cyan-50 p-4 dark:border-gray-600 dark:from-blue-900/20 dark:to-cyan-900/20"
                           >
-                            <div className="flex items-center justify-between">
+                            {/* 기본 날씨 정보 */}
+                            <div className="mb-3 flex items-center justify-between">
                               <div className="flex items-center space-x-3">
                                 <span className="text-2xl">
                                   {getWeatherIcon(forecast.condition)}
@@ -2234,16 +2549,134 @@ export function TravelPlanDetailPage() {
                               </div>
                               <div className="text-right">
                                 <div className="text-lg font-bold text-gray-800 dark:text-gray-100">
-                                  {forecast.temperature?.min || '--'}°~
-                                  {forecast.temperature?.max || '--'}°
+                                  {forecast.isCurrentWeather &&
+                                  forecast.temperature?.current ? (
+                                    <>
+                                      <span className="text-blue-600 dark:text-blue-400">
+                                        현재 {forecast.temperature.current}°
+                                      </span>
+                                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                                        {forecast.temperature?.min || '--'}°~
+                                        {forecast.temperature?.max || '--'}°
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <>
+                                      {forecast.temperature?.min || '--'}°~
+                                      {forecast.temperature?.max || '--'}°
+                                    </>
+                                  )}
                                 </div>
-                                {forecast.precipitation > 0 && (
-                                  <div className="text-sm text-blue-500 dark:text-blue-400">
-                                    💧{forecast.precipitation}%
+                                {forecast.feels_like && (
+                                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                                    체감 {forecast.feels_like}°
+                                  </div>
+                                )}
+                                {forecast.isToday && (
+                                  <div className="text-xs text-green-600 dark:text-green-400">
+                                    📅 오늘
                                   </div>
                                 )}
                               </div>
                             </div>
+
+                            {/* 상세 날씨 정보 그리드 */}
+                            <div className="grid grid-cols-2 gap-3 text-xs">
+                              {/* 강수 확률 */}
+                              {(forecast.precipitation > 0 ||
+                                forecast.precipitation_chance > 0) && (
+                                <div className="flex items-center justify-between rounded bg-white/50 px-2 py-1 dark:bg-gray-700/50">
+                                  <span className="text-blue-600 dark:text-blue-400">
+                                    💧 강수확률
+                                  </span>
+                                  <span className="font-medium">
+                                    {forecast.precipitation_chance ||
+                                      forecast.precipitation}
+                                    %
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* 습도 */}
+                              {forecast.humidity && (
+                                <div className="flex items-center justify-between rounded bg-white/50 px-2 py-1 dark:bg-gray-700/50">
+                                  <span className="text-cyan-600 dark:text-cyan-400">
+                                    💨 습도
+                                  </span>
+                                  <span className="font-medium">
+                                    {forecast.humidity}%
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* 풍속 */}
+                              {forecast.wind_speed && (
+                                <div className="flex items-center justify-between rounded bg-white/50 px-2 py-1 dark:bg-gray-700/50">
+                                  <span className="text-gray-600 dark:text-gray-400">
+                                    🌬️ 풍속
+                                  </span>
+                                  <span className="font-medium">
+                                    {forecast.wind_speed}km/h
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* UV 지수 */}
+                              {forecast.uv_index && (
+                                <div className="flex items-center justify-between rounded bg-white/50 px-2 py-1 dark:bg-gray-700/50">
+                                  <span className="text-orange-600 dark:text-orange-400">
+                                    ☀️ UV지수
+                                  </span>
+                                  <span className="font-medium">
+                                    {forecast.uv_index}
+                                    {forecast.uv_index <= 2 && ' (낮음)'}
+                                    {forecast.uv_index > 2 &&
+                                      forecast.uv_index <= 5 &&
+                                      ' (보통)'}
+                                    {forecast.uv_index > 5 &&
+                                      forecast.uv_index <= 7 &&
+                                      ' (높음)'}
+                                    {forecast.uv_index > 7 &&
+                                      forecast.uv_index <= 10 &&
+                                      ' (매우높음)'}
+                                    {forecast.uv_index > 10 && ' (위험)'}
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* 기압 */}
+                              {forecast.pressure && (
+                                <div className="flex items-center justify-between rounded bg-white/50 px-2 py-1 dark:bg-gray-700/50">
+                                  <span className="text-purple-600 dark:text-purple-400">
+                                    📊 기압
+                                  </span>
+                                  <span className="font-medium">
+                                    {forecast.pressure}hPa
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* 가시거리 */}
+                              {forecast.visibility && (
+                                <div className="flex items-center justify-between rounded bg-white/50 px-2 py-1 dark:bg-gray-700/50">
+                                  <span className="text-green-600 dark:text-green-400">
+                                    👁️ 가시거리
+                                  </span>
+                                  <span className="font-medium">
+                                    {forecast.visibility}km
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* 날씨 조건별 추천 */}
+                            {forecast.recommendation && (
+                              <div className="mt-3 rounded border border-yellow-200 bg-yellow-50 p-2 text-xs dark:border-yellow-800 dark:bg-yellow-900/20">
+                                <span className="text-yellow-700 dark:text-yellow-300">
+                                  💡 {forecast.recommendation}
+                                </span>
+                              </div>
+                            )}
                           </Card>
                         )
                       })}

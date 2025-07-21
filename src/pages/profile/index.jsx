@@ -7,9 +7,7 @@ import {
   useGetMyDestinationSavesQuery,
   useGetMyDestinationLikesQuery,
 } from '@/store/api/destinationLikesSavesApi'
-import {
-  useGetMyTravelCourseSavesQuery,
-} from '@/store/api/travelCourseSavesApi'
+import { useGetMyTravelCourseSavesQuery } from '@/store/api/travelCourseSavesApi'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -328,7 +326,6 @@ export default function ProfilePage() {
                 <div className="text-muted-foreground text-sm">방문한 도시</div>
               </CardContent>
             </Card>
-
           </div>
 
           {/* 최근 여행 플랜 */}
@@ -437,7 +434,7 @@ export default function ProfilePage() {
                   <Bookmark className="text-sky-blue h-5 w-5" />
                   저장한 여행지 및 코스
                 </CardTitle>
-                {(savedDestinations.length + savedTravelCourses.length) > 4 && (
+                {savedDestinations.length + savedTravelCourses.length > 4 && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -454,7 +451,8 @@ export default function ProfilePage() {
                 <div className="text-muted-foreground py-8 text-center">
                   <p>로딩 중...</p>
                 </div>
-              ) : (savedDestinations.length > 0 || savedTravelCourses.length > 0) ? (
+              ) : savedDestinations.length > 0 ||
+                savedTravelCourses.length > 0 ? (
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                   {/* 저장된 여행지 표시 */}
                   {savedDestinations.slice(0, 2).map((save) => (
@@ -465,22 +463,19 @@ export default function ProfilePage() {
                       onRefresh={refetchSavedDestinations}
                     />
                   ))}
-                  
+
                   {/* 저장된 여행 코스 표시 */}
                   {savedTravelCourses.slice(0, 2).map((save) => (
-                    <div
-                      key={`course-${save.id}`}
-                      className="weather-card"
-                    >
+                    <div key={`course-${save.id}`} className="weather-card">
                       <div className="p-4">
-                        <div className="flex items-start justify-between mb-2">
-                          <h4 className="text-foreground font-semibold text-sm line-clamp-2">
+                        <div className="mb-2 flex items-start justify-between">
+                          <h4 className="text-foreground line-clamp-2 text-sm font-semibold">
                             {save.travel_course?.course_name || '여행 코스'}
                           </h4>
-                          <Bookmark className="text-sunshine-yellow h-4 w-4 flex-shrink-0 ml-2" />
+                          <Bookmark className="text-sunshine-yellow ml-2 h-4 w-4 flex-shrink-0" />
                         </div>
                         {save.travel_course?.address && (
-                          <p className="text-muted-foreground text-xs mb-2 line-clamp-1">
+                          <p className="text-muted-foreground mb-2 line-clamp-1 text-xs">
                             📍 {save.travel_course.address}
                           </p>
                         )}
@@ -489,7 +484,7 @@ export default function ProfilePage() {
                             {save.travel_course.course_theme}
                           </Badge>
                         )}
-                        <p className="text-muted-foreground text-xs mt-2">
+                        <p className="text-muted-foreground mt-2 text-xs">
                           {formatDate(save.created_at)} 저장
                         </p>
                       </div>
@@ -512,8 +507,6 @@ export default function ProfilePage() {
               )}
             </CardContent>
           </Card>
-
-
 
           {/* 계정 관리 */}
           {/* (추가로 비밀번호 변경 관련 버튼/링크/섹션도 모두 삭제) */}

@@ -2,10 +2,10 @@ import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGetTravelCoursesQuery } from '@/store/api/travelCoursesApi'
 import { useToggleTravelCourseLikeMutation } from '@/store/api/travelCourseLikesApi'
-import { 
+import {
   useAddDestinationSaveMutation,
   useRemoveDestinationSaveMutation,
-  useSearchDestinationByNameQuery
+  useSearchDestinationByNameQuery,
 } from '@/store/api/destinationLikesSavesApi'
 import {
   useCreateTravelCourseSaveMutation,
@@ -124,7 +124,7 @@ const getRegionCodeParam = (code) => {
 function RecommendCourseItem({ course, onLikeChange }) {
   const navigate = useNavigate()
   const { user } = useAuth()
-  
+
   // 백엔드에서 받아온 저장 정보 사용 (API에서 받은 is_saved 값으로 초기화)
   const [isBookmarked, setIsBookmarked] = useState(course.is_saved || false)
 
@@ -139,11 +139,11 @@ function RecommendCourseItem({ course, onLikeChange }) {
 
   // 좋아요 상태 변경을 위한 API
   const [toggleTravelCourseLike] = useToggleTravelCourseLikeMutation()
-  
+
   // 여행지 저장을 위한 API (destinations용 - 기존 호환성)
   const [addDestinationSave] = useAddDestinationSaveMutation()
   const [removeDestinationSave] = useRemoveDestinationSaveMutation()
-  
+
   // 여행 코스 저장을 위한 API (새로운 기능)
   const [createTravelCourseSave] = useCreateTravelCourseSaveMutation()
   const [deleteTravelCourseSave] = useDeleteTravelCourseSaveMutation()
@@ -220,32 +220,42 @@ function RecommendCourseItem({ course, onLikeChange }) {
           console.log('🗑️ 여행 코스 저장 취소 시도:', contentId)
           await deleteTravelCourseSave(contentId).unwrap()
           setIsBookmarked(false)
-          console.log('✅ 여행 코스 저장 취소 성공:', course.course_name || course.title)
+          console.log(
+            '✅ 여행 코스 저장 취소 성공:',
+            course.course_name || course.title,
+          )
         } else {
           // 여행 코스 저장 추가
           console.log('💾 여행 코스 저장 추가 시도:', contentId)
-          await createTravelCourseSave({ 
+          await createTravelCourseSave({
             content_id: contentId,
-            note: null // 메모는 선택사항
+            note: null, // 메모는 선택사항
           }).unwrap()
           setIsBookmarked(true)
-          console.log('✅ 여행 코스 저장 성공:', course.course_name || course.title)
+          console.log(
+            '✅ 여행 코스 저장 성공:',
+            course.course_name || course.title,
+          )
         }
-        
+
         // 상위 컴포넌트에 변경 사항 알림 (데이터 새로고침 요청)
         if (onLikeChange) {
           onLikeChange()
         }
       } catch (error) {
         console.error('❌ 저장 처리 실패:', error)
-        const errorMessage = error.message || error.data?.detail || error.error || '알 수 없는 오류가 발생했습니다.'
+        const errorMessage =
+          error.message ||
+          error.data?.detail ||
+          error.error ||
+          '알 수 없는 오류가 발생했습니다.'
         console.log('🔍 에러 상세:', {
           message: error.message,
           data: error.data,
           status: error.status,
-          error: error.error
+          error: error.error,
         })
-        
+
         if (errorMessage.includes('Already saved')) {
           alert('이미 저장된 여행 코스입니다.')
         } else if (errorMessage.includes('not found')) {
@@ -255,7 +265,14 @@ function RecommendCourseItem({ course, onLikeChange }) {
         }
       }
     },
-    [isBookmarked, createTravelCourseSave, deleteTravelCourseSave, course, user, navigate]
+    [
+      isBookmarked,
+      createTravelCourseSave,
+      deleteTravelCourseSave,
+      course,
+      user,
+      navigate,
+    ],
   )
 
   const handleShare = (e) => {

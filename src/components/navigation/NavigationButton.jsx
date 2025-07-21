@@ -59,13 +59,16 @@ export function NavigationButton({
   // 지도 서비스별 URL 생성 함수들
   const getKakaoMapUrl = (_transportType = 'car') => {
     const encodedName = encodeURIComponent(
-      name || destination.description || 'Unknown',
+      name || destination.description || address || 'Unknown',
     )
     if (lat && lng) {
-      // 카카오맵에서는 자동으로 현재 위치에서 출발하는 길찾기 제공
+      // 카카오맵 길찾기 URL: 출발지 없이 목적지만 설정하면 현재 위치에서 자동 시작
       return `https://map.kakao.com/link/to/${encodedName},${lat},${lng}`
+    } else if (address) {
+      // 주소를 이용한 카카오맵 길찾기
+      return `https://map.kakao.com/link/to/${encodedName}`
     } else if (destination.place_id) {
-      // place_id를 이용한 카카오맵 검색 (현재 위치에서 길찾기)
+      // place_id를 이용한 카카오맵 검색
       return `https://map.kakao.com/link/search/${encodedName}`
     }
     return null
@@ -73,7 +76,7 @@ export function NavigationButton({
 
   const getNaverMapUrl = (_transportType = 'car') => {
     const encodedName = encodeURIComponent(
-      name || destination.description || 'Unknown',
+      name || destination.description || address || 'Unknown',
     )
     const transportMap = {
       car: 'car',
@@ -82,10 +85,13 @@ export function NavigationButton({
     }
     const naverTransport = transportMap[_transportType] || 'car'
     if (lat && lng) {
-      // 네이버맵에서는 자동으로 현재 위치에서 출발하는 길찾기 제공
-      return `https://map.naver.com/v5/${naverTransport}/-/-/${lat},${lng},name=${encodedName}`
+      // 네이버맵 길찾기 URL: 현재 위치에서 목적지까지
+      return `https://map.naver.com/v5/directions/-,-/-,-/${lat},${lng}?c=14,0,0,0,dh&mode=${naverTransport}`
+    } else if (address) {
+      // 주소를 이용한 네이버맵 길찾기
+      return `https://map.naver.com/v5/directions/-,-/-,-/?query=${encodedName}&c=14,0,0,0,dh&mode=${naverTransport}`
     } else if (destination.place_id) {
-      // place_id를 이용한 네이버맵 검색 (현재 위치에서 길찾기)
+      // place_id를 이용한 네이버맵 검색
       return `https://map.naver.com/v5/search/${encodedName}`
     }
     return null
@@ -100,10 +106,17 @@ export function NavigationButton({
     const googleTransport = transportMap[transportType] || 'driving'
 
     if (lat && lng) {
+      // 좌표가 있는 경우: 정확한 위치로 길찾기
       return `https://www.google.com/maps/dir/?api=1&origin=current+location&destination=${lat},${lng}&travelmode=${googleTransport}`
     } else if (destination.place_id) {
+      // Google Place ID가 있는 경우: Place ID로 길찾기 (가장 정확함)
       return `https://www.google.com/maps/dir/?api=1&origin=current+location&destination_place_id=${destination.place_id}&travelmode=${googleTransport}`
+    } else if (address) {
+      // 주소가 있는 경우: 주소로 길찾기
+      const encodedAddress = encodeURIComponent(address)
+      return `https://www.google.com/maps/dir/?api=1&origin=current+location&destination=${encodedAddress}&travelmode=${googleTransport}`
     } else if (name || destination.description) {
+      // 이름만 있는 경우: 장소명으로 검색하여 길찾기
       const encodedName = encodeURIComponent(name || destination.description)
       return `https://www.google.com/maps/dir/?api=1&origin=current+location&destination=${encodedName}&travelmode=${googleTransport}`
     }
@@ -113,9 +126,16 @@ export function NavigationButton({
   // 링크 열기 함수
   const openNavigation = (url, serviceName) => {
     if (!url) {
-      console.error(`${serviceName} URL 생성 실패`)
+      console.error(`${serviceName} URL 생성 실패`, {
+        destination,
+        lat,
+        lng,
+        name,
+        address,
+      })
       return
     }
+    console.log(`${serviceName} 길찾기 URL:`, url)
     try {
       window.open(url, '_blank', 'noopener,noreferrer')
     } catch (error) {
