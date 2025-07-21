@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContextRTK'
 import { useGetUserPlansQuery } from '@/store/api/travelPlansApi'
 import { useGetTravelCourseLikesQuery } from '@/store/api/travelCourseLikesApi'
+import { useGetUserStatsQuery } from '@/store/api/authApi'
 import {
   useGetMyDestinationSavesQuery,
   useGetMyDestinationLikesQuery,
@@ -52,6 +53,15 @@ export default function ProfilePage() {
     error: likesError,
   } = useGetTravelCourseLikesQuery(authUser?.user_id, {
     skip: !authUser?.user_id,
+  })
+
+  // 사용자 통계 정보 가져오기
+  const {
+    data: userStats = {},
+    isLoading: statsLoading,
+    error: statsError,
+  } = useGetUserStatsQuery(undefined, {
+    skip: !isAuthenticated,
   })
 
   // 저장한 여행지 데이터 가져오기
@@ -135,6 +145,7 @@ export default function ProfilePage() {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
+        timeZone: 'Asia/Seoul',
       })
     } catch (error) {
       console.warn('날짜 형식 오류:', dateString)
@@ -148,7 +159,7 @@ export default function ProfilePage() {
     // 필요시 추가 필드
   }))
 
-  if (loading || authLoading || plansLoading || likesLoading) {
+  if (loading || authLoading || plansLoading || likesLoading || statsLoading) {
     return (
       <div className="bg-background min-h-screen">
         <div className="container mx-auto px-4 py-8">
@@ -289,7 +300,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div className="text-foreground mb-1 text-2xl font-bold">
-                  {userPlans.length}
+                  {userStats.travel_plans_count || userPlans.length}
                 </div>
                 <div className="text-muted-foreground text-sm">
                   생성한 여행 플랜
@@ -305,7 +316,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div className="text-foreground mb-1 text-2xl font-bold">
-                  {likedCourses.length}
+                  {userStats.liked_courses_count || likedCourses.length}
                 </div>
                 <div className="text-muted-foreground text-sm">
                   좋아요한 여행지 수
@@ -321,7 +332,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div className="text-foreground mb-1 text-2xl font-bold">
-                  {favoritePlaces.length}
+                  {userStats.visited_regions_count || 0}
                 </div>
                 <div className="text-muted-foreground text-sm">방문한 도시</div>
               </CardContent>

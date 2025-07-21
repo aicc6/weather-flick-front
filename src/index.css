@@ -588,6 +588,78 @@
     color: #991b1b;
   }
 
+  /* 로그인 페이지 특화 스타일 */
+  .login-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%);
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 28rem;
+    margin: auto;
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border);
+  }
+
+  .login-form-field {
+    min-height: 44px;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .login-form-field:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.15);
+  }
+
+  .login-button {
+    min-height: 44px;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+  }
+
+  .login-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  }
+
+  .login-button:focus {
+    outline: none;
+    ring: 2px solid #3b82f6;
+    ring-offset: 2px;
+  }
+
+  /* 모바일 최적화 */
+  @media (max-width: 640px) {
+    .login-container {
+      padding: 0.75rem;
+      align-items: flex-start;
+      padding-top: 2rem;
+    }
+    
+    .login-card {
+      margin-top: 1rem;
+      margin-bottom: 2rem;
+    }
+  }
+
+  /* 터치 타겟 최적화 */
+  @media (hover: none) and (pointer: coarse) {
+    .login-form-field,
+    .login-button,
+    .login-link {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
   /* Dark mode alerts */
   .dark .alert-success {
     background-color: color-mix(in srgb, var(--soft-mint) 20%, transparent 80%);

@@ -1184,16 +1184,19 @@ export function TravelPlanDetailPage() {
 
           {/* Quick Actions */}
           <div className="flex items-center gap-3">
-            <Button
-              asChild
-              onClick={handleEditClick}
-              className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg hover:from-indigo-600 hover:to-purple-700"
-            >
-              <Link to={`/planner?planId=${planId}`}>
-                <Edit className="mr-2 h-4 w-4" />
-                수정하기
-              </Link>
-            </Button>
+            {/* AI 추천 플랜(custom)이 아닌 경우에만 수정하기 버튼 표시 */}
+            {plan?.plan_type !== 'custom' && (
+              <Button
+                asChild
+                onClick={handleEditClick}
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg hover:from-indigo-600 hover:to-purple-700"
+              >
+                <Link to={`/planner?planId=${planId}`}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  수정하기
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
 

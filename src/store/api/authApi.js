@@ -15,16 +15,22 @@ export const authApi = createApi({
       }),
     }),
 
-    // 로그인 (JSON 형식)
+    // 로그인 (Form 데이터 형식)
     login: builder.mutation({
-      query: (credentials) => ({
-        url: 'auth/login',
-        method: 'POST',
-        body: {
-          email: credentials.email,
-          password: credentials.password,
-        },
-      }),
+      query: (credentials) => {
+        const formData = new URLSearchParams()
+        formData.append('username', credentials.email)
+        formData.append('password', credentials.password)
+        
+        return {
+          url: 'auth/login',
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
+      },
       invalidatesTags: ['User'],
     }),
 
@@ -42,6 +48,13 @@ export const authApi = createApi({
       query: () => 'auth/me',
       providesTags: ['User'],
       keepUnusedDataFor: 60, // 1분간 캐싱
+    }),
+
+    // 사용자 통계 정보 조회
+    getUserStats: builder.query({
+      query: () => 'auth/me/stats',
+      providesTags: ['User'],
+      keepUnusedDataFor: 30, // 30초간 캐싱
     }),
 
     // 사용자 프로필 업데이트
@@ -122,6 +135,7 @@ export const {
   useLoginMutation,
   useLogoutMutation,
   useGetMeQuery,
+  useGetUserStatsQuery,
   useUpdateProfileMutation,
   useChangePasswordMutation,
   useGetGoogleAuthUrlQuery,

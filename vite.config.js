@@ -239,10 +239,43 @@ export default defineConfig(({ mode }) => {
           }
         },
       },
+      // 프론트엔드 보안 헤더 플러그인
+      {
+        name: 'security-headers',
+        configureServer(server) {
+          server.middlewares.use((req, res, next) => {
+            // 보안 헤더 적용
+            res.setHeader('X-Content-Type-Options', 'nosniff');
+            res.setHeader('X-Frame-Options', 'DENY');
+            res.setHeader('X-XSS-Protection', '1; mode=block');
+            res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+            res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+            res.setHeader(
+              'Content-Security-Policy',
+              [
+                "default-src 'self'",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://www.googletagmanager.com",
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://maps.googleapis.com",
+                "font-src 'self' https://fonts.gstatic.com",
+                "img-src 'self' data: blob: https: http: https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com",
+                "connect-src 'self' http://localhost:8000 https://api.openweathermap.org https://pixabay.com https://maps.googleapis.com https://*.googleapis.com",
+                "frame-src 'self' https://maps.google.com https://www.google.com",
+                "object-src 'none'",
+                "base-uri 'self'",
+                "form-action 'self'",
+                "upgrade-insecure-requests"
+              ].join('; ')
+            );
+            next();
+          });
+        },
+      },
     ],
     server: {
       port: 5173,
       allowedHosts: true,
+      // 보안 헤더 미들웨어 추가
+      middlewareMode: false,
       proxy: {
         '/api': {
           target: 'http://localhost:8000',
@@ -260,57 +293,121 @@ export default defineConfig(({ mode }) => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            // React 관련 라이브러리를 별도 청크로 분리
-            'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-
-            // UI 라이브러리를 별도 청크로 분리
-            'ui-vendor': [
-              '@radix-ui/react-dropdown-menu',
-              '@radix-ui/react-popover',
-              '@radix-ui/react-slot',
-              'lucide-react',
-              'class-variance-authority',
-              'clsx',
-              'tailwind-merge',
-            ],
-
-            // 애니메이션 라이브러리를 별도 청크로 분리
-            'animation-vendor': ['framer-motion'],
-
-            // 유틸리티 라이브러리를 별도 청크로 분리
-            'utils-vendor': ['date-fns', 'zod', 'sonner'],
-
-            // 페이지별 청크 분리
-            planner: ['./src/pages/planner/index.jsx'],
-            recommend: [
-              './src/pages/recommend/index.jsx',
-              './src/pages/recommend/detail.jsx',
-              './src/pages/recommend/RecommendCourseCard.jsx',
-            ],
-            'customized-schedule': [
-              './src/pages/customized-schedule/customized-schedule.jsx',
-              './src/pages/customized-schedule/region.jsx',
-              './src/pages/customized-schedule/period.jsx',
-              './src/pages/customized-schedule/who.jsx',
-              './src/pages/customized-schedule/style.jsx',
-              './src/pages/customized-schedule/schedule.jsx',
-              './src/pages/customized-schedule/result.jsx',
-            ],
-            profile: [
-              './src/pages/profile/index.jsx',
-              './src/pages/profile/edit.jsx',
-              './src/pages/profile/change-password.jsx',
-            ],
+          manualChunks: (id) => {
+            // Node modules 분리
+            if (id.includes('node_modules')) {
+              // React 관련 라이브러리
+              if (id.includes('react') && !id.includes('react-router') && !id.includes('react-redux')) {
+                return 'react-vendor';
+              }
+              
+              // React Router (별도 분리)
+              if (id.includes('react-router')) {
+                return 'react-router-vendor';
+              }
+              
+              // UI 컴포넌트 라이브러리 (세분화)
+              if (id.includes('@radix-ui')) {
+                return 'radix-vendor';
+              }
+              
+              if (id.includes('lucide-react')) {
+                return 'icons-vendor';
+              }
+              
+              if (id.includes('class-variance-authority') || id.includes('clsx') || 
+                  id.includes('tailwind-merge')) {
+                return 'ui-utils-vendor';
+              }
+              
+              // 상태 관리
+              if (id.includes('@reduxjs') || id.includes('react-redux') || id.includes('redux')) {
+                return 'state-vendor';
+              }
+              
+              // Firebase (동적 로딩 대상 - 청크 분리)
+              if (id.includes('firebase')) {
+                if (id.includes('firebase/app') || id.includes('firebase/auth')) {
+                  return 'firebase-core';
+                }
+                if (id.includes('firebase/messaging')) {
+                  return 'firebase-messaging';
+                }
+                return 'firebase-vendor';
+              }
+              
+              // 애니메이션 (동적 로딩 대상)
+              if (id.includes('framer-motion')) {
+                return 'animation-vendor';
+              }
+              
+              // 지도 관련 (동적 로딩 대상)
+              if (id.includes('@googlemaps') || id.includes('google-maps')) {
+                return 'maps-vendor';
+              }
+              
+              // 드래그앤드롭 (동적 로딩 대상)
+              if (id.includes('@dnd-kit')) {
+                return 'dnd-vendor';
+              }
+              
+              // 캐러셀 (동적 로딩 대상)
+              if (id.includes('embla-carousel')) {
+                return 'carousel-vendor';
+              }
+              
+              // 유틸리티 (자주 사용되는 것만)
+              if (id.includes('date-fns') || id.includes('zod')) {
+                return 'utils-vendor';
+              }
+              
+              // 폼 관련
+              if (id.includes('react-hook-form') || id.includes('@hookform')) {
+                return 'form-vendor';
+              }
+              
+              // 알림 및 기타
+              if (id.includes('sonner') || id.includes('react-hot-toast')) {
+                return 'notification-vendor';
+              }
+              
+              // 나머지 vendor 라이브러리
+              return 'vendor';
+            }
+            
+            // 페이지별 분리
+            if (id.includes('src/pages/')) {
+              if (id.includes('customized-schedule')) return 'customized-schedule';
+              if (id.includes('recommend')) return 'recommend';
+              if (id.includes('planner')) return 'planner';
+              if (id.includes('profile')) return 'profile';
+              if (id.includes('auth')) return 'auth';
+              return 'pages';
+            }
+            
+            // 컴포넌트별 분리
+            if (id.includes('src/components/')) {
+              if (id.includes('ui/')) return 'ui-components';
+              if (id.includes('layout/')) return 'layout-components';
+              return 'components';
+            }
           },
         },
       },
-      // 청크 크기 경고 임계값 증가
-      chunkSizeWarningLimit: 1000,
-      // 소스맵 최적화
+      // 청크 크기 경고 임계값 감소 (최적화 목표)
+      chunkSizeWarningLimit: 500,
+      // 소스맵 비활성화 (번들 크기 감소)
       sourcemap: false,
-      // 압축 최적화 (esbuild 사용)
-      minify: 'esbuild',
+      // 압축 최적화 (terser로 변경하여 더 강력한 압축)
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: true, // console.log 제거
+          drop_debugger: true, // debugger 제거
+        },
+      },
+      // 번들 분석을 위한 설정
+      reportCompressedSize: true,
     },
     // 의존성 최적화
     optimizeDeps: {

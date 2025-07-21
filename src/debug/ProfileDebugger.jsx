@@ -36,7 +36,10 @@ export function ProfileDebugger() {
   })
 
   const addLog = (message, type = 'info') => {
-    const timestamp = new Date().toLocaleTimeString()
+    const timestamp = new Date().toLocaleTimeString('ko-KR', {
+      timeZone: 'Asia/Seoul',
+      hour12: false
+    })
     setDebugLog((prev) => [...prev, { timestamp, message, type }])
   }
 

@@ -106,15 +106,15 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4 dark:from-gray-900 dark:to-gray-800">
-      <Card className="w-full max-w-md bg-white dark:bg-gray-800">
+    <div className="login-container">
+      <Card className="login-card">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">로그인</CardTitle>
           <CardDescription>
             Weather Flick에 다시 오신 것을 환영합니다
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-1">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {submitError && (
               <Alert variant="destructive">
@@ -123,61 +123,72 @@ export function LoginPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">이메일</Label>
+              <Label htmlFor="email" className="text-sm font-medium">이메일</Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
+                autoComplete="email"
                 placeholder="example@email.com"
                 {...register('email')}
-                className={errors.email ? 'border-red-500' : ''}
+                className={`login-form-field ${errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'focus:border-blue-500 focus:ring-blue-200'}`}
+                aria-invalid={errors.email ? 'true' : 'false'}
+                aria-describedby={errors.email ? 'email-error' : undefined}
               />
               {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
+                <p id="email-error" className="text-sm text-red-500" role="alert">
+                  {errors.email.message}
+                </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">비밀번호</Label>
+              <Label htmlFor="password" className="text-sm font-medium">비밀번호</Label>
               <Input
                 id="password"
+                name="password"
                 type="password"
+                autoComplete="current-password"
                 placeholder="비밀번호를 입력해주세요"
                 {...register('password')}
-                className={errors.password ? 'border-red-500' : ''}
+                className={`login-form-field ${errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'focus:border-blue-500 focus:ring-blue-200'}`}
+                aria-invalid={errors.password ? 'true' : 'false'}
+                aria-describedby={errors.password ? 'password-error' : undefined}
               />
               {errors.password && (
-                <p className="text-sm text-red-500">
+                <p id="password-error" className="text-sm text-red-500" role="alert">
                   {errors.password.message}
                 </p>
               )}
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center space-x-2">
                 <input
                   id="remember"
                   type="checkbox"
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 min-w-[16px] min-h-[16px]"
                 />
-                <label htmlFor="remember" className="text-sm text-gray-600">
+                <label htmlFor="remember" className="text-sm text-gray-600 cursor-pointer">
                   로그인 상태 유지
                 </label>
               </div>
               <Link
                 to="/forgot-password"
-                className="text-sm text-blue-600 hover:underline"
+                className="login-link text-sm text-blue-600 hover:underline focus:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-1"
               >
                 비밀번호 찾기
               </Link>
             </div>
 
-            <button
+            <Button
               type="submit"
-              className="w-full rounded-md bg-blue-600 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="login-button w-full py-3 px-4 font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isLoading}
+              size="lg"
             >
               {isLoading ? '로그인 중...' : '로그인'}
-            </button>
+            </Button>
           </form>
 
           <div className="relative my-6">
@@ -193,9 +204,10 @@ export function LoginPage() {
 
           <Button
             variant="outline"
-            className="w-full"
+            className="login-button w-full py-3 px-4"
             onClick={handleGoogleLogin}
             disabled={isLoading}
+            size="lg"
           >
             <GoogleIcon />
             Google 계정으로 계속하기
@@ -204,7 +216,10 @@ export function LoginPage() {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               계정이 없으신가요?{' '}
-              <Link to="/sign-up" className="text-blue-600 hover:underline">
+              <Link 
+                to="/sign-up" 
+                className="login-link text-blue-600 hover:underline focus:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-1"
+              >
                 회원가입하기
               </Link>
             </p>
