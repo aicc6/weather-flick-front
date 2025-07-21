@@ -63,7 +63,8 @@ export default defineConfig(({ mode }) => {
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
           navigateFallback: '/offline',
           navigateFallbackDenylist: [/^\/api/],
-          importScripts: ['/firebase-messaging-sw.js'],
+          skipWaiting: true,
+          clientsClaim: true,
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/pixabay\.com\/api\/.*/i,
@@ -114,7 +115,7 @@ export default defineConfig(({ mode }) => {
           enabled: true, // 개발 모드에서 PWA 활성화 (FCM 테스트를 위해)
           type: 'module',
         },
-        includeAssets: ['firebase-messaging-sw.js'],
+        includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png', '*.png'],
       }),
       {
         name: 'firebase-sw-env-replace',
@@ -296,14 +297,22 @@ export default defineConfig(({ mode }) => {
           manualChunks: (id) => {
             // Node modules 분리
             if (id.includes('node_modules')) {
-              // React 관련 라이브러리
-              if (id.includes('react') && !id.includes('react-router') && !id.includes('react-redux')) {
+              // React 관련 라이브러리 (더 정확한 조건)
+              if (id.includes('react') || id.includes('react-dom')) {
+                if (id.includes('react-router')) {
+                  return 'react-router-vendor';
+                }
+                if (id.includes('react-redux') || id.includes('@reduxjs')) {
+                  return 'state-vendor';
+                }
+                if (id.includes('react-hook-form')) {
+                  return 'form-vendor';
+                }
+                // 핵심 React 라이브러리만 포함
+                if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('react/index') || id.includes('react-dom/index')) {
+                  return 'react-core';
+                }
                 return 'react-vendor';
-              }
-              
-              // React Router (별도 분리)
-              if (id.includes('react-router')) {
-                return 'react-router-vendor';
               }
               
               // UI 컴포넌트 라이브러리 (세분화)
@@ -427,6 +436,11 @@ export default defineConfig(({ mode }) => {
         '@radix-ui/react-dropdown-menu',
         '@radix-ui/react-slot',
       ],
+      exclude: ['@firebase/app'],
+      force: true,
+    },
+    resolve: {
+      dedupe: ['react', 'react-dom'],
     },
   }
 })
