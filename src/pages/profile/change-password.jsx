@@ -15,6 +15,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Eye, EyeOff, Lock } from 'lucide-react'
 import { toast } from 'sonner'
+import { useChangePasswordMutation } from '@/store/api/authApi'
 
 const changePasswordSchema = z
   .object({
@@ -37,7 +38,7 @@ export function ChangePasswordPage() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [changePassword, { isLoading }] = useChangePasswordMutation()
 
   const {
     register,
@@ -49,24 +50,21 @@ export function ChangePasswordPage() {
   })
 
   const onSubmit = async (data) => {
-    setIsLoading(true)
     try {
-      // TODO: API 호출로 비밀번호 변경 요청
-      // const response = await changePassword({
-      //   currentPassword: data.currentPassword,
-      //   newPassword: data.newPassword
-      // })
-
-      // 임시로 성공 처리
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await changePassword({
+        current_password: data.currentPassword,
+        new_password: data.newPassword,
+      }).unwrap()
 
       toast.success('비밀번호가 성공적으로 변경되었습니다')
       reset()
     } catch (error) {
-      toast.error('비밀번호 변경에 실패했습니다. 다시 시도해주세요.')
+      if (error?.data?.detail) {
+        toast.error(error.data.detail)
+      } else {
+        toast.error('비밀번호 변경에 실패했습니다. 다시 시도해주세요.')
+      }
       console.error('Password change error:', error)
-    } finally {
-      setIsLoading(false)
     }
   }
 

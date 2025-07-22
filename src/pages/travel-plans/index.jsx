@@ -458,12 +458,6 @@ export function TravelPlansPage() {
                     지금 시작하기
                   </Link>
                 </Button>
-                <button
-                  onClick={() => refetch()}
-                  className="text-sky-blue-dark hover:text-sky-blue text-sm underline transition-colors"
-                >
-                  새로고침
-                </button>
               </div>
             </div>
           </div>
