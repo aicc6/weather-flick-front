@@ -82,10 +82,10 @@ export default function ProfileEditPage() {
   } = useForm({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      nickname: '',
-      bio: '',
-      preferred_region: 'none',
-      preferred_theme: 'none',
+      nickname: user?.nickname || '',
+      bio: user?.bio || '',
+      preferred_region: user?.preferred_region || 'none',
+      preferred_theme: user?.preferred_theme || 'none',
     },
   })
 
@@ -138,7 +138,7 @@ export default function ProfileEditPage() {
     navigate('/profile')
   }
 
-  if (authLoading) {
+  if (authLoading || !user) {
     return (
       <div className="bg-background min-h-screen">
         <div className="container mx-auto px-4 py-8">
@@ -252,10 +252,11 @@ export default function ProfileEditPage() {
                 <div className="space-y-2">
                   <Label htmlFor="preferred_region">선호 지역</Label>
                   <Select
+                    key={`region-${user?.preferred_region || 'none'}`}
                     value={watch('preferred_region')}
-                    onValueChange={(value) =>
-                      setValue('preferred_region', value)
-                    }
+                    onValueChange={(value) => {
+                      setValue('preferred_region', value, { shouldDirty: true })
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="선호하는 지역을 선택하세요" />
@@ -274,10 +275,11 @@ export default function ProfileEditPage() {
                 <div className="space-y-2">
                   <Label htmlFor="preferred_theme">선호 테마</Label>
                   <Select
+                    key={`theme-${user?.preferred_theme || 'none'}`}
                     value={watch('preferred_theme')}
-                    onValueChange={(value) =>
-                      setValue('preferred_theme', value)
-                    }
+                    onValueChange={(value) => {
+                      setValue('preferred_theme', value, { shouldDirty: true })
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="선호하는 테마를 선택하세요" />
