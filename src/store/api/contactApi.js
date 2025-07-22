@@ -26,10 +26,10 @@ export const contactApi = createApi({
       providesTags: ['Contact'],
     }),
     verifyContactPassword: builder.mutation({
-      query: ({ contactId, email, password }) => ({
+      query: ({ contactId, password }) => ({
         url: `contact/${contactId}/verify-password`,
         method: 'POST',
-        body: { email, password },
+        body: { password },
       }),
     }),
     getContact: builder.query({

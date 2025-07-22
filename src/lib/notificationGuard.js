@@ -8,7 +8,7 @@ const originalRequestPermission = window.Notification?.requestPermission
 if (window.Notification && originalRequestPermission) {
   window.Notification.requestPermission = async function (...args) {
     // 알림 테스트 페이지에서는 로그인 체크 우회
-    if (window.location.pathname === '/notification-test') {
+    if (window.location.pathname === '/test-fcm') {
       console.log('알림 테스트 페이지에서는 로그인 체크를 우회합니다.')
       return originalRequestPermission.apply(this, args)
     }
