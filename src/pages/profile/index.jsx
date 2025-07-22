@@ -445,16 +445,6 @@ export default function ProfilePage() {
                   <Bookmark className="text-sky-blue h-5 w-5" />
                   저장한 여행지 및 코스
                 </CardTitle>
-                {savedDestinations.length + savedTravelCourses.length > 4 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-sky-blue-dark hover:text-sky-blue hover:bg-sky-blue-light/50"
-                  >
-                    전체보기
-                    <ChevronRight className="ml-1 h-4 w-4" />
-                  </Button>
-                )}
               </div>
             </CardHeader>
             <CardContent>

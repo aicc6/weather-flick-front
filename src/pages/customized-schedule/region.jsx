@@ -110,18 +110,6 @@ export default function CustomizedScheduleRegionPage() {
     loadRegionImages()
   }, [regions])
 
-  const _getSelectedCityData = () => {
-    if (!regionCode) return null
-    const cityData = regions.find((city) => city.region_code === regionCode)
-    if (cityData) {
-      return {
-        ...cityData,
-        images: regionImages[regionCode] || getFallbackImages(regionCode, 3),
-      }
-    }
-    return null
-  }
-
   const getCityImages = (code) => {
     return regionImages[code] || getFallbackImages(code, 3)
   }
