@@ -1,6 +1,7 @@
 import {
   useGetUserPlansQuery,
   useDeleteTravelPlanMutation,
+  useToggleBookmarkMutation,
 } from '@/store/api/travelPlansApi'
 import { Link } from 'react-router-dom'
 import React, { useState } from 'react'
@@ -30,6 +31,8 @@ import {
   PlusCircle,
   Trash2,
   Filter,
+  Star,
+  StarOff,
 } from '@/components/icons'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { toast } from 'sonner'
@@ -109,8 +112,24 @@ export function TravelPlansPage() {
   })
   const [deleteTravelPlan, { isLoading: isDeleting }] =
     useDeleteTravelPlanMutation()
+  const [toggleBookmark, { isLoading: isBookmarking }] =
+    useToggleBookmarkMutation()
   const [planToDelete, setPlanToDelete] = useState(null)
   const [filterType, setFilterType] = useState('all') // 'all', 'manual', 'custom'
+  const [bookmarkedPlans, setBookmarkedPlans] = useState(new Set())
+
+  // plans가 로드되면 북마크 상태 초기화
+  React.useEffect(() => {
+    if (plans && Array.isArray(plans)) {
+      const bookmarked = new Set()
+      plans.forEach((plan) => {
+        if (plan.is_bookmarked) {
+          bookmarked.add(plan.plan_id)
+        }
+      })
+      setBookmarkedPlans(bookmarked)
+    }
+  }, [plans])
 
   const filteredPlans = (plans || []).filter((plan) => {
     if (filterType === 'all') return true
@@ -157,6 +176,43 @@ export function TravelPlansPage() {
       })
       console.error('Failed to delete the plan: ', err)
       setPlanToDelete(null)
+    }
+  }
+
+  const handleToggleBookmark = async (plan) => {
+    if (isBookmarking) return
+
+    try {
+      const result = await toggleBookmark(plan.plan_id).unwrap()
+      
+      // 북마크 상태 업데이트
+      setBookmarkedPlans((prev) => {
+        const newSet = new Set(prev)
+        if (result.data?.bookmarked) {
+          newSet.add(plan.plan_id)
+          toast.success(`"${plan.title}"을(를) 즐겨찾기에 추가했습니다`, {
+            duration: 2000,
+            position: 'top-center',
+            icon: '⭐',
+          })
+        } else {
+          newSet.delete(plan.plan_id)
+          toast.success(`"${plan.title}"을(를) 즐겨찾기에서 제거했습니다`, {
+            duration: 2000,
+            position: 'top-center',
+            icon: '☆',
+          })
+        }
+        return newSet
+      })
+    } catch (err) {
+      const errorMessage = err?.data?.message || '즐겨찾기 처리에 실패했습니다'
+      toast.error(errorMessage, {
+        duration: 3000,
+        position: 'top-center',
+        icon: '⚠️',
+      })
+      console.error('Failed to toggle bookmark:', err)
     }
   }
 
@@ -377,14 +433,33 @@ export function TravelPlansPage() {
                         </p>
                       )}
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-destructive h-8 w-8 flex-shrink-0"
-                      onClick={() => handleDeleteClick(plan)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={`h-8 w-8 flex-shrink-0 ${
+                          bookmarkedPlans.has(plan.plan_id)
+                            ? 'text-yellow-500 hover:text-yellow-600'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                        onClick={() => handleToggleBookmark(plan)}
+                        disabled={isBookmarking}
+                      >
+                        {bookmarkedPlans.has(plan.plan_id) ? (
+                          <Star className="h-4 w-4 fill-current" />
+                        ) : (
+                          <StarOff className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-muted-foreground hover:text-destructive h-8 w-8 flex-shrink-0"
+                        onClick={() => handleDeleteClick(plan)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
 
                   <Badge

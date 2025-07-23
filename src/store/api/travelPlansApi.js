@@ -395,6 +395,54 @@ export const travelPlansApi = createApi({
         }
       },
     }),
+
+    // 북마크 관련 API
+    // 북마크 토글 (추가/제거)
+    toggleBookmark: builder.mutation({
+      query: (planId) => ({
+        url: `travel-plans/${planId}/bookmark`,
+        method: 'POST',
+      }),
+      invalidatesTags: (_, __, planId) => [
+        { type: 'TravelPlan', id: planId },
+        { type: 'TravelPlan', id: 'LIST' },
+        { type: 'TravelPlan', id: 'BOOKMARKED' },
+      ],
+      transformResponse: (response) => {
+        return validateAndSanitizeResponse(response, {
+          bookmarked: false,
+          message: '',
+        })
+      },
+    }),
+
+    // 북마크한 플랜 목록 조회
+    getBookmarkedPlans: builder.query({
+      query: () => 'travel-plans/bookmarks',
+      providesTags: [{ type: 'TravelPlan', id: 'BOOKMARKED' }],
+      keepUnusedDataFor: 0, // 캐싱 비활성화하여 항상 최신 데이터 로드
+      transformResponse: (response) => {
+        const validatedResponse = validateAndSanitizeResponse(response, {
+          plans: [],
+          total: 0,
+        })
+        return validatedResponse
+      },
+    }),
+
+    // 특정 플랜의 북마크 상태 확인
+    getBookmarkStatus: builder.query({
+      query: (planId) => `travel-plans/${planId}/bookmark/status`,
+      providesTags: (_, __, planId) => [
+        { type: 'TravelPlan', id: `bookmark-${planId}` },
+      ],
+      keepUnusedDataFor: 300, // 5분간 캐싱
+      transformResponse: (response) => {
+        return validateAndSanitizeResponse(response, {
+          bookmarked: false,
+        })
+      },
+    }),
   }),
 })
 
@@ -419,4 +467,8 @@ export const {
   useDeleteRouteMutation,
   useGetDetailedRouteInfoQuery,
   useGetTimemachineRouteInfoQuery,
+  // 북마크 관련 hooks
+  useToggleBookmarkMutation,
+  useGetBookmarkedPlansQuery,
+  useGetBookmarkStatusQuery,
 } = travelPlansApi

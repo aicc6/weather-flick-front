@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import NotificationIcon from '@/components/header/NotificationIcon'
+import NotificationPermissionBanner from '@/components/header/NotificationPermissionBanner'
 
 export function Header() {
   const [isDark, setIsDark] = useState(false)
@@ -138,6 +139,9 @@ export function Header() {
 
   return (
     <>
+      {/* 알림 권한 배너 */}
+      <NotificationPermissionBanner />
+      
       {/* 메인 헤더 */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md dark:bg-gray-900/80">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

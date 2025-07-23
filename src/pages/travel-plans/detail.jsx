@@ -349,14 +349,36 @@ export function TravelPlanDetailPage() {
       const forecast = await Promise.all(
         baseForecast.map(async (dayForecast) => {
           try {
-            // 한글 도시명을 영어로 변환 (캐시와 API 호출에 사용)
-            const englishCityNameForCache = cityKoreanToEnglish[dayForecast.city] || 'Seoul'
+            // 해당 일차의 첫 번째 장소의 좌표를 가져오기 (캐싱용)
+            const dayItineraryForCache = itinerary[dayForecast.day ? `Day ${dayForecast.day}` : `Day ${dayForecast.day || 1}`]
+            let latForCache = null, lonForCache = null
             
-            // 캐시 키 생성
-            const cacheKey = weatherCacheUtils.generateCacheKey(
-              englishCityNameForCache,
-              dayForecast.date,
-            )
+            if (dayItineraryForCache && dayItineraryForCache.length > 0) {
+              const firstPlace = dayItineraryForCache[0]
+              latForCache = firstPlace.lat || firstPlace.latitude || firstPlace.y || 
+                            firstPlace.coords?.lat || firstPlace.location?.lat || 
+                            firstPlace.geometry?.location?.lat
+              lonForCache = firstPlace.lng || firstPlace.longitude || firstPlace.x || 
+                            firstPlace.coords?.lng || firstPlace.location?.lng || 
+                            firstPlace.geometry?.location?.lng
+            }
+            
+            // 캐시 키 생성 (좌표가 있으면 좌표 기반, 없으면 도시명 기반)
+            let cacheKey
+            if (latForCache && lonForCache && !isNaN(latForCache) && !isNaN(lonForCache)) {
+              cacheKey = weatherCacheUtils.generateCacheKey(
+                Number(latForCache),
+                Number(lonForCache),
+                dayForecast.date,
+              )
+            } else {
+              // 한글 도시명을 영어로 변환 (캐시와 API 호출에 사용)
+              const englishCityNameForCache = cityKoreanToEnglish[dayForecast.city] || 'Seoul'
+              cacheKey = weatherCacheUtils.generateCacheKey(
+                englishCityNameForCache,
+                dayForecast.date,
+              )
+            }
 
             // 캐시에서 데이터 확인
             const cachedData = weatherCacheUtils.get(cacheKey)
@@ -377,21 +399,52 @@ export function TravelPlanDetailPage() {
             const today = new Date().toISOString().split('T')[0]
             const isToday = forecastDate === today
 
-            // 한글 도시명을 영어로 변환
-            const englishCityName = cityKoreanToEnglish[dayForecast.city] || 'Seoul'
+            // 해당 일차의 첫 번째 장소의 좌표를 가져오기
+            const dayItinerary = itinerary[dayForecast.day ? `Day ${dayForecast.day}` : `Day ${dayForecast.day || 1}`]
+            let lat = null, lon = null
+            
+            if (dayItinerary && dayItinerary.length > 0) {
+              const firstPlace = dayItinerary[0]
+              // 다양한 좌표 속성 확인
+              lat = firstPlace.lat || firstPlace.latitude || firstPlace.y || 
+                    firstPlace.coords?.lat || firstPlace.location?.lat || 
+                    firstPlace.geometry?.location?.lat
+              lon = firstPlace.lng || firstPlace.longitude || firstPlace.x || 
+                    firstPlace.coords?.lng || firstPlace.location?.lng || 
+                    firstPlace.geometry?.location?.lng
+            }
 
-            // 현재 날씨와 예보 정보를 모두 가져오기
-            const weatherResponse = await fetch(
-              `/api/weather/forecast/${englishCityName}?country=KR&days=7`,
-            )
+            // 좌표가 있으면 좌표 기반 조회, 없으면 도시명 기반 조회
+            let weatherResponse
+            if (lat && lon && !isNaN(lat) && !isNaN(lon)) {
+              // 좌표 기반 날씨 조회
+              weatherResponse = await fetch(
+                `/api/weather/forecast/coordinates?lat=${lat}&lon=${lon}&days=7`,
+              )
+            } else {
+              // 한글 도시명을 영어로 변환
+              const englishCityName = cityKoreanToEnglish[dayForecast.city] || 'Seoul'
+              // 도시명 기반 날씨 조회
+              weatherResponse = await fetch(
+                `/api/weather/forecast/${englishCityName}?country=KR&days=7`,
+              )
+            }
 
             // 현재 날씨 정보도 함께 가져오기 (오늘 날짜인 경우)
             let currentWeatherResponse = null
             if (isToday) {
               try {
-                currentWeatherResponse = await fetch(
-                  `/api/weather/current/${englishCityName}?country=KR`,
-                )
+                if (lat && lon && !isNaN(lat) && !isNaN(lon)) {
+                  // 좌표 기반 현재 날씨 조회
+                  currentWeatherResponse = await fetch(
+                    `/api/weather/current/coordinates?lat=${lat}&lon=${lon}`,
+                  )
+                } else {
+                  const englishCityName = cityKoreanToEnglish[dayForecast.city] || 'Seoul'
+                  currentWeatherResponse = await fetch(
+                    `/api/weather/current/${englishCityName}?country=KR`,
+                  )
+                }
               } catch (error) {
                 console.warn('현재 날씨 정보 조회 실패:', error)
               }

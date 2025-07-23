@@ -28,8 +28,17 @@ export const CACHE_CONFIG = {
 
 // 캐시 유틸리티 함수들
 export const weatherCacheUtils = {
-  // 캐시 키 생성
-  generateCacheKey: (city, date) => `${city}_${date}`,
+  // 캐시 키 생성 (도시명 또는 좌표 기반)
+  generateCacheKey: (cityOrLat, dateOrLon, date = null) => {
+    // 좌표 기반 캐시 키 (lat, lon, date)
+    if (typeof cityOrLat === 'number' && typeof dateOrLon === 'number') {
+      const lat = Math.round(cityOrLat * 100) / 100  // 소수점 2자리로 반올림
+      const lon = Math.round(dateOrLon * 100) / 100
+      return `coords_${lat}_${lon}_${date || 'current'}`
+    }
+    // 도시명 기반 캐시 키 (city, date)
+    return `${cityOrLat}_${dateOrLon}`
+  },
 
   // 캐시에서 데이터 가져오기
   get: (key) => {

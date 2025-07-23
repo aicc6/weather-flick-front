@@ -111,49 +111,73 @@ export function DestinationCard({
       className={`overflow-hidden transition-shadow hover:shadow-lg ${className}`}
     >
       {/* 이미지 섹션 */}
-      {destination.image_url && (
-        <div className="relative h-48 overflow-hidden">
+      <div className="relative h-48 overflow-hidden">
+        {destination.image_url ? (
           <img
             src={destination.image_url}
             alt={destination.name}
             className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
             loading="lazy"
+            onError={(e) => {
+              // 이미지 로드 실패 시 플레이스홀더 표시
+              e.target.onerror = null
+              e.target.style.display = 'none'
+              e.target.parentElement.innerHTML = `
+                <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 dark:from-blue-900/20 dark:via-purple-900/20 dark:to-pink-900/20">
+                  <div class="text-center">
+                    <div class="mb-2 text-4xl">🏞️</div>
+                    <div class="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      ${destination.province || '여행지'}
+                    </div>
+                  </div>
+                </div>
+              `
+            }}
           />
-          {/* 좋아요/저장 버튼 오버레이 */}
-          <div className="absolute top-3 right-3 flex gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-full bg-white/90 shadow-md hover:bg-white"
-              onClick={handleLikeToggle}
-              disabled={isLiking}
-            >
-              <Heart
-                className={`h-4 w-4 transition-colors ${
-                  destination.is_liked
-                    ? 'fill-red-500 text-red-500'
-                    : 'text-gray-600'
-                }`}
-              />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-full bg-white/90 shadow-md hover:bg-white"
-              onClick={handleSaveToggle}
-              disabled={isSaving}
-            >
-              <Bookmark
-                className={`h-4 w-4 transition-colors ${
-                  destination.is_saved
-                    ? 'fill-blue-500 text-blue-500'
-                    : 'text-gray-600'
-                }`}
-              />
-            </Button>
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 dark:from-blue-900/20 dark:via-purple-900/20 dark:to-pink-900/20">
+            <div className="text-center">
+              <div className="mb-2 text-4xl">🏞️</div>
+              <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                {destination.province || '여행지'}
+              </div>
+            </div>
           </div>
+        )}
+        {/* 좋아요/저장 버튼 오버레이 */}
+        <div className="absolute top-3 right-3 flex gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 rounded-full bg-white/90 shadow-md hover:bg-white"
+            onClick={handleLikeToggle}
+            disabled={isLiking}
+          >
+            <Heart
+              className={`h-4 w-4 transition-colors ${
+                destination.is_liked
+                  ? 'fill-red-500 text-red-500'
+                  : 'text-gray-600'
+              }`}
+            />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 rounded-full bg-white/90 shadow-md hover:bg-white"
+            onClick={handleSaveToggle}
+            disabled={isSaving}
+          >
+            <Bookmark
+              className={`h-4 w-4 transition-colors ${
+                destination.is_saved
+                  ? 'fill-blue-500 text-blue-500'
+                  : 'text-gray-600'
+              }`}
+            />
+          </Button>
         </div>
-      )}
+      </div>
 
       <CardContent className="p-4">
         {/* 여행지 기본 정보 */}

@@ -71,6 +71,7 @@ export {
   Phone,
   MapPin,
   Star,
+  StarOff,
   Settings,
   Bell,
   BellOff,

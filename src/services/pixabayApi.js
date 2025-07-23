@@ -34,6 +34,7 @@ const regionSearchTerms = {
 
 // region_code(숫자/문자열) → 영문 키워드 매핑
 const regionCodeToKeyword = {
+  // 숫자 코드 매핑
   1: 'seoul',
   2: 'incheon',
   3: 'daejeon',
@@ -51,6 +52,25 @@ const regionCodeToKeyword = {
   37: 'jeonju',
   38: 'mokpo',
   39: 'jeju',
+  // 한글 지역명 매핑
+  '서울': 'seoul',
+  '부산': 'busan',
+  '대구': 'daegu',
+  '인천': 'incheon',
+  '광주': 'gwangju',
+  '대전': 'daejeon',
+  '울산': 'ulsan',
+  '세종': 'sejong',
+  '세종특별자치시': 'sejong',
+  '경기': 'gyeonggi',
+  '강원': 'gangneung',
+  '충북': 'cheongju',
+  '충남': 'daejeon',
+  '전북': 'jeonju',
+  '전남': 'mokpo',
+  '경북': 'gyeongju',
+  '경남': 'changwon',
+  '제주': 'jeju',
 }
 
 // Pixabay에서 이미지 검색

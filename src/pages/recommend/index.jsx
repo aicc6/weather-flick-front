@@ -12,6 +12,7 @@ import {
   useDeleteTravelCourseSaveMutation,
 } from '@/store/api/travelCourseSavesApi'
 import { useAuth } from '@/contexts/AuthContextRTK'
+import { getRegionFirstImage } from '@/services/imageService'
 
 // 아이콘 컴포넌트들
 const HeartIcon = ({ className, filled = false }) => (
@@ -127,6 +128,7 @@ function RecommendCourseItem({ course, onLikeChange }) {
 
   // 백엔드에서 받아온 저장 정보 사용 (API에서 받은 is_saved 값으로 초기화)
   const [isBookmarked, setIsBookmarked] = useState(course.is_saved || false)
+  const [placeholderImage, setPlaceholderImage] = useState(null)
 
   // 백엔드에서 받아온 좋아요 정보 사용 (개별 API 호출 제거)
   const isLiked = course.is_liked || false
@@ -136,6 +138,24 @@ function RecommendCourseItem({ course, onLikeChange }) {
   useEffect(() => {
     setIsBookmarked(course.is_saved || false)
   }, [course.is_saved])
+
+  // 이미지가 없는 경우 지역 기반 플레이스홀더 이미지 로드
+  useEffect(() => {
+    const loadPlaceholderImage = async () => {
+      if (!course.first_image && !course.mainImage && course.region) {
+        try {
+          // 지역명을 기반으로 플레이스홀더 이미지 가져오기
+          const regionName = getRegionName(course.region_code) || course.region
+          const imageUrl = await getRegionFirstImage(regionName)
+          setPlaceholderImage(imageUrl)
+        } catch (error) {
+          console.error('플레이스홀더 이미지 로드 실패:', error)
+        }
+      }
+    }
+
+    loadPlaceholderImage()
+  }, [course])
 
   // 좋아요 상태 변경을 위한 API
   const [toggleTravelCourseLike] = useToggleTravelCourseLikeMutation()
@@ -308,16 +328,26 @@ function RecommendCourseItem({ course, onLikeChange }) {
     >
       {/* 썸네일 */}
       <div className="relative aspect-video w-full overflow-hidden">
-        {course.first_image || course.mainImage ? (
+        {course.first_image || course.mainImage || placeholderImage ? (
           <img
-            src={course.first_image || course.mainImage}
+            src={course.first_image || course.mainImage || placeholderImage}
             alt={course.course_name || course.title}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
+            onError={(e) => {
+              // 이미지 로드 실패 시 기본 플레이스홀더로 대체
+              e.target.onerror = null
+              e.target.src = 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&auto=format&q=80&ixlib=rb-4.0.3'
+            }}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gray-100 transition-colors group-hover:bg-gray-200 dark:bg-gray-700 dark:group-hover:bg-gray-600">
-            <span className="text-gray-400 dark:text-gray-500">No Image</span>
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 transition-colors group-hover:from-blue-200 group-hover:via-purple-200 group-hover:to-pink-200 dark:from-blue-900/20 dark:via-purple-900/20 dark:to-pink-900/20 dark:group-hover:from-blue-800/30 dark:group-hover:via-purple-800/30 dark:group-hover:to-pink-800/30">
+            <div className="text-center">
+              <div className="mb-2 text-5xl">🏞️</div>
+              <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                {course.region || '여행지'}
+              </div>
+            </div>
           </div>
         )}
 

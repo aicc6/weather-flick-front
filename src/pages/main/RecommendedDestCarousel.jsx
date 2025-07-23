@@ -19,15 +19,19 @@ function RecommendedDestCard({ destination, onClick }) {
     >
       {/* Image or Icon Display */}
       <div className="relative h-48 w-full overflow-hidden rounded-t-xl sm:h-52 md:h-56">
-        {destination.image && (
+        {destination.image ? (
           <img
             src={destination.image}
             alt={destination.name}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
             loading="lazy"
+            onError={(e) => {
+              // 이미지 로드 실패 시 플레이스홀더로 대체
+              e.target.onerror = null
+              e.target.src = 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&auto=format&q=80&ixlib=rb-4.0.3'
+            }}
           />
-        )}
-        {!destination.image && (
+        ) : (
           <div className="from-sky-blue-light/80 via-sunshine-yellow-light/60 to-sunset-orange-light/80 dark:from-sky-blue/20 dark:via-sunshine-yellow/10 dark:to-sunset-orange/20 flex h-full w-full items-center justify-center bg-gradient-to-br">
             <div className="text-center">
               <div className="mb-4 text-6xl">🏞️</div>
