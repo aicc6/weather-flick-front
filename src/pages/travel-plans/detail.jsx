@@ -59,6 +59,7 @@ const formatDate = (dateString) => {
 export function TravelPlanDetailPage() {
   const { planId } = useParams()
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
+  const [isBookmarked, setIsBookmarked] = useState(false)
 
   const {
     data: plan,
@@ -170,6 +171,27 @@ export function TravelPlanDetailPage() {
   //   skip: !plan,
   // })
 
+  // 한글 도시명을 영어로 변환하는 매핑
+  const cityKoreanToEnglish = {
+    서울: 'Seoul',
+    부산: 'Busan',
+    대구: 'Daegu',
+    인천: 'Incheon',
+    광주: 'Gwangju',
+    대전: 'Daejeon',
+    울산: 'Ulsan',
+    제주: 'Jeju',
+    경기: 'Seoul', // 경기도는 서울 날씨로 대체
+    강원: 'Gangneung', // 강원도는 강릉 날씨로 대표
+    충북: 'Cheongju',
+    충남: 'Daejeon', // 충남은 대전 날씨로 대체
+    전북: 'Jeonju',
+    전남: 'Gwangju', // 전남은 광주 날씨로 대체
+    경북: 'Daegu', // 경북은 대구 날씨로 대체
+    경남: 'Busan', // 경남은 부산 날씨로 대체
+    세종: 'Daejeon', // 세종은 대전 날씨로 대체
+  }
+
   // 위치 정보에서 도시명 추출
   const extractCityFromLocation = (description) => {
     if (!description) return '서울'
@@ -196,7 +218,7 @@ export function TravelPlanDetailPage() {
         울산: ['울산', 'Ulsan'],
         제주: ['제주', 'Jeju'],
         경기: ['경기', '수원', '성남', '고양', '용인'],
-        강원: ['강원', '춘천', '강릉', '속초'],
+        강원: ['강원', '춘천', '강릉', '속초', '평창', '정선'],
         충북: ['충북', '청주', '제천'],
         충남: ['충남', '천안', '아산'],
         전북: ['전북', '전주', '군산'],
@@ -327,9 +349,12 @@ export function TravelPlanDetailPage() {
       const forecast = await Promise.all(
         baseForecast.map(async (dayForecast) => {
           try {
+            // 한글 도시명을 영어로 변환 (캐시와 API 호출에 사용)
+            const englishCityNameForCache = cityKoreanToEnglish[dayForecast.city] || 'Seoul'
+            
             // 캐시 키 생성
             const cacheKey = weatherCacheUtils.generateCacheKey(
-              dayForecast.city,
+              englishCityNameForCache,
               dayForecast.date,
             )
 
@@ -352,9 +377,12 @@ export function TravelPlanDetailPage() {
             const today = new Date().toISOString().split('T')[0]
             const isToday = forecastDate === today
 
+            // 한글 도시명을 영어로 변환
+            const englishCityName = cityKoreanToEnglish[dayForecast.city] || 'Seoul'
+
             // 현재 날씨와 예보 정보를 모두 가져오기
             const weatherResponse = await fetch(
-              `/api/weather/forecast/${dayForecast.city}?country=KR&days=7`,
+              `/api/weather/forecast/${englishCityName}?country=KR&days=7`,
             )
 
             // 현재 날씨 정보도 함께 가져오기 (오늘 날짜인 경우)
@@ -362,7 +390,7 @@ export function TravelPlanDetailPage() {
             if (isToday) {
               try {
                 currentWeatherResponse = await fetch(
-                  `/api/weather/current/${dayForecast.city}?country=KR`,
+                  `/api/weather/current/${englishCityName}?country=KR`,
                 )
               } catch (error) {
                 console.warn('현재 날씨 정보 조회 실패:', error)
@@ -482,12 +510,48 @@ export function TravelPlanDetailPage() {
         }),
       )
 
+      // 실제 방문하는 도시들만 추출 (출발지 제외)
+      const visitingCities = []
+      const cityVisitCount = {}
+      
+      // 각 날짜별로 방문하는 도시 파악
+      Object.keys(itinerary).forEach((day) => {
+        const dayItinerary = itinerary[day]
+        if (dayItinerary && dayItinerary.length > 0) {
+          dayItinerary.forEach((place) => {
+            const city = extractCityFromLocation(place.description)
+            if (city) {
+              if (!cityVisitCount[city]) {
+                cityVisitCount[city] = 0
+              }
+              cityVisitCount[city]++
+            }
+          })
+        }
+      })
+      
+      // 방문 횟수가 많은 순으로 정렬하여 주요 도시 추출
+      const sortedCities = Object.entries(cityVisitCount)
+        .sort((a, b) => b[1] - a[1])
+        .map(([city]) => city)
+      
+      // 중복 제거하여 실제 방문 도시 목록 만들기
+      const uniqueVisitingCities = [...new Set(sortedCities)]
+      const isMultiCityTrip = uniqueVisitingCities.length > 1
+      
+      let recommendation = ''
+      if (isMultiCityTrip) {
+        recommendation = `${uniqueVisitingCities.join(', ')} 지역을 여행하시네요. 각 지역의 날씨를 확인하고 적절한 옷차림을 준비하세요.`
+      } else if (uniqueVisitingCities.length > 0) {
+        recommendation = `${uniqueVisitingCities[0]} 지역 여행입니다. 전반적으로 여행하기 좋은 날씨입니다.`
+      } else {
+        recommendation = '여행 계획에 따라 날씨를 확인하고 적절한 옷차림을 준비하세요.'
+      }
+      
       return {
         forecast,
-        recommendation: isMultiCity
-          ? `${cities.join(', ')} 지역을 여행하시네요. 각 지역의 날씨를 확인하고 적절한 옷차림을 준비하세요.`
-          : `${cities[0]} 지역 여행입니다. 전반적으로 여행하기 좋은 날씨입니다.`,
-        isMultiCity,
+        recommendation,
+        isMultiCity: isMultiCityTrip,
       }
     } catch (error) {
       console.warn('날씨 데이터 생성 중 오류:', error)
@@ -606,18 +670,57 @@ export function TravelPlanDetailPage() {
 
   // 날씨 데이터 로드 함수
   const loadWeatherData = async () => {
-    if (!plan?.start_date || !plan?.itinerary) return
+    if (!plan?.start_date) return
 
     setIsWeatherLoading(true)
     try {
-      const data = await generateWeatherDataWithAPI(
-        plan.start_date,
-        plan.itinerary,
-      )
-      setWeatherData({
-        ...data,
-        lastUpdated: new Date(),
-      })
+      // itinerary가 없는 경우 기본 날씨 데이터 생성
+      if (!plan.itinerary || Object.keys(plan.itinerary).length === 0) {
+        // 여행 기간만큼 날씨 정보 생성
+        const days = tripDuration
+        const forecast = []
+        const start = new Date(plan.start_date)
+        
+        // 제목에서 도시 추출 시도 (예: "부산 1박 2일 여행" → "부산")
+        let city = '서울'
+        if (plan.title) {
+          const cityMatch = plan.title.match(/^(서울|부산|대구|인천|광주|대전|울산|제주|강원|충북|충남|전북|전남|경북|경남|세종)/);
+          if (cityMatch) {
+            city = cityMatch[1];
+          }
+        }
+        
+        for (let i = 0; i < days; i++) {
+          const date = new Date(start.getTime() + i * 86400000)
+          forecast.push({
+            date: date.toISOString(),
+            city,
+            day: i + 1,
+            temperature: { min: 15, max: 25 },
+            condition: '맑음',
+            icon: '☀️',
+            humidity: 60,
+            precipitation: 0,
+          })
+        }
+        
+        setWeatherData({
+          forecast,
+          recommendation: `${city} 지역 ${days}일간의 날씨 정보입니다. 여행 전 실시간 날씨를 확인해 주세요.`,
+          isMultiCity: false,
+          lastUpdated: new Date(),
+        })
+      } else {
+        // itinerary가 있는 경우 기존 로직 사용
+        const data = await generateWeatherDataWithAPI(
+          plan.start_date,
+          plan.itinerary,
+        )
+        setWeatherData({
+          ...data,
+          lastUpdated: new Date(),
+        })
+      }
     } catch (error) {
       console.error('날씨 데이터 로드 실패:', error)
       setWeatherData({
@@ -634,12 +737,62 @@ export function TravelPlanDetailPage() {
 
   // 날씨 데이터 로드
   useEffect(() => {
-    loadWeatherData()
-  }, [plan?.start_date, plan?.itinerary])
+    if (plan) {
+      loadWeatherData()
+    }
+  }, [plan?.start_date, plan?.end_date, plan?.title])
+
+  // 즐겨찾기 상태 확인
+  useEffect(() => {
+    if (planId) {
+      checkBookmarkStatus()
+    }
+  }, [planId])
+
+  const checkBookmarkStatus = async () => {
+    try {
+      const response = await fetch(`/api/travel-plans/${planId}/bookmark/status`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+        },
+      })
+      const result = await response.json()
+      if (result.success) {
+        setIsBookmarked(result.data.bookmarked)
+      }
+    } catch (error) {
+      console.error('즐겨찾기 상태 확인 실패:', error)
+    }
+  }
+
+  const toggleBookmark = async () => {
+    try {
+      const response = await fetch(`/api/travel-plans/${planId}/bookmark`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+        },
+      })
+      const result = await response.json()
+      if (result.success) {
+        setIsBookmarked(result.data.bookmarked)
+        toast.success(result.data.message, {
+          duration: 2000,
+          position: 'bottom-right',
+        })
+      }
+    } catch (error) {
+      console.error('즐겨찾기 토글 실패:', error)
+      toast.error('즐겨찾기 처리 중 오류가 발생했습니다', {
+        duration: 3000,
+        position: 'bottom-right',
+      })
+    }
+  }
 
   // 자동 새로고침 기능 (10분마다)
   useEffect(() => {
-    if (!plan?.start_date || !plan?.itinerary) return
+    if (!plan?.start_date) return
 
     const interval = setInterval(
       () => {
@@ -655,7 +808,7 @@ export function TravelPlanDetailPage() {
   // 페이지 포커스 시 데이터 새로고침
   useEffect(() => {
     const handleFocus = () => {
-      if (plan?.start_date && plan?.itinerary) {
+      if (plan?.start_date) {
         console.log('페이지 포커스 시 날씨 데이터 새로고침')
         loadWeatherData()
       }
@@ -777,6 +930,18 @@ export function TravelPlanDetailPage() {
   // console.log('Travel plan loaded successfully:', !!plan)
 
   const itineraryDays = plan.itinerary ? Object.keys(plan.itinerary) : []
+  
+  // 실제 여행 기간 계산 (start_date와 end_date 기반)
+  const calculateTripDuration = () => {
+    if (!plan.start_date || !plan.end_date) return 0
+    const start = new Date(plan.start_date)
+    const end = new Date(plan.end_date)
+    const diffTime = Math.abs(end - start)
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1 // 1박 2일인 경우 2일로 계산
+    return diffDays
+  }
+  
+  const tripDuration = calculateTripDuration()
 
   // 수정 페이지로 이동 시 사용자 안내
   const handleEditClick = () => {
@@ -1322,7 +1487,7 @@ export function TravelPlanDetailPage() {
                   )}
                   <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                     <Calendar className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
-                    <span>기간: {itineraryDays.length}일</span>
+                    <span>기간: {tripDuration}일</span>
                   </div>
                 </CardContent>
               </Card>
@@ -1339,7 +1504,7 @@ export function TravelPlanDetailPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                        {itineraryDays.length}
+                        {tripDuration}
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-300">
                         여행 일수
@@ -1411,9 +1576,13 @@ export function TravelPlanDetailPage() {
                     <Share2 className="h-4 w-4" />
                     공유하기
                   </Button>
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <span>⭐</span>
-                    즐겨찾기
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center gap-2"
+                    onClick={toggleBookmark}
+                  >
+                    <span>{isBookmarked ? '⭐' : '☆'}</span>
+                    {isBookmarked ? '즐겨찾기 해제' : '즐겨찾기'}
                   </Button>
                 </div>
               </CardContent>
@@ -1435,7 +1604,7 @@ export function TravelPlanDetailPage() {
                         여행 기간
                       </div>
                       <div className="font-semibold text-gray-800 dark:text-gray-100">
-                        {itineraryDays.length}일
+                        {tripDuration}일
                       </div>
                     </div>
                   </div>
@@ -1520,9 +1689,10 @@ export function TravelPlanDetailPage() {
                       variant="outline"
                       size="sm"
                       className="flex items-center gap-2"
+                      onClick={toggleBookmark}
                     >
-                      <span>⭐</span>
-                      즐겨찾기
+                      <span>{isBookmarked ? '⭐' : '☆'}</span>
+                      {isBookmarked ? '즐겨찾기 해제' : '즐겨찾기'}
                     </Button>
                   </div>
                 </div>
@@ -1851,7 +2021,7 @@ export function TravelPlanDetailPage() {
                       <Calendar className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                      {itineraryDays.length}
+                      {tripDuration}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-300">
                       여행 일수

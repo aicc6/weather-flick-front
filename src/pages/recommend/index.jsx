@@ -294,8 +294,18 @@ function RecommendCourseItem({ course, onLikeChange }) {
   // 지역 태그 정보 가져오기
   const regionName = getRegionName(course.region_code)
 
+  const handleCardClick = useCallback(() => {
+    const courseId = course.content_id || course.id
+    if (courseId) {
+      navigate(`/recommend/detail/${courseId}`)
+    }
+  }, [course, navigate])
+
   return (
-    <div className="group cursor-pointer overflow-hidden rounded-lg bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:bg-gray-800">
+    <div 
+      className="group cursor-pointer overflow-hidden rounded-lg bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:bg-gray-800"
+      onClick={handleCardClick}
+    >
       {/* 썸네일 */}
       <div className="relative aspect-video w-full overflow-hidden">
         {course.first_image || course.mainImage ? (

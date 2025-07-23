@@ -57,7 +57,7 @@ export default function SharePlanModal({ isOpen, onClose, planId, planTitle }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
         },
         body: JSON.stringify(shareData),
       })
@@ -87,7 +87,7 @@ export default function SharePlanModal({ isOpen, onClose, planId, planTitle }) {
     try {
       const response = await fetch(`/api/travel-plans/${planId}/shares`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
         },
       })
 
@@ -119,7 +119,7 @@ export default function SharePlanModal({ isOpen, onClose, planId, planTitle }) {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
           },
           body: JSON.stringify({ is_active: false }),
         },

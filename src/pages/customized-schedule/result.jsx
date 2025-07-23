@@ -347,6 +347,14 @@ const getErrorInfo = (error) => {
   // RTK Query 에러 구조 확인
   if (error?.status) {
     switch (error.status) {
+      case 400:
+        return {
+          type: 'badRequest',
+          title: '⚠️ 잘못된 요청',
+          message: error.message || '요청 정보가 올바르지 않습니다.',
+          canRetry: true,
+          suggestedAction: '입력 정보 확인',
+        }
       case 401:
         return {
           type: 'auth',
@@ -366,8 +374,8 @@ const getErrorInfo = (error) => {
       case 404:
         return {
           type: 'notFound',
-          title: '🔍 요청한 정보를 찾을 수 없습니다',
-          message: '선택하신 지역의 정보를 찾을 수 없습니다.',
+          title: '🔍 여행 정보를 찾을 수 없습니다',
+          message: error.message || '선택하신 지역의 여행 정보를 찾을 수 없습니다. 다른 지역을 선택해주세요.',
           canRetry: true,
           suggestedAction: '다른 지역 선택',
         }
@@ -772,12 +780,21 @@ export default function CustomizedScheduleResultPage() {
           toast.error(errorInfo.title + '\n인터넷 연결을 확인해주세요.')
         } else if (errorInfo.type === 'rate_limit') {
           toast.error(errorInfo.title + '\n잠시 후 다시 시도해주세요.')
+        } else if (errorInfo.type === 'notFound') {
+          toast.error(errorInfo.message)
+          // 404 에러의 경우 다시 지역 선택 페이지로 이동
+          setTimeout(() => {
+            navigateCallback('/customized-schedule/region')
+          }, 2000)
+          return
+        } else if (errorInfo.type === 'badRequest') {
+          toast.error(errorInfo.message)
         } else {
           toast.error('추천 생성에 실패했습니다. 모의 데이터를 표시합니다.')
         }
 
-        // 일부 에러의 경우 mock 데이터라도 제공
-        if (errorInfo.type !== 'auth' && errorInfo.type !== 'forbidden') {
+        // 일부 에러의 경우 mock 데이터라도 제공 (404, 400 제외)
+        if (errorInfo.type !== 'auth' && errorInfo.type !== 'forbidden' && errorInfo.type !== 'notFound' && errorInfo.type !== 'badRequest') {
           const mockData = {
             summary: {
               region: finalRegionCode,

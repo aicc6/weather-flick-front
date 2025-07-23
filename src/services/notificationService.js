@@ -113,21 +113,84 @@ export const markAllNotificationsAsRead = async () => {
 // FCM 토큰 초기화 및 저장
 export const initializeFCMToken = async () => {
   try {
-    const permission = await Notification.requestPermission()
+    // 브라우저 정보
+    const isFirefox = navigator.userAgent.toLowerCase().includes('firefox')
+    const isSafari = navigator.userAgent.toLowerCase().includes('safari') && !navigator.userAgent.toLowerCase().includes('chrome')
+    
+    console.log('FCM 토큰 초기화 시작...', {
+      browser: isFirefox ? 'Firefox' : isSafari ? 'Safari' : 'Other',
+      currentPermission: Notification.permission
+    })
+
+    // 이미 권한이 있는 경우 바로 토큰 요청
+    let permission = Notification.permission
+    
+    // 권한이 없는 경우만 요청
+    if (permission === 'default') {
+      permission = await Notification.requestPermission()
+      console.log('알림 권한 요청 결과:', permission)
+    }
 
     if (permission === 'granted') {
-      const token = await getFCMToken()
+      // Firefox/Safari의 경우 약간의 지연 추가
+      if (isFirefox || isSafari) {
+        console.log(`${isFirefox ? 'Firefox' : 'Safari'} 감지 - 토큰 요청 전 대기 중...`)
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      }
+
+      // 여러 번 시도
+      let token = null
+      const maxAttempts = isFirefox ? 5 : 3
+      
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          console.log(`FCM 토큰 요청 시도 ${attempt}/${maxAttempts}...`)
+          token = await getFCMToken()
+          
+          if (token) {
+            console.log(`FCM 토큰 획득 성공 (시도 ${attempt})`)
+            break
+          }
+          
+          // 실패 시 재시도 전 대기
+          if (attempt < maxAttempts) {
+            const delay = isFirefox ? 2000 : 1000
+            console.log(`토큰 획득 실패. ${delay}ms 후 재시도...`)
+            await new Promise(resolve => setTimeout(resolve, delay))
+          }
+        } catch (tokenError) {
+          console.error(`토큰 요청 시도 ${attempt} 실패:`, tokenError)
+          if (attempt < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 2000))
+          }
+        }
+      }
 
       if (token) {
-        await saveFCMToken(token)
-        localStorage.setItem('fcm_token', token)
-        return token
+        try {
+          await saveFCMToken(token)
+          localStorage.setItem('fcm_token', token)
+          console.log('FCM 토큰 저장 완료')
+          return token
+        } catch (saveError) {
+          console.error('FCM 토큰 저장 실패:', saveError)
+          // 저장 실패해도 토큰은 반환
+          return token
+        }
+      } else {
+        console.error('FCM 토큰 획득 실패 - 모든 시도 소진')
       }
+    } else {
+      console.log('알림 권한이 거부되었습니다:', permission)
     }
 
     return null
   } catch (error) {
     console.error('FCM 토큰 초기화 오류:', error)
+    console.error('오류 상세:', {
+      message: error.message,
+      stack: error.stack
+    })
     return null
   }
 }

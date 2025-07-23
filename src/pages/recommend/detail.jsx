@@ -392,14 +392,57 @@ export default function TravelCourseDetailPage() {
           {/* 이미지 갤러리 */}
           <Card className="mb-8 overflow-hidden dark:border-gray-700 dark:bg-gray-800">
             <div className="relative">
-              <div className="flex h-96 w-full items-center justify-center bg-gradient-to-br from-blue-400 to-blue-600">
-                <div className="text-center text-white">
-                  <h3 className="mb-2 text-2xl font-bold">{course.title}</h3>
-                  <p className="text-lg opacity-90">
-                    {getRegionDisplayName(course.region)}
-                  </p>
+              {/* 이미지 표시 */}
+              {images.length > 0 ? (
+                <>
+                  <img
+                    src={images[currentImageIndex]}
+                    alt={`${course.title} - 이미지 ${currentImageIndex + 1}`}
+                    className="h-96 w-full cursor-pointer object-cover"
+                    onClick={openImageModal}
+                  />
+                  {/* 이미지 네비게이션 버튼 */}
+                  {images.length > 1 && (
+                    <>
+                      <button
+                        onClick={handlePrevImage}
+                        className="absolute top-1/2 left-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={handleNextImage}
+                        className="absolute top-1/2 right-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                      <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
+                        {images.map((_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setCurrentImageIndex(index)}
+                            className={`h-2 w-2 rounded-full transition-colors ${
+                              index === currentImageIndex
+                                ? 'bg-white'
+                                : 'bg-white/50'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </>
+              ) : (
+                /* 이미지가 없을 때 기본 배경 */
+                <div className="flex h-96 w-full items-center justify-center bg-gradient-to-br from-blue-400 to-blue-600">
+                  <div className="text-center text-white">
+                    <h3 className="mb-2 text-2xl font-bold">{course.title}</h3>
+                    <p className="text-lg opacity-90">
+                      {getRegionDisplayName(course.region)}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </Card>
 
